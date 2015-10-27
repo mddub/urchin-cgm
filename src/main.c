@@ -1,9 +1,10 @@
 #include <pebble.h>
 
 #include "comm.h"
+#include "layout.h"
 
 static Window *s_window;
-static Layer *s_canvas_layer;
+static Layer *s_graph_layer;
 static TextLayer *s_time_text;
 static TextLayer *s_last_bg_text;
 static TextLayer *s_trend_text;
@@ -39,7 +40,7 @@ static void data_callback(DictionaryIterator *received) {
     }
   }
 
-  layer_mark_dirty(s_canvas_layer);
+  layer_mark_dirty(s_graph_layer);
   update_last_bg(last_bg);
   update_delta();
 
@@ -70,7 +71,7 @@ static int y_from_bg(int bg) {
   return 100 - bg / 3;
 }
 
-static void canvas_update_proc(Layer *layer, GContext *ctx) {
+static void graph_update_proc(Layer *layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(layer);
   unsigned int i, x, y;
 
@@ -102,12 +103,6 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
       graphics_draw_line(ctx, GPoint(x, y), GPoint(x + 1, y));
     }
   }
-
-  // horizontal line
-  graphics_draw_line(ctx, GPoint(0, y_from_bg(40)), GPoint(bounds.size.w, y_from_bg(40)));
-
-  // vertical line
-  graphics_draw_line(ctx, GPoint(3 * 36, 0), GPoint(3 * 36, y_from_bg(40) + 2));
 }
 
 static void update_last_bg(int last) {
@@ -181,50 +176,64 @@ static void minute_handler(struct tm *tick_time, TimeUnits units_changed) {
 }
 
 static void window_load(Window *s_window) {
-  Layer *window_layer = window_get_root_layer(s_window);
-  GRect bounds = layer_get_bounds(window_layer);
-
-  // TODO
-  int graph_height = y_from_bg(40) + 2;
+  LayoutLayers layout = init_layout(s_window);
 
   // ensure the time is drawn before anything else
-  s_time_text = text_layer_create(GRect(0, graph_height + 20, bounds.size.w, bounds.size.h - graph_height));
+  GRect time_area_bounds = layer_get_bounds(layout.time_area);
+
+  int time_margin_r = 2;
+  s_time_text = text_layer_create(GRect(0, 4, time_area_bounds.size.w - time_margin_r, time_area_bounds.size.h));
+  text_layer_set_background_color(s_time_text, GColorClear);
   text_layer_set_font(s_time_text, fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD));
-  text_layer_set_text_alignment(s_time_text, GTextAlignmentCenter);
-  layer_add_child(window_layer, text_layer_get_layer(s_time_text));
+  text_layer_set_text_alignment(s_time_text, GTextAlignmentRight);
+  layer_add_child(layout.time_area, text_layer_get_layer(s_time_text));
+
   update_time(NULL);
 
-  // XXX: increased width from 3 * 36 + 2 in order to draw bottom line across whole screen
-  s_canvas_layer = layer_create(GRect(0, 0, bounds.size.w, graph_height));
-  layer_add_child(window_layer, s_canvas_layer);
-  layer_set_update_proc(s_canvas_layer, canvas_update_proc);
 
-  // TODO make these all belong to the graph canvas so it can be moved to top/bottom easily
-  s_last_bg_text = text_layer_create(GRect(3 * 36 + 2, 3, bounds.size.w - 3 * 36 - 2, 24));
+  GRect graph_bounds = layer_get_bounds(layout.graph);
+
+  s_graph_layer = layer_create(GRect(0, 0, graph_bounds.size.w, graph_bounds.size.h));
+  layer_add_child(layout.graph, s_graph_layer);
+  layer_set_update_proc(s_graph_layer, graph_update_proc);
+
+
+  GRect sidebar_bounds = layer_get_bounds(layout.sidebar);
+
+  s_last_bg_text = text_layer_create(GRect(0, 3, sidebar_bounds.size.w, 24));
   text_layer_set_font(s_last_bg_text, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+  text_layer_set_background_color(s_last_bg_text, GColorClear);
   text_layer_set_text_alignment(s_last_bg_text, GTextAlignmentCenter);
-  layer_add_child(window_layer, text_layer_get_layer(s_last_bg_text));
+  layer_add_child(layout.sidebar, text_layer_get_layer(s_last_bg_text));
 
-  s_trend_text = text_layer_create(GRect(3 * 36 + 2, 3 + 24, bounds.size.w - 3 * 36 - 2, 28));
+  s_trend_text = text_layer_create(GRect(0, 3 + 22, sidebar_bounds.size.w, 28));
   text_layer_set_font(s_trend_text, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
+  text_layer_set_background_color(s_trend_text, GColorClear);
   text_layer_set_text_alignment(s_trend_text, GTextAlignmentCenter);
-  layer_add_child(window_layer, text_layer_get_layer(s_trend_text));
+  layer_add_child(layout.sidebar, text_layer_get_layer(s_trend_text));
 
-  s_delta_text = text_layer_create(GRect(3 * 36 + 2, 3 + 24 + 26, bounds.size.w - 3 * 36 - 2, 24));
+  s_delta_text = text_layer_create(GRect(0, 3 + 22 + 28, sidebar_bounds.size.w, 24));
   text_layer_set_font(s_delta_text, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+  text_layer_set_background_color(s_delta_text, GColorClear);
   text_layer_set_text_alignment(s_delta_text, GTextAlignmentCenter);
-  layer_add_child(window_layer, text_layer_get_layer(s_delta_text));
+  layer_add_child(layout.sidebar, text_layer_get_layer(s_delta_text));
+
+
+  GRect row_bounds = layer_get_bounds(layout.row);
 
   int sm_text_margin = 2;
-  s_iob_text = text_layer_create(GRect(sm_text_margin, y_from_bg(40) + 1, bounds.size.w / 2, 22));
+  s_iob_text = text_layer_create(GRect(sm_text_margin, 0, row_bounds.size.w / 2 - sm_text_margin, 22));
+  text_layer_set_background_color(s_iob_text, GColorClear);
   text_layer_set_font(s_iob_text, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
   text_layer_set_text_alignment(s_iob_text, GTextAlignmentLeft);
-  layer_add_child(window_layer, text_layer_get_layer(s_iob_text));
+  layer_add_child(layout.row, text_layer_get_layer(s_iob_text));
 
-  s_data_recency_text = text_layer_create(GRect(bounds.size.w / 2 - sm_text_margin, y_from_bg(40) + 1, bounds.size.w / 2, 22));
+  s_data_recency_text = text_layer_create(GRect(row_bounds.size.w / 2 - sm_text_margin, 0, row_bounds.size.w / 2, 22));
+  text_layer_set_background_color(s_data_recency_text, GColorClear);
   text_layer_set_font(s_data_recency_text, fonts_get_system_font(FONT_KEY_GOTHIC_18));
   text_layer_set_text_alignment(s_data_recency_text, GTextAlignmentRight);
-  layer_add_child(window_layer, text_layer_get_layer(s_data_recency_text));
+  layer_add_child(layout.row, text_layer_get_layer(s_data_recency_text));
+
 
   tick_timer_service_subscribe(MINUTE_UNIT, minute_handler);
 }
@@ -241,7 +250,8 @@ static void window_unload(Window *s_window) {
   for(unsigned int i = 0; i < ARRAY_LENGTH(to_destroy); i++) {
     text_layer_destroy(to_destroy[i]);
   }
-  layer_destroy(s_canvas_layer);
+  layer_destroy(s_graph_layer);
+  deinit_layout();
 }
 
 static void init(void) {

@@ -1,5 +1,4 @@
-#ifndef _COMM
-#define _COMM
+#pragma once
 
 #include <pebble.h>
 
@@ -15,5 +14,3 @@
 #define IN_RETRY_DELAY 100
 
 void init_comm(void (*callback)(DictionaryIterator *received));
-
-#endif
