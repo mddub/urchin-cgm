@@ -84,17 +84,13 @@ function graphArray(sgvs) {
   return ys;
 }
 
-function lastTrendStr(sgvs) {
-  var trend = sgvs[0]['direction'];
-  return {
-    'Flat': '->',
-    'FortyFiveUp': '/',
-    'FortyFiveDown': '\\',
-    'SingleUp': '^',
-    'DoubleUp': '^^',
-    'SingleDown': '¡',
-    'DoubleDown': '¡¡',
-  }[trend] || '-';
+function lastTrendNumber(sgvs) {
+  var trend = sgvs[0]['trend'];
+  if (trend !== undefined && trend >= 0 && trend <= 9) {
+    return trend;
+  } else {
+    return 0;
+  }
 }
 
 function recency(sgvs) {
@@ -106,7 +102,7 @@ function requestAndSendBGs() {
   try {
     var sgvs = getSGVsDateDescending();
     var bgs = graphArray(sgvs);
-    var trend = lastTrendStr(sgvs);
+    var trend = lastTrendNumber(sgvs);
     var iobStr = getIOB();
     var data = {'0': bgs, '1': trend, '2': recency(sgvs), '3': iobStr};
     console.log('sending ' + JSON.stringify(data));

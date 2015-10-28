@@ -3,11 +3,14 @@
 #include "comm.h"
 #include "layout.h"
 
+#define NO_ICON -1
+
 static Window *s_window;
 static Layer *s_graph_layer;
 static TextLayer *s_time_text;
 static TextLayer *s_last_bg_text;
-static TextLayer *s_trend_text;
+static GBitmap *s_trend_bitmap;
+static BitmapLayer *s_trend_layer;
 static TextLayer *s_delta_text;
 static TextLayer *s_iob_text;
 static TextLayer *s_data_recency_text;
@@ -19,10 +22,23 @@ static int s_recency_wrt_phone;
 static time_t s_last_phone_update_time;
 
 static void update_last_bg(int last);
-static void update_trend(char* str);
+static void update_trend(int trend);
 static void update_iob(char* str);
 static void update_delta();
 static void update_data_recency();
+
+const int TREND_ICONS[] = {
+  NO_ICON,
+  RESOURCE_ID_ARROW_DOUBLE_UP,
+  RESOURCE_ID_ARROW_SINGLE_UP,
+  RESOURCE_ID_ARROW_FORTY_FIVE_UP,
+  RESOURCE_ID_ARROW_FLAT,
+  RESOURCE_ID_ARROW_FORTY_FIVE_DOWN,
+  RESOURCE_ID_ARROW_SINGLE_DOWN,
+  RESOURCE_ID_ARROW_DOUBLE_DOWN,
+  NO_ICON,
+  NO_ICON
+};
 
 static void data_callback(DictionaryIterator *received) {
   s_last_phone_update_time = time(NULL);
@@ -45,7 +61,7 @@ static void data_callback(DictionaryIterator *received) {
   update_delta();
 
   Tuple *trend_tuple = dict_find(received, 1);
-  char* trend = trend_tuple->value->cstring;
+  int trend = trend_tuple->value->int32;
   update_trend(trend);
 
   // TODO use timestamp instead after figuring out timezones
@@ -72,7 +88,6 @@ static int y_from_bg(int bg) {
 }
 
 static void graph_update_proc(Layer *layer, GContext *ctx) {
-  GRect bounds = layer_get_bounds(layer);
   unsigned int i, x, y;
 
   unsigned int bg_len = 36;
@@ -110,8 +125,23 @@ static void update_last_bg(int last) {
   text_layer_set_text(s_last_bg_text, s_last_bg_str);
 }
 
-static void update_trend(char* str) {
-  text_layer_set_text(s_trend_text, str);
+static void update_trend(int trend) {
+  static int last_trend = -1;
+  if (trend == last_trend) {
+    return;
+  }
+  last_trend = trend;
+
+  if (TREND_ICONS[trend] == NO_ICON) {
+    layer_set_hidden(bitmap_layer_get_layer(s_trend_layer), true);
+  } else {
+    layer_set_hidden(bitmap_layer_get_layer(s_trend_layer), false);
+    if (s_trend_bitmap != NULL) {
+      gbitmap_destroy(s_trend_bitmap);
+    }
+    s_trend_bitmap = gbitmap_create_with_resource(TREND_ICONS[trend]);
+    bitmap_layer_set_bitmap(s_trend_layer, s_trend_bitmap);
+  }
 }
 
 static void update_iob(char* str) {
@@ -206,11 +236,9 @@ static void window_load(Window *s_window) {
   text_layer_set_text_alignment(s_last_bg_text, GTextAlignmentCenter);
   layer_add_child(layout.sidebar, text_layer_get_layer(s_last_bg_text));
 
-  s_trend_text = text_layer_create(GRect(0, 3 + 22, sidebar_bounds.size.w, 28));
-  text_layer_set_font(s_trend_text, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
-  text_layer_set_background_color(s_trend_text, GColorClear);
-  text_layer_set_text_alignment(s_trend_text, GTextAlignmentCenter);
-  layer_add_child(layout.sidebar, text_layer_get_layer(s_trend_text));
+  int trend_arrow_width = 25;
+  s_trend_layer = bitmap_layer_create(GRect((sidebar_bounds.size.w - trend_arrow_width) / 2, 3 + 28, trend_arrow_width, trend_arrow_width));
+  layer_add_child(layout.sidebar, bitmap_layer_get_layer(s_trend_layer));
 
   s_delta_text = text_layer_create(GRect(0, 3 + 22 + 28, sidebar_bounds.size.w, 24));
   text_layer_set_font(s_delta_text, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
@@ -242,7 +270,6 @@ static void window_unload(Window *s_window) {
   TextLayer* to_destroy[] = {
     s_time_text,
     s_last_bg_text,
-    s_trend_text,
     s_delta_text,
     s_iob_text,
     s_data_recency_text
@@ -250,6 +277,12 @@ static void window_unload(Window *s_window) {
   for(unsigned int i = 0; i < ARRAY_LENGTH(to_destroy); i++) {
     text_layer_destroy(to_destroy[i]);
   }
+
+  if (s_trend_bitmap != NULL) {
+    gbitmap_destroy(s_trend_bitmap);
+  }
+  bitmap_layer_destroy(s_trend_layer);
+
   layer_destroy(s_graph_layer);
   deinit_layout();
 }

@@ -11,6 +11,42 @@
   },
   "appKeys": {},
   "resources": {
-    "media": []
+    "media": [
+      {
+        "type": "png",
+        "name": "ARROW_DOUBLE_UP",
+        "file": "images/arrow_double_up.png"
+      },
+      {
+        "type": "png",
+        "name": "ARROW_SINGLE_UP",
+        "file": "images/arrow_single_up.png"
+      },
+      {
+        "type": "png",
+        "name": "ARROW_FORTY_FIVE_UP",
+        "file": "images/arrow_forty_five_up.png"
+      },
+      {
+        "type": "png",
+        "name": "ARROW_FLAT",
+        "file": "images/arrow_flat.png"
+      },
+      {
+        "type": "png",
+        "name": "ARROW_FORTY_FIVE_DOWN",
+        "file": "images/arrow_forty_five_down.png"
+      },
+      {
+        "type": "png",
+        "name": "ARROW_SINGLE_DOWN",
+        "file": "images/arrow_single_down.png"
+      },
+      {
+        "type": "png",
+        "name": "ARROW_DOUBLE_DOWN",
+        "file": "images/arrow_double_down.png"
+      }
+    ]
   }
 }
