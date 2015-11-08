@@ -26,7 +26,8 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
 
   char* bgs = (char*)layer_get_data(layer);
   for(i = 0; i < SGV_COUNT; i++) {
-    int bg = bgs[i];
+    // XXX: JS divides by 2 to fit into 1 byte
+    int bg = bgs[i] * 2;
     if(bg == 0) {
       continue;
     }
@@ -71,9 +72,10 @@ void graph_element_destroy(GraphElement *el) {
 }
 
 void graph_element_update(GraphElement *el, DictionaryIterator *data) {
-  strcpy(
+  memcpy(
     (char*)layer_get_data(el->graph_layer),
-    (char*)dict_find(data, APP_KEY_SGVS)->value->cstring
+    (char*)dict_find(data, APP_KEY_SGVS)->value->cstring,
+    SGV_COUNT
   );
   layer_mark_dirty(el->graph_layer);
 }

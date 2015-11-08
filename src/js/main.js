@@ -73,6 +73,9 @@ function graphArray(sgvs) {
 
   var ys = graphed.map(function(entry) { return entry['sgv']; });
 
+  // XXX: divide BG by 2 to fit into 1 byte
+  ys = ys.map(function(y) { return Math.floor(y / 2); });
+
   // TODO Pebble should do all the padding
   var now = Date.now() / 1000;
   var stalePadding = Math.floor((now - endTime) / INTERVAL_SIZE_SECONDS);
