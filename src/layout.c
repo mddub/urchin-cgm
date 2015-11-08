@@ -43,8 +43,7 @@ static void do_config() {
 
 static Layer* get_layer_for_element(int element) {
   for(unsigned int i = 0; i < ARRAY_LENGTH(layout_order); i++) {
-    LayoutElementConfig* config = (LayoutElementConfig*)layer_get_data(layout[i]);
-    if(config->el == element) {
+    if(get_element_data(layout[i])->el == element) {
       return layout[i];
     }
   }
@@ -63,11 +62,10 @@ static LayoutElementConfig* get_config_for_element(int element) {
 static void draw_borders(Layer *layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(layer);
   graphics_context_set_stroke_color(ctx, GColorBlack);
-  LayoutElementConfig *config = (LayoutElementConfig*)layer_get_data(layer);
-  if (config->bottom) {
+  if (get_element_data(layer)->bottom) {
     graphics_draw_line(ctx, GPoint(0, bounds.size.h - 1), GPoint(bounds.size.w - 1, bounds.size.h - 1));
   }
-  if (config->right) {
+  if (get_element_data(layer)->right) {
     graphics_draw_line(ctx, GPoint(bounds.size.w - 1, 0), GPoint(bounds.size.w - 1, bounds.size.h - 1));
   }
 }
@@ -90,7 +88,7 @@ static Layer* make_layer(Layer *parent, GPoint *pos, LayoutElementConfig *config
     sizeof(LayoutElementConfig)
   );
 
-  memcpy((LayoutElementConfig*)layer_get_data(layer), config, sizeof(LayoutElementConfig));
+  memcpy(get_element_data(layer), config, sizeof(LayoutElementConfig));
   layer_add_child(parent, layer);
   layer_set_update_proc(layer, draw_borders);
 
@@ -101,6 +99,10 @@ static Layer* make_layer(Layer *parent, GPoint *pos, LayoutElementConfig *config
   }
 
   return layer;
+}
+
+LayoutElementConfig* get_element_data(Layer* layer) {
+  return (LayoutElementConfig*)layer_get_data(layer);
 }
 
 LayoutLayers init_layout(Window* window) {

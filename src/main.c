@@ -2,18 +2,19 @@
 
 #include "comm.h"
 #include "layout.h"
+#include "graph_element.h"
+#include "row_element.h"
+#include "sidebar_element.h"
+#include "time_element.h"
 
 #define NO_ICON -1
 
 static Window *s_window;
-static Layer *s_graph_layer;
-static TextLayer *s_time_text;
-static TextLayer *s_last_bg_text;
-static GBitmap *s_trend_bitmap;
-static BitmapLayer *s_trend_layer;
-static TextLayer *s_delta_text;
-static TextLayer *s_iob_text;
-static TextLayer *s_data_recency_text;
+
+static TimeElement *s_time_element;
+static GraphElement *s_graph_element;
+static SidebarElement *s_sidebar_element;
+static RowElement *s_row_element;
 
 static int *s_bgs;
 static char *s_last_bg_str;
@@ -56,7 +57,7 @@ static void data_callback(DictionaryIterator *received) {
     }
   }
 
-  layer_mark_dirty(s_graph_layer);
+  layer_mark_dirty(s_graph_element->graph_layer);
   update_last_bg(last_bg);
   update_delta();
 
@@ -122,7 +123,7 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
 
 static void update_last_bg(int last) {
   snprintf(s_last_bg_str, 4, "%d", last);
-  text_layer_set_text(s_last_bg_text, s_last_bg_str);
+  text_layer_set_text(s_sidebar_element->last_bg_text, s_last_bg_str);
 }
 
 static void update_trend(int trend) {
@@ -133,19 +134,19 @@ static void update_trend(int trend) {
   last_trend = trend;
 
   if (TREND_ICONS[trend] == NO_ICON) {
-    layer_set_hidden(bitmap_layer_get_layer(s_trend_layer), true);
+    layer_set_hidden(bitmap_layer_get_layer(s_sidebar_element->trend_layer), true);
   } else {
-    layer_set_hidden(bitmap_layer_get_layer(s_trend_layer), false);
-    if (s_trend_bitmap != NULL) {
-      gbitmap_destroy(s_trend_bitmap);
+    layer_set_hidden(bitmap_layer_get_layer(s_sidebar_element->trend_layer), false);
+    if (s_sidebar_element->trend_bitmap != NULL) {
+      gbitmap_destroy(s_sidebar_element->trend_bitmap);
     }
-    s_trend_bitmap = gbitmap_create_with_resource(TREND_ICONS[trend]);
-    bitmap_layer_set_bitmap(s_trend_layer, s_trend_bitmap);
+    s_sidebar_element->trend_bitmap = gbitmap_create_with_resource(TREND_ICONS[trend]);
+    bitmap_layer_set_bitmap(s_sidebar_element->trend_layer, s_sidebar_element->trend_bitmap);
   }
 }
 
 static void update_iob(char* str) {
-  text_layer_set_text(s_iob_text, str);
+  text_layer_set_text(s_row_element->iob_text, str);
 }
 
 static void update_data_recency() {
@@ -154,15 +155,15 @@ static void update_data_recency() {
   int data_min = (s_recency_wrt_phone + now - s_last_phone_update_time) / 60;
 
   if(phone_min >= 10 || data_min >= 10) {
-    text_layer_set_font(s_data_recency_text, fonts_get_system_font(FONT_KEY_GOTHIC_18));
+    text_layer_set_font(s_row_element->data_recency_text, fonts_get_system_font(FONT_KEY_GOTHIC_18));
   } else {
-    text_layer_set_font(s_data_recency_text, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
+    text_layer_set_font(s_row_element->data_recency_text, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
   }
 
   static char s_recency_buffer[16];
   snprintf(s_recency_buffer, sizeof(s_recency_buffer), "(%d/%d)", phone_min, data_min);
 
-  text_layer_set_text(s_data_recency_text, s_recency_buffer);
+  text_layer_set_text(s_row_element->data_recency_text, s_recency_buffer);
 }
 
 static void update_delta() {
@@ -182,7 +183,7 @@ static void update_delta() {
     strcat(s_delta_str, s_delta_as_i_buffer);
   }
 
-  text_layer_set_text(s_delta_text, s_delta_str);
+  text_layer_set_text(s_sidebar_element->delta_text, s_delta_str);
 }
 
 static void update_time(struct tm *time_now) {
@@ -197,7 +198,8 @@ static void update_time(struct tm *time_now) {
   if(s_time_buffer[0] == ' ') {
     memmove(s_time_buffer, &s_time_buffer[1], sizeof(s_time_buffer)-1);
   };
-  text_layer_set_text(s_time_text, s_time_buffer);
+  // TODO
+  text_layer_set_text(s_time_element->time_text, s_time_buffer);
 }
 
 static void minute_handler(struct tm *tick_time, TimeUnits units_changed) {
@@ -209,81 +211,25 @@ static void window_load(Window *s_window) {
   LayoutLayers layout = init_layout(s_window);
 
   // ensure the time is drawn before anything else
-  GRect time_area_bounds = layer_get_bounds(layout.time_area);
-
-  int time_margin_r = 2;
-  s_time_text = text_layer_create(GRect(0, 4, time_area_bounds.size.w - time_margin_r, time_area_bounds.size.h));
-  text_layer_set_background_color(s_time_text, GColorClear);
-  text_layer_set_font(s_time_text, fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD));
-  text_layer_set_text_alignment(s_time_text, GTextAlignmentRight);
-  layer_add_child(layout.time_area, text_layer_get_layer(s_time_text));
-
+  s_time_element = time_element_create(layout.time_area);
   update_time(NULL);
 
 
-  GRect graph_bounds = layer_get_bounds(layout.graph);
+  s_graph_element = graph_element_create(layout.graph);
+  layer_set_update_proc(s_graph_element->graph_layer, graph_update_proc);
 
-  s_graph_layer = layer_create(GRect(0, 0, graph_bounds.size.w, graph_bounds.size.h));
-  layer_add_child(layout.graph, s_graph_layer);
-  layer_set_update_proc(s_graph_layer, graph_update_proc);
-
-
-  GRect sidebar_bounds = layer_get_bounds(layout.sidebar);
-
-  s_last_bg_text = text_layer_create(GRect(0, 3, sidebar_bounds.size.w, 24));
-  text_layer_set_font(s_last_bg_text, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
-  text_layer_set_background_color(s_last_bg_text, GColorClear);
-  text_layer_set_text_alignment(s_last_bg_text, GTextAlignmentCenter);
-  layer_add_child(layout.sidebar, text_layer_get_layer(s_last_bg_text));
-
-  int trend_arrow_width = 25;
-  s_trend_layer = bitmap_layer_create(GRect((sidebar_bounds.size.w - trend_arrow_width) / 2, 3 + 28, trend_arrow_width, trend_arrow_width));
-  layer_add_child(layout.sidebar, bitmap_layer_get_layer(s_trend_layer));
-
-  s_delta_text = text_layer_create(GRect(0, 3 + 22 + 28, sidebar_bounds.size.w, 24));
-  text_layer_set_font(s_delta_text, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
-  text_layer_set_background_color(s_delta_text, GColorClear);
-  text_layer_set_text_alignment(s_delta_text, GTextAlignmentCenter);
-  layer_add_child(layout.sidebar, text_layer_get_layer(s_delta_text));
-
-
-  GRect row_bounds = layer_get_bounds(layout.row);
-
-  int sm_text_margin = 2;
-  s_iob_text = text_layer_create(GRect(sm_text_margin, 0, row_bounds.size.w / 2 - sm_text_margin, 22));
-  text_layer_set_background_color(s_iob_text, GColorClear);
-  text_layer_set_font(s_iob_text, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
-  text_layer_set_text_alignment(s_iob_text, GTextAlignmentLeft);
-  layer_add_child(layout.row, text_layer_get_layer(s_iob_text));
-
-  s_data_recency_text = text_layer_create(GRect(row_bounds.size.w / 2 - sm_text_margin, 0, row_bounds.size.w / 2, 22));
-  text_layer_set_background_color(s_data_recency_text, GColorClear);
-  text_layer_set_font(s_data_recency_text, fonts_get_system_font(FONT_KEY_GOTHIC_18));
-  text_layer_set_text_alignment(s_data_recency_text, GTextAlignmentRight);
-  layer_add_child(layout.row, text_layer_get_layer(s_data_recency_text));
-
+  s_sidebar_element = sidebar_element_create(layout.sidebar);
+  s_row_element = row_element_create(layout.row);
 
   tick_timer_service_subscribe(MINUTE_UNIT, minute_handler);
 }
 
 static void window_unload(Window *s_window) {
-  TextLayer* to_destroy[] = {
-    s_time_text,
-    s_last_bg_text,
-    s_delta_text,
-    s_iob_text,
-    s_data_recency_text
-  };
-  for(unsigned int i = 0; i < ARRAY_LENGTH(to_destroy); i++) {
-    text_layer_destroy(to_destroy[i]);
-  }
+  time_element_destroy(s_time_element);
+  graph_element_destroy(s_graph_element);
+  sidebar_element_destroy(s_sidebar_element);
+  row_element_destroy(s_row_element);
 
-  if (s_trend_bitmap != NULL) {
-    gbitmap_destroy(s_trend_bitmap);
-  }
-  bitmap_layer_destroy(s_trend_layer);
-
-  layer_destroy(s_graph_layer);
   deinit_layout();
 }
 

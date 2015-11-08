@@ -22,5 +22,6 @@ typedef struct LayoutLayers {
   Layer *time_area;
 } LayoutLayers;
 
+LayoutElementConfig* get_element_data(Layer* layer);
 LayoutLayers init_layout(Window *window);
 void deinit_layout();
