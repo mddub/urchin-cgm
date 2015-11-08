@@ -18,3 +18,19 @@ void time_element_destroy(TimeElement* el) {
   text_layer_destroy(el->time_text);
   free(el);
 }
+
+void time_element_update(TimeElement *el, DictionaryIterator *data) {}
+
+void time_element_tick(TimeElement *el) {
+  static char time_buffer[16];
+
+  time_t now = time(NULL);
+  struct tm *time_now = localtime(&now);
+  strftime(time_buffer, sizeof(time_buffer), "%l:%M", time_now);
+  // Remove leading space if present
+  if(time_buffer[0] == ' ') {
+    memmove(time_buffer, &time_buffer[1], sizeof(time_buffer) - 1);
+  };
+
+  text_layer_set_text(el->time_text, time_buffer);
+}

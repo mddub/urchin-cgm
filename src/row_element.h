@@ -9,3 +9,5 @@ typedef struct RowElement {
 
 RowElement* row_element_create(Layer *parent);
 void row_element_destroy(RowElement *el);
+void row_element_update(RowElement *el, DictionaryIterator *data);
+void row_element_tick(RowElement *el);

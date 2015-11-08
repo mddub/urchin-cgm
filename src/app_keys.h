@@ -1,0 +1,10 @@
+#pragma once
+
+enum {
+  APP_KEY_RECENCY,
+  APP_KEY_SGVS,
+  APP_KEY_LAST_SGV,
+  APP_KEY_TREND,
+  APP_KEY_DELTA,
+  APP_KEY_STATUS_TEXT,
+};

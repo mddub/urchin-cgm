@@ -71,7 +71,7 @@ function graphArray(sgvs) {
     }
   }
 
-  ys = graphed.map(function(entry) { return entry['sgv']; });
+  var ys = graphed.map(function(entry) { return entry['sgv']; });
 
   // TODO Pebble should do all the padding
   var now = Date.now() / 1000;
@@ -84,12 +84,25 @@ function graphArray(sgvs) {
   return ys;
 }
 
+function lastSgv(sgvs) {
+  return parseInt(sgvs[0]['sgv'], 10);
+}
+
 function lastTrendNumber(sgvs) {
   var trend = sgvs[0]['trend'];
   if (trend !== undefined && trend >= 0 && trend <= 9) {
     return trend;
   } else {
     return 0;
+  }
+}
+
+function lastDelta(ys) {
+  if (ys[ys.length - 1] === 0 || ys[ys.length - 2] === 0) {
+    return '-';
+  } else {
+    var delta = ys[ys.length - 1] - ys[ys.length - 2];
+    return (delta >= 0 ? '+' : '') + delta;
   }
 }
 
@@ -101,10 +114,15 @@ function recency(sgvs) {
 function requestAndSendBGs() {
   try {
     var sgvs = getSGVsDateDescending();
-    var bgs = graphArray(sgvs);
-    var trend = lastTrendNumber(sgvs);
-    var iobStr = getIOB();
-    var data = {'0': bgs, '1': trend, '2': recency(sgvs), '3': iobStr};
+    var ys = graphArray(sgvs);
+    var data = {
+      recency: recency(sgvs),
+      sgvs: ys,
+      lastSgv: lastSgv(sgvs),
+      trend: lastTrendNumber(sgvs),
+      delta: lastDelta(ys),
+      statusText: getIOB()
+    };
     console.log('sending ' + JSON.stringify(data));
     var transactionId = Pebble.sendAppMessage(
       data,

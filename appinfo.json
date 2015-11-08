@@ -9,7 +9,14 @@
   "watchapp": {
     "watchface": true
   },
-  "appKeys": {},
+  "appKeys": {
+    "recency": 0,
+    "sgvs": 1,
+    "lastSgv": 2,
+    "trend": 3,
+    "delta": 4,
+    "statusText": 5
+  },
   "resources": {
     "media": [
       {

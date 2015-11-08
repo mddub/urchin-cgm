@@ -1,4 +1,18 @@
+#include "app_keys.h"
 #include "sidebar_element.h"
+
+const int TREND_ICONS[] = {
+  NO_ICON,
+  RESOURCE_ID_ARROW_DOUBLE_UP,
+  RESOURCE_ID_ARROW_SINGLE_UP,
+  RESOURCE_ID_ARROW_FORTY_FIVE_UP,
+  RESOURCE_ID_ARROW_FLAT,
+  RESOURCE_ID_ARROW_FORTY_FIVE_DOWN,
+  RESOURCE_ID_ARROW_SINGLE_DOWN,
+  RESOURCE_ID_ARROW_DOUBLE_DOWN,
+  NO_ICON,
+  NO_ICON
+};
 
 SidebarElement* sidebar_element_create(Layer *parent) {
   GRect bounds = layer_get_bounds(parent);
@@ -35,3 +49,45 @@ void sidebar_element_destroy(SidebarElement *el) {
   bitmap_layer_destroy(el->trend_layer);
   free(el);
 }
+
+static void update_last_bg(SidebarElement *el, DictionaryIterator *data) {
+  static char last_bg_buffer[4];
+  snprintf(last_bg_buffer, 4, "%d", (int)dict_find(data, APP_KEY_LAST_SGV)->value->int32);
+  text_layer_set_text(el->last_bg_text, last_bg_buffer);
+}
+
+static void update_trend(SidebarElement *el, DictionaryIterator *data) {
+  static int last_trend = -1;
+  int trend = dict_find(data, APP_KEY_TREND)->value->int32;
+
+  if (trend == last_trend) {
+    return;
+  }
+  last_trend = trend;
+
+  if (TREND_ICONS[trend] == NO_ICON) {
+    layer_set_hidden(bitmap_layer_get_layer(el->trend_layer), true);
+  } else {
+    layer_set_hidden(bitmap_layer_get_layer(el->trend_layer), false);
+    if (el->trend_bitmap != NULL) {
+      gbitmap_destroy(el->trend_bitmap);
+    }
+    el->trend_bitmap = gbitmap_create_with_resource(TREND_ICONS[trend]);
+    bitmap_layer_set_bitmap(el->trend_layer, el->trend_bitmap);
+  }
+}
+
+static void update_delta(SidebarElement *el, DictionaryIterator *data) {
+  text_layer_set_text(
+    el->delta_text,
+    dict_find(data, APP_KEY_DELTA)->value->cstring
+  );
+}
+
+void sidebar_element_update(SidebarElement *el, DictionaryIterator *data) {
+  update_last_bg(el, data);
+  update_trend(el, data);
+  update_delta(el, data);
+}
+
+void sidebar_element_tick(SidebarElement *el) {}
