@@ -1,21 +1,28 @@
 #include "app_keys.h"
 #include "graph_element.h"
 
-static int LIMIT_LINES[] = {75, 200};
-static const int GRIDLINES[] = {50, 100, 150, 250};
+static int LIMIT_LINES[] = {70, 180};
+static const int GRIDLINES[] = {50, 100, 150, 200, 250};
 
 static void plot_point(int x, int y, GContext *ctx) {
   graphics_context_set_fill_color(ctx, GColorBlack);
-  graphics_fill_rect(ctx, GRect(x, y, 3, 3), 0, GCornerNone);
+  // treat x as the left boundary and y as the vertical center of the rectangle
+  graphics_fill_rect(ctx, GRect(x, y - 1 >= -1 ? y - 1 : -1, 3, 3), 0, GCornerNone);
 }
 
-static int y_from_bg(int bg) {
-  // TODO compute this in JS; apply max/min; use float division
-  return 100 - bg / 3;
+static int y_from_bg(int height, int bg) {
+  int y = (float)height - (float)(bg - SGV_MIN) / (float)(SGV_MAX - SGV_MIN) * (float)height - 1.0f;
+  if (y < -1) {
+    y = -1;
+  } else if (y > height - 1) {
+    y = height - 1;
+  }
+  return y;
 }
 
 static void graph_update_proc(Layer *layer, GContext *ctx) {
   unsigned int i, x, y;
+  int height = layer_get_bounds(layer).size.h;
 
   char* bgs = (char*)layer_get_data(layer);
   for(i = 0; i < SGV_COUNT; i++) {
@@ -24,19 +31,19 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
       continue;
     }
     x = 3 * i;
-    y = y_from_bg(bg);
+    y = y_from_bg(height, bg);
     plot_point(x, y, ctx);
   }
 
   for(i = 0; i < ARRAY_LENGTH(LIMIT_LINES); i++) {
-    y = y_from_bg(LIMIT_LINES[i]);
+    y = y_from_bg(height, LIMIT_LINES[i]);
     for(x = 0; x < 3 * SGV_COUNT; x += 4) {
       graphics_draw_line(ctx, GPoint(x, y), GPoint(x + 2, y));
     }
   }
 
   for(i = 0; i < ARRAY_LENGTH(GRIDLINES); i++) {
-    y = y_from_bg(GRIDLINES[i]);
+    y = y_from_bg(height, GRIDLINES[i]);
     for(x = 0; x < 3 * SGV_COUNT; x += 8) {
       graphics_draw_line(ctx, GPoint(x, y), GPoint(x + 1, y));
     }
