@@ -2,12 +2,12 @@
 
 #include <pebble.h>
 
-typedef struct RowElement {
-  TextLayer *iob_text;
-  TextLayer *data_recency_text;
-} RowElement;
+typedef struct StatusBarElement {
+  TextLayer *left_text;
+  TextLayer *right_text;
+} StatusBarElement;
 
-RowElement* row_element_create(Layer *parent);
-void row_element_destroy(RowElement *el);
-void row_element_update(RowElement *el, DictionaryIterator *data);
-void row_element_tick(RowElement *el);
+StatusBarElement* status_bar_element_create(Layer *parent);
+void status_bar_element_destroy(StatusBarElement *el);
+void status_bar_element_update(StatusBarElement *el, DictionaryIterator *data);
+void status_bar_element_tick(StatusBarElement *el);

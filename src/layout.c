@@ -32,7 +32,7 @@ static void do_config() {
     .right = false,
   };
   layout_order[i++] = (LayoutElementConfig){
-    .el = ROW_ELEMENT,
+    .el = STATUS_BAR_ELEMENT,
     .w = 0,
     .h = 22,
     .bottom = true,
@@ -118,8 +118,8 @@ LayoutLayers init_layout(Window* window) {
     bounds.size.h
     - get_config_for_element(GRAPH_ELEMENT)->h
     - (get_config_for_element(GRAPH_ELEMENT)->bottom ? 1 : 0)
-    - get_config_for_element(ROW_ELEMENT)->h
-    - (get_config_for_element(ROW_ELEMENT)->bottom ? 1 : 0);
+    - get_config_for_element(STATUS_BAR_ELEMENT)->h
+    - (get_config_for_element(STATUS_BAR_ELEMENT)->bottom ? 1 : 0);
 
   GPoint pos = {.x = 0, .y = 0};
   for(unsigned int i = 0; i < ARRAY_LENGTH(layout_order); i++) {
@@ -129,7 +129,7 @@ LayoutLayers init_layout(Window* window) {
   return (LayoutLayers) {
     .graph = get_layer_for_element(GRAPH_ELEMENT),
     .sidebar = get_layer_for_element(SIDEBAR_ELEMENT),
-    .row = get_layer_for_element(ROW_ELEMENT),
+    .status_bar = get_layer_for_element(STATUS_BAR_ELEMENT),
     .time_area = get_layer_for_element(TIME_AREA_ELEMENT),
   };
 }
