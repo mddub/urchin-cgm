@@ -3,7 +3,7 @@
 #include "comm.h"
 #include "layout.h"
 #include "graph_element.h"
-#include "row_element.h"
+#include "status_bar_element.h"
 #include "sidebar_element.h"
 #include "time_element.h"
 
