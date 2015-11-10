@@ -2,10 +2,6 @@
 
 #include <pebble.h>
 
-#define SGV_COUNT 36
-#define SGV_MIN 40
-#define SGV_MAX 300
-
 typedef struct GraphElement {
   Layer *graph_layer;
 } GraphElement;

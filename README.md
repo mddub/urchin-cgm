@@ -8,8 +8,8 @@ Still very much work-in-progress. Architecture is liable to change. Probably soo
 * Add a `src/js/_config.js` with your Nightscout host and build/install with the Pebble SDK.
 
 #### To configure (for now):
-* The size, position, and borders of each layout element can be configured in `do_config()` at the top of `layout.c`. (e.g., move the graph to the top and time to the bottom, etc.)
-* You can change the graph range and gridline positions at the top of `graph_element.c` and `graph_element.h`.
+* You can change the graph range and gridline positions in `config.h`.
+* You can change the size, position, and borders of each layout element in `config.c`. (e.g., move the graph to the top and time to the bottom, etc.)
 * You can show whatever string you want in the status bar (including newlines, if you configure the status bar to be taller) by sending a different value for `statusText` in `main.js`. This can be based on data from any URL, following the pattern of `getIOB()`.
 
 #### Notes:

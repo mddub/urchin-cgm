@@ -2,26 +2,6 @@
 
 #include <pebble.h>
 
-#define GRAPH_ELEMENT 0
-#define SIDEBAR_ELEMENT 1
-#define STATUS_BAR_ELEMENT 2
-#define TIME_AREA_ELEMENT 3
-
-typedef struct LayoutElementConfig {
-  int el;
-  int w;
-  int h;
-  bool bottom;
-  bool right;
-} LayoutElementConfig;
-
-typedef struct LayoutLayers {
-  Layer *graph;
-  Layer *sidebar;
-  Layer *status_bar;
-  Layer *time_area;
-} LayoutLayers;
-
-LayoutElementConfig* get_element_data(Layer* layer);
-LayoutLayers init_layout(Window *window);
+ElementConfig* get_element_data(Layer* layer);
+LayoutLayers init_layout(Window *window, int layout_option);
 void deinit_layout();

@@ -1,6 +1,7 @@
 #include <pebble.h>
 
 #include "comm.h"
+#include "config.h"
 #include "layout.h"
 #include "graph_element.h"
 #include "status_bar_element.h"
@@ -30,7 +31,7 @@ static void minute_handler(struct tm *tick_time, TimeUnits units_changed) {
 }
 
 static void window_load(Window *s_window) {
-  LayoutLayers layout = init_layout(s_window);
+  LayoutLayers layout = init_layout(s_window, LAYOUT);
 
   // ensure the time is drawn before anything else
   s_time_element = time_element_create(layout.time_area);

@@ -1,59 +1,22 @@
+#include "config.h"
 #include "layout.h"
 
-static Layer** layout;
-
-////////////////////////////////////////////////////////
-// TODO init_layout should take this as a parameter
-
-static LayoutElementConfig layout_order[4];
-
-static void do_config() {
-  int i = 0;
-  layout_order[i++] = (LayoutElementConfig) {
-    .el = TIME_AREA_ELEMENT,
-    .w = 0,
-    // This height has no effect; time area always consumes the leftover height.
-    .h = 0,
-    .bottom = true,
-    .right = false,
-  };
-  layout_order[i++] = (LayoutElementConfig) {
-    .el = GRAPH_ELEMENT,
-    .w = 3*36,
-    .h = 87,
-    .bottom = true,
-    .right = true,
-  };
-  layout_order[i++] = (LayoutElementConfig) {
-    .el = SIDEBAR_ELEMENT,
-    .w = 0,
-    .h = 87,
-    .bottom = true,
-    .right = false,
-  };
-  layout_order[i++] = (LayoutElementConfig){
-    .el = STATUS_BAR_ELEMENT,
-    .w = 0,
-    .h = 22,
-    .bottom = true,
-    .right = false,
-  };
-}
-////////////////////////////////////////////////////////
+static LayoutConfig *s_config;
+static Layer** s_layers;
 
 static Layer* get_layer_for_element(int element) {
-  for(unsigned int i = 0; i < ARRAY_LENGTH(layout_order); i++) {
-    if(get_element_data(layout[i])->el == element) {
-      return layout[i];
+  for(int i = 0; i < s_config->num_elements; i++) {
+    if(get_element_data(s_layers[i])->el == element) {
+      return s_layers[i];
     }
   }
   return NULL;
 }
 
-static LayoutElementConfig* get_config_for_element(int element) {
-  for(unsigned int i = 0; i < ARRAY_LENGTH(layout_order); i++) {
-    if(layout_order[i].el == element) {
-      return &layout_order[i];
+static ElementConfig* get_config_for_element(int element) {
+  for(int i = 0; i < s_config->num_elements; i++) {
+    if(s_config->elements[i].el == element) {
+      return &s_config->elements[i];
     }
   }
   return NULL;
@@ -70,7 +33,7 @@ static void draw_borders(Layer *layer, GContext *ctx) {
   }
 }
 
-static Layer* make_layer(Layer *parent, GPoint *pos, LayoutElementConfig *config) {
+static Layer* make_layer(Layer *parent, GPoint *pos, ElementConfig *config) {
   int width;
   if (config->w == 0) {
     width = layer_get_bounds(parent).size.w - pos->x;
@@ -85,10 +48,10 @@ static Layer* make_layer(Layer *parent, GPoint *pos, LayoutElementConfig *config
       width + (config->right ? 1 : 0),
       config->h + (config->bottom ? 1 : 0)
     ),
-    sizeof(LayoutElementConfig)
+    sizeof(ElementConfig)
   );
 
-  memcpy(get_element_data(layer), config, sizeof(LayoutElementConfig));
+  memcpy(get_element_data(layer), config, sizeof(ElementConfig));
   layer_add_child(parent, layer);
   layer_set_update_proc(layer, draw_borders);
 
@@ -101,14 +64,13 @@ static Layer* make_layer(Layer *parent, GPoint *pos, LayoutElementConfig *config
   return layer;
 }
 
-LayoutElementConfig* get_element_data(Layer* layer) {
-  return (LayoutElementConfig*)layer_get_data(layer);
+ElementConfig* get_element_data(Layer* layer) {
+  return (ElementConfig*)layer_get_data(layer);
 }
 
-LayoutLayers init_layout(Window* window) {
-  layout = malloc(4 * sizeof(Layer*));
-
-  do_config();
+LayoutLayers init_layout(Window* window, int layout_option) {
+  s_config = layout_config_create(layout_option);
+  s_layers = malloc(s_config->num_elements * sizeof(Layer*));
 
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
@@ -122,8 +84,8 @@ LayoutLayers init_layout(Window* window) {
     - (get_config_for_element(STATUS_BAR_ELEMENT)->bottom ? 1 : 0);
 
   GPoint pos = {.x = 0, .y = 0};
-  for(unsigned int i = 0; i < ARRAY_LENGTH(layout_order); i++) {
-    layout[i] = make_layer(window_layer, &pos, &layout_order[i]);
+  for(int i = 0; i < s_config->num_elements; i++) {
+    s_layers[i] = make_layer(window_layer, &pos, &s_config->elements[i]);
   }
 
   return (LayoutLayers) {
@@ -135,8 +97,9 @@ LayoutLayers init_layout(Window* window) {
 }
 
 void deinit_layout() {
-  for(unsigned int i = 0; i < ARRAY_LENGTH(layout_order); i++) {
-    layer_destroy(layout[i]);
+  for(int i = 0; i < s_config->num_elements; i++) {
+    layer_destroy(s_layers[i]);
   }
-  free(layout);
+  free(s_layers);
+  layout_config_destroy(s_config);
 }
