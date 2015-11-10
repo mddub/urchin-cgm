@@ -8,19 +8,24 @@
 // and SIDEBAR_ELEMENT should be placed consecutively
 // (though either may come first).
 //
+// A height of 0 means take up all vertical space remaining
+// after the elements with non-zero heights are accounted
+// for. Multiple elements may have a height of 0, in which
+// case they will evenly share the remaining space.
+//
 // A width of 0 means take up all horizontal space remaining
 // after the last element that was placed. (If the previous
 // element already specified a width of 0, this element will
 // start below.)
 //
-// bottom/right are to toggle borders.
+// bottom/right toggle borders, and will add an extra pixel
+// to that dimension of the resulting layer (like CSS).
 
 static void layout_option_a(LayoutConfig* dest) {
   int i = 0;
   dest->elements[i++] = (ElementConfig) {
     .el = TIME_AREA_ELEMENT,
     .w = 0,
-    // This height has no effect; time area always consumes the leftover height.
     .h = 0,
     .bottom = true,
     .right = false,
@@ -75,7 +80,6 @@ static void layout_option_b(LayoutConfig* dest) {
   dest->elements[i++] = (ElementConfig) {
     .el = TIME_AREA_ELEMENT,
     .w = 0,
-    // This height has no effect; time area always consumes the leftover height.
     .h = 0,
     .bottom = false,
     .right = false,
