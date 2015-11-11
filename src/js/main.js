@@ -104,7 +104,8 @@ function lastDelta(ys) {
   if (ys[ys.length - 1] === 0 || ys[ys.length - 2] === 0) {
     return '-';
   } else {
-    var delta = ys[ys.length - 1] - ys[ys.length - 2];
+    // XXX: delta always rounds down to nearest even number
+    var delta = 2 * (ys[ys.length - 1] - ys[ys.length - 2]);
     return (delta >= 0 ? '+' : '') + delta;
   }
 }
