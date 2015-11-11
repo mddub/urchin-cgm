@@ -8,3 +8,5 @@ enum {
   APP_KEY_DELTA,
   APP_KEY_STATUS_TEXT,
 };
+
+#define NO_DELTA_VALUE 65536

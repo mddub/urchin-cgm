@@ -11,13 +11,17 @@
 // The details of the layout can be set in config.c
 #define LAYOUT LAYOUT_OPTION_A
 
-#define GRAPH_SGV_COUNT 36
+#define USE_MMOL false
+
+// These must be specified in mg/dL
 #define GRAPH_SGV_MIN 40
 #define GRAPH_SGV_MAX 300
 #define GRAPH_LIMIT_LINES {70, 180}
 #define GRAPH_GRIDLINES {40, 50, 100, 150, 200, 250}
 
 ///////////////////////////////////////////////////////
+
+#define GRAPH_SGV_COUNT 36
 
 #define GRAPH_ELEMENT 0
 #define SIDEBAR_ELEMENT 1

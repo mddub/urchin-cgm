@@ -1,5 +1,7 @@
 #include "app_keys.h"
+#include "config.h"
 #include "sidebar_element.h"
+#include "units.h"
 
 const int TREND_ICONS[] = {
   NO_ICON,
@@ -51,8 +53,9 @@ void sidebar_element_destroy(SidebarElement *el) {
 }
 
 static void update_last_bg(SidebarElement *el, DictionaryIterator *data) {
-  static char last_bg_buffer[4];
-  snprintf(last_bg_buffer, 4, "%d", (int)dict_find(data, APP_KEY_LAST_SGV)->value->int32);
+  static char last_bg_buffer[8];
+  int mgdl = dict_find(data, APP_KEY_LAST_SGV)->value->int32;
+  format_bg(last_bg_buffer, sizeof(last_bg_buffer), mgdl, false, USE_MMOL);
   text_layer_set_text(el->last_bg_text, last_bg_buffer);
 }
 
@@ -78,10 +81,14 @@ static void update_trend(SidebarElement *el, DictionaryIterator *data) {
 }
 
 static void update_delta(SidebarElement *el, DictionaryIterator *data) {
-  text_layer_set_text(
-    el->delta_text,
-    dict_find(data, APP_KEY_DELTA)->value->cstring
-  );
+  static char delta_buffer[8];
+  int delta = dict_find(data, APP_KEY_DELTA)->value->int32;
+  if (delta == NO_DELTA_VALUE) {
+    text_layer_set_text(el->delta_text, "-");
+  } else {
+    format_bg(delta_buffer, sizeof(delta_buffer), delta, true, USE_MMOL);
+    text_layer_set_text(el->delta_text, delta_buffer);
+  }
 }
 
 void sidebar_element_update(SidebarElement *el, DictionaryIterator *data) {

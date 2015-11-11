@@ -3,6 +3,7 @@ var SGV_FOR_PEBBLE_COUNT = 36;
 var INTERVAL_SIZE_SECONDS = 5 * 60;
 var IOB_RECENCY_THRESHOLD_SECONDS = 10 * 60;
 var REQUEST_TIMEOUT = 5000;
+var NO_DELTA_VALUE = 65536;
 
 var syncGetJSON = function (url) {
   // async == false, since timeout/ontimeout is broken for Pebble XHR
@@ -101,12 +102,12 @@ function lastTrendNumber(sgvs) {
 }
 
 function lastDelta(ys) {
+  // TODO stop adding padding here, let Pebble handle it
   if (ys[ys.length - 1] === 0 || ys[ys.length - 2] === 0) {
-    return '-';
+    return NO_DELTA_VALUE;
   } else {
     // XXX: delta always rounds down to nearest even number
-    var delta = 2 * (ys[ys.length - 1] - ys[ys.length - 2]);
-    return (delta >= 0 ? '+' : '') + delta;
+    return 2 * (ys[ys.length - 1] - ys[ys.length - 2]);
   }
 }
 
