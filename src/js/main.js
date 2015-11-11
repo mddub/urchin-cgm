@@ -74,9 +74,6 @@ function graphArray(sgvs) {
 
   var ys = graphed.map(function(entry) { return entry['sgv']; });
 
-  // XXX: divide BG by 2 to fit into 1 byte
-  ys = ys.map(function(y) { return Math.floor(y / 2); });
-
   // TODO Pebble should do all the padding
   var now = Date.now() / 1000;
   var stalePadding = Math.floor((now - endTime) / INTERVAL_SIZE_SECONDS);
@@ -106,8 +103,7 @@ function lastDelta(ys) {
   if (ys[ys.length - 1] === 0 || ys[ys.length - 2] === 0) {
     return NO_DELTA_VALUE;
   } else {
-    // XXX: delta always rounds down to nearest even number
-    return 2 * (ys[ys.length - 1] - ys[ys.length - 2]);
+    return ys[ys.length - 1] - ys[ys.length - 2];
   }
 }
 
@@ -122,7 +118,8 @@ function requestAndSendBGs() {
     var ys = graphArray(sgvs);
     var data = {
       recency: recency(sgvs),
-      sgvs: ys,
+      // XXX: divide BG by 2 to fit into 1 byte
+      sgvs: ys.map(function(y) { return Math.min(255, Math.floor(y / 2)); }),
       lastSgv: lastSgv(sgvs),
       trend: lastTrendNumber(sgvs),
       delta: lastDelta(ys),
