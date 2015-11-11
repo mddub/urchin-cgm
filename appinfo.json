@@ -10,12 +10,13 @@
     "watchface": true
   },
   "appKeys": {
-    "recency": 0,
-    "sgvs": 1,
-    "lastSgv": 2,
-    "trend": 3,
-    "delta": 4,
-    "statusText": 5
+    "error": 0,
+    "recency": 1,
+    "sgvs": 2,
+    "lastSgv": 3,
+    "trend": 4,
+    "delta": 5,
+    "statusText": 6
   },
   "resources": {
     "media": [

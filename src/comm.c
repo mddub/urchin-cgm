@@ -1,6 +1,9 @@
+#include "app_keys.h"
+#include "config.h"
 #include "comm.h"
+#include "staleness.h"
 
-static bool ever_received_data = false;
+static bool phone_contact = false;
 static bool update_in_progress;
 static AppTimer *request_timer = NULL;
 static AppTimer *timeout_timer = NULL;
@@ -21,7 +24,7 @@ static int timeout_length() {
   // Start with extra short timeouts on launch to get data showing as soon as possible.
   static int exponential_timeout = INITIAL_TIMEOUT;
 
-  if (ever_received_data) {
+  if (phone_contact) {
     return DEFAULT_TIMEOUT;
   } else {
     exponential_timeout = exponential_timeout * 2 < DEFAULT_TIMEOUT ? exponential_timeout * 2 : DEFAULT_TIMEOUT;
@@ -57,9 +60,14 @@ static void request_update() {
 }
 
 static void in_received_handler(DictionaryIterator *received, void *context) {
+  phone_contact = true;
   update_in_progress = false;
   schedule_update(UPDATE_FREQUENCY);
-  data_callback(received);
+
+  staleness_update(received);
+  if (!dict_find(received, APP_KEY_ERROR)->value->uint8) {
+    data_callback(received);
+  }
 }
 
 static void in_dropped_handler(AppMessageResult reason, void *context) {

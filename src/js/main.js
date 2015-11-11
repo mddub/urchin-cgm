@@ -74,14 +74,6 @@ function graphArray(sgvs) {
 
   var ys = graphed.map(function(entry) { return entry['sgv']; });
 
-  // TODO Pebble should do all the padding
-  var now = Date.now() / 1000;
-  var stalePadding = Math.floor((now - endTime) / INTERVAL_SIZE_SECONDS);
-  for(i = 0; i < stalePadding; i++) {
-    ys.shift();
-    ys.push(0);
-  }
-
   return ys;
 }
 
@@ -99,8 +91,7 @@ function lastTrendNumber(sgvs) {
 }
 
 function lastDelta(ys) {
-  // TODO stop adding padding here, let Pebble handle it
-  if (ys[ys.length - 1] === 0 || ys[ys.length - 2] === 0) {
+  if (ys[ys.length - 2] === 0) {
     return NO_DELTA_VALUE;
   } else {
     return ys[ys.length - 1] - ys[ys.length - 2];
@@ -113,10 +104,12 @@ function recency(sgvs) {
 }
 
 function requestAndSendBGs() {
+  var data;
   try {
     var sgvs = getSGVsDateDescending();
     var ys = graphArray(sgvs);
-    var data = {
+    data = {
+      error: false,
       recency: recency(sgvs),
       // XXX: divide BG by 2 to fit into 1 byte
       sgvs: ys.map(function(y) { return Math.min(255, Math.floor(y / 2)); }),
@@ -125,21 +118,14 @@ function requestAndSendBGs() {
       delta: lastDelta(ys),
       statusText: getIOB()
     };
-    console.log('sending ' + JSON.stringify(data));
-    var transactionId = Pebble.sendAppMessage(
-      data,
-      function(e) {
-        console.log('success');
-      },
-      function(e) {
-        console.log('failed: ' + JSON.stringify(e));
-      }
-    );
   }
   catch (e) {
-    // Don't need error handling because watch will just retry
     console.log(e);
+    var data = {error: true};
   }
+
+  console.log('sending ' + JSON.stringify(data));
+  Pebble.sendAppMessage(data);
 }
 
 Pebble.addEventListener('ready', function(e) {

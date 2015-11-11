@@ -1,9 +1,6 @@
 #include "app_keys.h"
+#include "staleness.h"
 #include "status_bar_element.h"
-
-static bool ever_received_data = false;
-static time_t last_data_update_time;
-static int last_delay_wrt_phone;
 
 StatusBarElement* status_bar_element_create(Layer *parent) {
   GRect bounds = layer_get_bounds(parent);
@@ -39,10 +36,6 @@ void status_bar_element_destroy(StatusBarElement *el) {
 }
 
 void status_bar_element_update(StatusBarElement *el, DictionaryIterator *data) {
-  ever_received_data = true;
-  last_data_update_time = time(NULL);
-  last_delay_wrt_phone = dict_find(data, APP_KEY_RECENCY)->value->int32;
-
   text_layer_set_text(
     el->left_text,
     dict_find(data, APP_KEY_STATUS_TEXT)->value->cstring
@@ -52,13 +45,10 @@ void status_bar_element_update(StatusBarElement *el, DictionaryIterator *data) {
 
 // TODO: for now, the right status always shows the recency of the data
 void status_bar_element_tick(StatusBarElement *el) {
-  if (!ever_received_data) {
+  if (!ever_received_data()) {
     return;
   }
-  time_t now = time(NULL);
-  int phone_min = (now - last_data_update_time) / 60;
-  int data_min = phone_min + last_delay_wrt_phone / 60;
-  static char s_recency_buffer[16];
-  snprintf(s_recency_buffer, sizeof(s_recency_buffer), "(%d/%d)", phone_min, data_min);
-  text_layer_set_text(el->right_text, s_recency_buffer);
+  static char recency_buffer[16];
+  snprintf(recency_buffer, sizeof(recency_buffer), "%d+%d+%d", phone_to_pebble_staleness() / 60, web_to_phone_staleness() / 60, rig_to_web_staleness() / 60);
+  text_layer_set_text(el->right_text, recency_buffer);
 }

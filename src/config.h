@@ -19,6 +19,15 @@
 #define GRAPH_LIMIT_LINES {70, 180}
 #define GRAPH_GRIDLINES {40, 50, 100, 150, 200, 250}
 
+#define UPDATE_FREQUENCY 60*1000
+
+// Even though the data is technically "stale" if we don't have a new
+// reading every 5 minutes, there is some lag between the components
+// of rig -> web -> phone -> Pebble. Give the data some extra time to
+// propagate through the system before shifting the graph to the left
+// to indicate staleness.
+#define GRAPH_STALENESS_GRACE_PERIOD_SECONDS 3*60
+
 ///////////////////////////////////////////////////////
 
 #define GRAPH_SGV_COUNT 36

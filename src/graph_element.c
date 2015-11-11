@@ -1,6 +1,7 @@
 #include "app_keys.h"
 #include "config.h"
 #include "graph_element.h"
+#include "staleness.h"
 
 static int LIMIT_LINES[] = GRAPH_LIMIT_LINES;
 static const int GRIDLINES[] = GRAPH_GRIDLINES;
@@ -30,6 +31,12 @@ static int bg_to_y_for_line(int height, int bg) {
   return bg_to_y(height, bg, -1, height - 1);
 }
 
+static int staleness_padding() {
+  int staleness = total_data_staleness() - GRAPH_STALENESS_GRACE_PERIOD_SECONDS;
+  staleness = staleness < 0 ? 0 : staleness;
+  return staleness / (5 * 60);
+}
+
 static void graph_update_proc(Layer *layer, GContext *ctx) {
   unsigned int i, x, y;
   int height = layer_get_bounds(layer).size.h;
@@ -41,7 +48,7 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
     if(bg == 0) {
       continue;
     }
-    x = 3 * i;
+    x = 3 * (i - staleness_padding());
     y = bg_to_y_for_point(height, bg);
     plot_point(x, y, ctx);
   }

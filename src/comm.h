@@ -4,8 +4,6 @@
 
 #define CONTENT_SIZE 256
 
-#define UPDATE_FREQUENCY 60*1000
-
 // There are many failure modes...
 #define INITIAL_TIMEOUT 1000
 #define DEFAULT_TIMEOUT 20*1000

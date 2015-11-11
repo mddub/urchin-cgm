@@ -20,7 +20,6 @@ Still very much work-in-progress. Architecture is liable to change. Probably soo
 * Generalize configuration of status bar content
 * Conserve battery by not redrawing unchanged data
 * Better indicators for phone/web/rig connectivity
-* Shift graph to the left for stale phone data on Pebble, as JS does for stale web data
 * Stale data alerts
 * Show watch battery level
 * Show date in time area when space allows

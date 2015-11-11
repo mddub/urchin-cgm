@@ -1,6 +1,7 @@
 #pragma once
 
 enum {
+  APP_KEY_ERROR,
   APP_KEY_RECENCY,
   APP_KEY_SGVS,
   APP_KEY_LAST_SGV,
