@@ -2,8 +2,6 @@
 
 #include <pebble.h>
 
-#define NO_ICON -1
-
 typedef struct SidebarElement {
   TextLayer *last_bg_text;
   GBitmap *trend_bitmap;

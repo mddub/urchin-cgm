@@ -38,6 +38,7 @@ SidebarElement* sidebar_element_create(Layer *parent) {
   SidebarElement* el = malloc(sizeof(SidebarElement));
   el->last_bg_text = last_bg_text;
   el->trend_layer = trend_layer;
+  el->trend_bitmap = NULL;
   el->delta_text = delta_text;
   return el;
 }

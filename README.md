@@ -19,7 +19,6 @@ Still very much work-in-progress. Architecture is liable to change. Probably soo
 #### To do (ordered vaguely by priority):
 * Generalize configuration of status bar content
 * Conserve battery by not redrawing unchanged data
-* Better indicators for phone/web/rig connectivity
 * Stale data alerts
 * Show watch battery level
 * Show date in time area when space allows

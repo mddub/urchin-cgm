@@ -82,13 +82,17 @@ GraphElement* graph_element_create(Layer *parent) {
   layer_set_update_proc(graph_layer, graph_update_proc);
   layer_add_child(parent, graph_layer);
 
+  ConnectionStatusComponent *conn_status = connection_status_component_create(parent, 1, 1);
+
   GraphElement *el = malloc(sizeof(GraphElement));
   el->graph_layer = graph_layer;
+  el->conn_status = conn_status;
   return el;
 }
 
 void graph_element_destroy(GraphElement *el) {
   layer_destroy(el->graph_layer);
+  connection_status_component_destroy(el->conn_status);
   free(el);
 }
 
@@ -99,6 +103,9 @@ void graph_element_update(GraphElement *el, DictionaryIterator *data) {
     GRAPH_SGV_COUNT
   );
   layer_mark_dirty(el->graph_layer);
+  connection_status_component_refresh(el->conn_status);
 }
 
-void graph_element_tick(GraphElement *el) {}
+void graph_element_tick(GraphElement *el) {
+  connection_status_component_refresh(el->conn_status);
+}

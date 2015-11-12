@@ -54,6 +54,21 @@
         "type": "png",
         "name": "ARROW_DOUBLE_DOWN",
         "file": "images/arrow_double_down.png"
+      },
+      {
+        "type": "png",
+        "name": "CONN_ISSUE_BLUETOOTH",
+        "file": "images/conn_issue_bluetooth.png"
+      },
+      {
+        "type": "png",
+        "name": "CONN_ISSUE_NETWORK",
+        "file": "images/conn_issue_network.png"
+      },
+      {
+        "type": "png",
+        "name": "CONN_ISSUE_RIG",
+        "file": "images/conn_issue_rig.png"
       }
     ]
   }

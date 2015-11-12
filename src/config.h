@@ -21,6 +21,19 @@
 
 #define UPDATE_FREQUENCY 60*1000
 
+// STALENESS ALERTS:
+// Show an icon if there is unacceptable lag between any component of:
+// Rig -> Nightscout -> Phone -> Pebble
+
+// Longest time (minutes) phone can be unreachable by Bluetooth before alerting
+#define PHONE_TO_PEBBLE_MAX_ACCEPTABLE_DELAY 10
+
+// If Bluetooth is working, longest time (minutes) the network can be unreachable before alerting
+#define WEB_TO_PHONE_MAX_ACCEPTABLE_DELAY 10
+
+// Maximum age (minutes) of the data in Nightscout before alerting
+#define RIG_TO_WEB_MAX_ACCEPTABLE_DELAY 20
+
 // Even though the data is technically "stale" if we don't have a new
 // reading every 5 minutes, there is some lag between the components
 // of rig -> web -> phone -> Pebble. Give the data some extra time to
@@ -38,6 +51,8 @@
 #define TIME_AREA_ELEMENT 3
 
 #define MAX_LAYOUT_ELEMENTS 4
+
+#define NO_ICON -1
 
 typedef struct ElementConfig {
   int el;
