@@ -7,6 +7,7 @@ static int LIMIT_LINES[] = GRAPH_LIMIT_LINES;
 static const int GRIDLINES[] = GRAPH_GRIDLINES;
 
 static const int POINT_SIZE = 3;
+static const int INTERVAL_SIZE_SECONDS = 5 * 60;
 
 static void plot_point(int x, int y, GContext *ctx) {
   graphics_context_set_fill_color(ctx, GColorBlack);
@@ -32,9 +33,12 @@ static int bg_to_y_for_line(int height, int bg) {
 }
 
 static int staleness_padding() {
-  int staleness = total_data_staleness() - GRAPH_STALENESS_GRACE_PERIOD_SECONDS;
-  staleness = staleness < 0 ? 0 : staleness;
-  return staleness / (5 * 60);
+  int staleness = total_data_staleness();
+  int padding = staleness / INTERVAL_SIZE_SECONDS;
+  if (padding == 1 && staleness < INTERVAL_SIZE_SECONDS + GRAPH_STALENESS_GRACE_PERIOD_SECONDS) {
+    padding = 0;
+  }
+  return padding;
 }
 
 static void graph_update_proc(Layer *layer, GContext *ctx) {
@@ -48,21 +52,21 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
     if(bg == 0) {
       continue;
     }
-    x = 3 * (i - staleness_padding());
+    x = POINT_SIZE * (i - staleness_padding());
     y = bg_to_y_for_point(height, bg);
     plot_point(x, y, ctx);
   }
 
   for(i = 0; i < ARRAY_LENGTH(LIMIT_LINES); i++) {
     y = bg_to_y_for_line(height, LIMIT_LINES[i]);
-    for(x = 0; x < 3 * GRAPH_SGV_COUNT; x += 4) {
+    for(x = 0; x < POINT_SIZE * GRAPH_SGV_COUNT; x += 4) {
       graphics_draw_line(ctx, GPoint(x, y), GPoint(x + 2, y));
     }
   }
 
   for(i = 0; i < ARRAY_LENGTH(GRIDLINES); i++) {
     y = bg_to_y_for_line(height, GRIDLINES[i]);
-    for(x = 0; x < 3 * GRAPH_SGV_COUNT; x += 8) {
+    for(x = 0; x < POINT_SIZE * GRAPH_SGV_COUNT; x += 8) {
       graphics_draw_line(ctx, GPoint(x, y), GPoint(x + 1, y));
     }
   }
