@@ -1,6 +1,6 @@
 A Pebble watchface for showing [Nightscout](https://github.com/nightscout/cgm-remote-monitor) CGM data in graph format, like this:
 
-![Screenshot](http://i.imgur.com/DfCeIs2.png)
+![Screenshot](http://i.imgur.com/JHj19C2.png)
 
 Still very much work-in-progress. Architecture is liable to change. Probably soon to be renamed, too.
 
@@ -13,8 +13,8 @@ Still very much work-in-progress. Architecture is liable to change. Probably soo
 * You can show whatever string you want in the status bar (including newlines, if you configure the status bar to be taller) by sending a different value for `statusText` in `main.js`. This can be based on data from any URL, following the pattern of `getIOB()`.
 
 #### Notes:
-* `(0/3)` means the Pebble last heard from the phone 0 minutes ago, and the Nightscout data is from 3 minutes ago (actually, the sum of (time since last phone contact) and (age of Nightscout data as of last phone contact) is 3 minutes). This will be improved and moved elsewhere soon.
-* `0.8 u (4)` means IOB is 0.8 units as of 4 minutes ago. This data is [reported by a MiniMed Connect](https://github.com/mddub/minimed-connect-to-nightscout) and probably does not apply for most people, but is easy to customize (see above).
+* `0+0+2` shows the lag in each leg of `Pebble -> phone -> Nightscout -> rig`. In this case, it has been 0 minutes since the Pebble last heard from the phone, 0 minutes since the phone last successfully got data from Nightscout, and the data in Nightscout was 2 minutes old when it was retrieved by the phone. You can use these to diagnose whether a lack of recent data is because of a Bluetooth issue, a network issue, or an issue getting data from your device to Nightscout. The *total* lag is the sum of these, and is indicated visually on the graph, which shows empty space when recent data is missing.
+* `2.8 u (1)` means IOB is 2.8 units as of 1 minute ago. This data is [reported by a MiniMed Connect](https://github.com/mddub/minimed-connect-to-nightscout) and probably does not apply for most people, but is easy to customize (see above).
 
 #### To do (ordered vaguely by priority):
 * Generalize configuration of status bar content
