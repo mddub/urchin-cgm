@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="css/slate.min.css">
+  </head>
+  <body>
+    <form id="config-form">
+      <div class="item-container">
+        <div class="item-container-header">Nightscout URL</div>
+        <div class="item-container-content">
+          <label class="item">
+            <div class="item-input-wrapper">
+              <input id="ns-url" type="url" class="item-input">
+            </div>
+          </label>
+        </div>
+        <div class="item-container-footer">
+          This probably looks like: <strong>https://YOURSITENAME.azurewebsites.net</strong>
+        </div>
+      </div>
+      <div class="item-container">
+        <div class="item-container-header">Units</div>
+        <div class="item-container-content">
+          <div class="item tab-buttons">
+            <a id="units-mgdl" name="units" class="tab-button">mg/dL</a>
+            <a id="units-mmol" name="units" class="tab-button">mmol/L</a>
+          </div>
+        </div>
+      </div>
+      <div class="item-container">
+        <div class="button-container">
+          <input id="submit-button" type="submit" class="item-button" value="SAVE">
+        </div>
+      </div>
+    </form>
+    <script src="js/slate.min.js"></script>
+    <script src="js/config.js"></script>
+  </body>
+</html>
