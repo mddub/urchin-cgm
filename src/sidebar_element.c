@@ -1,5 +1,6 @@
 #include "app_keys.h"
 #include "config.h"
+#include "layout.h"
 #include "sidebar_element.h"
 #include "units.h"
 
@@ -17,7 +18,7 @@ const int TREND_ICONS[] = {
 };
 
 SidebarElement* sidebar_element_create(Layer *parent) {
-  GRect bounds = layer_get_bounds(parent);
+  GRect bounds = element_get_bounds(parent);
 
   TextLayer *last_bg_text = text_layer_create(GRect(0, 3, bounds.size.w, 24));
   text_layer_set_font(last_bg_text, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));

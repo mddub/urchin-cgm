@@ -1,3 +1,4 @@
+#include "layout.h"
 #include "time_element.h"
 
 // https://forums.getpebble.com/discussion/7147/text-layer-padding
@@ -6,7 +7,7 @@
 #define PADDING_BOTTOM_42 8
 
 TimeElement* time_element_create(Layer* parent) {
-  GRect bounds = layer_get_bounds(parent);
+  GRect bounds = element_get_bounds(parent);
   const int time_margin = 2;
   TextLayer* time_text = text_layer_create(GRect(time_margin, (bounds.size.h - ACTUAL_TEXT_HEIGHT_42) / 2 - PADDING_TOP_42, bounds.size.w - 2 * time_margin, ACTUAL_TEXT_HEIGHT_42 + PADDING_TOP_42 + PADDING_BOTTOM_42));
   text_layer_set_font(time_text, fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD));

@@ -1,9 +1,10 @@
 #include "app_keys.h"
+#include "layout.h"
 #include "staleness.h"
 #include "status_bar_element.h"
 
 StatusBarElement* status_bar_element_create(Layer *parent) {
-  GRect bounds = layer_get_bounds(parent);
+  GRect bounds = element_get_bounds(parent);
 
   int sm_text_margin = 2;
   // L- and R-aligned text overlap, so one can be much longer, or nonexistent

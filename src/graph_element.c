@@ -1,6 +1,7 @@
 #include "app_keys.h"
 #include "config.h"
 #include "graph_element.h"
+#include "layout.h"
 #include "staleness.h"
 
 static int LIMIT_LINES[] = GRAPH_LIMIT_LINES;
@@ -73,7 +74,7 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
 }
 
 GraphElement* graph_element_create(Layer *parent) {
-  GRect bounds = layer_get_bounds(parent);
+  GRect bounds = element_get_bounds(parent);
 
   Layer* graph_layer = layer_create_with_data(
     GRect(0, 0, bounds.size.w, bounds.size.h),
