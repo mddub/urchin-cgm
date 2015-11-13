@@ -4,7 +4,7 @@ A Pebble watchface for showing [Nightscout](https://github.com/nightscout/cgm-re
 
 Still very much work-in-progress. Architecture is liable to change. Probably soon to be renamed, too.
 
-#### To install:
+#### To install (for now):
 * Add a `src/js/_config.js` with your Nightscout host and build/install with the Pebble SDK.
 
 #### To configure (for now):
@@ -27,7 +27,7 @@ Still very much work-in-progress. Architecture is liable to change. Probably soo
 
   ![](http://i.imgur.com/ayrbxEm.png) There is a problem with the Rig -> Nightscout connection; the most recent data point in your Nightscout server is from 26 minutes ago. Maybe there's a problem with your receiver or uploader. Maybe the sensor fell out.
 
-  By default, the phone-> Pebble and Nightscout -> phone icons appear after 10 minutes, and the rig -> Nightscout icon appears after 20 minutes. You can customize these thresholds in `config.h`.
+  By default, the phone -> Pebble and Nightscout -> phone icons appear after 10 minutes, and the rig -> Nightscout icon appears after 20 minutes. You can customize these thresholds in `config.h`.
 
 #### To do (ordered vaguely by priority):
 * Generalize configuration of status bar content
@@ -40,11 +40,7 @@ Still very much work-in-progress. Architecture is liable to change. Probably soo
 * Configuration via phone
 * Integration tests based on visual diffs
 * Cache data
-* Periodically recreate the entire window in an attempt to stop garbled screen issues when the watchface has been running for a long time
-* Multiple layouts, toggled by [shaking watch](https://developer.getpebble.com/guides/pebble-apps/sensors/accelerometer/#tap-event-service)
 * etc.
-
-The code style favors comprehensibility and extensibility. By design, there is some boilerplate where one might otherwise prefer abstraction. Ideally, that boilerplate makes it easy for you to understand and modify the layout components.
 
 File an issue to report a bug or provide feedback for future development.
 
