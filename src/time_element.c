@@ -16,7 +16,10 @@ TimeElement* time_element_create(Layer* parent) {
   text_layer_set_text_alignment(time_text, GTextAlignmentRight);
   layer_add_child(parent, text_layer_get_layer(time_text));
 
-  BatteryComponent *battery = battery_component_create(parent, battery_component_vertical_padding(), bounds.size.h - battery_component_height());
+  BatteryComponent *battery = NULL;
+  if (!BATTERY_IN_STATUS_BAR) {
+    battery = battery_component_create(parent, battery_component_vertical_padding(), bounds.size.h - battery_component_height());
+  }
 
   TimeElement* out = malloc(sizeof(TimeElement));
   out->time_text = time_text;
@@ -26,7 +29,9 @@ TimeElement* time_element_create(Layer* parent) {
 
 void time_element_destroy(TimeElement* el) {
   text_layer_destroy(el->time_text);
-  battery_component_destroy(el->battery);
+  if (el->battery != NULL) {
+    battery_component_destroy(el->battery);
+  }
   free(el);
 }
 

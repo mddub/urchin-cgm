@@ -13,6 +13,10 @@
 
 #define USE_MMOL false
 
+// TODO this should be part of the layout config
+// For now, true == status bar, false == time area
+#define BATTERY_IN_STATUS_BAR true
+
 // These must be specified in mg/dL
 #define GRAPH_SGV_MIN 40
 #define GRAPH_SGV_MAX 300

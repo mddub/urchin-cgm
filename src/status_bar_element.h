@@ -1,10 +1,11 @@
 #pragma once
 
 #include <pebble.h>
+#include "battery_component.h"
 
 typedef struct StatusBarElement {
-  TextLayer *left_text;
-  TextLayer *right_text;
+  TextLayer *text;
+  BatteryComponent *battery;
 } StatusBarElement;
 
 StatusBarElement* status_bar_element_create(Layer *parent);
