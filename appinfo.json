@@ -69,6 +69,31 @@
         "type": "png",
         "name": "CONN_ISSUE_RIG",
         "file": "images/conn_issue_rig.png"
+      },
+      {
+        "type": "png",
+        "name": "BATTERY_25",
+        "file": "images/battery_25.png"
+      },
+      {
+        "type": "png",
+        "name": "BATTERY_50",
+        "file": "images/battery_50.png"
+      },
+      {
+        "type": "png",
+        "name": "BATTERY_75",
+        "file": "images/battery_75.png"
+      },
+      {
+        "type": "png",
+        "name": "BATTERY_100",
+        "file": "images/battery_100.png"
+      },
+      {
+        "type": "png",
+        "name": "BATTERY_CHARGING",
+        "file": "images/battery_charging.png"
       }
     ]
   }

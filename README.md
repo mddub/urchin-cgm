@@ -1,6 +1,6 @@
 A Pebble watchface for showing [Nightscout](https://github.com/nightscout/cgm-remote-monitor) CGM data in graph format, like this:
 
-![Screenshot](http://i.imgur.com/JHj19C2.png)
+![Screenshot](http://i.imgur.com/ywmRz52.png)
 
 Still very much work-in-progress. Architecture is liable to change. Probably soon to be renamed, too.
 
@@ -20,7 +20,6 @@ Still very much work-in-progress. Architecture is liable to change. Probably soo
 * Generalize configuration of status bar content
 * Conserve battery by not redrawing unchanged data
 * Stale data alerts
-* Show watch battery level
 * Show date in time area when space allows
 * High/low BG alerts
 * Ability to rearrange/hide content within layout elements
