@@ -95,10 +95,27 @@ function lastSgv(sgvs) {
   return parseInt(sgvs[0]['sgv'], 10);
 }
 
+function directionToTrend(direction) {
+  return {
+    'NONE': 0,
+    'DoubleUp': 1,
+    'SingleUp': 2,
+    'FortyFiveUp': 3,
+    'Flat': 4,
+    'FortyFiveDown': 5,
+    'SingleDown': 6,
+    'DoubleDown': 7,
+    'NOT COMPUTABLE': 8,
+    'RATE OUT OF RANGE': 9,
+  }[direction];
+}
+
 function lastTrendNumber(sgvs) {
   var trend = sgvs[0]['trend'];
   if (trend !== undefined && trend >= 0 && trend <= 9) {
     return trend;
+  } else if (sgvs[0]['direction'] !== undefined) {
+    return directionToTrend(sgvs[0]['direction']);
   } else {
     return 0;
   }
