@@ -5,10 +5,14 @@ A Pebble watchface for showing [Nightscout](https://github.com/nightscout/cgm-re
 Still very much work-in-progress. Architecture is liable to change. Probably soon to be renamed, too.
 
 #### To install (for now):
-* Add a `src/js/_config.js` with your Nightscout host and build/install with the Pebble SDK.
+* In the Pebble app on your phone, go to "Settings" and enable "Developer Mode".
+* Open [this pbw file](https://raw.githubusercontent.com/mddub/nightscout-graph-pebble/master/release/nightscout-graph-pebble.pbw) in the Pebble app on your phone.
 
 #### To configure (for now):
-* You can change the units (mmol/L or mg/dL), graph range, gridline positions, and more in `config.h`.
+* Set your Nightscout host and display units on the phone:
+
+  ![](http://i.imgur.com/2MFI3hM.png)
+* You can change the graph range, gridline positions, and more in `config.h`.
 * You can change the size, position, and borders of each layout element in `config.c`. (e.g., move the graph to the top and time to the bottom, etc.)
 * You can show whatever string you want in the status bar (including newlines, if you configure the status bar to be taller) by sending a different value for `statusText` in `main.js`. This can be based on data from any URL, following the pattern of `getIOB()`.
 
@@ -37,7 +41,6 @@ Still very much work-in-progress. Architecture is liable to change. Probably soo
 * High/low BG alerts
 * Ability to rearrange/hide content within layout elements
 * Additional, optional layout elements (bolus visualization, basal visualization, large SGV number a la [cgm-pebble](https://github.com/nightscout/cgm-pebble))
-* Configuration via phone
 * Integration tests based on visual diffs
 * Cache data
 * etc.
