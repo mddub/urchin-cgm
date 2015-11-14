@@ -1,4 +1,5 @@
-/* global XMLHttpRequest, console, localStorage, Pebble */
+/* jshint browser: true */
+/* global console, Pebble */
 
 var SGV_FETCH_COUNT = 72;
 var SGV_FOR_PEBBLE_COUNT = 36;
@@ -19,39 +20,73 @@ var config = {
   mmol: false,
 };
 
-var syncGetJSON = function (url) {
-  // async == false, since timeout/ontimeout is broken for Pebble XHR
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', url, false);
-  xhr.setRequestHeader('Content-type', 'application/json');
-  xhr.timeout = REQUEST_TIMEOUT;
-  xhr.send();
-
-  if(xhr.status === 200) {
-    return JSON.parse(xhr.responseText);
-  } else if(xhr.status === null || xhr.status === 0) {
-    throw new Error('Request timed out: ' + url);
-  } else {
-    throw new Error('Request failed, status ' + xhr.status + ': ' + url);
-  }
-};
-
-function getIOB() {
-  var iobs = syncGetJSON(config.nightscout_url + '/api/v1/entries.json?find[activeInsulin][$exists]=true&count=1');
-  if(iobs.length && Date.now() - iobs[0]['date'] <= IOB_RECENCY_THRESHOLD_SECONDS * 1000) {
-    var recency = Math.floor((Date.now() - iobs[0]['date']) / (60 * 1000));
-    return iobs[0]['activeInsulin'].toFixed(1).toString() + ' u (' + recency + ')';
-  } else {
-    return '-';
-  }
+function handleError(e) {
+  console.log(e);
+  sendMessage({msgType: MSG_TYPE_ERROR});
 }
 
-function getSGVsDateDescending() {
-  var entries = syncGetJSON(config.nightscout_url + '/api/v1/entries/sgv.json?count=' + SGV_FETCH_COUNT);
-  entries.forEach(function(e) {
-    e['date'] = e['date'] / 1000;
+// In PebbleKit JS, specifying a timeout works only for synchronous XHR,
+// except on Android, where synchronous XHR doesn't work at all.
+// https://forums.getpebble.com/discussion/13224/problem-with-xmlhttprequest-timeout
+function getURL(url, callback) {
+  var received = false;
+  var timedOut = false;
+
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', url, true);
+  xhr.onreadystatechange = function () {
+    if (timedOut) {
+      return;
+    }
+    if (xhr.readyState === 4) {
+      received = true;
+      if (xhr.status === 200) {
+        callback(xhr.responseText);
+      } else {
+        handleError(new Error('Request failed, status ' + xhr.status + ': ' + url));
+      }
+    }
+  };
+  xhr.send(null);
+
+  setTimeout(function() {
+    if (received) {
+      return;
+    }
+    timedOut = true;
+    handleError(new Error('Request timed out: ' + url));
+  }, REQUEST_TIMEOUT);
+}
+
+function getJSON(url, callback) {
+  getURL(url, function(result) {
+    try {
+      callback(JSON.parse(result));
+    } catch (e) {
+      handleError(e);
+    }
   });
-  return entries;
+}
+
+function getIOB(callback) {
+  getJSON(config.nightscout_url + '/api/v1/entries.json?find[activeInsulin][$exists]=true&count=1', function(iobs) {
+    if(iobs.length && Date.now() - iobs[0]['date'] <= IOB_RECENCY_THRESHOLD_SECONDS * 1000) {
+      var recency = Math.floor((Date.now() - iobs[0]['date']) / (60 * 1000));
+      var iob = iobs[0]['activeInsulin'].toFixed(1).toString() + ' u (' + recency + ')';
+      callback(iob);
+    } else {
+      callback('-');
+    }
+  });
+}
+
+function getSGVsDateDescending(callback) {
+  getJSON(config.nightscout_url + '/api/v1/entries/sgv.json?count=' + SGV_FETCH_COUNT, function(entries) {
+    callback(entries.map(function(e) {
+      e['date'] = e['date'] / 1000;
+      return e;
+    }));
+  });
 }
 
 function graphArray(sgvs) {
@@ -140,27 +175,29 @@ function sendMessage(data) {
 }
 
 function requestAndSendBGs() {
-  var data;
-  try {
-    var sgvs = getSGVsDateDescending();
-    var ys = graphArray(sgvs);
-    data = {
-      msgType: MSG_TYPE_DATA,
-      recency: recency(sgvs),
-      // XXX: divide BG by 2 to fit into 1 byte
-      sgvs: ys.map(function(y) { return Math.min(255, Math.floor(y / 2)); }),
-      lastSgv: lastSgv(sgvs),
-      trend: lastTrendNumber(sgvs),
-      delta: lastDelta(ys),
-      statusText: getIOB()
-    };
-  }
-  catch (e) {
-    console.log(e);
-    data = {msgType: MSG_TYPE_ERROR};
+  function onData(sgvs, iobText) {
+    try {
+      var ys = graphArray(sgvs);
+      sendMessage({
+        msgType: MSG_TYPE_DATA,
+        recency: recency(sgvs),
+        // XXX: divide BG by 2 to fit into 1 byte
+        sgvs: ys.map(function(y) { return Math.min(255, Math.floor(y / 2)); }),
+        lastSgv: lastSgv(sgvs),
+        trend: lastTrendNumber(sgvs),
+        delta: lastDelta(ys),
+        statusText: iobText,
+      });
+    } catch (e) {
+      handleError(e);
+    }
   }
 
-  sendMessage(data);
+  getSGVsDateDescending(function(sgvs) {
+    getIOB(function(iobText) {
+      onData(sgvs, iobText);
+    });
+  });
 }
 
 function sendPreferences() {
@@ -173,7 +210,11 @@ function sendPreferences() {
 Pebble.addEventListener('ready', function() {
   var configStr = localStorage.getItem(LOCAL_STORAGE_KEY_CONFIG);
   if (configStr !== null) {
-    config = JSON.parse(configStr);
+    try {
+      config = JSON.parse(configStr);
+    } catch (e) {
+      console.log('Bad config: ' + configStr);
+    }
   }
 
   Pebble.addEventListener('showConfiguration', function() {
