@@ -29,6 +29,7 @@ SidebarElement* sidebar_element_create(Layer *parent) {
 
   int trend_arrow_width = 25;
   BitmapLayer *trend_layer = bitmap_layer_create(GRect((bounds.size.w - trend_arrow_width) / 2, 3 + 28, trend_arrow_width, trend_arrow_width));
+  bitmap_layer_set_compositing_mode(trend_layer, GCompOpAnd);
   layer_add_child(parent, bitmap_layer_get_layer(trend_layer));
 
   TextLayer *delta_text = text_layer_create(GRect(0, 3 + 22 + 28, bounds.size.w, 24));

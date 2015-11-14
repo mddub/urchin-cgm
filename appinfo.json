@@ -25,77 +25,77 @@
   "resources": {
     "media": [
       {
-        "type": "png",
+        "type": "pbi",
         "name": "ARROW_DOUBLE_UP",
         "file": "images/arrow_double_up.png"
       },
       {
-        "type": "png",
+        "type": "pbi",
         "name": "ARROW_SINGLE_UP",
         "file": "images/arrow_single_up.png"
       },
       {
-        "type": "png",
+        "type": "pbi",
         "name": "ARROW_FORTY_FIVE_UP",
         "file": "images/arrow_forty_five_up.png"
       },
       {
-        "type": "png",
+        "type": "pbi",
         "name": "ARROW_FLAT",
         "file": "images/arrow_flat.png"
       },
       {
-        "type": "png",
+        "type": "pbi",
         "name": "ARROW_FORTY_FIVE_DOWN",
         "file": "images/arrow_forty_five_down.png"
       },
       {
-        "type": "png",
+        "type": "pbi",
         "name": "ARROW_SINGLE_DOWN",
         "file": "images/arrow_single_down.png"
       },
       {
-        "type": "png",
+        "type": "pbi",
         "name": "ARROW_DOUBLE_DOWN",
         "file": "images/arrow_double_down.png"
       },
       {
-        "type": "png",
+        "type": "pbi",
         "name": "CONN_ISSUE_BLUETOOTH",
         "file": "images/conn_issue_bluetooth.png"
       },
       {
-        "type": "png",
+        "type": "pbi",
         "name": "CONN_ISSUE_NETWORK",
         "file": "images/conn_issue_network.png"
       },
       {
-        "type": "png",
+        "type": "pbi",
         "name": "CONN_ISSUE_RIG",
         "file": "images/conn_issue_rig.png"
       },
       {
-        "type": "png",
+        "type": "pbi",
         "name": "BATTERY_25",
         "file": "images/battery_25.png"
       },
       {
-        "type": "png",
+        "type": "pbi",
         "name": "BATTERY_50",
         "file": "images/battery_50.png"
       },
       {
-        "type": "png",
+        "type": "pbi",
         "name": "BATTERY_75",
         "file": "images/battery_75.png"
       },
       {
-        "type": "png",
+        "type": "pbi",
         "name": "BATTERY_100",
         "file": "images/battery_100.png"
       },
       {
-        "type": "png",
+        "type": "pbi",
         "name": "BATTERY_CHARGING",
         "file": "images/battery_charging.png"
       }

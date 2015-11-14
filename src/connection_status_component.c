@@ -20,6 +20,7 @@ const int CONN_ISSUE_ICONS[] = {
 
 ConnectionStatusComponent* connection_status_component_create(Layer *parent, int x, int y) {
   BitmapLayer *icon_layer = bitmap_layer_create(GRect(x, y, REASON_ICON_WIDTH, REASON_ICON_WIDTH));
+  bitmap_layer_set_compositing_mode(icon_layer, GCompOpAssign);
   layer_add_child(parent, bitmap_layer_get_layer(icon_layer));
 
   TextLayer *staleness_text = text_layer_create(GRect(
