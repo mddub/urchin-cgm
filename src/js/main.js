@@ -8,8 +8,16 @@ var REQUEST_TIMEOUT = 5000;
 var NO_DELTA_VALUE = 65536;
 
 var CONFIG_URL = 'https://mddub.github.io/nightscout-graph-pebble/config/';
-var LOCAL_STORAGE_KEY_NS_URL = 'nightscout_url';
-var LOCAL_STORAGE_KEY_MMOL = 'mmol';
+var LOCAL_STORAGE_KEY_CONFIG = 'config';
+
+var MSG_TYPE_ERROR = 0;
+var MSG_TYPE_DATA = 1;
+var MSG_TYPE_PREFERENCES = 2;
+
+var config = {
+  nightscout_url: '',
+  mmol: false,
+};
 
 var syncGetJSON = function (url) {
   // async == false, since timeout/ontimeout is broken for Pebble XHR
@@ -29,7 +37,7 @@ var syncGetJSON = function (url) {
 };
 
 function getIOB() {
-  var iobs = syncGetJSON(nightscoutUrlBase() + '/api/v1/entries.json?find[activeInsulin][$exists]=true&count=1');
+  var iobs = syncGetJSON(config.nightscout_url + '/api/v1/entries.json?find[activeInsulin][$exists]=true&count=1');
   if(iobs.length && Date.now() - iobs[0]['date'] <= IOB_RECENCY_THRESHOLD_SECONDS * 1000) {
     var recency = Math.floor((Date.now() - iobs[0]['date']) / (60 * 1000));
     return iobs[0]['activeInsulin'].toFixed(1).toString() + ' u (' + recency + ')';
@@ -39,7 +47,7 @@ function getIOB() {
 }
 
 function getSGVsDateDescending() {
-  var entries = syncGetJSON(nightscoutUrlBase() + '/api/v1/entries/sgv.json?count=' + SGV_FETCH_COUNT);
+  var entries = syncGetJSON(config.nightscout_url + '/api/v1/entries/sgv.json?count=' + SGV_FETCH_COUNT);
   entries.forEach(function(e) {
     e['date'] = e['date'] / 1000;
   });
@@ -109,13 +117,18 @@ function recency(sgvs) {
   return Math.floor(seconds);
 }
 
+function sendMessage(data) {
+  console.log('sending ' + JSON.stringify(data));
+  Pebble.sendAppMessage(data);
+}
+
 function requestAndSendBGs() {
   var data;
   try {
     var sgvs = getSGVsDateDescending();
     var ys = graphArray(sgvs);
     data = {
-      error: false,
+      msgType: MSG_TYPE_DATA,
       recency: recency(sgvs),
       // XXX: divide BG by 2 to fit into 1 byte
       sgvs: ys.map(function(y) { return Math.min(255, Math.floor(y / 2)); }),
@@ -127,45 +140,34 @@ function requestAndSendBGs() {
   }
   catch (e) {
     console.log(e);
-    data = {error: true};
+    data = {msgType: MSG_TYPE_ERROR};
   }
 
-  console.log('sending ' + JSON.stringify(data));
-  Pebble.sendAppMessage(data);
+  sendMessage(data);
 }
 
-function readConfigValue(key, defaultValue) {
-  var value = localStorage.getItem(key);
-  console.log('reading ' + key + ': ' + value);
-  return value === null ? defaultValue : value;
-}
-
-function nightscoutUrlBase() {
-  return readConfigValue(LOCAL_STORAGE_KEY_NS_URL);
-}
-
-function getConfig() {
-  return {
-    nightscout_url: readConfigValue(LOCAL_STORAGE_KEY_NS_URL, ''),
-    mmol: readConfigValue(LOCAL_STORAGE_KEY_MMOL, 'false') === 'true',
-  };
-}
-
-function setConfig(config) {
-  config.nightscout_url = config.nightscout_url.replace(/\/$/, '');
-  localStorage.setItem(LOCAL_STORAGE_KEY_NS_URL, config.nightscout_url);
-  localStorage.setItem(LOCAL_STORAGE_KEY_MMOL, config.mmol === true ? 'true' : 'false');
+function sendPreferences() {
+  sendMessage({
+    msgType: MSG_TYPE_PREFERENCES,
+    mmol: config.mmol,
+  });
 }
 
 Pebble.addEventListener('ready', function() {
+  var configStr = localStorage.getItem(LOCAL_STORAGE_KEY_CONFIG);
+  if (configStr !== null) {
+    config = JSON.parse(configStr);
+  }
+
   Pebble.addEventListener('showConfiguration', function() {
-    var current = getConfig();
-    Pebble.openURL(CONFIG_URL + '?current=' + encodeURIComponent(JSON.stringify(current)));
+    Pebble.openURL(CONFIG_URL + '?current=' + encodeURIComponent(JSON.stringify(config)));
   });
 
   Pebble.addEventListener('webviewclosed', function(e) {
-    var config = JSON.parse(decodeURIComponent(e.response));
-    setConfig(config);
+    var configStr = decodeURIComponent(e.response);
+    config = JSON.parse(configStr);
+    localStorage.setItem(LOCAL_STORAGE_KEY_CONFIG, configStr);
+    sendPreferences();
     requestAndSendBGs();
   });
 

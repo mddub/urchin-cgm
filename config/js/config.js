@@ -28,7 +28,7 @@
     var mmol = document.getElementById('units-mgdl').className.indexOf('active') === -1;
     return {
       mmol: mmol,
-      nightscout_url: document.getElementById('ns-url').value,
+      nightscout_url: document.getElementById('ns-url').value.replace(/\/$/, ''),
     };
   }
 

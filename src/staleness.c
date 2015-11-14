@@ -68,7 +68,7 @@ void staleness_update(DictionaryIterator *data) {
   phone_contact = true;
   time_t now = time(NULL);
   last_phone_contact = now;
-  if (!dict_find(data, APP_KEY_ERROR)->value->uint8) {
+  if (dict_find(data, APP_KEY_MSG_TYPE)->value->uint8 == MSG_TYPE_DATA) {
     data_received = true;
     last_successful_phone_contact = now;
     last_data_staleness_wrt_phone = dict_find(data, APP_KEY_RECENCY)->value->int32;

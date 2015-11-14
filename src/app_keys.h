@@ -1,7 +1,16 @@
 #pragma once
 
+#define APP_KEY_MSG_TYPE 0
+#define NO_DELTA_VALUE 65536
+
 enum {
-  APP_KEY_ERROR,
+  MSG_TYPE_ERROR,
+  MSG_TYPE_DATA,
+  MSG_TYPE_PREFERENCES,
+};
+
+enum {
+  __APP_KEYS_FOR_DATA,
   APP_KEY_RECENCY,
   APP_KEY_SGVS,
   APP_KEY_LAST_SGV,
@@ -10,4 +19,7 @@ enum {
   APP_KEY_STATUS_TEXT,
 };
 
-#define NO_DELTA_VALUE 65536
+enum {
+  __APP_KEYS_FOR_PREFERENCES,
+  APP_KEY_MMOL,
+};

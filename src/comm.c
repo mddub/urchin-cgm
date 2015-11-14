@@ -65,7 +65,7 @@ static void in_received_handler(DictionaryIterator *received, void *context) {
   schedule_update(UPDATE_FREQUENCY);
 
   staleness_update(received);
-  if (!dict_find(received, APP_KEY_ERROR)->value->uint8) {
+  if (dict_find(received, APP_KEY_MSG_TYPE)->value->uint8 != MSG_TYPE_ERROR) {
     data_callback(received);
   }
 }

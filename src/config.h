@@ -11,8 +11,6 @@
 // The details of the layout can be set in config.c
 #define LAYOUT LAYOUT_OPTION_A
 
-#define USE_MMOL false
-
 // TODO this should be part of the layout config
 // For now, true == status bar, false == time area
 #define BATTERY_IN_STATUS_BAR true
@@ -57,6 +55,9 @@
 #define MAX_LAYOUT_ELEMENTS 4
 
 #define NO_ICON -1
+
+#define PERSIST_KEY_VERSION 0
+#define PERSIST_KEY_PREFERENCES_OBJECT 1
 
 typedef struct ElementConfig {
   int el;

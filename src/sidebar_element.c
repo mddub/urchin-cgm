@@ -1,6 +1,7 @@
 #include "app_keys.h"
 #include "config.h"
 #include "layout.h"
+#include "preferences.h"
 #include "sidebar_element.h"
 #include "units.h"
 
@@ -57,7 +58,7 @@ void sidebar_element_destroy(SidebarElement *el) {
 static void update_last_bg(SidebarElement *el, DictionaryIterator *data) {
   static char last_bg_buffer[8];
   int mgdl = dict_find(data, APP_KEY_LAST_SGV)->value->int32;
-  format_bg(last_bg_buffer, sizeof(last_bg_buffer), mgdl, false, USE_MMOL);
+  format_bg(last_bg_buffer, sizeof(last_bg_buffer), mgdl, false, get_prefs()->mmol);
   text_layer_set_text(el->last_bg_text, last_bg_buffer);
 }
 
@@ -88,7 +89,7 @@ static void update_delta(SidebarElement *el, DictionaryIterator *data) {
   if (delta == NO_DELTA_VALUE) {
     text_layer_set_text(el->delta_text, "-");
   } else {
-    format_bg(delta_buffer, sizeof(delta_buffer), delta, true, USE_MMOL);
+    format_bg(delta_buffer, sizeof(delta_buffer), delta, true, get_prefs()->mmol);
     text_layer_set_text(el->delta_text, delta_buffer);
   }
 }
