@@ -3,6 +3,7 @@
 #include "layout.h"
 #include "preferences.h"
 #include "sidebar_element.h"
+#include "staleness.h"
 #include "units.h"
 
 const int TREND_ICONS[] = {
@@ -65,8 +66,14 @@ static void update_last_bg(SidebarElement *el, DictionaryIterator *data) {
 
 static void update_trend(SidebarElement *el, DictionaryIterator *data) {
   static int last_trend = -1;
-  int trend = dict_find(data, APP_KEY_TREND)->value->int32;
 
+  if (graph_staleness_padding() > 0) {
+    last_trend = -1;
+    layer_set_hidden(bitmap_layer_get_layer(el->trend_layer), true);
+    return;
+  }
+
+  int trend = dict_find(data, APP_KEY_TREND)->value->int32;
   if (trend == last_trend) {
     return;
   }
@@ -86,7 +93,13 @@ static void update_trend(SidebarElement *el, DictionaryIterator *data) {
 
 static void update_delta(SidebarElement *el, DictionaryIterator *data) {
   static char delta_buffer[8];
-  int delta = dict_find(data, APP_KEY_DELTA)->value->int32;
+  int delta;
+  if (graph_staleness_padding() > 0) {
+    delta = NO_DELTA_VALUE;
+  } else {
+    delta = dict_find(data, APP_KEY_DELTA)->value->int32;
+  }
+
   if (delta == NO_DELTA_VALUE) {
     text_layer_set_text(el->delta_text, "-");
   } else {

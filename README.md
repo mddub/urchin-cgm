@@ -21,7 +21,7 @@ Still very much work-in-progress. Architecture is liable to change. Probably soo
 
 * **How do I know how recent the data is?** You can tell by the graph whether the data is recent. If there is no data missing, then the data is up to date. If the data is not recent, there will be a gap:
 
-  ![](http://i.imgur.com/25c0UIA.png)
+  ![](http://i.imgur.com/z72apqX.png)
 
 * **How do I determine why the data is not recent?** The data that you see on your watch travels like this: `Rig -> Nightscout -> Phone -> Pebble`.
 

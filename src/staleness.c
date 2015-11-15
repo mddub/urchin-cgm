@@ -32,6 +32,15 @@ int total_data_staleness() {
   return rig_to_web_staleness() + web_to_phone_staleness() + phone_to_pebble_staleness();
 }
 
+int graph_staleness_padding() {
+  int staleness = total_data_staleness();
+  int padding = staleness / GRAPH_INTERVAL_SIZE_SECONDS;
+  if (padding == 1 && staleness < GRAPH_INTERVAL_SIZE_SECONDS + GRAPH_STALENESS_GRACE_PERIOD_SECONDS) {
+    padding = 0;
+  }
+  return padding;
+}
+
 ConnectionIssue connection_issue() {
   // TODO
   if (!ever_had_phone_contact()) {

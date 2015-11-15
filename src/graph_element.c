@@ -8,7 +8,6 @@ static int LIMIT_LINES[] = GRAPH_LIMIT_LINES;
 static const int GRIDLINES[] = GRAPH_GRIDLINES;
 
 static const int POINT_SIZE = 3;
-static const int INTERVAL_SIZE_SECONDS = 5 * 60;
 
 static void plot_point(int x, int y, GContext *ctx) {
   graphics_context_set_fill_color(ctx, GColorBlack);
@@ -33,15 +32,6 @@ static int bg_to_y_for_line(int height, int bg) {
   return bg_to_y(height, bg, -1, height - 1);
 }
 
-static int staleness_padding() {
-  int staleness = total_data_staleness();
-  int padding = staleness / INTERVAL_SIZE_SECONDS;
-  if (padding == 1 && staleness < INTERVAL_SIZE_SECONDS + GRAPH_STALENESS_GRACE_PERIOD_SECONDS) {
-    padding = 0;
-  }
-  return padding;
-}
-
 static void graph_update_proc(Layer *layer, GContext *ctx) {
   unsigned int i, x, y;
   int height = layer_get_bounds(layer).size.h;
@@ -53,7 +43,7 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
     if(bg == 0) {
       continue;
     }
-    x = POINT_SIZE * (i - staleness_padding());
+    x = POINT_SIZE * (i - graph_staleness_padding());
     y = bg_to_y_for_point(height, bg);
     plot_point(x, y, ctx);
   }

@@ -3,7 +3,7 @@
 #include "staleness.h"
 
 #define REASON_ICON_WIDTH 25
-#define TEXT_WIDTH 25
+#define TEXT_WIDTH 40
 
 // https://forums.getpebble.com/discussion/7147/text-layer-padding
 #define ACTUAL_TEXT_HEIGHT_18 11
@@ -55,6 +55,8 @@ static char* staleness_text(int staleness_seconds) {
   int minutes = staleness_seconds / 60;
   if (minutes < 60) {
     snprintf(buf, sizeof(buf), "%d", minutes);
+  } else if (minutes < 120) {
+    snprintf(buf, sizeof(buf), "1h%d", minutes - 60);
   } else if (minutes / 60 <= 6) {
     snprintf(buf, sizeof(buf), "%dhr", minutes / 60);
   } else {
