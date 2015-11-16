@@ -16,6 +16,10 @@ Still very much work-in-progress. Architecture is liable to change. Probably soo
 * You can change the size, position, and borders of each layout element in `config.c`. (e.g., move the graph to the top and time to the bottom, etc.)
 * You can show whatever string you want in the status bar (including newlines, if you configure the status bar to be taller) by sending a different value for `statusText` in `main.js`. This can be based on data from any URL, following the pattern of `getIOB()`.
 
+Customizability in both appearance and content is a fundamental design priority. A tool of this kind should respect how personal your relationship with the data is. In cases where configuration is not available, the code should be easy to understand and modify. Here are *very* basic examples of customization via modifications to `config.h` and `config.c`:
+
+![](http://i.imgur.com/OSEmAtZ.png) ![](http://i.imgur.com/YmDYVcF.png)
+
 #### Notes:
 * `1.1 u (1)` means IOB is 1.1 units as of 1 minute ago. This data is [reported by a MiniMed Connect](https://github.com/mddub/minimed-connect-to-nightscout) and probably does not apply for most people, but is easy to customize (see above).
 
