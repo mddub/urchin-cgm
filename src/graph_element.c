@@ -2,6 +2,7 @@
 #include "config.h"
 #include "graph_element.h"
 #include "layout.h"
+#include "preferences.h"
 #include "staleness.h"
 
 static int LIMIT_LINES[] = GRAPH_LIMIT_LINES;
@@ -14,22 +15,26 @@ static void plot_point(int x, int y, GContext *ctx) {
   graphics_fill_rect(ctx, GRect(x, y, POINT_SIZE, POINT_SIZE), 0, GCornerNone);
 }
 
-static int bg_to_y(int height, int bg, int min, int max) {
-  int y = (float)height - (float)(bg - GRAPH_SGV_MIN) / (float)(GRAPH_SGV_MAX - GRAPH_SGV_MIN) * (float)height - 1.0f;
-  if (y < min) {
-    y = min;
-  } else if (y > max) {
-    y = max;
+static int bg_to_y(int height, int bg, int min, int max, bool fit_in_bounds) {
+  int graph_min = get_prefs()->glb;
+  int graph_max = get_prefs()->gub;
+  int y = (float)height - (float)(bg - graph_min) / (float)(graph_max - graph_min) * (float)height - 1.0f;
+  if (fit_in_bounds) {
+    if (y < min) {
+      y = min;
+    } else if (y > max) {
+      y = max;
+    }
   }
   return y;
 }
 
 static int bg_to_y_for_point(int height, int bg) {
-  return bg_to_y(height, bg, 0, height - 1 - POINT_SIZE);
+  return bg_to_y(height, bg, 0, height - 1 - POINT_SIZE, true);
 }
 
 static int bg_to_y_for_line(int height, int bg) {
-  return bg_to_y(height, bg, -1, height - 1);
+  return bg_to_y(height, bg, -1, height - 1, false);
 }
 
 static void graph_update_proc(Layer *layer, GContext *ctx) {

@@ -60,8 +60,8 @@ static void window_unload(Window *s_window) {
 }
 
 static void init(void) {
-  init_comm(data_callback);
   init_prefs();
+  init_comm(data_callback);
 
   s_window = window_create();
   window_set_window_handlers(s_window, (WindowHandlers) {

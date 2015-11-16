@@ -14,6 +14,10 @@
     return defaultValue || false;
   }
 
+  function tryParseInt(s) {
+    return parseInt(s, 10) >= 0 ? parseInt(s, 10) : undefined;
+  }
+
   (function populateValues() {
     var current = JSON.parse(getQueryParam('current', '{}'));
     document.getElementById('ns-url').value = current['nightscout_url'] || '';
@@ -22,6 +26,8 @@
     } else {
       document.getElementById('units-mgdl').className += ' active';
     }
+    document.getElementById('gub').value = current['gub'];
+    document.getElementById('glb').value = current['glb'];
   })();
 
   function buildConfig() {
@@ -29,6 +35,8 @@
     return {
       mmol: mmol,
       nightscout_url: document.getElementById('ns-url').value.replace(/\/$/, ''),
+      gub: tryParseInt(document.getElementById('gub').value),
+      glb: tryParseInt(document.getElementById('glb').value),
     };
   }
 

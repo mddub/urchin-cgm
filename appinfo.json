@@ -20,7 +20,9 @@
     "delta": 5,
     "statusText": 6,
 
-    "mmol": 1
+    "mmol": 1,
+    "gub": 2,
+    "glb": 3
   },
   "resources": {
     "media": [

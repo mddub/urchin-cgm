@@ -22,4 +22,6 @@ enum {
 enum {
   __APP_KEYS_FOR_PREFERENCES,
   APP_KEY_MMOL,
+  APP_KEY_GUB,
+  APP_KEY_GLB,
 };

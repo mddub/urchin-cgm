@@ -15,10 +15,25 @@ var MSG_TYPE_ERROR = 0;
 var MSG_TYPE_DATA = 1;
 var MSG_TYPE_PREFERENCES = 2;
 
-var config = {
+var DEFAULT_CONFIG = {
   nightscout_url: '',
   mmol: false,
+  gub: 300,
+  glb: 40,
 };
+
+var config;
+
+function mergeConfig(config, defaults) {
+  var out = {};
+  Object.keys(defaults).forEach(function(key) {
+    out[key] = defaults[key];
+  });
+  Object.keys(config).forEach(function(key) {
+    out[key] = config[key];
+  });
+  return out;
+}
 
 function sgvDataError(e) {
   console.log(e);
@@ -224,6 +239,8 @@ function sendPreferences() {
   sendMessage({
     msgType: MSG_TYPE_PREFERENCES,
     mmol: config.mmol,
+    gub: config.gub,
+    glb: config.glb,
   });
 }
 
@@ -231,9 +248,10 @@ Pebble.addEventListener('ready', function() {
   var configStr = localStorage.getItem(LOCAL_STORAGE_KEY_CONFIG);
   if (configStr !== null) {
     try {
-      config = JSON.parse(configStr);
+      config = mergeConfig(JSON.parse(configStr), DEFAULT_CONFIG);
     } catch (e) {
-      console.log('Bad config: ' + configStr);
+      console.log('Bad config from localStorage: ' + configStr);
+      config = mergeConfig({}, DEFAULT_CONFIG);
     }
   }
 
@@ -241,12 +259,19 @@ Pebble.addEventListener('ready', function() {
     Pebble.openURL(CONFIG_URL + '?current=' + encodeURIComponent(JSON.stringify(config)));
   });
 
-  Pebble.addEventListener('webviewclosed', function(e) {
-    var configStr = decodeURIComponent(e.response);
-    config = JSON.parse(configStr);
-    localStorage.setItem(LOCAL_STORAGE_KEY_CONFIG, configStr);
-    sendPreferences();
-    requestAndSendBGs();
+  Pebble.addEventListener('webviewclosed', function(event) {
+    var configStr = decodeURIComponent(event.response);
+    try {
+      var newConfig = JSON.parse(configStr);
+      config = mergeConfig(newConfig, DEFAULT_CONFIG);
+      localStorage.setItem(LOCAL_STORAGE_KEY_CONFIG, JSON.stringify(config));
+      console.log('Preferences updated: ' + JSON.stringify(config));
+      sendPreferences();
+      requestAndSendBGs();
+    } catch (e) {
+      console.log(e);
+      console.log('Bad config from webview: ' + configStr);
+    }
   });
 
   Pebble.addEventListener('appmessage', function() {

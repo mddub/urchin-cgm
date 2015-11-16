@@ -16,8 +16,6 @@
 #define BATTERY_IN_STATUS_BAR true
 
 // These must be specified in mg/dL
-#define GRAPH_SGV_MIN 40
-#define GRAPH_SGV_MAX 300
 #define GRAPH_LIMIT_LINES {70, 180}
 #define GRAPH_GRIDLINES {50, 100, 150, 200, 250}
 
