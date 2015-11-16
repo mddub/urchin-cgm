@@ -20,7 +20,7 @@ var config = {
   mmol: false,
 };
 
-function handleError(e) {
+function sgvDataError(e) {
   console.log(e);
   sendMessage({msgType: MSG_TYPE_ERROR});
 }
@@ -41,9 +41,9 @@ function getURL(url, callback) {
     if (xhr.readyState === 4) {
       received = true;
       if (xhr.status === 200) {
-        callback(xhr.responseText);
+        callback(null, xhr.responseText);
       } else {
-        handleError(new Error('Request failed, status ' + xhr.status + ': ' + url));
+        callback(new Error('Request failed, status ' + xhr.status + ': ' + url));
       }
     }
   };
@@ -54,35 +54,45 @@ function getURL(url, callback) {
       return;
     }
     timedOut = true;
-    handleError(new Error('Request timed out: ' + url));
+    xhr.abort();
+    callback(new Error('Request timed out: ' + url));
   }, REQUEST_TIMEOUT);
 }
 
 function getJSON(url, callback) {
-  getURL(url, function(result) {
+  getURL(url, function(err, result) {
+    if (err) {
+      return callback(err);
+    }
     try {
-      callback(JSON.parse(result));
+      callback(null, JSON.parse(result));
     } catch (e) {
-      handleError(e);
+      callback(e);
     }
   });
 }
 
 function getIOB(callback) {
-  getJSON(config.nightscout_url + '/api/v1/entries.json?find[activeInsulin][$exists]=true&count=1', function(iobs) {
+  getJSON(config.nightscout_url + '/api/v1/entries.json?find[activeInsulin][$exists]=true&count=1', function(err, iobs) {
+    if (err) {
+      return callback(err);
+    }
     if(iobs.length && Date.now() - iobs[0]['date'] <= IOB_RECENCY_THRESHOLD_SECONDS * 1000) {
       var recency = Math.floor((Date.now() - iobs[0]['date']) / (60 * 1000));
       var iob = iobs[0]['activeInsulin'].toFixed(1).toString() + ' u (' + recency + ')';
-      callback(iob);
+      callback(null, iob);
     } else {
-      callback('-');
+      callback(null, '-');
     }
   });
 }
 
 function getSGVsDateDescending(callback) {
-  getJSON(config.nightscout_url + '/api/v1/entries/sgv.json?count=' + SGV_FETCH_COUNT, function(entries) {
-    callback(entries.map(function(e) {
+  getJSON(config.nightscout_url + '/api/v1/entries/sgv.json?count=' + SGV_FETCH_COUNT, function(err, entries) {
+    if (err) {
+      return callback(err);
+    }
+    callback(null, entries.map(function(e) {
       e['date'] = e['date'] / 1000;
       return e;
     }));
@@ -189,14 +199,24 @@ function requestAndSendBGs() {
         statusText: iobText,
       });
     } catch (e) {
-      handleError(e);
+      sgvDataError(e);
     }
   }
 
-  getSGVsDateDescending(function(sgvs) {
-    getIOB(function(iobText) {
-      onData(sgvs, iobText);
-    });
+  getSGVsDateDescending(function(err, sgvs) {
+    if (err) {
+      // error fetching sgvs is unrecoverable
+      sgvDataError(err);
+    } else {
+      getIOB(function(err, iobText) {
+        if (err) {
+          // error fetching status bar text is okay
+          console.log(err);
+          iobText = '-';
+        }
+        onData(sgvs, iobText);
+      });
+    }
   });
 }
 
