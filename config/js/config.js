@@ -26,10 +26,10 @@
     } else {
       document.getElementById('units-mgdl').className += ' active';
     }
-    document.getElementById('gub').value = current['gub'] || '';
-    document.getElementById('glb').value = current['glb'] || '';
-    document.getElementById('ghl').value = current['ghl'] || '';
-    document.getElementById('gll').value = current['gll'] || '';
+    ['gub', 'glb', 'ghl', 'gll'].forEach(function(sliderKey) {
+      document.getElementById(sliderKey).value = current[sliderKey] || '';
+      document.getElementById(sliderKey + '-val').value = current[sliderKey] || '';
+    });
   })();
 
   function buildConfig() {

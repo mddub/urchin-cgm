@@ -39,44 +39,48 @@
       </div>
 
       <div class="item-container">
-        <div class="item-container-header">Upper bound (default: 300)</div>
+        <div class="item-container-header">Top of graph</div>
         <div class="item-container-content">
           <label class="item">
-            <div class="item-input-wrapper">
-              <input id="gub" type="tel" class="item-input">
+            <input id="gub" name="gub" type="range" class="item-slider" min="30" max="500" step="10">
+            <div class="item-input-wrapper item-slider-text">
+              <input id="gub-val" name="gub" type="tel" class="item-input">
             </div>
           </label>
         </div>
       </div>
 
       <div class="item-container">
-        <div class="item-container-header">Lower bound (default: 40)</div>
+        <div class="item-container-header">Top of target range</div>
         <div class="item-container-content">
           <label class="item">
-            <div class="item-input-wrapper">
-              <input id="glb" type="tel" class="item-input">
+            <input id="ghl" name="ghl" type="range" class="item-slider" min="30" max="500" step="10">
+            <div class="item-input-wrapper item-slider-text">
+              <input id="ghl-val" name="ghl" type="tel" class="item-input">
             </div>
           </label>
         </div>
       </div>
 
       <div class="item-container">
-        <div class="item-container-header">High BG limit (default: 200)</div>
+        <div class="item-container-header">Bottom of target range</div>
         <div class="item-container-content">
           <label class="item">
-            <div class="item-input-wrapper">
-              <input id="ghl" type="tel" class="item-input">
+            <input id="gll" name="gll" type="range" class="item-slider" min="30" max="500" step="10">
+            <div class="item-input-wrapper item-slider-text">
+              <input id="gll-val" name="gll" type="tel" class="item-input">
             </div>
           </label>
         </div>
       </div>
 
       <div class="item-container">
-        <div class="item-container-header">Low BG limit (default: 70)</div>
+        <div class="item-container-header">Bottom of graph</div>
         <div class="item-container-content">
           <label class="item">
-            <div class="item-input-wrapper">
-              <input id="gll" type="tel" class="item-input">
+            <input id="glb" name="glb" type="range" class="item-slider" min="30" max="500" step="10">
+            <div class="item-input-wrapper item-slider-text">
+              <input id="glb-val" name="glb" type="tel" class="item-input">
             </div>
           </label>
         </div>
