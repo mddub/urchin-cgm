@@ -2,14 +2,15 @@
 
 #include <pebble.h>
 
-#define PREFERENCES_SCHEMA_VERSION 2
+#define PREFERENCES_SCHEMA_VERSION 3
 
 typedef struct __attribute__((__packed__)) Preferences {
   bool mmol;
   uint16_t gub;
-  uint16_t glb;
+  uint8_t glb;
   uint16_t ghl;
-  uint16_t gll;
+  uint8_t gll;
+  uint16_t hgl;
 } Preferences;
 
 void init_prefs();

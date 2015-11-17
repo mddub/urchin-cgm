@@ -17,6 +17,7 @@ static void set_default_prefs() {
   s_prefs->glb = 40;
   s_prefs->ghl = 200;
   s_prefs->gll = 70;
+  s_prefs->hgl = 50;
   save_prefs();
 }
 
@@ -51,5 +52,6 @@ void set_prefs(DictionaryIterator *data) {
   s_prefs->glb = dict_find(data, APP_KEY_GLB)->value->uint16;
   s_prefs->ghl = dict_find(data, APP_KEY_GHL)->value->uint16;
   s_prefs->gll = dict_find(data, APP_KEY_GLL)->value->uint16;
+  s_prefs->hgl = dict_find(data, APP_KEY_HGL)->value->uint16;
   save_prefs();
 }

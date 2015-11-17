@@ -30,6 +30,7 @@
       document.getElementById(sliderKey).value = current[sliderKey] || '';
       document.getElementById(sliderKey + '-val').value = current[sliderKey] || '';
     });
+    document.getElementById('hgl').value = current['hgl'];
   })();
 
   function buildConfig() {
@@ -41,6 +42,7 @@
       glb: tryParseInt(document.getElementById('glb').value),
       ghl: tryParseInt(document.getElementById('ghl').value),
       gll: tryParseInt(document.getElementById('gll').value),
+      hgl: tryParseInt(document.getElementById('hgl').value),
     };
   }
 

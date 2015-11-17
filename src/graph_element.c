@@ -5,8 +5,6 @@
 #include "preferences.h"
 #include "staleness.h"
 
-static const int GRIDLINES[] = GRAPH_GRIDLINES;
-
 static const int POINT_SIZE = 3;
 
 static void plot_point(int x, int y, GContext *ctx) {
@@ -62,10 +60,19 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
     }
   }
 
-  for(i = 0; i < ARRAY_LENGTH(GRIDLINES); i++) {
-    y = bg_to_y_for_line(height, GRIDLINES[i]);
-    for(x = 0; x < POINT_SIZE * GRAPH_SGV_COUNT; x += 8) {
-      graphics_draw_line(ctx, GPoint(x, y), GPoint(x + 1, y));
+  // Horizontal gridlines
+  int h_gridline_frequency = get_prefs()->hgl;
+  if (h_gridline_frequency > 0) {
+    int graph_min = get_prefs()->glb;
+    int graph_max = get_prefs()->gub;
+    for(int g = 0; g < graph_max; g += h_gridline_frequency) {
+      if (g <= graph_min || g == limits[0] || g == limits[1]) {
+        continue;
+      }
+      y = bg_to_y_for_line(height, g);
+      for(x = 0; x < POINT_SIZE * GRAPH_SGV_COUNT; x += 8) {
+        graphics_draw_line(ctx, GPoint(x, y), GPoint(x + 1, y));
+      }
     }
   }
 }

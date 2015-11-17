@@ -26,4 +26,5 @@ enum {
   APP_KEY_GLB,
   APP_KEY_GHL,
   APP_KEY_GLL,
+  APP_KEY_HGL,
 };

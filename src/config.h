@@ -15,9 +15,6 @@
 // For now, true == status bar, false == time area
 #define BATTERY_IN_STATUS_BAR true
 
-// These must be specified in mg/dL
-#define GRAPH_GRIDLINES {50, 100, 150, 200, 250}
-
 #define UPDATE_FREQUENCY (60*1000)
 
 // STALENESS ALERTS:

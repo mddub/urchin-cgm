@@ -18,10 +18,16 @@ var MSG_TYPE_PREFERENCES = 2;
 var DEFAULT_CONFIG = {
   nightscout_url: '',
   mmol: false,
+  // graph upper bound
   gub: 300,
+  // graph lower bound
   glb: 40,
+  // graph high limit
   ghl: 200,
+  // graph low limit
   gll: 70,
+  // horizontal gridlines
+  hgl: 50,
 };
 
 var config;
@@ -245,6 +251,7 @@ function sendPreferences() {
     glb: config.glb,
     ghl: config.ghl,
     gll: config.gll,
+    hgl: config.hgl,
   });
 }
 
