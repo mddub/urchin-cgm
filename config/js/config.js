@@ -26,8 +26,10 @@
     } else {
       document.getElementById('units-mgdl').className += ' active';
     }
-    document.getElementById('gub').value = current['gub'];
-    document.getElementById('glb').value = current['glb'];
+    document.getElementById('gub').value = current['gub'] || '';
+    document.getElementById('glb').value = current['glb'] || '';
+    document.getElementById('ghl').value = current['ghl'] || '';
+    document.getElementById('gll').value = current['gll'] || '';
   })();
 
   function buildConfig() {
@@ -37,6 +39,8 @@
       nightscout_url: document.getElementById('ns-url').value.replace(/\/$/, ''),
       gub: tryParseInt(document.getElementById('gub').value),
       glb: tryParseInt(document.getElementById('glb').value),
+      ghl: tryParseInt(document.getElementById('ghl').value),
+      gll: tryParseInt(document.getElementById('gll').value),
     };
   }
 

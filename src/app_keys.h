@@ -24,4 +24,6 @@ enum {
   APP_KEY_MMOL,
   APP_KEY_GUB,
   APP_KEY_GLB,
+  APP_KEY_GHL,
+  APP_KEY_GLL,
 };

@@ -33,10 +33,13 @@
 
       <div class="item-container">
         <h3>GRAPH SETTINGS:</h3>
+        <div class="item-container-footer">
+          All numbers must be in mg/dL.
+        </div>
       </div>
 
       <div class="item-container">
-        <div class="item-container-header">Upper bound in mg/dL (default: 300)</div>
+        <div class="item-container-header">Upper bound (default: 300)</div>
         <div class="item-container-content">
           <label class="item">
             <div class="item-input-wrapper">
@@ -47,11 +50,33 @@
       </div>
 
       <div class="item-container">
-        <div class="item-container-header">Lower bound in mg/dL (default: 40)</div>
+        <div class="item-container-header">Lower bound (default: 40)</div>
         <div class="item-container-content">
           <label class="item">
             <div class="item-input-wrapper">
               <input id="glb" type="tel" class="item-input">
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="item-container">
+        <div class="item-container-header">High BG limit (default: 200)</div>
+        <div class="item-container-content">
+          <label class="item">
+            <div class="item-input-wrapper">
+              <input id="ghl" type="tel" class="item-input">
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="item-container">
+        <div class="item-container-header">Low BG limit (default: 70)</div>
+        <div class="item-container-content">
+          <label class="item">
+            <div class="item-input-wrapper">
+              <input id="gll" type="tel" class="item-input">
             </div>
           </label>
         </div>

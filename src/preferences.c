@@ -15,6 +15,8 @@ static void set_default_prefs() {
   s_prefs->mmol = false;
   s_prefs->gub = 300;
   s_prefs->glb = 40;
+  s_prefs->ghl = 200;
+  s_prefs->gll = 70;
   save_prefs();
 }
 
@@ -47,5 +49,7 @@ void set_prefs(DictionaryIterator *data) {
   s_prefs->mmol = (bool)dict_find(data, APP_KEY_MMOL)->value->uint8;
   s_prefs->gub = dict_find(data, APP_KEY_GUB)->value->uint16;
   s_prefs->glb = dict_find(data, APP_KEY_GLB)->value->uint16;
+  s_prefs->ghl = dict_find(data, APP_KEY_GHL)->value->uint16;
+  s_prefs->gll = dict_find(data, APP_KEY_GLL)->value->uint16;
   save_prefs();
 }

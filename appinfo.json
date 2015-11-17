@@ -22,7 +22,9 @@
 
     "mmol": 1,
     "gub": 2,
-    "glb": 3
+    "glb": 3,
+    "ghl": 4,
+    "gll": 5
   },
   "resources": {
     "media": [

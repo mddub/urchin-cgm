@@ -20,6 +20,8 @@ var DEFAULT_CONFIG = {
   mmol: false,
   gub: 300,
   glb: 40,
+  ghl: 200,
+  gll: 70,
 };
 
 var config;
@@ -241,6 +243,8 @@ function sendPreferences() {
     mmol: config.mmol,
     gub: config.gub,
     glb: config.glb,
+    ghl: config.ghl,
+    gll: config.gll,
   });
 }
 
