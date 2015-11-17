@@ -1,6 +1,13 @@
 /* global document */
 (function() {
 
+  var SLIDER_KEYS = [
+    'topOfGraph',
+    'topOfRange',
+    'bottomOfRange',
+    'bottomOfGraph',
+  ];
+
   // https://developer.getpebble.com/guides/pebble-apps/pebblekit-js/app-configuration/
   function getQueryParam(variable, defaultValue) {
     var query = document.location.search.substring(1);
@@ -21,29 +28,32 @@
   (function populateValues() {
     var current = JSON.parse(getQueryParam('current', '{}'));
     document.getElementById('ns-url').value = current['nightscout_url'] || '';
+
     if (current.mmol === true) {
       document.getElementById('units-mmol').className += ' active';
     } else {
       document.getElementById('units-mgdl').className += ' active';
     }
-    ['gub', 'glb', 'ghl', 'gll'].forEach(function(sliderKey) {
-      document.getElementById(sliderKey).value = current[sliderKey] || '';
-      document.getElementById(sliderKey + '-val').value = current[sliderKey] || '';
+
+    SLIDER_KEYS.forEach(function(key) {
+      document.getElementById(key).value = current[key] || '';
+      document.getElementById(key + '-val').value = current[key] || '';
     });
-    document.getElementById('hgl').value = current['hgl'];
+
+    document.getElementById('hGridlines').value = current['hGridlines'];
   })();
 
   function buildConfig() {
     var mmol = document.getElementById('units-mgdl').className.indexOf('active') === -1;
-    return {
+    var out = {
       mmol: mmol,
       nightscout_url: document.getElementById('ns-url').value.replace(/\/$/, ''),
-      gub: tryParseInt(document.getElementById('gub').value),
-      glb: tryParseInt(document.getElementById('glb').value),
-      ghl: tryParseInt(document.getElementById('ghl').value),
-      gll: tryParseInt(document.getElementById('gll').value),
-      hgl: tryParseInt(document.getElementById('hgl').value),
+      hGridlines: tryParseInt(document.getElementById('hGridlines').value),
     };
+    SLIDER_KEYS.forEach(function(key) {
+      out[key] = tryParseInt(document.getElementById(key + '-val').value);
+    });
+    return out;
   }
 
   function onSubmit(e) {

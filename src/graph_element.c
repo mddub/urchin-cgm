@@ -14,8 +14,8 @@ static void plot_point(int x, int y, GContext *ctx) {
 
 static int bg_to_y(int height, int bg, int min, int max, bool fit_in_bounds) {
   // Graph lower bound, graph upper bound
-  int graph_min = get_prefs()->glb;
-  int graph_max = get_prefs()->gub;
+  int graph_min = get_prefs()->bottom_of_graph;
+  int graph_max = get_prefs()->top_of_graph;
   int y = (float)height - (float)(bg - graph_min) / (float)(graph_max - graph_min) * (float)height - 1.0f;
   if (fit_in_bounds) {
     if (y < min) {
@@ -51,8 +51,8 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
     plot_point(x, y, ctx);
   }
 
-  // Graph high limit, graph low limit
-  uint16_t limits[2] = {get_prefs()->ghl, get_prefs()->gll};
+  // Target range bounds
+  uint16_t limits[2] = {get_prefs()->top_of_range, get_prefs()->bottom_of_range};
   for(i = 0; i < ARRAY_LENGTH(limits); i++) {
     y = bg_to_y_for_line(height, limits[i]);
     for(x = 0; x < POINT_SIZE * GRAPH_SGV_COUNT; x += 4) {
@@ -61,10 +61,10 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
   }
 
   // Horizontal gridlines
-  int h_gridline_frequency = get_prefs()->hgl;
+  int h_gridline_frequency = get_prefs()->h_gridlines;
   if (h_gridline_frequency > 0) {
-    int graph_min = get_prefs()->glb;
-    int graph_max = get_prefs()->gub;
+    int graph_min = get_prefs()->bottom_of_graph;
+    int graph_max = get_prefs()->top_of_graph;
     for(int g = 0; g < graph_max; g += h_gridline_frequency) {
       if (g <= graph_min || g == limits[0] || g == limits[1]) {
         continue;

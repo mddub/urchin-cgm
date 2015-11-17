@@ -13,11 +13,11 @@ static void set_default_prefs() {
   // TODO don't duplicate this here; if watch doesn't have valid prefs,
   // request from phone and don't render anything until they are received
   s_prefs->mmol = false;
-  s_prefs->gub = 300;
-  s_prefs->glb = 40;
-  s_prefs->ghl = 200;
-  s_prefs->gll = 70;
-  s_prefs->hgl = 50;
+  s_prefs->top_of_graph = 250;
+  s_prefs->top_of_range = 200;
+  s_prefs->bottom_of_range = 75;
+  s_prefs->bottom_of_graph = 40;
+  s_prefs->h_gridlines = 50;
   save_prefs();
 }
 
@@ -48,10 +48,10 @@ Preferences* get_prefs() {
 
 void set_prefs(DictionaryIterator *data) {
   s_prefs->mmol = (bool)dict_find(data, APP_KEY_MMOL)->value->uint8;
-  s_prefs->gub = dict_find(data, APP_KEY_GUB)->value->uint16;
-  s_prefs->glb = dict_find(data, APP_KEY_GLB)->value->uint16;
-  s_prefs->ghl = dict_find(data, APP_KEY_GHL)->value->uint16;
-  s_prefs->gll = dict_find(data, APP_KEY_GLL)->value->uint16;
-  s_prefs->hgl = dict_find(data, APP_KEY_HGL)->value->uint16;
+  s_prefs->top_of_graph = dict_find(data, APP_KEY_TOP_OF_GRAPH)->value->uint16;
+  s_prefs->top_of_range = dict_find(data, APP_KEY_TOP_OF_RANGE)->value->uint16;
+  s_prefs->bottom_of_range = dict_find(data, APP_KEY_BOTTOM_OF_RANGE)->value->uint8;
+  s_prefs->bottom_of_graph = dict_find(data, APP_KEY_BOTTOM_OF_GRAPH)->value->uint8;
+  s_prefs->h_gridlines = dict_find(data, APP_KEY_H_GRIDLINES)->value->uint8;
   save_prefs();
 }

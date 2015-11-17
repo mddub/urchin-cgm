@@ -21,11 +21,11 @@
     "statusText": 6,
 
     "mmol": 1,
-    "gub": 2,
-    "glb": 3,
-    "ghl": 4,
-    "gll": 5,
-    "hgl": 6
+    "topOfGraph": 2,
+    "topOfRange": 3,
+    "bottomOfRange": 4,
+    "bottomOfGraph": 5,
+    "hGridlines": 6
   },
   "resources": {
     "media": [

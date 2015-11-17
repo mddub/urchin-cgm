@@ -18,16 +18,11 @@ var MSG_TYPE_PREFERENCES = 2;
 var DEFAULT_CONFIG = {
   nightscout_url: '',
   mmol: false,
-  // graph upper bound
-  gub: 300,
-  // graph lower bound
-  glb: 40,
-  // graph high limit
-  ghl: 200,
-  // graph low limit
-  gll: 70,
-  // horizontal gridlines
-  hgl: 50,
+  topOfGraph: 250,
+  topOfRange: 200,
+  bottomOfRange: 70,
+  bottomOfGraph: 40,
+  hGridlines: 50,
 };
 
 var config;
@@ -247,11 +242,11 @@ function sendPreferences() {
   sendMessage({
     msgType: MSG_TYPE_PREFERENCES,
     mmol: config.mmol,
-    gub: config.gub,
-    glb: config.glb,
-    ghl: config.ghl,
-    gll: config.gll,
-    hgl: config.hgl,
+    topOfGraph: config.topOfGraph,
+    topOfRange: config.topOfRange,
+    bottomOfRange: config.bottomOfRange,
+    bottomOfGraph: config.bottomOfGraph,
+    hGridlines: config.hGridlines,
   });
 }
 
