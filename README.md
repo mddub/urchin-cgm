@@ -2,13 +2,9 @@ A Pebble watchface for showing [Nightscout](https://github.com/nightscout/cgm-re
 
 ![Screenshot](http://i.imgur.com/9aYMsCn.png)
 
-Still very much work-in-progress. Architecture is liable to change. Probably soon to be renamed, too.
+To install, enable Developer Mode in the Pebble app on your phone, then open [this pbw file][pbw] in the Pebble app.
 
-## To install (for now):
-* In the Pebble app on your phone, go to "Settings" and enable "Developer Mode".
-* Open [this pbw file](https://raw.githubusercontent.com/mddub/nightscout-graph-pebble/master/release/nightscout-graph-pebble.pbw) in the Pebble app on your phone.
-
-At the moment, the watchface changes almost daily. Watch the commit log for new releases, and repeat the pbw install process to upgrade.
+Still very much work-in-progress. Probably soon to be renamed, too.
 
 ## To configure (for now):
 * Set your Nightscout host and display units on the phone. You can customize the graph:
@@ -60,3 +56,5 @@ File an issue to report a bug or provide feedback for future development.
 ## Disclaimer
 
 This project is intended for educational and informational purposes only. It is not FDA approved and should not be used to make medical decisions. It is neither affiliated with nor endorsed by Dexcom.
+
+[pbw]: https://raw.githubusercontent.com/mddub/nightscout-graph-pebble/master/release/nightscout-graph-pebble.pbw
