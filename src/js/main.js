@@ -285,13 +285,14 @@ function sendPreferences() {
 }
 
 Pebble.addEventListener('ready', function() {
+  config = mergeConfig({}, DEFAULT_CONFIG);
+
   var configStr = localStorage.getItem(LOCAL_STORAGE_KEY_CONFIG);
   if (configStr !== null) {
     try {
       config = mergeConfig(JSON.parse(configStr), DEFAULT_CONFIG);
     } catch (e) {
       console.log('Bad config from localStorage: ' + configStr);
-      config = mergeConfig({}, DEFAULT_CONFIG);
     }
   }
 
