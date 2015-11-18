@@ -1,6 +1,8 @@
 /* global document, Zepto */
 (function($) {
 
+  var VERSION = '0.0.1';
+
   var SLIDER_KEYS = [
     'topOfGraph',
     'topOfRange',
@@ -77,5 +79,9 @@
     $('#status-url-container').toggle(evt.currentTarget.value === 'customurl');
   });
   $('#statusContent').trigger('change');
+
+  $('#update-available #running-version').text(getQueryParam('version') || '0.0.0');
+  $('#update-available #available-version').text(VERSION);
+  $('#update-available').toggle(VERSION !== getQueryParam('version'));
 
 })(Zepto);

@@ -7,6 +7,16 @@
   <body>
     <form id="config-form">
 
+      <div id="update-available" class="item-container" style="display: none;">
+        <div class="item-container-content">
+          <div class="item alert">
+            <strong>An update is available!</strong>
+            <br>
+            Your watch is running v<span id="running-version">?</span>. The current version is v<span id="available-version">?</span>. Some of these options may not work until you update. Visit the GitHub page for <strong>nightscout-graph-pebble</strong>.
+          </div>
+        </div>
+      </div>
+
       <div class="item-container">
         <div class="item-container-header">Nightscout URL</div>
         <div class="item-container-content">

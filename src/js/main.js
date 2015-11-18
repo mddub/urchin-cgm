@@ -1,6 +1,9 @@
 /* jshint browser: true */
 /* global console, Pebble */
 
+// TODO use a real build process to share this with the config page
+var VERSION = '0.0.1';
+
 var SGV_FETCH_COUNT = 72;
 var SGV_FOR_PEBBLE_COUNT = 36;
 var INTERVAL_SIZE_SECONDS = 5 * 60;
@@ -297,7 +300,7 @@ Pebble.addEventListener('ready', function() {
   }
 
   Pebble.addEventListener('showConfiguration', function() {
-    Pebble.openURL(CONFIG_URL + '?current=' + encodeURIComponent(JSON.stringify(config)));
+    Pebble.openURL(CONFIG_URL + '?version=' + VERSION + '&current=' + encodeURIComponent(JSON.stringify(config)));
   });
 
   Pebble.addEventListener('webviewclosed', function(event) {
