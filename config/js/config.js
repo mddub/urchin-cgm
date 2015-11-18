@@ -43,7 +43,10 @@
     document.getElementById('hGridlines').value = current['hGridlines'];
 
     document.getElementById('statusContent').value = current['statusContent'];
-    document.getElementById('statusUrl').value = current['statusUrl'];
+    document.getElementById('statusUrl').value = current['statusUrl'] || '';
+
+    document.getElementById('batteryLoc').value = current['batteryLoc'];
+    document.getElementById('timeAlign').value = current['timeAlign'];
   })();
 
   function buildConfig() {
@@ -54,6 +57,8 @@
       hGridlines: tryParseInt(document.getElementById('hGridlines').value),
       statusContent: document.getElementById('statusContent').value,
       statusUrl: document.getElementById('statusUrl').value,
+      timeAlign: document.getElementById('timeAlign').value,
+      batteryLoc: document.getElementById('batteryLoc').value,
     };
     SLIDER_KEYS.forEach(function(key) {
       out[key] = tryParseInt(document.getElementById(key + '-val').value);

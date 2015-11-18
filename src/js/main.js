@@ -25,6 +25,23 @@ var DEFAULT_CONFIG = {
   hGridlines: 50,
   statusContent: 'pumpiob',
   statusUrl: '',
+  timeAlign: 'center',
+  batteryLoc: 'statusRight',
+};
+
+var ALIGN = {
+  'left': 0,
+  'center': 1,
+  'right': 2,
+};
+
+var BATTERY_LOC = {
+  'none': 0,
+  'statusRight': 1,
+  'timeTopLeft': 2,
+  'timeTopRight': 3,
+  'timeBottomLeft': 4,
+  'timeBottomRight': 5,
 };
 
 var config;
@@ -262,6 +279,8 @@ function sendPreferences() {
     bottomOfRange: config.bottomOfRange,
     bottomOfGraph: config.bottomOfGraph,
     hGridlines: config.hGridlines,
+    timeAlign: ALIGN[config.timeAlign],
+    batteryLoc: BATTERY_LOC[config.batteryLoc],
   });
 }
 

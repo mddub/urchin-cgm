@@ -1,5 +1,6 @@
 #include "app_keys.h"
 #include "layout.h"
+#include "preferences.h"
 #include "staleness.h"
 #include "status_bar_element.h"
 
@@ -17,7 +18,7 @@ StatusBarElement* status_bar_element_create(Layer *parent) {
   layer_add_child(parent, text_layer_get_layer(text));
 
   BatteryComponent *battery = NULL;
-  if (BATTERY_IN_STATUS_BAR) {
+  if (get_prefs()->battery_loc == BATTERY_LOC_STATUS_RIGHT) {
     battery = battery_component_create(parent, bounds.size.w - battery_component_width() - battery_component_vertical_padding(), (bounds.size.h - battery_component_height()) / 2);
   }
 

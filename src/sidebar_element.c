@@ -26,7 +26,11 @@ const int TREND_ICONS[] = {
   NO_ICON
 };
 
+static int last_trend;
+
 SidebarElement* sidebar_element_create(Layer *parent) {
+  last_trend = -1;
+
   GRect bounds = element_get_bounds(parent);
 
   int trend_arrow_y = (bounds.size.h - TREND_ARROW_WIDTH) / 2;
@@ -75,8 +79,6 @@ static void update_last_bg(SidebarElement *el, DictionaryIterator *data) {
 }
 
 static void update_trend(SidebarElement *el, DictionaryIterator *data) {
-  static int last_trend = -1;
-
   if (graph_staleness_padding() > 0) {
     last_trend = -1;
     layer_set_hidden(bitmap_layer_get_layer(el->trend_layer), true);

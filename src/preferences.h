@@ -2,7 +2,7 @@
 
 #include <pebble.h>
 
-#define PREFERENCES_SCHEMA_VERSION 4
+#define PREFERENCES_SCHEMA_VERSION 5
 
 typedef struct __attribute__((__packed__)) Preferences {
   bool mmol;
@@ -11,6 +11,8 @@ typedef struct __attribute__((__packed__)) Preferences {
   uint8_t bottom_of_range;
   uint8_t bottom_of_graph;
   uint8_t h_gridlines;
+  unsigned int time_align:2;
+  unsigned int battery_loc:3;
 } Preferences;
 
 void init_prefs();

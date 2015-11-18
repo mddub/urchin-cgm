@@ -90,7 +90,7 @@
         <div class="item-container-header">Gridlines</div>
         <div class="item-container-content">
           <label class="item">
-            Horizontal gridlines
+            Horizontal
             <select id="hGridlines" name="hGridlines" dir="rtl" class="item-select">
               <option value="0" class="item-select-option">None</option>
               <option value="20" class="item-select-option">Every 20 mg/dL</option>
@@ -109,11 +109,12 @@
       </div>
 
       <div class="item-container">
+        <div class="item-container-header">Status bar</div>
         <div class="item-container-content">
           <label class="item">
-            Status bar
+            &nbsp;
             <select id="statusContent" name="statusContent" dir="rtl" class="item-select">
-              <option value="pumpiob" class="item-select-option">Pump IOB - MiniMed Connect</option>
+              <option value="pumpiob" class="item-select-option">Pump IOB - MM Connect</option>
               <option value="customurl" class="item-select-option">Custom URL</option>
             </select>
           </label>
@@ -127,6 +128,41 @@
             <div class="item-input-wrapper">
               <input id="statusUrl" type="url" class="item-input">
             </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="item-container">
+        <h3>LAYOUT SETTINGS:</h3>
+      </div>
+
+      <div class="item-container">
+        <div class="item-container-header">Time alignment</div>
+        <div class="item-container-content">
+          <label class="item">
+            &nbsp;
+            <select id="timeAlign" name="timeAlign" dir="rtl" class="item-select">
+              <option value="left" class="item-select-option">Left</option>
+              <option value="center" class="item-select-option">Center</option>
+              <option value="right" class="item-select-option">Right</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="item-container">
+        <div class="item-container-header">Battery</div>
+        <div class="item-container-content">
+          <label class="item">
+            &nbsp;
+            <select id="batteryLoc" name="batteryLoc" dir="rtl" class="item-select">
+              <option value="none" class="item-select-option">Don't show</option>
+              <option value="statusRight" class="item-select-option">Status bar</option>
+              <option value="timeTopLeft" class="item-select-option">Time - top left</option>
+              <option value="timeTopRight" class="item-select-option">Time - top right</option>
+              <option value="timeBottomLeft" class="item-select-option">Time - bottom left</option>
+              <option value="timeBottomRight" class="item-select-option">Time - bottom right</option>
+            </select>
           </label>
         </div>
       </div>

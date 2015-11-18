@@ -11,10 +11,6 @@
 // The details of the layout can be set in config.c
 #define LAYOUT LAYOUT_OPTION_A
 
-// TODO this should be part of the layout config
-// For now, true == status bar, false == time area
-#define BATTERY_IN_STATUS_BAR true
-
 #define UPDATE_FREQUENCY (60*1000)
 
 // STALENESS ALERTS:

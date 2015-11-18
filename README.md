@@ -8,6 +8,8 @@ Still very much work-in-progress. Architecture is liable to change. Probably soo
 * In the Pebble app on your phone, go to "Settings" and enable "Developer Mode".
 * Open [this pbw file](https://raw.githubusercontent.com/mddub/nightscout-graph-pebble/master/release/nightscout-graph-pebble.pbw) in the Pebble app on your phone.
 
+At the moment, the watchface changes almost daily. Watch the commit log for new releases, and repeat the pbw install process to upgrade.
+
 ## To configure (for now):
 * Set your Nightscout host and display units on the phone. You can customize the graph:
 

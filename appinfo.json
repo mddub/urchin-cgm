@@ -25,7 +25,9 @@
     "topOfRange": 3,
     "bottomOfRange": 4,
     "bottomOfGraph": 5,
-    "hGridlines": 6
+    "hGridlines": 6,
+    "timeAlign": 7,
+    "batteryLoc": 8
   },
   "resources": {
     "media": [
