@@ -11,15 +11,11 @@
 // The details of the layout can be set in config.c
 #define LAYOUT LAYOUT_OPTION_A
 
-#define USE_MMOL false
+// TODO this should be part of the layout config
+// For now, true == status bar, false == time area
+#define BATTERY_IN_STATUS_BAR true
 
-// These must be specified in mg/dL
-#define GRAPH_SGV_MIN 40
-#define GRAPH_SGV_MAX 300
-#define GRAPH_LIMIT_LINES {70, 180}
-#define GRAPH_GRIDLINES {40, 50, 100, 150, 200, 250}
-
-#define UPDATE_FREQUENCY 60*1000
+#define UPDATE_FREQUENCY (60*1000)
 
 // STALENESS ALERTS:
 // Show an icon if there is unacceptable lag between any component of:
@@ -39,11 +35,12 @@
 // of rig -> web -> phone -> Pebble. Give the data some extra time to
 // propagate through the system before shifting the graph to the left
 // to indicate staleness.
-#define GRAPH_STALENESS_GRACE_PERIOD_SECONDS 3*60
+#define GRAPH_STALENESS_GRACE_PERIOD_SECONDS (3*60)
 
 ///////////////////////////////////////////////////////
 
 #define GRAPH_SGV_COUNT 36
+#define GRAPH_INTERVAL_SIZE_SECONDS (5*60)
 
 #define GRAPH_ELEMENT 0
 #define SIDEBAR_ELEMENT 1
@@ -53,6 +50,9 @@
 #define MAX_LAYOUT_ELEMENTS 4
 
 #define NO_ICON -1
+
+#define PERSIST_KEY_VERSION 0
+#define PERSIST_KEY_PREFERENCES_OBJECT 1
 
 typedef struct ElementConfig {
   int el;

@@ -1,4 +1,3 @@
-#include "config.h"
 #include "layout.h"
 
 static LayoutConfig *s_config;
@@ -71,6 +70,18 @@ static int compute_auto_height(Layer *parent) {
 
 ElementConfig* get_element_data(Layer* layer) {
   return (ElementConfig*)layer_get_data(layer);
+}
+
+GRect element_get_bounds(Layer* layer) {
+  GRect bounds = layer_get_bounds(layer);
+  ElementConfig *config = get_element_data(layer);
+  if (config->bottom) {
+    bounds.size.h--;
+  }
+  if (config->right) {
+    bounds.size.w--;
+  }
+  return bounds;
 }
 
 LayoutLayers init_layout(Window* window, int layout_option) {

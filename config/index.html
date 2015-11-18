@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="css/slate.min.css">
+  </head>
+  <body>
+    <form id="config-form">
+
+      <div class="item-container">
+        <div class="item-container-header">Nightscout URL</div>
+        <div class="item-container-content">
+          <label class="item">
+            <div class="item-input-wrapper">
+              <input id="ns-url" type="url" class="item-input">
+            </div>
+          </label>
+        </div>
+        <div class="item-container-footer">
+          This probably looks like: <strong>https://YOURSITENAME.azurewebsites.net</strong>
+        </div>
+      </div>
+
+      <div class="item-container">
+        <div class="item-container-header">Units</div>
+        <div class="item-container-content">
+          <div class="item tab-buttons">
+            <a id="units-mgdl" name="units" class="tab-button">mg/dL</a>
+            <a id="units-mmol" name="units" class="tab-button">mmol/L</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="item-container">
+        <h3>GRAPH SETTINGS:</h3>
+        <div class="item-container-footer">
+          All numbers must be in mg/dL.
+        </div>
+      </div>
+
+      <div class="item-container">
+        <div class="item-container-header">Top of graph</div>
+        <div class="item-container-content">
+          <label class="item">
+            <input id="topOfGraph" name="topOfGraph" type="range" class="item-slider" min="30" max="500" step="10">
+            <div class="item-input-wrapper item-slider-text">
+              <input id="topOfGraph-val" name="topOfGraph" type="tel" class="item-input">
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="item-container">
+        <div class="item-container-header">Top of target range</div>
+        <div class="item-container-content">
+          <label class="item">
+            <input id="topOfRange" name="topOfRange" type="range" class="item-slider" min="30" max="500" step="10">
+            <div class="item-input-wrapper item-slider-text">
+              <input id="topOfRange-val" name="topOfRange" type="tel" class="item-input">
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="item-container">
+        <div class="item-container-header">Bottom of target range</div>
+        <div class="item-container-content">
+          <label class="item">
+            <input id="bottomOfRange" name="bottomOfRange" type="range" class="item-slider" min="30" max="500" step="10">
+            <div class="item-input-wrapper item-slider-text">
+              <input id="bottomOfRange-val" name="bottomOfRange" type="tel" class="item-input">
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="item-container">
+        <div class="item-container-header">Bottom of graph</div>
+        <div class="item-container-content">
+          <label class="item">
+            <input id="bottomOfGraph" name="bottomOfGraph" type="range" class="item-slider" min="30" max="500" step="10">
+            <div class="item-input-wrapper item-slider-text">
+              <input id="bottomOfGraph-val" name="bottomOfGraph" type="tel" class="item-input">
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="item-container">
+        <div class="item-container-header">Gridlines</div>
+        <div class="item-container-content">
+          <label class="item">
+            Horizontal gridlines
+            <select id="hGridlines" name="hGridlines" dir="rtl" class="item-select">
+              <option value="0" class="item-select-option">None</option>
+              <option value="20" class="item-select-option">Every 20 mg/dL</option>
+              <option value="25" class="item-select-option">Every 25 mg/dL</option>
+              <option value="40" class="item-select-option">Every 40 mg/dL</option>
+              <option value="50" class="item-select-option">Every 50 mg/dL</option>
+              <option value="75" class="item-select-option">Every 75 mg/dL</option>
+              <option value="100" class="item-select-option">Every 100 mg/dL</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="item-container">
+        <h3>CONTENT SETTINGS:</h3>
+      </div>
+
+      <div class="item-container">
+        <div class="item-container-content">
+          <label class="item">
+            Status bar
+            <select id="statusContent" name="statusContent" dir="rtl" class="item-select">
+              <option value="pumpiob" class="item-select-option">Pump IOB - MiniMed Connect</option>
+              <option value="customurl" class="item-select-option">Custom URL</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div id="status-url-container" class="item-container">
+        <div class="item-container-header">Status bar URL</div>
+        <div class="item-container-content">
+          <label class="item">
+            <div class="item-input-wrapper">
+              <input id="statusUrl" type="url" class="item-input">
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="item-container">
+        <div class="button-container">
+          <input id="submit-button" type="submit" class="item-button" value="SAVE">
+        </div>
+      </div>
+
+    </form>
+    <script src="js/slate.min.js"></script>
+    <script src="js/config.js"></script>
+  </body>
+</html>

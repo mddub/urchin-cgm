@@ -32,6 +32,15 @@ int total_data_staleness() {
   return rig_to_web_staleness() + web_to_phone_staleness() + phone_to_pebble_staleness();
 }
 
+int graph_staleness_padding() {
+  int staleness = total_data_staleness();
+  int padding = staleness / GRAPH_INTERVAL_SIZE_SECONDS;
+  if (padding == 1 && staleness < GRAPH_INTERVAL_SIZE_SECONDS + GRAPH_STALENESS_GRACE_PERIOD_SECONDS) {
+    padding = 0;
+  }
+  return padding;
+}
+
 ConnectionIssue connection_issue() {
   // TODO
   if (!ever_had_phone_contact()) {
@@ -68,7 +77,7 @@ void staleness_update(DictionaryIterator *data) {
   phone_contact = true;
   time_t now = time(NULL);
   last_phone_contact = now;
-  if (!dict_find(data, APP_KEY_ERROR)->value->uint8) {
+  if (dict_find(data, APP_KEY_MSG_TYPE)->value->uint8 == MSG_TYPE_DATA) {
     data_received = true;
     last_successful_phone_contact = now;
     last_data_staleness_wrt_phone = dict_find(data, APP_KEY_RECENCY)->value->int32;

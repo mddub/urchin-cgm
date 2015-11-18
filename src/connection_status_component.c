@@ -3,7 +3,7 @@
 #include "staleness.h"
 
 #define REASON_ICON_WIDTH 25
-#define TEXT_WIDTH 25
+#define TEXT_WIDTH 40
 
 // https://forums.getpebble.com/discussion/7147/text-layer-padding
 #define ACTUAL_TEXT_HEIGHT_18 11
@@ -20,6 +20,7 @@ const int CONN_ISSUE_ICONS[] = {
 
 ConnectionStatusComponent* connection_status_component_create(Layer *parent, int x, int y) {
   BitmapLayer *icon_layer = bitmap_layer_create(GRect(x, y, REASON_ICON_WIDTH, REASON_ICON_WIDTH));
+  bitmap_layer_set_compositing_mode(icon_layer, GCompOpAssign);
   layer_add_child(parent, bitmap_layer_get_layer(icon_layer));
 
   TextLayer *staleness_text = text_layer_create(GRect(
@@ -54,6 +55,8 @@ static char* staleness_text(int staleness_seconds) {
   int minutes = staleness_seconds / 60;
   if (minutes < 60) {
     snprintf(buf, sizeof(buf), "%d", minutes);
+  } else if (minutes < 120) {
+    snprintf(buf, sizeof(buf), "1h%d", minutes - 60);
   } else if (minutes / 60 <= 6) {
     snprintf(buf, sizeof(buf), "%dhr", minutes / 60);
   } else {

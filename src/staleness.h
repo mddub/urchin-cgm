@@ -20,5 +20,6 @@ int phone_to_pebble_staleness();
 int web_to_phone_staleness();
 int rig_to_web_staleness();
 int total_data_staleness();
+int graph_staleness_padding();
 ConnectionIssue connection_issue();
 void staleness_update(DictionaryIterator *data);

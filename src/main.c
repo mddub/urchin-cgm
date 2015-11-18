@@ -1,9 +1,11 @@
 #include <pebble.h>
 
+#include "app_keys.h"
 #include "comm.h"
 #include "config.h"
 #include "layout.h"
 #include "graph_element.h"
+#include "preferences.h"
 #include "status_bar_element.h"
 #include "sidebar_element.h"
 #include "time_element.h"
@@ -16,11 +18,15 @@ static SidebarElement *s_sidebar_element;
 static StatusBarElement *s_status_bar_element;
 
 static void data_callback(DictionaryIterator *received) {
-  time_element_update(s_time_element, received);
-  status_bar_element_update(s_status_bar_element, received);
-  sidebar_element_update(s_sidebar_element, received);
-  graph_element_update(s_graph_element, received);
-
+  int msg_type = dict_find(received, APP_KEY_MSG_TYPE)->value->uint8;
+  if (msg_type == MSG_TYPE_DATA) {
+    time_element_update(s_time_element, received);
+    status_bar_element_update(s_status_bar_element, received);
+    sidebar_element_update(s_sidebar_element, received);
+    graph_element_update(s_graph_element, received);
+  } else if (msg_type == MSG_TYPE_PREFERENCES) {
+    set_prefs(received);
+  }
 }
 
 static void minute_handler(struct tm *tick_time, TimeUnits units_changed) {
@@ -54,6 +60,7 @@ static void window_unload(Window *s_window) {
 }
 
 static void init(void) {
+  init_prefs();
   init_comm(data_callback);
 
   s_window = window_create();
@@ -66,6 +73,7 @@ static void init(void) {
 
 static void deinit(void) {
   window_destroy(s_window);
+  deinit_prefs();
 }
 
 int main(void) {
