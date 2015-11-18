@@ -1,5 +1,5 @@
-/* global document */
-(function() {
+/* global document, Zepto */
+(function($) {
 
   var SLIDER_KEYS = [
     'topOfGraph',
@@ -41,6 +41,9 @@
     });
 
     document.getElementById('hGridlines').value = current['hGridlines'];
+
+    document.getElementById('statusContent').value = current['statusContent'];
+    document.getElementById('statusUrl').value = current['statusUrl'];
   })();
 
   function buildConfig() {
@@ -49,6 +52,8 @@
       mmol: mmol,
       nightscout_url: document.getElementById('ns-url').value.replace(/\/$/, ''),
       hGridlines: tryParseInt(document.getElementById('hGridlines').value),
+      statusContent: document.getElementById('statusContent').value,
+      statusUrl: document.getElementById('statusUrl').value,
     };
     SLIDER_KEYS.forEach(function(key) {
       out[key] = tryParseInt(document.getElementById(key + '-val').value);
@@ -62,4 +67,10 @@
   }
 
   document.getElementById('config-form').addEventListener('submit', onSubmit);
-}());
+
+  $('#statusContent').on('change', function(evt) {
+    $('#status-url-container').toggle(evt.currentTarget.value === 'customurl');
+  });
+  $('#statusContent').trigger('change');
+
+})(Zepto);

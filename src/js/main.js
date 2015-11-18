@@ -23,6 +23,8 @@ var DEFAULT_CONFIG = {
   bottomOfRange: 70,
   bottomOfGraph: 40,
   hGridlines: 50,
+  statusContent: 'pumpiob',
+  statusUrl: '',
 };
 
 var config;
@@ -90,7 +92,7 @@ function getJSON(url, callback) {
   });
 }
 
-function getIOB(callback) {
+function getIOB(config, callback) {
   getJSON(config.nightscout_url + '/api/v1/entries.json?find[activeInsulin][$exists]=true&count=1', function(err, iobs) {
     if (err) {
       return callback(err);
@@ -105,7 +107,20 @@ function getIOB(callback) {
   });
 }
 
-function getSGVsDateDescending(callback) {
+function getCustomUrl(config, callback) {
+  getURL(config.statusUrl, callback);
+}
+
+function getStatusText(config, callback) {
+  var defaultFn = getIOB;
+  var fn = {
+    'pumpiob': getIOB,
+    'customurl': getCustomUrl,
+  }[config.statusContent];
+  (fn || defaultFn)(config, callback);
+}
+
+function getSGVsDateDescending(config, callback) {
   getJSON(config.nightscout_url + '/api/v1/entries/sgv.json?count=' + SGV_FETCH_COUNT, function(err, entries) {
     if (err) {
       return callback(err);
@@ -203,7 +218,7 @@ function sendMessage(data) {
 }
 
 function requestAndSendBGs() {
-  function onData(sgvs, iobText) {
+  function onData(sgvs, statusText) {
     try {
       var ys = graphArray(sgvs);
       sendMessage({
@@ -214,25 +229,25 @@ function requestAndSendBGs() {
         lastSgv: lastSgv(sgvs),
         trend: lastTrendNumber(sgvs),
         delta: lastDelta(ys),
-        statusText: iobText,
+        statusText: statusText,
       });
     } catch (e) {
       sgvDataError(e);
     }
   }
 
-  getSGVsDateDescending(function(err, sgvs) {
+  getSGVsDateDescending(config, function(err, sgvs) {
     if (err) {
       // error fetching sgvs is unrecoverable
       sgvDataError(err);
     } else {
-      getIOB(function(err, iobText) {
+      getStatusText(config, function(err, statusText) {
         if (err) {
           // error fetching status bar text is okay
           console.log(err);
-          iobText = '-';
+          statusText = '-';
         }
-        onData(sgvs, iobText);
+        onData(sgvs, statusText);
       });
     }
   });
