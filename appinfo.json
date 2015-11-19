@@ -1,109 +1,113 @@
 {
-  "uuid": "ea361603-0373-4865-9824-8f52c65c6e07",
-  "shortName": "nightscout-graph-pebble",
-  "longName": "nightscout-graph-pebble",
-  "companyName": "Mark Wilson",
-  "versionLabel": "0.1",
-  "sdkVersion": "3",
-  "targetPlatforms": ["aplite", "basalt"],
-  "capabilities": ["configurable"],
-  "watchapp": {
-    "watchface": true
-  },
-  "appKeys": {
-    "msgType": 0,
-
-    "recency": 1,
-    "sgvs": 2,
-    "lastSgv": 3,
-    "trend": 4,
-    "delta": 5,
-    "statusText": 6,
-
-    "mmol": 1,
-    "topOfGraph": 2,
-    "topOfRange": 3,
-    "bottomOfRange": 4,
-    "bottomOfGraph": 5,
-    "hGridlines": 6
-  },
-  "resources": {
-    "media": [
-      {
-        "type": "pbi",
-        "name": "ARROW_DOUBLE_UP",
-        "file": "images/arrow_double_up.png"
-      },
-      {
-        "type": "pbi",
-        "name": "ARROW_SINGLE_UP",
-        "file": "images/arrow_single_up.png"
-      },
-      {
-        "type": "pbi",
-        "name": "ARROW_FORTY_FIVE_UP",
-        "file": "images/arrow_forty_five_up.png"
-      },
-      {
-        "type": "pbi",
-        "name": "ARROW_FLAT",
-        "file": "images/arrow_flat.png"
-      },
-      {
-        "type": "pbi",
-        "name": "ARROW_FORTY_FIVE_DOWN",
-        "file": "images/arrow_forty_five_down.png"
-      },
-      {
-        "type": "pbi",
-        "name": "ARROW_SINGLE_DOWN",
-        "file": "images/arrow_single_down.png"
-      },
-      {
-        "type": "pbi",
-        "name": "ARROW_DOUBLE_DOWN",
-        "file": "images/arrow_double_down.png"
-      },
-      {
-        "type": "pbi",
-        "name": "CONN_ISSUE_BLUETOOTH",
-        "file": "images/conn_issue_bluetooth.png"
-      },
-      {
-        "type": "pbi",
-        "name": "CONN_ISSUE_NETWORK",
-        "file": "images/conn_issue_network.png"
-      },
-      {
-        "type": "pbi",
-        "name": "CONN_ISSUE_RIG",
-        "file": "images/conn_issue_rig.png"
-      },
-      {
-        "type": "pbi",
-        "name": "BATTERY_25",
-        "file": "images/battery_25.png"
-      },
-      {
-        "type": "pbi",
-        "name": "BATTERY_50",
-        "file": "images/battery_50.png"
-      },
-      {
-        "type": "pbi",
-        "name": "BATTERY_75",
-        "file": "images/battery_75.png"
-      },
-      {
-        "type": "pbi",
-        "name": "BATTERY_100",
-        "file": "images/battery_100.png"
-      },
-      {
-        "type": "pbi",
-        "name": "BATTERY_CHARGING",
-        "file": "images/battery_charging.png"
-      }
-    ]
-  }
+    "appKeys": {
+        "bottomOfGraph": 5,
+        "bottomOfRange": 4,
+        "delta": 5,
+        "hGridlines": 6,
+        "lastSgv": 3,
+        "mmol": 1,
+        "msgType": 0,
+        "recency": 1,
+        "sgvs": 2,
+        "statusText": 6,
+        "topOfGraph": 2,
+        "topOfRange": 3,
+        "trend": 4
+    },
+    "capabilities": [
+        "configurable"
+    ],
+    "companyName": "Mark Wilson",
+    "longName": "nightscout-graph-pebble",
+    "projectType": "native",
+    "resources": {
+        "media": [
+            {
+                "file": "images/conn_issue_rig.png",
+                "name": "CONN_ISSUE_RIG",
+                "type": "pbi"
+            },
+            {
+                "file": "images/conn_issue_network.png",
+                "name": "CONN_ISSUE_NETWORK",
+                "type": "pbi"
+            },
+            {
+                "file": "images/conn_issue_bluetooth.png",
+                "name": "CONN_ISSUE_BLUETOOTH",
+                "type": "pbi"
+            },
+            {
+                "file": "images/battery_charging.png",
+                "name": "BATTERY_CHARGING",
+                "type": "pbi"
+            },
+            {
+                "file": "images/battery_75.png",
+                "name": "BATTERY_75",
+                "type": "pbi"
+            },
+            {
+                "file": "images/battery_50.png",
+                "name": "BATTERY_50",
+                "type": "pbi"
+            },
+            {
+                "file": "images/battery_25.png",
+                "name": "BATTERY_25",
+                "type": "pbi"
+            },
+            {
+                "file": "images/battery_100.png",
+                "name": "BATTERY_100",
+                "type": "pbi"
+            },
+            {
+                "file": "images/arrow_single_up.png",
+                "name": "ARROW_SINGLE_UP",
+                "type": "pbi"
+            },
+            {
+                "file": "images/arrow_single_down.png",
+                "name": "ARROW_SINGLE_DOWN",
+                "type": "pbi"
+            },
+            {
+                "file": "images/arrow_forty_five_up.png",
+                "name": "ARROW_FORTY_FIVE_UP",
+                "type": "pbi"
+            },
+            {
+                "file": "images/arrow_forty_five_down.png",
+                "name": "ARROW_FORTY_FIVE_DOWN",
+                "type": "pbi"
+            },
+            {
+                "file": "images/arrow_flat.png",
+                "name": "ARROW_FLAT",
+                "type": "pbi"
+            },
+            {
+                "file": "images/arrow_double_up.png",
+                "name": "ARROW_DOUBLE_UP",
+                "type": "pbi"
+            },
+            {
+                "file": "images/arrow_double_down.png",
+                "name": "ARROW_DOUBLE_DOWN",
+                "type": "pbi"
+            }
+        ]
+    },
+    "sdkVersion": "3",
+    "shortName": "nightscout-graph-pebble",
+    "targetPlatforms": [
+        "aplite",
+        "basalt"
+    ],
+    "uuid": "ea361603-0373-4865-9824-8f52c65c6e07",
+    "versionLabel": "0.1",
+    "watchapp": {
+        "watchface": true
+    }
 }

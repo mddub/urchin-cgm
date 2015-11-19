@@ -8,6 +8,7 @@ var IOB_RECENCY_THRESHOLD_SECONDS = 10 * 60;
 var REQUEST_TIMEOUT = 5000;
 var NO_DELTA_VALUE = 65536;
 
+
 var CONFIG_URL = 'https://mddub.github.io/nightscout-graph-pebble/config/';
 var LOCAL_STORAGE_KEY_CONFIG = 'config';
 
@@ -93,6 +94,7 @@ function getJSON(url, callback) {
 }
 
 function getIOB(config, callback) {
+  /*
   getJSON(config.nightscout_url + '/api/v1/entries.json?find[activeInsulin][$exists]=true&count=1', function(err, iobs) {
     if (err) {
       return callback(err);
@@ -105,7 +107,30 @@ function getIOB(config, callback) {
       callback(null, '-');
     }
   });
-}
+  */
+  var iob = '-';
+  getJSON(config.nightscout_url + '/api/v1/treatments?find[eventType]=Temp+Basal&count=1', function(err, iobs) {
+    if (err) {
+      return callback(err);
+    }
+    if (iobs.length && iobs[0]['duration'] && Date.now() < (Date.now(iobs[0]['created_at']) + iobs[0]['duration']*1000) ) {
+      //temp basal active
+      if (iobs[0]['percent']) { //because nightscout can't handle temps of 0u/h
+        iob = 'Rate: 0u/h';
+      }
+      iob = 'Rate: ' + iobs[0]['absolute'].toFixed(1).toString() + 'u/h';
+    }//end active temp
+  });//get most reccent temp basal treatment (might not be relevant)
+  
+  getJSON(config.nightscout_url + '/api/v1/profile.json', function(err, iobs) {
+    if (err) {
+      return callback(err);
+    }
+    //TODO check what rate is active -- currently only using one so can skip the check
+    iob = 'Rate: ' + iobs[0]['basal']['value'].toFixed(1).toString() + 'u/h';
+  });//get scheduled basal rate
+  callback(null, iob);
+}//get "iob"
 
 function getCustomUrl(config, callback) {
   getURL(config.statusUrl, callback);
