@@ -2,7 +2,7 @@
 /* global console, Pebble */
 
 // TODO use a real build process to share this with the config page
-var VERSION = '0.0.1';
+var VERSION = '0.0.2';
 
 var SGV_FETCH_COUNT = 72;
 var SGV_FOR_PEBBLE_COUNT = 36;
@@ -87,16 +87,21 @@ function getURL(url, callback) {
       }
     }
   };
-  xhr.send(null);
 
-  setTimeout(function() {
-    if (received) {
-      return;
-    }
-    timedOut = true;
-    xhr.abort();
-    callback(new Error('Request timed out: ' + url));
-  }, REQUEST_TIMEOUT);
+  // On iOS, PebbleKit JS will throw an error on send() for an invalid URL
+  try {
+    xhr.send();
+    setTimeout(function() {
+      if (received) {
+        return;
+      }
+      timedOut = true;
+      xhr.abort();
+      callback(new Error('Request timed out: ' + url));
+    }, REQUEST_TIMEOUT);
+  } catch (e) {
+    callback(e);
+  }
 }
 
 function getJSON(url, callback) {
