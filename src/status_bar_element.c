@@ -4,15 +4,26 @@
 #include "staleness.h"
 #include "status_bar_element.h"
 
+// https://forums.getpebble.com/discussion/7147/text-layer-padding
+#define ACTUAL_TEXT_HEIGHT_18 11
+#define PADDING_TOP_18 7
+#define PADDING_BOTTOM_18 3
+
 StatusBarElement* status_bar_element_create(Layer *parent) {
   GRect bounds = element_get_bounds(parent);
 
   int sm_text_margin = 2;
-  int text_width = bounds.size.w - sm_text_margin;
 
-  TextLayer *text = text_layer_create(GRect(sm_text_margin, 0, text_width, bounds.size.h));
+  TextLayer *text = text_layer_create(GRect(
+    sm_text_margin,
+    (bounds.size.h - ACTUAL_TEXT_HEIGHT_18) / 2 - PADDING_TOP_18,
+    bounds.size.w - sm_text_margin,
+    ACTUAL_TEXT_HEIGHT_18 + PADDING_TOP_18 + PADDING_BOTTOM_18
+  ));
   text_layer_set_text_alignment(text, GTextAlignmentLeft);
   text_layer_set_background_color(text, GColorClear);
+  text_layer_set_text_color(text, GColorBlack);
+
   text_layer_set_font(text, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
   text_layer_set_overflow_mode(text, GTextOverflowModeWordWrap);
   layer_add_child(parent, text_layer_get_layer(text));
