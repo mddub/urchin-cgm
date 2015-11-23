@@ -42,6 +42,7 @@
 #define SIDEBAR_ELEMENT 1
 #define STATUS_BAR_ELEMENT 2
 #define TIME_AREA_ELEMENT 3
+#define BG_ROW_ELEMENT 4
 
 #define MAX_LAYOUT_ELEMENTS 4
 
@@ -68,6 +69,7 @@ typedef struct LayoutLayers {
   Layer *sidebar;
   Layer *status_bar;
   Layer *time_area;
+  Layer *bg_row;
 } LayoutLayers;
 
 LayoutConfig* layout_config_create(int layout_option);

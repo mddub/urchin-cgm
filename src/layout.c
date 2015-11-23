@@ -107,6 +107,7 @@ LayoutLayers init_layout(Window* window, int layout_option) {
     .sidebar = get_layer_for_element(SIDEBAR_ELEMENT),
     .status_bar = get_layer_for_element(STATUS_BAR_ELEMENT),
     .time_area = get_layer_for_element(TIME_AREA_ELEMENT),
+    .bg_row = get_layer_for_element(BG_ROW_ELEMENT),
   };
 }
 

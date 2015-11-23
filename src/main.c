@@ -1,6 +1,7 @@
 #include <pebble.h>
 
 #include "app_keys.h"
+#include "bg_row_element.h"
 #include "comm.h"
 #include "config.h"
 #include "layout.h"
@@ -16,33 +17,67 @@ static TimeElement *s_time_element;
 static GraphElement *s_graph_element;
 static SidebarElement *s_sidebar_element;
 static StatusBarElement *s_status_bar_element;
+static BGRowElement *s_bg_row_element;
 
 static void minute_handler(struct tm *tick_time, TimeUnits units_changed) {
-  time_element_tick(s_time_element);
-  status_bar_element_tick(s_status_bar_element);
-  sidebar_element_tick(s_sidebar_element);
-  graph_element_tick(s_graph_element);
+  if (s_time_element != NULL) {
+    time_element_tick(s_time_element);
+  }
+  if (s_graph_element != NULL) {
+    graph_element_tick(s_graph_element);
+  }
+  if (s_sidebar_element != NULL) {
+    sidebar_element_tick(s_sidebar_element);
+  }
+  if (s_status_bar_element != NULL) {
+    status_bar_element_tick(s_status_bar_element);
+  }
+  if (s_bg_row_element != NULL) {
+    bg_row_element_tick(s_bg_row_element);
+  }
 }
 
 static void window_load(Window *window) {
   LayoutLayers layout = init_layout(window, LAYOUT);
 
-  // ensure the time is drawn before anything else
-  s_time_element = time_element_create(layout.time_area);
-  time_element_tick(s_time_element);
+  if (layout.time_area != NULL) {
+    // ensure the time is drawn before anything else
+    s_time_element = time_element_create(layout.time_area);
+    time_element_tick(s_time_element);
+  }
 
-  s_graph_element = graph_element_create(layout.graph);
-  s_sidebar_element = sidebar_element_create(layout.sidebar);
-  s_status_bar_element = status_bar_element_create(layout.status_bar);
+  if (layout.graph != NULL) {
+    s_graph_element = graph_element_create(layout.graph);
+  }
+  if (layout.sidebar != NULL) {
+    s_sidebar_element = sidebar_element_create(layout.sidebar);
+  }
+  if (layout.status_bar != NULL) {
+    s_status_bar_element = status_bar_element_create(layout.status_bar);
+  }
+  if (layout.bg_row != NULL) {
+    s_bg_row_element = bg_row_element_create(layout.bg_row);
+  }
 
   tick_timer_service_subscribe(MINUTE_UNIT, minute_handler);
 }
 
 static void window_unload(Window *window) {
-  time_element_destroy(s_time_element);
-  graph_element_destroy(s_graph_element);
-  sidebar_element_destroy(s_sidebar_element);
-  status_bar_element_destroy(s_status_bar_element);
+  if (s_time_element != NULL) {
+    time_element_destroy(s_time_element);
+  }
+  if (s_graph_element != NULL) {
+    graph_element_destroy(s_graph_element);
+  }
+  if (s_sidebar_element != NULL) {
+    sidebar_element_destroy(s_sidebar_element);
+  }
+  if (s_status_bar_element != NULL) {
+    status_bar_element_destroy(s_status_bar_element);
+  }
+  if (s_bg_row_element != NULL) {
+    bg_row_element_destroy(s_bg_row_element);
+  }
 
   deinit_layout();
 }
@@ -60,10 +95,21 @@ static Window *create_main_window() {
 static void data_callback(DictionaryIterator *received) {
   int msg_type = dict_find(received, APP_KEY_MSG_TYPE)->value->uint8;
   if (msg_type == MSG_TYPE_DATA) {
-    time_element_update(s_time_element, received);
-    status_bar_element_update(s_status_bar_element, received);
-    sidebar_element_update(s_sidebar_element, received);
-    graph_element_update(s_graph_element, received);
+    if (s_time_element != NULL) {
+      time_element_update(s_time_element, received);
+    }
+    if (s_graph_element != NULL) {
+      graph_element_update(s_graph_element, received);
+    }
+    if (s_sidebar_element != NULL) {
+      sidebar_element_update(s_sidebar_element, received);
+    }
+    if (s_status_bar_element != NULL) {
+      status_bar_element_update(s_status_bar_element, received);
+    }
+    if (s_bg_row_element != NULL) {
+      bg_row_element_update(s_bg_row_element, received);
+    }
   } else if (msg_type == MSG_TYPE_PREFERENCES) {
     set_prefs(received);
     // recreate the window in case layout preferences have changed

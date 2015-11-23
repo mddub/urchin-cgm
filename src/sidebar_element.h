@@ -1,11 +1,11 @@
 #pragma once
 
 #include <pebble.h>
+#include "trend_arrow_component.h"
 
 typedef struct SidebarElement {
   TextLayer *last_bg_text;
-  GBitmap *trend_bitmap;
-  BitmapLayer *trend_layer;
+  TrendArrowComponent *trend;
   TextLayer *delta_text;
 } SidebarElement;
 

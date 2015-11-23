@@ -58,22 +58,22 @@ static void layout_option_b(LayoutConfig* dest) {
   int i = 0;
   dest->elements[i++] = (ElementConfig) {
     .el = GRAPH_ELEMENT,
-    .w = 3 * GRAPH_SGV_COUNT,
-    .h = 87,
+    .w = 0,
+    .h = 75,
     .bottom = true,
-    .right = true,
+    .right = false,
   };
   dest->elements[i++] = (ElementConfig) {
-    .el = SIDEBAR_ELEMENT,
+    .el = BG_ROW_ELEMENT,
     .w = 0,
-    .h = 87,
+    .h = 32,
     .bottom = true,
     .right = false,
   };
   dest->elements[i++] = (ElementConfig) {
     .el = STATUS_BAR_ELEMENT,
     .w = 0,
-    .h = 22,
+    .h = 17,
     .bottom = false,
     .right = false,
   };
