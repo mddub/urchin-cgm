@@ -215,7 +215,7 @@ function directionToTrend(direction) {
     'DoubleDown': 7,
     'NOT COMPUTABLE': 8,
     'RATE OUT OF RANGE': 9,
-  }[direction];
+  }[direction] || 0;
 }
 
 function lastTrendNumber(sgvs) {
