@@ -5,11 +5,9 @@
 #include "preferences.h"
 #include "staleness.h"
 
-static const int POINT_SIZE = 3;
-
 static void plot_point(int x, int y, GContext *ctx) {
   graphics_context_set_fill_color(ctx, GColorBlack);
-  graphics_fill_rect(ctx, GRect(x, y, POINT_SIZE, POINT_SIZE), 0, GCornerNone);
+  graphics_fill_rect(ctx, GRect(x, y, GRAPH_POINT_SIZE, GRAPH_POINT_SIZE), 0, GCornerNone);
 }
 
 static int bg_to_y(int height, int bg, int min, int max, bool fit_in_bounds) {
@@ -28,7 +26,7 @@ static int bg_to_y(int height, int bg, int min, int max, bool fit_in_bounds) {
 }
 
 static int bg_to_y_for_point(int height, int bg) {
-  return bg_to_y(height, bg, 0, height - 1 - POINT_SIZE, true);
+  return bg_to_y(height, bg, 0, height - 1 - GRAPH_POINT_SIZE, true);
 }
 
 static int bg_to_y_for_line(int height, int bg) {
@@ -36,26 +34,27 @@ static int bg_to_y_for_line(int height, int bg) {
 }
 
 static void graph_update_proc(Layer *layer, GContext *ctx) {
-  unsigned int i, x, y;
-  int height = layer_get_bounds(layer).size.h;
+  int i, x, y;
+  GSize size = layer_get_bounds(layer).size;
 
-  char* bgs = (char*)layer_get_data(layer);
-  for(i = 0; i < GRAPH_SGV_COUNT; i++) {
+  GraphData *data = layer_get_data(layer);
+  int padding = graph_staleness_padding();
+  for(i = 0; i < data->count; i++) {
     // XXX: JS divides by 2 to fit into 1 byte
-    int bg = bgs[i] * 2;
+    int bg = data->sgvs[i] * 2;
     if(bg == 0) {
       continue;
     }
-    x = POINT_SIZE * (i - graph_staleness_padding());
-    y = bg_to_y_for_point(height, bg);
+    x = size.w - GRAPH_POINT_SIZE * (1 + i + padding);
+    y = bg_to_y_for_point(size.h, bg);
     plot_point(x, y, ctx);
   }
 
   // Target range bounds
   uint16_t limits[2] = {get_prefs()->top_of_range, get_prefs()->bottom_of_range};
-  for(i = 0; i < ARRAY_LENGTH(limits); i++) {
-    y = bg_to_y_for_line(height, limits[i]);
-    for(x = 0; x < POINT_SIZE * GRAPH_SGV_COUNT; x += 4) {
+  for(i = 0; i < (int)ARRAY_LENGTH(limits); i++) {
+    y = bg_to_y_for_line(size.h, limits[i]);
+    for(x = 0; x < size.w; x += 4) {
       graphics_draw_line(ctx, GPoint(x, y), GPoint(x + 2, y));
     }
   }
@@ -69,8 +68,8 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
       if (g <= graph_min || g == limits[0] || g == limits[1]) {
         continue;
       }
-      y = bg_to_y_for_line(height, g);
-      for(x = 0; x < POINT_SIZE * GRAPH_SGV_COUNT; x += 8) {
+      y = bg_to_y_for_line(size.h, g);
+      for(x = 2; x < size.w; x += 8) {
         graphics_draw_line(ctx, GPoint(x, y), GPoint(x + 1, y));
       }
     }
@@ -82,8 +81,9 @@ GraphElement* graph_element_create(Layer *parent) {
 
   Layer* graph_layer = layer_create_with_data(
     GRect(0, 0, bounds.size.w, bounds.size.h),
-    GRAPH_SGV_COUNT * sizeof(char)
+    sizeof(GraphData)
   );
+  ((GraphData*)layer_get_data(graph_layer))->sgvs = malloc(GRAPH_MAX_SGV_COUNT * sizeof(char));
   layer_set_update_proc(graph_layer, graph_update_proc);
   layer_add_child(parent, graph_layer);
 
@@ -96,16 +96,20 @@ GraphElement* graph_element_create(Layer *parent) {
 }
 
 void graph_element_destroy(GraphElement *el) {
+  free(((GraphData*)layer_get_data(el->graph_layer))->sgvs);
   layer_destroy(el->graph_layer);
   connection_status_component_destroy(el->conn_status);
   free(el);
 }
 
 void graph_element_update(GraphElement *el, DictionaryIterator *data) {
+  int count = dict_find(data, APP_KEY_SGV_COUNT)->value->int32;
+  count = count > GRAPH_MAX_SGV_COUNT ? GRAPH_MAX_SGV_COUNT : count;
+  ((GraphData*)layer_get_data(el->graph_layer))->count = count;
   memcpy(
-    (char*)layer_get_data(el->graph_layer),
+    ((GraphData*)layer_get_data(el->graph_layer))->sgvs,
     (char*)dict_find(data, APP_KEY_SGVS)->value->cstring,
-    GRAPH_SGV_COUNT
+    count * sizeof(char)
   );
   layer_mark_dirty(el->graph_layer);
   connection_status_component_refresh(el->conn_status);

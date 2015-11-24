@@ -14,11 +14,12 @@
     "msgType": 0,
 
     "recency": 1,
-    "sgvs": 2,
-    "lastSgv": 3,
-    "trend": 4,
-    "delta": 5,
-    "statusText": 6,
+    "sgvCount": 2,
+    "sgvs": 3,
+    "lastSgv": 4,
+    "trend": 5,
+    "delta": 6,
+    "statusText": 7,
 
     "mmol": 1,
     "topOfGraph": 2,

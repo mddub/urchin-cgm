@@ -4,9 +4,9 @@
 // TODO use a real build process to share this with the config page
 var VERSION = '0.0.2';
 
-var SGV_FETCH_COUNT = 72;
-var SGV_FOR_PEBBLE_COUNT = 36;
+var SGV_FETCH_SECONDS = 4 * 60 * 60;
 var INTERVAL_SIZE_SECONDS = 5 * 60;
+var FETCH_EXTRA = 5;
 var IOB_RECENCY_THRESHOLD_SECONDS = 10 * 60;
 var REQUEST_TIMEOUT = 5000;
 var NO_DELTA_VALUE = 65536;
@@ -148,7 +148,10 @@ function getStatusText(config, callback) {
 }
 
 function getSGVsDateDescending(config, callback) {
-  getJSON(config.nightscout_url + '/api/v1/entries/sgv.json?count=' + SGV_FETCH_COUNT, function(err, entries) {
+  var fetchStart = Date.now() - SGV_FETCH_SECONDS * 1000;
+  var points = SGV_FETCH_SECONDS / INTERVAL_SIZE_SECONDS + FETCH_EXTRA;
+  var url = config.nightscout_url + '/api/v1/entries/sgv.json?find[date][$gte]=' + fetchStart + '&count=' + points;
+  getJSON(url, function(err, entries) {
     if (err) {
       return callback(err);
     }
@@ -169,9 +172,9 @@ function graphArray(sgvs) {
 
   var graphed = [];
   var xs = [];
-  for(i = SGV_FOR_PEBBLE_COUNT - 1; i >= 0; i--) {
+  for(i = 0; i <= SGV_FETCH_SECONDS; i += INTERVAL_SIZE_SECONDS) {
     graphed.push(noEntry);
-    xs.push(endTime - i * INTERVAL_SIZE_SECONDS);
+    xs.push(endTime - i);
   }
 
   // This n^2 algorithm sacrifices efficiency for clarity
@@ -227,10 +230,10 @@ function lastTrendNumber(sgvs) {
 }
 
 function lastDelta(ys) {
-  if (ys[ys.length - 2] === 0) {
+  if (ys[1] === 0) {
     return NO_DELTA_VALUE;
   } else {
-    return ys[ys.length - 1] - ys[ys.length - 2];
+    return ys[0] - ys[1];
   }
 }
 
@@ -251,6 +254,7 @@ function requestAndSendBGs() {
       sendMessage({
         msgType: MSG_TYPE_DATA,
         recency: recency(sgvs),
+        sgvCount: ys.length,
         // XXX: divide BG by 2 to fit into 1 byte
         sgvs: ys.map(function(y) { return Math.min(255, Math.floor(y / 2)); }),
         lastSgv: lastSgv(sgvs),

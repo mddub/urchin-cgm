@@ -35,7 +35,8 @@
 
 ///////////////////////////////////////////////////////
 
-#define GRAPH_SGV_COUNT 36
+#define GRAPH_MAX_SGV_COUNT 48
+#define GRAPH_POINT_SIZE 3
 #define GRAPH_INTERVAL_SIZE_SECONDS (5*60)
 
 #define GRAPH_ELEMENT 0

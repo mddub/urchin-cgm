@@ -32,7 +32,7 @@ static void layout_option_a(LayoutConfig* dest) {
   };
   dest->elements[i++] = (ElementConfig) {
     .el = GRAPH_ELEMENT,
-    .w = 3 * GRAPH_SGV_COUNT,
+    .w = 3 * 36,
     .h = 87,
     .bottom = true,
     .right = true,
