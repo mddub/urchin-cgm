@@ -52,10 +52,19 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
 
   // Target range bounds
   uint16_t limits[2] = {get_prefs()->top_of_range, get_prefs()->bottom_of_range};
+  bool is_top[2] = {true, false};
   for(i = 0; i < (int)ARRAY_LENGTH(limits); i++) {
     y = bg_to_y_for_line(size.h, limits[i]);
-    for(x = 0; x < size.w; x += 4) {
-      graphics_draw_line(ctx, GPoint(x, y), GPoint(x + 2, y));
+    for(x = 0; x < size.w; x += 2) {
+      graphics_draw_pixel(ctx, GPoint(x + 1, y - 1));
+      graphics_draw_pixel(ctx, GPoint(x, y));
+      graphics_draw_pixel(ctx, GPoint(x + 1, y + 1));
+      // Draw bounds symmetrically, on the inside of the range
+      if (is_top[i]) {
+        graphics_draw_pixel(ctx, GPoint(x, y + 2));
+      } else {
+        graphics_draw_pixel(ctx, GPoint(x, y - 2));
+      }
     }
   }
 
