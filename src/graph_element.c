@@ -26,7 +26,7 @@ static int bg_to_y(int height, int bg, int min, int max, bool fit_in_bounds) {
 }
 
 static int bg_to_y_for_point(int height, int bg) {
-  return bg_to_y(height, bg, 0, height - 1 - GRAPH_POINT_SIZE, true);
+  return bg_to_y(height, bg, 0, height - GRAPH_POINT_SIZE, true);
 }
 
 static int bg_to_y_for_line(int height, int bg) {
