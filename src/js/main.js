@@ -88,17 +88,19 @@ function getURL(url, callback) {
     }
   };
 
+  function onTimeout() {
+    if (received) {
+      return;
+    }
+    timedOut = true;
+    xhr.abort();
+    callback(new Error('Request timed out: ' + url));
+  }
+
   // On iOS, PebbleKit JS will throw an error on send() for an invalid URL
   try {
     xhr.send();
-    setTimeout(function() {
-      if (received) {
-        return;
-      }
-      timedOut = true;
-      xhr.abort();
-      callback(new Error('Request timed out: ' + url));
-    }, REQUEST_TIMEOUT);
+    setTimeout(onTimeout, REQUEST_TIMEOUT);
   } catch (e) {
     callback(e);
   }
