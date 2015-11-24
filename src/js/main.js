@@ -10,6 +10,7 @@ var FETCH_EXTRA = 5;
 var IOB_RECENCY_THRESHOLD_SECONDS = 10 * 60;
 var REQUEST_TIMEOUT = 5000;
 var NO_DELTA_VALUE = 65536;
+var DEXCOM_ERROR_CODE_MAX = 12;
 
 var CONFIG_URL = 'https://mddub.github.io/nightscout-graph-pebble/config/';
 var LOCAL_STORAGE_KEY_CONFIG = 'config';
@@ -177,10 +178,13 @@ function graphArray(sgvs) {
     xs.push(endTime - i);
   }
 
-  // This n^2 algorithm sacrifices efficiency for clarity
   for(i = 0; i < sgvs.length; i++) {
     var min = Infinity;
     var xi;
+    // Don't graph error codes
+    if(sgvs[i]['sgv'] <= DEXCOM_ERROR_CODE_MAX) {
+      continue;
+    }
     // Find the x value closest to this sgv's date
     for(var j = 0; j < xs.length; j++) {
       if(Math.abs(sgvs[i]['date'] - xs[j]) < min) {

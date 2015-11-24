@@ -2,7 +2,7 @@
 #include "preferences.h"
 #include "staleness.h"
 #include "text_updates.h"
-#include "units.h"
+#include "format.h"
 
 void last_bg_text_layer_update(TextLayer *text_layer, DictionaryIterator *data) {
   static char last_bg_buffer[8];
