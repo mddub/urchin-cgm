@@ -14,11 +14,21 @@ StatusBarElement* status_bar_element_create(Layer *parent) {
 
   int sm_text_margin = 2;
 
+  int y, height;
+  if (bounds.size.h <= ACTUAL_TEXT_HEIGHT_18 + PADDING_TOP_18 + PADDING_BOTTOM_18) {
+    // vertically center text if there is only room for one line
+    y = (bounds.size.h - ACTUAL_TEXT_HEIGHT_18) / 2 - PADDING_TOP_18;
+    height = ACTUAL_TEXT_HEIGHT_18 + PADDING_TOP_18 + PADDING_BOTTOM_18;
+  } else {
+    // otherwise take up all the space, with half the default padding
+    y = -1 * PADDING_TOP_18 / 2;
+    height = bounds.size.h - y;
+  }
   TextLayer *text = text_layer_create(GRect(
     sm_text_margin,
-    (bounds.size.h - ACTUAL_TEXT_HEIGHT_18) / 2 - PADDING_TOP_18,
+    y,
     bounds.size.w - sm_text_margin,
-    ACTUAL_TEXT_HEIGHT_18 + PADDING_TOP_18 + PADDING_BOTTOM_18
+    height
   ));
   text_layer_set_text_alignment(text, GTextAlignmentLeft);
   text_layer_set_background_color(text, GColorClear);
