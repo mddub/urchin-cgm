@@ -15,15 +15,15 @@ static char* dexcom_error_string(int mgdl) {
   }
 }
 
-void format_bg(char* buffer, char buf_size, int mgdl, bool add_plus_minus, bool use_mmol) {
+void format_bg(char* buffer, char buf_size, int mgdl, bool is_delta, bool use_mmol) {
   char* error_string = dexcom_error_string(mgdl);
-  if (error_string != NULL) {
+  if (!is_delta && error_string != NULL) {
     strcpy(buffer, error_string);
     return;
   }
 
   char* plus_minus;
-  if (add_plus_minus) {
+  if (is_delta) {
     plus_minus = mgdl >= 0 ? "+" : "-";
     mgdl = (mgdl < 0 ? -1 : 1) * mgdl;
   } else {
