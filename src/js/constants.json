@@ -1,0 +1,48 @@
+{
+   "VERSION" : "0.0.2",
+
+   "CONFIG_URL" : "https://mddub.github.io/nightscout-graph-pebble/config/",
+   "LOCAL_STORAGE_KEY_CONFIG" : "config",
+
+   "DEFAULT_CONFIG" : {
+      "hGridlines" : 50,
+      "statusContent" : "pumpiob",
+      "batteryLoc" : "statusRight",
+      "nightscout_url" : "",
+      "topOfGraph" : 250,
+      "mmol" : false,
+      "timeAlign" : "center",
+      "statusUrl" : "",
+      "topOfRange" : 200,
+      "bottomOfRange" : 70,
+      "bottomOfGraph" : 40
+   },
+
+   "ALIGN" : {
+      "left" : 0,
+      "right" : 2,
+      "center" : 1
+   },
+
+   "BATTERY_LOC" : {
+      "timeBottomLeft" : 4,
+      "timeTopRight" : 3,
+      "timeBottomRight" : 5,
+      "timeTopLeft" : 2,
+      "none" : 0,
+      "statusRight" : 1
+   },
+
+   "MSG_TYPE_ERROR" : 0,
+   "MSG_TYPE_DATA" : 1,
+   "MSG_TYPE_PREFERENCES" : 2,
+
+   "SGV_FETCH_SECONDS" : 14400,
+   "INTERVAL_SIZE_SECONDS" : 300,
+   "FETCH_EXTRA" : 5,
+   "IOB_RECENCY_THRESHOLD_SECONDS" : 600,
+   "REQUEST_TIMEOUT" : 5000,
+
+   "NO_DELTA_VALUE" : 65536,
+   "DEXCOM_ERROR_CODE_MAX" : 12
+}

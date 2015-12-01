@@ -1,4 +1,4 @@
-import os.path
+import os
 
 top = '.'
 out = 'build'
@@ -32,8 +32,11 @@ def build(ctx):
 
     ctx.set_group('bundle')
 
+    constants_json_str = ctx.path.find_resource('src/js/constants.json').read()
+    main_call = "main({});".format(constants_json_str)
+
     all_js = "\n".join([node.read() for node in ctx.path.ant_glob('src/js/**/*.js')])
     out_js_node = ctx.path.make_node('build/pebble-js-app.js')
-    out_js_node.write(all_js)
+    out_js_node.write(all_js + main_call)
 
     ctx.pbl_bundle(binaries=binaries, js=out_js_node)
