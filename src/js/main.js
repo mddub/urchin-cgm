@@ -181,8 +181,8 @@ function graphArray(sgvs) {
   for(i = 0; i < sgvs.length; i++) {
     var min = Infinity;
     var xi;
-    // Don't graph error codes
-    if(sgvs[i]['sgv'] <= DEXCOM_ERROR_CODE_MAX) {
+    // Don't graph missing sgvs or error codes
+    if(sgvs[i]['sgv'] === undefined || sgvs[i]['sgv'] <= c.DEXCOM_ERROR_CODE_MAX) {
       continue;
     }
     // Find the x value closest to this sgv's date
