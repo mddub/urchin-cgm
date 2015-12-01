@@ -55,8 +55,6 @@ BGRowElement* bg_row_element_create(Layer *parent) {
     (bounds.size.h - trend_arrow_component_height()) / 2
   );
 
-  GSize bg_size = text_layer_get_content_size(bg_text);
-
   TextLayer *delta_text = text_layer_create(GRect(
     0, // set by bg_row_element_rearrange
     (bounds.size.h - ACTUAL_TEXT_HEIGHT_28) / 2 - PADDING_TOP_28,
