@@ -1,5 +1,5 @@
-# Ignore build generated files
 build
-
-# Ignore waf lock file
+test/output
 .lock-waf*
+*.pyc
+__pycache__

@@ -1,5 +1,14 @@
 import os
 
+DEFAULT_BUILD_ENV = 'production'
+BUILD_ENV = os.environ.get('BUILD_ENV', DEFAULT_BUILD_ENV)
+
+ENV_CONSTANTS_OVERRIDES = {
+    'test': {
+        'CONFIG_URL': 'http://localhost:{}/auto-config'.format(os.environ.get('MOCK_SERVER_PORT'))
+    },
+}
+
 top = '.'
 out = 'build'
 
@@ -33,6 +42,17 @@ def build(ctx):
     ctx.set_group('bundle')
 
     constants_json_str = ctx.path.find_resource('src/js/constants.json').read()
+
+    if BUILD_ENV in ENV_CONSTANTS_OVERRIDES.keys():
+        try:
+            import simplejson as json
+        except ImportError:
+            import json
+        constants_json_str = json.dumps(dict(
+            json.loads(constants_json_str),
+            **ENV_CONSTANTS_OVERRIDES[BUILD_ENV]
+        ))
+
     main_call = "main({});".format(constants_json_str)
 
     all_js = "\n".join([node.read() for node in ctx.path.ant_glob('src/js/**/*.js')])

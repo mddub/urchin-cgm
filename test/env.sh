@@ -1,0 +1,2 @@
+export BUILD_ENV=test
+export MOCK_SERVER_PORT=5555

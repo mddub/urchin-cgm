@@ -53,8 +53,69 @@ By default, the phone -> Pebble and Nightscout -> phone icons appear after 10 mi
 
 File an issue to report a bug or provide feedback for future development.
 
+## Testing
+
+Since this software displays real-time health data, it is important to be able to verify that it works as expected. This project includes two tools to aid testing: a mock Nightscout server and automated screenshot testing.
+
+To install testing dependencies, use `pip`:
+```
+pip install -r requirements.txt
+```
+
+These instructions assume you are using the [Pebble SDK]. You can build and run the project with a command like:
+```
+pebble clean && pebble build && pebble install --emulator aplite && pebble logs
+```
+
+### Mock Nightscout server
+
+The `test/` directory includes a server which uses the [Flask] framework. To run it:
+```
+MOCK_SERVER_PORT=5555 python test/server.py
+```
+
+Then open the configuration page to set your Nightscout host to `http://localhost:5555`:
+```
+pebble emu-app-config
+# ...make configuration changes in web browser...
+```
+
+To set the data that will be returned by the `sgv.json` endpoint:
+```
+vi sgv-data.json
+# ...edit mock data...
+curl -H "Content-type: application/json" -d "@sgv-data.json" http://localhost:5555/set-sgv
+```
+
+### Automated screenshot testing
+
+Start the mock server:
+```
+source test/env.sh && python test/server.py
+```
+
+With the mock server running, run tests:
+```
+source test/env.sh && py.test
+# or, on OS X:
+source test/env.sh && py.test && open test/output/screenshots.html
+```
+
+This will build the watchface, run it in the emulator, and generate an HTML file with the results of the tests. Each test case consists of watchface configuration and mock data. To add a new test case, follow the examples in `test/test_screenshots.py`.
+
+Automated verification of the screenshots is coming soon. For now, you manually inspect them.
+
+### Testing the configuration page
+
+To test changes to the configuration page, use the `--file` option to `emu-app-config`:
+```
+pebble emu-app-config --file file:///path/to/nightscout-graph-pebble/config/index.html
+```
+
 ## Disclaimer
 
 This project is intended for educational and informational purposes only. It is not FDA approved and should not be used to make medical decisions. It is neither affiliated with nor endorsed by Dexcom.
 
+[Flask]: http://flask.pocoo.org/
 [pbw]: https://raw.githubusercontent.com/mddub/nightscout-graph-pebble/master/release/nightscout-graph-pebble.pbw
+[Pebble SDK]: https://developer.getpebble.com/sdk/

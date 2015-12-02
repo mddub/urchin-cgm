@@ -1,1 +1,4 @@
+flask==0.10.1
+pytest==2.6.1
+requests==2.3.0
 simplejson==3.8.0
