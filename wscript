@@ -7,6 +7,12 @@ ENV_CONSTANTS_OVERRIDES = {
     'test': {
         'CONFIG_URL': 'http://localhost:{}/auto-config'.format(os.environ.get('MOCK_SERVER_PORT'))
     },
+    'development': {
+        # Can't use `pebble emu-app-config --file` because it bypasses the JS
+        # which adds current config as a query param when it opens the page:
+        # https://github.com/pebble/pebble-tool/blob/0e51fa/pebble_tool/commands/emucontrol.py#L116
+        'CONFIG_URL': 'file://{}/config/index.html'.format(os.path.abspath(os.path.curdir))
+    }
 }
 
 top = '.'

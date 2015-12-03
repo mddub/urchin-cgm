@@ -107,15 +107,18 @@ Automated verification of the screenshots is coming soon. For now, you manually 
 
 ### Testing the configuration page
 
-To test changes to the configuration page, use the `--file` option to `emu-app-config`:
+To test changes to the configuration page, set `BUILD_ENV` to `development`. This will build the watchface to point to the local config page (`file:///...`). Using `emu-app-config --file` won't work because it [bypasses the JS][emu-app-config-file] which adds the current config to the query string.
 ```
-pebble emu-app-config --file file:///path/to/nightscout-graph-pebble/config/index.html
+BUILD_ENV=development pebble build
+pebble install --emulator aplite
+pebble emu-app-config
 ```
 
 ## Disclaimer
 
 This project is intended for educational and informational purposes only. It is not FDA approved and should not be used to make medical decisions. It is neither affiliated with nor endorsed by Dexcom.
 
+[emu-app-config-file]: https://github.com/pebble/pebble-tool/blob/0e51fa/pebble_tool/commands/emucontrol.py#L116
 [Flask]: http://flask.pocoo.org/
 [pbw]: https://raw.githubusercontent.com/mddub/nightscout-graph-pebble/master/release/nightscout-graph-pebble.pbw
 [Pebble SDK]: https://developer.getpebble.com/sdk/
