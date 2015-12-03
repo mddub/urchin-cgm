@@ -89,19 +89,12 @@ curl -H "Content-type: application/json" -d "@sgv-data.json" http://localhost:55
 
 ### Automated screenshot testing
 
-Start the mock server:
+The best method of automated integration testing for Pebble is to take screenshots under different scenarios. To run tests:
 ```
-source test/env.sh && python test/server.py
-```
-
-With the mock server running, run tests:
-```
-source test/env.sh && py.test
-# or, on OS X:
-source test/env.sh && py.test && open test/output/screenshots.html
+bash test/do_screenshots.sh
 ```
 
-This will build the watchface, run it in the emulator, and generate an HTML file with the results of the tests. Each test case consists of watchface configuration and mock data. To add a new test case, follow the examples in `test/test_screenshots.py`.
+This will build the watchface, run it in the emulator, take a screenshot for each test, and generate an HTML file with the results. Each test consists of watchface configuration and mock data. To add a new test case, follow the examples in `test/test_screenshots.py`.
 
 Automated verification of the screenshots is coming soon. For now, you manually inspect them.
 
