@@ -1,0 +1,16 @@
+{
+  "name": "nightscout-graph-pebble-js-tests",
+  "private": true,
+  "version": "0.0.1",
+  "scripts": {
+    "test": "node_modules/.bin/mocha"
+  },
+  "engines": {
+    "node": "0.10.x"
+  },
+  "dependencies": {
+    "expect.js": "0.3.x",
+    "mocha": "2.3.x",
+    "timekeeper": "0.0.5"
+  }
+}

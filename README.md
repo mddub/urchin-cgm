@@ -107,11 +107,23 @@ pebble install --emulator aplite
 pebble emu-app-config
 ```
 
+### JavaScript unit tests
+
+There are a few [Mocha] unit tests to verify the transformation of Nightscout data in PebbleKit JS. These are run with [Node].
+
+```
+cd test/js
+npm install
+npm test
+```
+
 ## Disclaimer
 
 This project is intended for educational and informational purposes only. It is not FDA approved and should not be used to make medical decisions. It is neither affiliated with nor endorsed by Dexcom.
 
 [emu-app-config-file]: https://github.com/pebble/pebble-tool/blob/0e51fa/pebble_tool/commands/emucontrol.py#L116
 [Flask]: http://flask.pocoo.org/
+[Mocha]: https://mochajs.org/
+[Node]: https://nodejs.org/
 [pbw]: https://raw.githubusercontent.com/mddub/nightscout-graph-pebble/master/release/nightscout-graph-pebble.pbw
 [Pebble SDK]: https://developer.getpebble.com/sdk/

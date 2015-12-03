@@ -1,4 +1,5 @@
 /* jshint browser: true */
+/* global exports */
 /* exported Data */
 
 var Data = function(c) {
@@ -181,3 +182,7 @@ var Data = function(c) {
 
   return d;
 };
+
+if (typeof(exports) !== 'undefined') {
+  exports.Data = Data;
+}
