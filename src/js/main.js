@@ -120,7 +120,7 @@ function main(c) {
   }
 
   function graphArray(sgvs) {
-    var endTime = sgvs[0]['date'];
+    var endTime = sgvs.length > 0 ? sgvs[0]['date'] : new Date();
     var noEntry = {
       'date': Infinity,
       'sgv': 0
@@ -160,7 +160,7 @@ function main(c) {
   }
 
   function lastSgv(sgvs) {
-    return parseInt(sgvs[0]['sgv'], 10);
+    return sgvs.length > 0 ? parseInt(sgvs[0]['sgv'], 10) : 0;
   }
 
   function directionToTrend(direction) {
@@ -179,6 +179,10 @@ function main(c) {
   }
 
   function lastTrendNumber(sgvs) {
+    if (sgvs.length === 0) {
+      return 0;
+    }
+
     var trend = sgvs[0]['trend'];
     if (trend !== undefined && trend >= 0 && trend <= 9) {
       return trend;
@@ -198,8 +202,13 @@ function main(c) {
   }
 
   function recency(sgvs) {
-    var seconds = Date.now() / 1000 - sgvs[0]['date'];
-    return Math.floor(seconds);
+    if (sgvs.length === 0) {
+      // TODO
+      return 99 * 60 * 60;
+    } else {
+      var seconds = Date.now() / 1000 - sgvs[0]['date'];
+      return Math.floor(seconds);
+    }
   }
 
   function sendMessage(data) {

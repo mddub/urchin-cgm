@@ -136,12 +136,14 @@ class SummaryFile(object):
             ))
 
     def printed_sgvs(self, sgvs):
-        return [sgvs[0]] + [
-            {
+        return [
+            s
+            if i == 0
+            else {
                 'sgv': s.get('sgv'),
                 'ago': self.format_ago(s['date'])
             }
-            for s in sgvs[1:]
+            for i, s in enumerate(sgvs)
         ]
 
     @staticmethod

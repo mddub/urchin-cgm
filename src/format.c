@@ -1,8 +1,8 @@
 #include "format.h"
 
-static char* dexcom_error_string(int mgdl) {
-  // From https://github.com/nightscout/cgm-remote-monitor/blob/master/lib/plugins/errorcodes.js
+static char* get_error_string(int mgdl) {
   switch(mgdl) {
+    // From https://github.com/nightscout/cgm-remote-monitor/blob/master/lib/plugins/errorcodes.js
     case 12: return "?RF"; // BAD_RF
     case 10: return "???"; // POWER_DEVIATION
     case 9:  return "?AD"; // ABSOLUTE_DEVIATION
@@ -11,12 +11,16 @@ static char* dexcom_error_string(int mgdl) {
     case 3:  return "?NA"; // NO_ANTENNA
     case 2:  return "?MD"; // MINIMAL_DEVIATION
     case 1:  return "?SN"; // SENSOR_NOT_ACTIVE
+
+    // JS indicates that there is no recent SGV on the server
+    case 0:  return "-";
+
     default: return NULL;
   }
 }
 
 void format_bg(char* buffer, char buf_size, int mgdl, bool is_delta, bool use_mmol) {
-  char* error_string = dexcom_error_string(mgdl);
+  char* error_string = get_error_string(mgdl);
   if (!is_delta && error_string != NULL) {
     strcpy(buffer, error_string);
     return;

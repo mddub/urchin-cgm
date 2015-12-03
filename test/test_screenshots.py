@@ -141,3 +141,8 @@ class TestDegenerateEntries(ScreenshotTest):
         # Some uploaders sometimes give trend and direction as null
         s[0]['trend'] = s[0]['direction'] = None
         return s
+
+
+class TestNoSGVs(ScreenshotTest):
+    """Test that the watchface indicates when there are no recent SGV entries."""
+    sgvs = []
