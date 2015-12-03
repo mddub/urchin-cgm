@@ -128,7 +128,7 @@ function main(c) {
       if (err) {
         return callback(err);
       }
-      if (treatments.length && treatments[0]['duration'] && Date.now() < treatments[0]['created_at'] + treatments[0]['duration'] * 1000) {
+      if (treatments.length && treatments[0]['duration'] && Date.now() < new Date(treatments[0]['created_at']).getTime() + parseFloat(treatments[0]['duration']) * 60 * 1000) {
         if (treatments[0]['percent'] && parseFloat(treatments[0]['percent']) === 0) {
           callback(null, 0);
         } else {
