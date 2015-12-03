@@ -95,10 +95,88 @@ function main(c) {
     getURL(config.statusUrl, callback);
   }
 
+  function _getCurrentProfileBasal(config, callback) {
+    getJSON(config.nightscout_url + '/api/v1/profile.json', function(err, profile) {
+      if (err) {
+        return callback(err);
+      }
+
+      // Handle different treatment API formats
+      var basals;
+      if (profile.length && profile[0]['basal']) {
+        basals = profile[0]['basal'];
+      } else if (profile.length && profile[0]['defaultProfile']) {
+        basals = profile[0]['store'][profile[0]['defaultProfile']]['basal'];
+      }
+
+      if (basals && basals.length) {
+        // Lexicographically compare current time with HH:MM basal start times
+        // TODO: don't assume phone timezone and profile timezone are the same
+        var now = new Date().toTimeString().substr(0, 5);
+        var currentBasal = basals.filter(function(basal, i) {
+          return (basal['time'] <= now && (i === basals.length - 1 || now < basals[i + 1]['time']));
+        })[0];
+        callback(null, parseFloat(currentBasal['value']));
+      } else {
+        callback(null, null);
+      }
+    });
+  }
+
+  function _getActiveTempBasal(config, callback) {
+    getJSON(config.nightscout_url + '/api/v1/treatments?find[eventType]=Temp+Basal&count=1', function(err, treatments) {
+      if (err) {
+        return callback(err);
+      }
+      if (treatments.length && treatments[0]['duration'] && Date.now() < treatments[0]['created_at'] + treatments[0]['duration'] * 1000) {
+        if (treatments[0]['percent'] && parseFloat(treatments[0]['percent']) === 0) {
+          callback(null, 0);
+        } else {
+          callback(null, parseFloat(treatments[0]['absolute']));
+        }
+      } else {
+        callback(null, null);
+      }
+    });
+  }
+
+  function _roundBasal(n) {
+    if (n === 0) {
+      return '0';
+    } else if (parseFloat(n.toFixed(1)) === parseFloat(n.toFixed(2))) {
+      return n.toFixed(1);
+    } else {
+      return n.toFixed(2);
+    }
+  }
+
+  function getCurrentBasal(config, callback) {
+    // adapted from @audiefile: https://github.com/mddub/nightscout-graph-pebble/pull/1
+    _getCurrentProfileBasal(config, function(err, profileBasal) {
+      if (err) {
+        callback(err);
+      }
+      _getActiveTempBasal(config, function(err, tempBasal) {
+        if (err) {
+          callback(err);
+        }
+        if (profileBasal === null && tempBasal === null) {
+          callback(null, '-');
+        } else if (tempBasal !== null) {
+          var diff = tempBasal - profileBasal;
+          callback(null, _roundBasal(tempBasal) + 'u/h (' + (diff >= 0 ? '+' : '') + _roundBasal(diff) + ')');
+        } else {
+          callback(null, _roundBasal(profileBasal) + 'u/h');
+        }
+      });
+    });
+  }
+
   function getStatusText(config, callback) {
     var defaultFn = getIOB;
     var fn = {
       'pumpiob': getIOB,
+      'basal': getCurrentBasal,
       'customurl': getCustomUrl,
     }[config.statusContent];
     (fn || defaultFn)(config, callback);
