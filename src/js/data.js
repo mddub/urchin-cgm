@@ -112,11 +112,14 @@ var Data = function(c) {
         return callback(err);
       }
       if (treatments.length && treatments[0]['duration'] && Date.now() < new Date(treatments[0]['created_at']).getTime() + parseFloat(treatments[0]['duration']) * 60 * 1000) {
+        var start = new Date(treatments[0]['created_at']);
+        var rate;
         if (treatments[0]['percent'] && parseFloat(treatments[0]['percent']) === 0) {
-          callback(null, 0);
+          rate = 0;
         } else {
-          callback(null, parseFloat(treatments[0]['absolute']));
+          rate = parseFloat(treatments[0]['absolute']);
         }
+        callback(null, {start: start, rate: rate});
       } else {
         callback(null, null);
       }
@@ -146,8 +149,9 @@ var Data = function(c) {
         if (profileBasal === null && tempBasal === null) {
           callback(null, '-');
         } else if (tempBasal !== null) {
-          var diff = tempBasal - profileBasal;
-          callback(null, _roundBasal(tempBasal) + 'u/h (' + (diff >= 0 ? '+' : '') + _roundBasal(diff) + ')');
+          var diff = tempBasal.rate - profileBasal;
+          var minutesAgo = Math.round((new Date() - tempBasal.start) / (60 * 1000));
+          callback(null, _roundBasal(tempBasal.rate) + 'u/h ' + (diff >= 0 ? '+' : '') + _roundBasal(diff) + ' (' + minutesAgo + ')');
         } else {
           callback(null, _roundBasal(profileBasal) + 'u/h');
         }

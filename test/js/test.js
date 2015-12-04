@@ -74,13 +74,24 @@ describe('getCurrentBasal', function() {
     };
   }
 
-  it('should report a temp basal and the difference from current basal', function(done) {
+  it('should report a temp basal with the difference from current basal and recency', function(done) {
     var d = Data(constants);
     mockBasals(d, "2015-12-03T14:12:25-08:00");
     timekeeper.freeze(new Date("2015-12-03T14:20:25-08:00"));
 
     d.getCurrentBasal(config, function(err, basal) {
-      expect(basal).to.be('0u/h (-0.65)');
+      expect(basal).to.be('0u/h -0.65 (8)');
+      done();
+    });
+  });
+
+  it('should compute recency correctly', function(done) {
+    var d = Data(constants);
+    mockBasals(d, "2015-12-03T14:12:25-08:00");
+    timekeeper.freeze(new Date("2015-12-03T14:28:25-08:00"));
+
+    d.getCurrentBasal(config, function(err, basal) {
+      expect(basal).to.be('0u/h -0.65 (16)');
       done();
     });
   });
