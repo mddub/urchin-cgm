@@ -45,6 +45,7 @@
     document.getElementById('hGridlines').value = current['hGridlines'];
 
     document.getElementById('statusContent').value = current['statusContent'];
+    document.getElementById('statusText').value = current['statusText'] || '';
     document.getElementById('statusUrl').value = current['statusUrl'] || '';
 
     document.getElementById('batteryLoc').value = current['batteryLoc'];
@@ -58,6 +59,7 @@
       nightscout_url: document.getElementById('ns-url').value.replace(/\/$/, ''),
       hGridlines: tryParseInt(document.getElementById('hGridlines').value),
       statusContent: document.getElementById('statusContent').value,
+      statusText: document.getElementById('statusText').value,
       statusUrl: document.getElementById('statusUrl').value,
       timeAlign: document.getElementById('timeAlign').value,
       batteryLoc: document.getElementById('batteryLoc').value,
@@ -76,6 +78,7 @@
   document.getElementById('config-form').addEventListener('submit', onSubmit);
 
   $('#statusContent').on('change', function(evt) {
+    $('#status-text-container').toggle(evt.currentTarget.value === 'customtext');
     $('#status-url-container').toggle(evt.currentTarget.value === 'customurl');
   });
   $('#statusContent').trigger('change');

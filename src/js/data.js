@@ -74,6 +74,10 @@ var Data = function(c) {
     });
   };
 
+  d.getCustomText = function(config, callback) {
+    callback(null, config.statusText);
+  };
+
   d.getCustomUrl = function(config, callback) {
     d.getURL(config.statusUrl, callback);
   };
@@ -164,6 +168,7 @@ var Data = function(c) {
     var fn = {
       'pumpiob': d.getIOB,
       'basal': d.getCurrentBasal,
+      'customtext': d.getCustomText,
       'customurl': d.getCustomUrl,
     }[config.statusContent];
     (fn || defaultFn)(config, callback);
