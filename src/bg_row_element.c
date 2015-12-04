@@ -16,18 +16,33 @@
 #define TREND_DELTA_PADDING 3
 
 static void bg_row_element_rearrange(BGRowElement *el) {
-  GRect bg_frame = layer_get_frame(text_layer_get_layer(el->bg_text));
   GSize bg_size = text_layer_get_content_size(el->bg_text);
+  GSize delta_size = text_layer_get_content_size(el->delta_text);
+  int total_width = bg_size.w \
+    + (trend_arrow_component_hidden(el->trend) ? 0 : BG_TREND_PADDING + trend_arrow_component_width()) \
+    + (layer_get_hidden(text_layer_get_layer(el->delta_text)) ? 0 : TREND_DELTA_PADDING + delta_size.w);
+  int bg_x = (el->parent_size.w - total_width) / 2;
+
+  GRect bg_frame = layer_get_frame(text_layer_get_layer(el->bg_text));
+  layer_set_frame(text_layer_get_layer(el->bg_text), GRect(
+    bg_x,
+    bg_frame.origin.y,
+    bg_frame.size.w,
+    bg_frame.size.h
+  ));
 
   trend_arrow_component_reposition(
     el->trend,
-    bg_frame.origin.x + bg_size.w + BG_TREND_PADDING,
+    bg_x + bg_size.w + BG_TREND_PADDING,
     (el->parent_size.h - trend_arrow_component_height()) / 2
   );
 
   GRect delta_frame = layer_get_frame(text_layer_get_layer(el->delta_text));
+  int delta_x = bg_x + bg_size.w \
+    + (trend_arrow_component_hidden(el->trend) ? 0 : BG_TREND_PADDING + trend_arrow_component_width())
+    + TREND_DELTA_PADDING;
   layer_set_frame(text_layer_get_layer(el->delta_text), GRect(
-    bg_frame.origin.x + bg_size.w + BG_TREND_PADDING + trend_arrow_component_width() + TREND_DELTA_PADDING,
+    delta_x,
     delta_frame.origin.y,
     delta_frame.size.w,
     delta_frame.size.h
@@ -38,9 +53,9 @@ BGRowElement* bg_row_element_create(Layer *parent) {
   GRect bounds = element_get_bounds(parent);
 
   TextLayer *bg_text = text_layer_create(GRect(
-    BG_EDGE_PADDING,
+    0,
     (bounds.size.h - ACTUAL_TEXT_HEIGHT_34) / 2 - PADDING_TOP_34,
-    bounds.size.w - BG_EDGE_PADDING,
+    bounds.size.w,
     ACTUAL_TEXT_HEIGHT_34 + PADDING_TOP_34 + PADDING_BOTTOM_34
   ));
   text_layer_set_font(bg_text, fonts_get_system_font(FONT_KEY_BITHAM_34_MEDIUM_NUMBERS));
@@ -86,6 +101,10 @@ void bg_row_element_update(BGRowElement *el, DictionaryIterator *data) {
   last_bg_text_layer_update(el->bg_text, data);
   trend_arrow_component_update(el->trend, data);
   delta_text_layer_update(el->delta_text, data);
+  layer_set_hidden(
+    text_layer_get_layer(el->delta_text),
+    strcmp("-", text_layer_get_text(el->delta_text)) == 0
+  );
   bg_row_element_rearrange(el);
 }
 

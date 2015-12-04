@@ -31,6 +31,7 @@ int trend_arrow_component_height() {
 TrendArrowComponent* trend_arrow_component_create(Layer *parent, int x, int y) {
   BitmapLayer *icon_layer = bitmap_layer_create(GRect(x, y, TREND_ARROW_WIDTH, TREND_ARROW_WIDTH));
   bitmap_layer_set_compositing_mode(icon_layer, element_comp_op(parent));
+  layer_set_hidden(bitmap_layer_get_layer(icon_layer), true);
   layer_add_child(parent, bitmap_layer_get_layer(icon_layer));
 
   TrendArrowComponent *c = malloc(sizeof(TrendArrowComponent));
@@ -79,4 +80,8 @@ void trend_arrow_component_reposition(TrendArrowComponent *c, int x, int y) {
     bitmap_layer_get_layer(c->icon_layer),
     GRect(x, y, frame.size.w, frame.size.h)
   );
+}
+
+bool trend_arrow_component_hidden(TrendArrowComponent *c) {
+  return layer_get_hidden(bitmap_layer_get_layer(c->icon_layer));
 }
