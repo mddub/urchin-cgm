@@ -10,6 +10,16 @@ var Data = require('../../src/js/data.js').Data;
 var constants = {};
 var config = {};
 
+function mockAPI(data, urlToData) {
+  data.getJSON = function(url, callback) {
+    Object.keys(urlToData).forEach(function(key) {
+      if (url.indexOf(key) !== -1) {
+        callback(null, urlToData[key]);
+      }
+    });
+  };
+}
+
 describe('getCurrentBasal', function() {
 
   var PROFILE = [{
@@ -65,13 +75,10 @@ describe('getCurrentBasal', function() {
   }
 
   function mockBasals(data, tempBasalTimestamp) {
-    data.getJSON = function(url, callback) {
-      if (url.indexOf('profile.json') !== -1) {
-        callback(null, PROFILE);
-      } else if (url.indexOf('treatments.json') !== -1) {
-        callback(null, TREATMENTS(tempBasalTimestamp));
-      }
-    };
+    mockAPI(data, {
+      'profile.json': PROFILE,
+      'treatments.json': TREATMENTS(tempBasalTimestamp),
+    });
   }
 
   it('should report a temp basal with the difference from current basal and recency', function(done) {
@@ -114,6 +121,37 @@ describe('getCurrentBasal', function() {
 
     d.getCurrentBasal(config, function(err, basal) {
       expect(basal).to.be('0.55u/h');
+      done();
+    });
+  });
+});
+
+describe('getRigBatteryLevel', function() {
+  var DEVICE_STATUS = [{
+    "uploaderBattery": 37,
+    "created_at": "2015-12-04T01:05:18.994Z"
+  }];
+
+  it('should report the rig battery level if it is recent enough', function(done) {
+    var constants = {DEVICE_STATUS_RECENCY_THRESHOLD_SECONDS: 1800};
+    var d = Data(constants);
+    mockAPI(d, {'devicestatus.json': DEVICE_STATUS});
+    timekeeper.freeze(new Date("2015-12-04T01:25:18.994Z"));
+
+    d.getRigBatteryLevel(config, function(err, battery) {
+      expect(battery).to.be('Rig 37%');
+      done();
+    });
+  });
+
+  it('should not report the rig battery level if it is stale', function(done) {
+    var constants = {DEVICE_STATUS_RECENCY_THRESHOLD_SECONDS: 60};
+    var d = Data(constants);
+    mockAPI(d, {'devicestatus.json': DEVICE_STATUS});
+    timekeeper.freeze(new Date("2015-12-04T01:25:18.994Z"));
+
+    d.getRigBatteryLevel(config, function(err, battery) {
+      expect(battery).to.be('-');
       done();
     });
   });

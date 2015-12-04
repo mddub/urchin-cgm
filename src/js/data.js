@@ -82,6 +82,19 @@ var Data = function(c) {
     d.getURL(config.statusUrl, callback);
   };
 
+  d.getRigBatteryLevel = function(config, callback) {
+    d.getJSON(config.nightscout_url + '/api/v1/devicestatus.json?find[uploaderBattery][$exists]=true&count=1', function(err, deviceStatus) {
+      if (err) {
+        return callback(err);
+      }
+      if (deviceStatus && deviceStatus.length && new Date(deviceStatus[0]['created_at']) >= new Date() - c.DEVICE_STATUS_RECENCY_THRESHOLD_SECONDS * 1000) {
+        callback(null, 'Rig ' + deviceStatus[0]['uploaderBattery'] + '%');
+      } else {
+        callback(null, '-');
+      }
+    });
+  };
+
   function _getCurrentProfileBasal(config, callback) {
     d.getJSON(config.nightscout_url + '/api/v1/profile.json', function(err, profile) {
       if (err) {
@@ -168,6 +181,7 @@ var Data = function(c) {
     var fn = {
       'pumpiob': d.getIOB,
       'basal': d.getCurrentBasal,
+      'rigbattery': d.getRigBatteryLevel,
       'customtext': d.getCustomText,
       'customurl': d.getCustomUrl,
     }[config.statusContent];
