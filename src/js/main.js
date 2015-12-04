@@ -88,7 +88,7 @@ function main(c) {
     }
 
     var trend = sgvs[0]['trend'];
-    if (trend !== undefined && trend >= 0 && trend <= 9) {
+    if (!isNaN(parseInt(trend)) && trend >= 0 && trend <= 9) {
       return trend;
     } else if (sgvs[0]['direction'] !== undefined) {
       return directionToTrend(sgvs[0]['direction']);
