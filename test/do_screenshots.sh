@@ -8,6 +8,7 @@ sleep 0.5
 
 # Run tests
 py.test -v
+pebble kill
 
 # Kill Flask server
 pkill -P $PID
