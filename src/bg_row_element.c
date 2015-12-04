@@ -99,6 +99,10 @@ void bg_row_element_destroy(BGRowElement *el) {
 
 void bg_row_element_update(BGRowElement *el, DictionaryIterator *data) {
   last_bg_text_layer_update(el->bg_text, data);
+  text_layer_set_font(
+    el->bg_text,
+    fonts_get_system_font(is_bg_special_value(data) ? FONT_KEY_GOTHIC_28_BOLD : FONT_KEY_BITHAM_34_MEDIUM_NUMBERS)
+  );
   trend_arrow_component_update(el->trend, data);
   delta_text_layer_update(el->delta_text, data);
   layer_set_hidden(

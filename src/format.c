@@ -1,6 +1,6 @@
 #include "format.h"
 
-static char* get_error_string(int mgdl) {
+const char* get_error_string(int mgdl) {
   switch(mgdl) {
     // From https://github.com/nightscout/cgm-remote-monitor/blob/master/lib/plugins/errorcodes.js
     case 12: return "?RF"; // BAD_RF
@@ -20,7 +20,7 @@ static char* get_error_string(int mgdl) {
 }
 
 void format_bg(char* buffer, char buf_size, int mgdl, bool is_delta, bool use_mmol) {
-  char* error_string = get_error_string(mgdl);
+  const char* error_string = get_error_string(mgdl);
   if (!is_delta && error_string != NULL) {
     strcpy(buffer, error_string);
     return;
