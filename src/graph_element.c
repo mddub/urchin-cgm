@@ -6,7 +6,6 @@
 #include "staleness.h"
 
 static void plot_point(int x, int y, GContext *ctx) {
-  graphics_context_set_fill_color(ctx, GColorBlack);
   graphics_fill_rect(ctx, GRect(x, y, GRAPH_POINT_SIZE, GRAPH_POINT_SIZE), 0, GCornerNone);
 }
 
@@ -38,6 +37,8 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
   GSize size = layer_get_bounds(layer).size;
 
   GraphData *data = layer_get_data(layer);
+  graphics_context_set_stroke_color(ctx, data->color);
+  graphics_context_set_fill_color(ctx, data->color);
   int padding = graph_staleness_padding();
   for(i = 0; i < data->count; i++) {
     // XXX: JS divides by 2 to fit into 1 byte
@@ -92,6 +93,7 @@ GraphElement* graph_element_create(Layer *parent) {
     GRect(0, 0, bounds.size.w, bounds.size.h),
     sizeof(GraphData)
   );
+  ((GraphData*)layer_get_data(graph_layer))->color = element_fg(parent);
   ((GraphData*)layer_get_data(graph_layer))->sgvs = malloc(GRAPH_MAX_SGV_COUNT * sizeof(char));
   layer_set_update_proc(graph_layer, graph_update_proc);
   layer_add_child(parent, graph_layer);

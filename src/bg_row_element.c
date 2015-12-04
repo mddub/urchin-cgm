@@ -46,7 +46,7 @@ BGRowElement* bg_row_element_create(Layer *parent) {
   text_layer_set_font(bg_text, fonts_get_system_font(FONT_KEY_BITHAM_34_MEDIUM_NUMBERS));
   text_layer_set_text_alignment(bg_text, GTextAlignmentLeft);
   text_layer_set_background_color(bg_text, GColorClear);
-  text_layer_set_text_color(bg_text, GColorBlack);
+  text_layer_set_text_color(bg_text, element_fg(parent));
   layer_add_child(parent, text_layer_get_layer(bg_text));
 
   TrendArrowComponent *trend = trend_arrow_component_create(
@@ -64,7 +64,7 @@ BGRowElement* bg_row_element_create(Layer *parent) {
   text_layer_set_font(delta_text, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
   text_layer_set_text_alignment(delta_text, GTextAlignmentLeft);
   text_layer_set_background_color(delta_text, GColorClear);
-  text_layer_set_text_color(delta_text, GColorBlack);
+  text_layer_set_text_color(delta_text, element_fg(parent));
   layer_add_child(parent, text_layer_get_layer(delta_text));
 
   BGRowElement *el = malloc(sizeof(BGRowElement));

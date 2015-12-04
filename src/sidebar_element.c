@@ -17,6 +17,7 @@ SidebarElement* sidebar_element_create(Layer *parent) {
   TextLayer *last_bg_text = text_layer_create(GRect(0, last_bg_y, bounds.size.w, ACTUAL_TEXT_HEIGHT_24 + PADDING_TOP_24 + PADDING_BOTTOM_24));
   text_layer_set_font(last_bg_text, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
   text_layer_set_background_color(last_bg_text, GColorClear);
+  text_layer_set_text_color(last_bg_text, element_fg(parent));
   text_layer_set_text_alignment(last_bg_text, GTextAlignmentCenter);
   layer_add_child(parent, text_layer_get_layer(last_bg_text));
 
@@ -25,6 +26,7 @@ SidebarElement* sidebar_element_create(Layer *parent) {
   TextLayer *delta_text = text_layer_create(GRect(0, delta_y, bounds.size.w, ACTUAL_TEXT_HEIGHT_24 + PADDING_TOP_24 + PADDING_BOTTOM_24));
   text_layer_set_font(delta_text, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
   text_layer_set_background_color(delta_text, GColorClear);
+  text_layer_set_text_color(delta_text, element_fg(parent));
   text_layer_set_text_alignment(delta_text, GTextAlignmentCenter);
   layer_add_child(parent, text_layer_get_layer(delta_text));
 

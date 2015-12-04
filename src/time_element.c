@@ -38,7 +38,7 @@ TimeElement* time_element_create(Layer* parent) {
   TextLayer* time_text = text_layer_create(GRect(time_margin, (bounds.size.h - ACTUAL_TEXT_HEIGHT_42) / 2 - PADDING_TOP_42, bounds.size.w - 2 * time_margin, ACTUAL_TEXT_HEIGHT_42 + PADDING_TOP_42 + PADDING_BOTTOM_42));
   text_layer_set_font(time_text, fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD));
   text_layer_set_background_color(time_text, GColorClear);
-  text_layer_set_text_color(time_text, GColorBlack);
+  text_layer_set_text_color(time_text, element_fg(parent));
 
   if (get_prefs()->time_align == ALIGN_LEFT) {
     text_layer_set_text_alignment(time_text, GTextAlignmentLeft);

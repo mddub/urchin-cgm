@@ -3,6 +3,18 @@
 static LayoutConfig *s_config;
 static Layer** s_layers;
 
+GColor element_bg(Layer* layer) {
+  return get_element_data(layer)->black ? GColorBlack : GColorWhite;
+}
+
+GColor element_fg(Layer* layer) {
+  return get_element_data(layer)->black ? GColorWhite : GColorBlack;
+}
+
+GCompOp element_comp_op(Layer* layer) {
+  return get_element_data(layer)->black ? GCompOpSet : GCompOpAnd;
+}
+
 static Layer* get_layer_for_element(int element) {
   for(int i = 0; i < s_config->num_elements; i++) {
     if(get_element_data(s_layers[i])->el == element) {
@@ -12,9 +24,13 @@ static Layer* get_layer_for_element(int element) {
   return NULL;
 }
 
-static void draw_borders(Layer *layer, GContext *ctx) {
+static void draw_background_and_borders(Layer *layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(layer);
-  graphics_context_set_stroke_color(ctx, GColorBlack);
+  if (get_element_data(layer)->black) {
+    graphics_context_set_fill_color(ctx, element_bg(layer));
+    graphics_fill_rect(ctx, GRect(0, 0, bounds.size.w, bounds.size.h), 0, GCornerNone);
+  }
+  graphics_context_set_stroke_color(ctx, element_fg(layer));
   if (get_element_data(layer)->bottom) {
     graphics_draw_line(ctx, GPoint(0, bounds.size.h - 1), GPoint(bounds.size.w - 1, bounds.size.h - 1));
   }
@@ -42,7 +58,7 @@ static Layer* position_layer(Layer *parent, GPoint *pos, ElementConfig *config, 
     );
     memcpy(get_element_data(layer), config, sizeof(ElementConfig));
     layer_add_child(parent, layer);
-    layer_set_update_proc(layer, draw_borders);
+    layer_set_update_proc(layer, draw_background_and_borders);
   }
 
   pos->x += width;
