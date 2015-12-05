@@ -47,6 +47,7 @@ static void schedule_update(uint32_t delay) {
   clear_timer(&request_timer);
   clear_timer(&timeout_timer);
   request_timer = app_timer_register(delay, request_update, NULL);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Scheduling update for delay %d", (int) delay);
 }
 
 static void request_update() {
@@ -62,8 +63,13 @@ static void request_update() {
 static void in_received_handler(DictionaryIterator *received, void *context) {
   phone_contact = true;
   update_in_progress = false;
-  schedule_update(UPDATE_FREQUENCY);
-
+  Tuple* recency = dict_find(received, APP_KEY_RECENCY);
+  if (recency) {
+    int32_t next_update = UPDATE_FREQUENCY - recency->value->uint32 * 1000;
+    int32_t delay = next_update < 60000 ? 60000 : next_update;
+    schedule_update((uint32_t) delay);
+  } else
+    schedule_update(UPDATE_FREQUENCY);
   staleness_update(received);
   if (dict_find(received, APP_KEY_MSG_TYPE)->value->uint8 != MSG_TYPE_ERROR) {
     data_callback(received);
