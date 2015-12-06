@@ -11,7 +11,7 @@
 // The details of the layout can be set in config.c
 #define LAYOUT LAYOUT_OPTION_A
 
-#define UPDATE_FREQUENCY ((60*1000) * 5 + 30000)
+#define SGV_UPDATE_FREQUENCY (60*1000*5 + 30*1000)
 
 // STALENESS ALERTS:
 // Show an icon if there is unacceptable lag between any component of:
