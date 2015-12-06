@@ -9,6 +9,7 @@ typedef struct GraphElement {
 } GraphElement;
 
 typedef struct GraphData {
+  GColor color;
   int count;
   char* sgvs;
 } GraphData;

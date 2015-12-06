@@ -1,9 +1,11 @@
 #include "config.h"
 #include "connection_status_component.h"
+#include "layout.h"
 #include "staleness.h"
 
 #define REASON_ICON_WIDTH 25
-#define TEXT_WIDTH 40
+#define INITIAL_TEXT_SIZE 40
+#define TEXT_PADDING_R 2
 
 // https://forums.getpebble.com/discussion/7147/text-layer-padding
 #define ACTUAL_TEXT_HEIGHT_18 11
@@ -20,18 +22,22 @@ const int CONN_ISSUE_ICONS[] = {
 
 ConnectionStatusComponent* connection_status_component_create(Layer *parent, int x, int y) {
   BitmapLayer *icon_layer = bitmap_layer_create(GRect(x, y, REASON_ICON_WIDTH, REASON_ICON_WIDTH));
-  bitmap_layer_set_compositing_mode(icon_layer, GCompOpAssign);
+  // draw the icon background over the graph
+  bitmap_layer_set_compositing_mode(icon_layer, get_element_data(parent)->black ? GCompOpAssignInverted : GCompOpAssign);
+  layer_set_hidden(bitmap_layer_get_layer(icon_layer), true);
   layer_add_child(parent, bitmap_layer_get_layer(icon_layer));
 
   TextLayer *staleness_text = text_layer_create(GRect(
     x + REASON_ICON_WIDTH + 1,
     y + (REASON_ICON_WIDTH - ACTUAL_TEXT_HEIGHT_18) / 2 - PADDING_TOP_18,
-    TEXT_WIDTH,
+    INITIAL_TEXT_SIZE,
     ACTUAL_TEXT_HEIGHT_18 + PADDING_TOP_18 + PADDING_BOTTOM_18
   ));
   text_layer_set_font(staleness_text, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
-  text_layer_set_background_color(staleness_text, GColorClear);
+  text_layer_set_background_color(staleness_text, element_bg(parent));
+  text_layer_set_text_color(staleness_text, element_fg(parent));
   text_layer_set_text_alignment(staleness_text, GTextAlignmentLeft);
+  layer_set_hidden(text_layer_get_layer(staleness_text), true);
   layer_add_child(parent, text_layer_get_layer(staleness_text));
 
   ConnectionStatusComponent *c = malloc(sizeof(ConnectionStatusComponent));
@@ -80,5 +86,13 @@ void connection_status_component_refresh(ConnectionStatusComponent *c) {
 
     layer_set_hidden(text_layer_get_layer(c->staleness_text), false);
     text_layer_set_text(c->staleness_text, staleness_text(issue.staleness));
+
+    GRect frame = layer_get_frame(text_layer_get_layer(c->staleness_text));
+    layer_set_frame(text_layer_get_layer(c->staleness_text), GRect(
+      frame.origin.x,
+      frame.origin.y,
+      text_layer_get_content_size(c->staleness_text).w + TEXT_PADDING_R,
+      frame.size.h
+    ));
   }
 }

@@ -84,7 +84,7 @@ To set the data that will be returned by the `sgv.json` endpoint:
 ```
 vi sgv-data.json
 # ...edit mock data...
-curl -H "Content-type: application/json" -d "@sgv-data.json" http://localhost:5555/set-sgv
+curl -d @sgv-data.json http://localhost:5555/set-sgv
 ```
 
 ### Automated screenshot testing

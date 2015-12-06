@@ -58,6 +58,7 @@ typedef struct ElementConfig {
   int h;
   bool bottom;
   bool right;
+  bool black;
 } ElementConfig;
 
 typedef struct LayoutConfig {

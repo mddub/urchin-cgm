@@ -11,6 +11,11 @@ void last_bg_text_layer_update(TextLayer *text_layer, DictionaryIterator *data) 
   text_layer_set_text(text_layer, last_bg_buffer);
 }
 
+bool is_bg_special_value(DictionaryIterator *data) {
+  int mgdl = dict_find(data, APP_KEY_LAST_SGV)->value->int32;
+  return get_error_string(mgdl) != NULL;
+}
+
 void delta_text_layer_update(TextLayer *text_layer, DictionaryIterator *data) {
   static char delta_buffer[8];
   int delta;

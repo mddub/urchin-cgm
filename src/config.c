@@ -29,6 +29,7 @@ static void layout_option_a(LayoutConfig* dest) {
     .h = 0,
     .bottom = true,
     .right = false,
+    .black = false,
   };
   dest->elements[i++] = (ElementConfig) {
     .el = GRAPH_ELEMENT,
@@ -36,6 +37,7 @@ static void layout_option_a(LayoutConfig* dest) {
     .h = 87,
     .bottom = true,
     .right = true,
+    .black = false,
   };
   dest->elements[i++] = (ElementConfig) {
     .el = SIDEBAR_ELEMENT,
@@ -43,6 +45,7 @@ static void layout_option_a(LayoutConfig* dest) {
     .h = 87,
     .bottom = true,
     .right = false,
+    .black = false,
   };
   dest->elements[i++] = (ElementConfig) {
     .el = STATUS_BAR_ELEMENT,
@@ -50,6 +53,7 @@ static void layout_option_a(LayoutConfig* dest) {
     .h = 22,
     .bottom = false,
     .right = false,
+    .black = false,
   };
   dest->num_elements = i;
 }
@@ -60,15 +64,17 @@ static void layout_option_b(LayoutConfig* dest) {
     .el = GRAPH_ELEMENT,
     .w = 0,
     .h = 75,
-    .bottom = true,
+    .bottom = false,
     .right = false,
+    .black = false,
   };
   dest->elements[i++] = (ElementConfig) {
     .el = BG_ROW_ELEMENT,
     .w = 0,
     .h = 32,
-    .bottom = true,
+    .bottom = false,
     .right = false,
+    .black = true,
   };
   dest->elements[i++] = (ElementConfig) {
     .el = STATUS_BAR_ELEMENT,
@@ -76,6 +82,7 @@ static void layout_option_b(LayoutConfig* dest) {
     .h = 17,
     .bottom = false,
     .right = false,
+    .black = false,
   };
   dest->elements[i++] = (ElementConfig) {
     .el = TIME_AREA_ELEMENT,
@@ -83,6 +90,7 @@ static void layout_option_b(LayoutConfig* dest) {
     .h = 0,
     .bottom = false,
     .right = false,
+    .black = false,
   };
   dest->num_elements = i;
 }

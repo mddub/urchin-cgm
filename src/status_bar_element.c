@@ -32,7 +32,7 @@ StatusBarElement* status_bar_element_create(Layer *parent) {
   ));
   text_layer_set_text_alignment(text, GTextAlignmentLeft);
   text_layer_set_background_color(text, GColorClear);
-  text_layer_set_text_color(text, GColorBlack);
+  text_layer_set_text_color(text, element_fg(parent));
 
   text_layer_set_font(text, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
   text_layer_set_overflow_mode(text, GTextOverflowModeWordWrap);

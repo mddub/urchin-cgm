@@ -1,5 +1,6 @@
-#include "config.h"
 #include "battery_component.h"
+#include "config.h"
+#include "layout.h"
 
 #define BATTERY_ICON_WIDTH 24
 #define BATTERY_ICON_HEIGHT 22
@@ -46,7 +47,7 @@ BatteryComponent* battery_component_create(Layer *parent, int x, int y) {
   battery_state_service_subscribe(battery_handler);
 
   BitmapLayer *icon_layer = bitmap_layer_create(GRect(x, y, BATTERY_ICON_WIDTH, BATTERY_ICON_HEIGHT));
-  bitmap_layer_set_compositing_mode(icon_layer, GCompOpAnd);
+  bitmap_layer_set_compositing_mode(icon_layer, element_comp_op(parent));
   layer_add_child(parent, bitmap_layer_get_layer(icon_layer));
 
   BatteryComponent *c = malloc(sizeof(BatteryComponent));

@@ -49,12 +49,13 @@ void draw_graph_sdk2(GContext *ctx, GSize *size, GraphData *data, int padding) {
     if(bg == 0) {
       continue;
     }
-    x = (*size).w - GRAPH_POINT_SIZE * (1 + i + padding);
-    y = bg_to_y_for_point((*size).h, bg);
+    x = size->w - GRAPH_POINT_SIZE * (1 + i + padding);
+    y = bg_to_y_for_point(size->h, bg);
     plot_point(x, y, ctx);
   }
 }
 #endif
+
 #ifdef PBL_SDK_3
 void draw_graph_sdk3(GContext *ctx, GSize *size, GraphData *data,
                   int padding) {
@@ -92,6 +93,9 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
   GSize size = layer_get_bounds(layer).size;
 
   GraphData *data = layer_get_data(layer);
+  graphics_context_set_stroke_color(ctx, data->color);
+  graphics_context_set_fill_color(ctx, data->color);
+
   int padding = graph_staleness_padding();
   graphics_context_set_fill_color(ctx, GColorBlack);
 
@@ -143,6 +147,7 @@ GraphElement* graph_element_create(Layer *parent) {
     GRect(0, 0, bounds.size.w, bounds.size.h),
     sizeof(GraphData)
   );
+  ((GraphData*)layer_get_data(graph_layer))->color = element_fg(parent);
   ((GraphData*)layer_get_data(graph_layer))->sgvs = malloc(GRAPH_MAX_SGV_COUNT * sizeof(char));
   layer_set_update_proc(graph_layer, graph_update_proc);
   layer_add_child(parent, graph_layer);

@@ -12,6 +12,9 @@ cache.set('sgv', '[]')
 
 app = Flask(__name__)
 
+def _get_post_data(request):
+    return request.data or request.form.keys()[0]
+
 @app.route('/auto-config', methods=['get'])
 def auto_config():
     """Pebble config page which immediately returns config values.
@@ -28,7 +31,7 @@ def auto_config():
 
 @app.route('/set-config', methods=['post'])
 def set_config():
-    cache.set('config', request.data)
+    cache.set('config', _get_post_data(request))
     return ''
 
 @app.route('/api/v1/entries/sgv.json')
@@ -37,7 +40,7 @@ def sgv():
 
 @app.route('/set-sgv', methods=['post'])
 def set_sgv():
-    cache.set('sgv', request.data)
+    cache.set('sgv', _get_post_data(request))
     return ''
 
 if __name__ == "__main__":

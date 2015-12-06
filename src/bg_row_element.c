@@ -14,20 +14,37 @@
 #define BG_EDGE_PADDING 2
 #define BG_TREND_PADDING 4
 #define TREND_DELTA_PADDING 3
+#define MISSING_TREND_BG_DELTA_PADDING 10
 
 static void bg_row_element_rearrange(BGRowElement *el) {
-  GRect bg_frame = layer_get_frame(text_layer_get_layer(el->bg_text));
   GSize bg_size = text_layer_get_content_size(el->bg_text);
+  GSize delta_size = text_layer_get_content_size(el->delta_text);
+  int total_width = bg_size.w \
+    + (trend_arrow_component_hidden(el->trend) ? 0 : BG_TREND_PADDING + trend_arrow_component_width()) \
+    + (layer_get_hidden(text_layer_get_layer(el->delta_text)) ? 0 : TREND_DELTA_PADDING + delta_size.w);
+  int bg_x = (el->parent_size.w - total_width) / 2;
+
+  GRect bg_frame = layer_get_frame(text_layer_get_layer(el->bg_text));
+  layer_set_frame(text_layer_get_layer(el->bg_text), GRect(
+    bg_x,
+    bg_frame.origin.y,
+    bg_frame.size.w,
+    bg_frame.size.h
+  ));
 
   trend_arrow_component_reposition(
     el->trend,
-    bg_frame.origin.x + bg_size.w + BG_TREND_PADDING,
+    bg_x + bg_size.w + BG_TREND_PADDING,
     (el->parent_size.h - trend_arrow_component_height()) / 2
   );
 
   GRect delta_frame = layer_get_frame(text_layer_get_layer(el->delta_text));
+  int delta_x = bg_x + bg_size.w \
+    + (trend_arrow_component_hidden(el->trend) \
+        ? MISSING_TREND_BG_DELTA_PADDING \
+        : BG_TREND_PADDING + trend_arrow_component_width() + TREND_DELTA_PADDING);
   layer_set_frame(text_layer_get_layer(el->delta_text), GRect(
-    bg_frame.origin.x + bg_size.w + BG_TREND_PADDING + trend_arrow_component_width() + TREND_DELTA_PADDING,
+    delta_x,
     delta_frame.origin.y,
     delta_frame.size.w,
     delta_frame.size.h
@@ -38,15 +55,15 @@ BGRowElement* bg_row_element_create(Layer *parent) {
   GRect bounds = element_get_bounds(parent);
 
   TextLayer *bg_text = text_layer_create(GRect(
-    BG_EDGE_PADDING,
+    0,
     (bounds.size.h - ACTUAL_TEXT_HEIGHT_34) / 2 - PADDING_TOP_34,
-    bounds.size.w - BG_EDGE_PADDING,
+    bounds.size.w,
     ACTUAL_TEXT_HEIGHT_34 + PADDING_TOP_34 + PADDING_BOTTOM_34
   ));
   text_layer_set_font(bg_text, fonts_get_system_font(FONT_KEY_BITHAM_34_MEDIUM_NUMBERS));
   text_layer_set_text_alignment(bg_text, GTextAlignmentLeft);
   text_layer_set_background_color(bg_text, GColorClear);
-  text_layer_set_text_color(bg_text, GColorBlack);
+  text_layer_set_text_color(bg_text, element_fg(parent));
   layer_add_child(parent, text_layer_get_layer(bg_text));
 
   TrendArrowComponent *trend = trend_arrow_component_create(
@@ -64,7 +81,7 @@ BGRowElement* bg_row_element_create(Layer *parent) {
   text_layer_set_font(delta_text, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
   text_layer_set_text_alignment(delta_text, GTextAlignmentLeft);
   text_layer_set_background_color(delta_text, GColorClear);
-  text_layer_set_text_color(delta_text, GColorBlack);
+  text_layer_set_text_color(delta_text, element_fg(parent));
   layer_add_child(parent, text_layer_get_layer(delta_text));
 
   BGRowElement *el = malloc(sizeof(BGRowElement));
@@ -84,8 +101,16 @@ void bg_row_element_destroy(BGRowElement *el) {
 
 void bg_row_element_update(BGRowElement *el, DictionaryIterator *data) {
   last_bg_text_layer_update(el->bg_text, data);
+  text_layer_set_font(
+    el->bg_text,
+    fonts_get_system_font(is_bg_special_value(data) ? FONT_KEY_GOTHIC_28_BOLD : FONT_KEY_BITHAM_34_MEDIUM_NUMBERS)
+  );
   trend_arrow_component_update(el->trend, data);
   delta_text_layer_update(el->delta_text, data);
+  layer_set_hidden(
+    text_layer_get_layer(el->delta_text),
+    strcmp("-", text_layer_get_text(el->delta_text)) == 0
+  );
   bg_row_element_rearrange(el);
 }
 
