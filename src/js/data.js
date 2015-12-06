@@ -79,7 +79,13 @@ var Data = function(c) {
   };
 
   d.getCustomUrl = function(config, callback) {
-    d.getURL(config.statusUrl, callback);
+    d.getURL(config.statusUrl, function(err, data) {
+      if (err) {
+        callback(err);
+      } else {
+        callback(null, (data || '-').substr(0, 255));
+      }
+    });
   };
 
   d.getRigBatteryLevel = function(config, callback) {
