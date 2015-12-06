@@ -95,6 +95,43 @@ var Data = function(c) {
     });
   };
 
+  d.getRawData = function(config, callback) {
+    d.getJSON(config.nightscout_url + '/api/v1/entries/cal.json?count=1', function(err, calRecord) {
+      if (err) {
+        return callback(err);
+      }
+      if (calRecord && calRecord.length) {
+        d.getJSON(config.nightscout_url + '/api/v1/entries/sgv.json?count=2', function(err, calRecord) {
+          if (err) {
+            return callback(err);
+          }
+          if (calRecord && calRecord.length) {
+            callback('Raw ' + calRecord.map(function(bg) {
+              return _getRawMgdl(bg, calRecord);
+            }).join(' '))
+          } else {
+            callback(null, '!!');
+          }
+        });
+      } else {
+        callback(null, '!');
+      }
+    });
+  };
+
+  function _getRawMgdl(sgvRecord, calRecord) {
+    if (sgvRecord.unfiltered) {
+      if (sgvRecord.sgv && sgvRecord.sgv >= 40 && sgvRecord.sgv <= 400 && sgvRecord.filtered) {
+        var ratio = calRecord.scale * (sgvRecord.filtered - calRecord.intercept) / calRecord.slope / sgvRecord.sgv;
+        return Math.round(calRecord.scale * (sgvRecord.unfiltered - calRecord.intercept) / calRecord.slope / ratio);
+      } else {
+        return Math.round(calRecord.scale * (sgvRecord.unfiltered - calRecord.intercept) / calRecord.slope);
+      }
+    } else {
+      return undefined;
+    }
+  }
+
   function _getCurrentProfileBasal(config, callback) {
     d.getJSON(config.nightscout_url + '/api/v1/profile.json', function(err, profile) {
       if (err) {
@@ -182,6 +219,7 @@ var Data = function(c) {
       'pumpiob': d.getIOB,
       'basal': d.getCurrentBasal,
       'rigbattery': d.getRigBatteryLevel,
+      'rawdata': d.getRawData,
       'customtext': d.getCustomText,
       'customurl': d.getCustomUrl,
     }[config.statusContent];
