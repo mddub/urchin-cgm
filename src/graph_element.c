@@ -124,6 +124,9 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
   }
 
   // Horizontal gridlines
+#ifdef PBL_SDK_3
+  graphics_context_set_stroke_width(ctx, 1);
+#endif
   int h_gridline_frequency = get_prefs()->h_gridlines;
   if (h_gridline_frequency > 0) {
     int graph_min = get_prefs()->bottom_of_graph;
