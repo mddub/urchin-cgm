@@ -6,7 +6,7 @@
 #include "staleness.h"
 
 #ifdef PBL_SDK_3
-static GPoint point_segments[49];
+static GPoint point_segments[GRAPH_MAX_SGV_COUNT+1];
 static GPathInfo bg_path_info = {
   .num_points = 0,
   .points = point_segments
@@ -62,7 +62,7 @@ void draw_graph_sdk3(GContext *ctx, GSize *size, GraphData *data,
   int segment_start = 0;
   bg_path_info.num_points = 0;
   graphics_context_set_stroke_width(ctx, 3);
-  for(i = 0; i < data->count && (unsigned int) i < 49; i++) {
+  for(i = 0; i < data->count && (unsigned int) i <= GRAPH_MAX_SGV_COUNT; i++) {
     // XXX: JS divides by 2 to fit into 1 byte
     int bg = data->sgvs[i] * 2;
     if(bg == 0) {
