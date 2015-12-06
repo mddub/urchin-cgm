@@ -100,21 +100,21 @@ var Data = function(c) {
       if (err) {
         return callback(err);
       }
-      if (calRecord && calRecord.length) {
-        d.getJSON(config.nightscout_url + '/api/v1/entries/sgv.json?count=2', function(err, calRecord) {
+      if (calRecord && calRecord.length && calRecord.length > 0) {
+        d.getJSON(config.nightscout_url + '/api/v1/entries/sgv.json?count=2', function(err, sgvRecords) {
           if (err) {
             return callback(err);
           }
-          if (calRecord && calRecord.length) {
-            callback('Raw ' + calRecord.map(function(bg) {
-              return _getRawMgdl(bg, calRecord);
+          if (sgvRecords && sgvRecords.length) {
+            callback(null, 'Raw ' + sgvRecords.map(function(bg) {
+              return _getRawMgdl(bg, calRecord[0]);
             }).join(' '))
           } else {
-            callback(null, '!!');
+            callback(null, '-');
           }
         });
       } else {
-        callback(null, '!');
+        callback(null, '-');
       }
     });
   };
