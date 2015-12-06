@@ -1,7 +1,7 @@
 /* global document, Zepto */
 (function($) {
 
-  var VERSION = '0.0.2';
+  var VERSION = '0.0.3';
 
   var SLIDER_KEYS = [
     'topOfGraph',
