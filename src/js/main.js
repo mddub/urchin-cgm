@@ -140,7 +140,7 @@ function main(c) {
       }
     }
 
-/*    data.getSGVsDateDescending(config, function(err, sgvs) {
+    data.setupWebSocket(config, function(err, sgvs) {
       if (err) {
         // error fetching sgvs is unrecoverable
         sgvDataError(err);
@@ -154,9 +154,7 @@ function main(c) {
           onData(sgvs, statusText);
         });
       }
-    });*/
-
-    data.setupSocket(config, onData);
+    });
   }
 
   function sendPreferences() {
@@ -205,6 +203,7 @@ function main(c) {
     });
 
     Pebble.addEventListener('appmessage', function() {
+      console.log('appmessage received');
       requestAndSendBGs();
     });
 

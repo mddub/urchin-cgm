@@ -8,45 +8,53 @@ var Data = function(c) {
   var cal;
   var treatments = [];
   var deviceStatus = [];
+  var profiles = [];
   var socket;
 
-  d.setupSocket = function(config, callback) {
-    socket = io(config.nightscout_url);
-    console.log("initing data "+ config.nightscout_url);
+  d.setupWebSocket = function(config, callback) {
     var sortByMillsDesc = function(rec1, rec2) {
       return rec2["mills"] - rec1["mills"];
     };
-    var mapMillsToDate = function(rec) {
+
+    var millsToSeconds = function(rec) {
       rec["date"] = ~~(rec["mills"] / 1000);
       return rec;
     };
 
-    socket.on('dataUpdate', function(data) {
-      console.log('dataUpdate ' + JSON.stringify(data));
-      var sgvStart = Date.now()/1000 - c.SGV_FETCH_SECONDS;
-      console.log("sgvStart:" + sgvStart);
-      if (data["sgvs"]) {
-        sgvs = sgvs.concat(data["sgvs"]).map(mapMillsToDate).filter(function (sgv) {
-          return sgv["date"] >= sgvStart;
-        }).map(function (sgv) {
-          sgv["sgv"] = sgv["mgdl"];
-          return sgv;
-        }).sort(sortByMillsDesc);
-      }
-      if (data["cals"]) {
-        cal = data["cals"]
-            .map(mapMillsToDate)
-            .concat(cal)
-            .sort(sortByMillsDesc)[0];
-      }
-      if (data["devicestatus"]) {
-        deviceStatus = data["devicestatus"];
-      }
-      console.log('sgvs: '+sgvs);
-      console.log('cal: '+JSON.stringify(cal));
-      console.log('deviceStatus: '+JSON.stringify(deviceStatus));
-      callback(sgvs, "fromWS");
-    });
+    if (!socket) {
+      socket = io(config.nightscout_url);
+      socket.on('dataUpdate', function (data) {
+        console.log('dataUpdate ' + JSON.stringify(data));
+        var sgvStart = Date.now() / 1000 - c.SGV_FETCH_SECONDS;
+        if (data["sgvs"]) {
+          sgvs = sgvs.concat(data["sgvs"]).map(millsToSeconds).filter(function (sgv) {
+            return sgv["date"] >= sgvStart;
+          }).map(function (sgv) {
+            sgv["sgv"] = sgv["mgdl"];
+            return sgv;
+          }).sort(sortByMillsDesc);
+        }
+        if (data["cals"]) {
+          cal = data["cals"]
+              .map(millsToSeconds)
+              .concat(cal)
+              .sort(sortByMillsDesc)[0];
+        }
+        if (data["treatments"]) {
+          // TODO: does this need filtering?
+          treatments = treatments.concat(treatments, data["treatments"]);
+        }
+        if (data["devicestatus"]) {
+          deviceStatus = data["devicestatus"];
+        }
+        if (data["profiles"]) {
+          profiles = data["profiles"];
+        }
+        callback(null, sgvs);
+      });
+    }
+    if (sgvs.length > 0)
+      callback(null, sgvs);
   };
 
   // In PebbleKit JS, specifying a timeout works only for synchronous XHR,
@@ -104,6 +112,7 @@ var Data = function(c) {
   };
 
   d.getIOB = function(config, callback) {
+    // these don't appear to be getting passed via socket.io.
     d.getJSON(config.nightscout_url + '/api/v1/entries.json?find[activeInsulin][$exists]=true&count=1', function(err, iobs) {
       if (err) {
         return callback(err);
@@ -133,49 +142,28 @@ var Data = function(c) {
   };
 
   d.getRigBatteryLevel = function(config, callback) {
-    d.getJSON(config.nightscout_url + '/api/v1/devicestatus.json?find[uploaderBattery][$exists]=true&count=1', function(err, deviceStatus) {
-      if (err) {
-        return callback(err);
-      }
-      if (deviceStatus && deviceStatus.length && new Date(deviceStatus[0]['created_at']) >= new Date() - c.DEVICE_STATUS_RECENCY_THRESHOLD_SECONDS * 1000) {
-        callback(null, 'Rig ' + deviceStatus[0]['uploaderBattery'] + '%');
-      } else {
-        callback(null, '-');
-      }
-    });
+    if (deviceStatus) {
+      callback(null, 'Rig ' + deviceStatus['uploaderBattery'] + '%');
+    } else {
+      callback(null, '-');
+    }
   };
 
   d.getRawData = function(config, callback) {
-    d.getJSON(config.nightscout_url + '/api/v1/entries/cal.json?count=1', function(err, calRecord) {
-      if (err) {
-        return callback(err);
-      }
-      if (calRecord && calRecord.length && calRecord.length > 0) {
-        d.getJSON(config.nightscout_url + '/api/v1/entries/sgv.json?count=2', function(err, sgvRecords) {
-          if (err) {
-            return callback(err);
-          }
-          if (sgvRecords && sgvRecords.length) {
-            callback(null, 'Raw ' + sgvRecords.map(function(bg) {
-              return _getRawMgdl(bg, calRecord[0]);
-            }).join(' '))
-          } else {
-            callback(null, '-');
-          }
-        });
-      } else {
-        callback(null, '-');
-      }
-    });
+    if (sgvs && sgvs.length >= 2 && cal) {
+      callback(null, sgvs.slice(0, 3).map(function(sgv) { return _getRawMgdl(sgv)}).reverse().join(" "));
+    } else {
+      callback(null, '-');
+    }
   };
 
-  function _getRawMgdl(sgvRecord, calRecord) {
-    if (sgvRecord.unfiltered) {
-      if (sgvRecord.sgv && sgvRecord.sgv >= 40 && sgvRecord.sgv <= 400 && sgvRecord.filtered) {
-        var ratio = calRecord.scale * (sgvRecord.filtered - calRecord.intercept) / calRecord.slope / sgvRecord.sgv;
-        return Math.round(calRecord.scale * (sgvRecord.unfiltered - calRecord.intercept) / calRecord.slope / ratio);
+  function _getRawMgdl(sgv) {
+    if (sgv.unfiltered) {
+      if (sgv.mgdl && sgv.mgdl >= 40 && sgv.mgdl <= 400 && sgv.filtered) {
+        var ratio = cal.scale * (sgv.filtered - cal.intercept) / cal.slope / sgv.sgv;
+        return Math.round(cal.scale * (sgv.unfiltered - cal.intercept) / cal.slope / ratio);
       } else {
-        return Math.round(calRecord.scale * (sgvRecord.unfiltered - calRecord.intercept) / calRecord.slope);
+        return Math.round(cal.scale * (sgv.unfiltered - cal.intercept) / cal.slope);
       }
     } else {
       return undefined;
@@ -183,51 +171,44 @@ var Data = function(c) {
   }
 
   function _getCurrentProfileBasal(config, callback) {
-    d.getJSON(config.nightscout_url + '/api/v1/profile.json', function(err, profile) {
-      if (err) {
-        return callback(err);
-      }
+    // Handle different treatment API formats
+    var basals;
+    if (profiles.length && profiles[0]['basal']) {
+      basals = profiles[0]['basal'];
+    } else if (profiles.length && profiles[0]['defaultProfile']) {
+      basals = profiles[0]['store'][profiles[0]['defaultProfile']]['basal'];
+    }
 
-      // Handle different treatment API formats
-      var basals;
-      if (profile.length && profile[0]['basal']) {
-        basals = profile[0]['basal'];
-      } else if (profile.length && profile[0]['defaultProfile']) {
-        basals = profile[0]['store'][profile[0]['defaultProfile']]['basal'];
-      }
+    if (basals && basals.length) {
+      // Lexicographically compare current time with HH:MM basal start times
+      // TODO: don't assume phone timezone and profile timezone are the same
+      var now = new Date().toTimeString().substr(0, 5);
+      var currentBasal = basals.filter(function (basal, i) {
+        return (basal['time'] <= now && (i === basals.length - 1 || now < basals[i + 1]['time']));
+      })[0];
 
-      if (basals && basals.length) {
-        // Lexicographically compare current time with HH:MM basal start times
-        // TODO: don't assume phone timezone and profile timezone are the same
-        var now = new Date().toTimeString().substr(0, 5);
-        var currentBasal = basals.filter(function(basal, i) {
-          return (basal['time'] <= now && (i === basals.length - 1 || now < basals[i + 1]['time']));
-        })[0];
-        callback(null, parseFloat(currentBasal['value']));
-      } else {
-        callback(null, null);
-      }
-    });
+      callback(null, parseFloat(currentBasal['value']));
+    } else {
+      callback(null, null);
+    }
   }
 
   function _getActiveTempBasal(config, callback) {
-    d.getJSON(config.nightscout_url + '/api/v1/treatments.json?find[eventType]=Temp+Basal&count=1', function(err, treatments) {
-      if (err) {
-        return callback(err);
-      }
-      if (treatments.length && treatments[0]['duration'] && Date.now() < new Date(treatments[0]['created_at']).getTime() + parseFloat(treatments[0]['duration']) * 60 * 1000) {
-        var start = new Date(treatments[0]['created_at']);
-        var rate;
-        if (treatments[0]['percent'] && parseFloat(treatments[0]['percent']) === 0) {
-          rate = 0;
-        } else {
-          rate = parseFloat(treatments[0]['absolute']);
-        }
-        callback(null, {start: start, rate: rate});
-      } else {
-        callback(null, null);
-      }
+    var tempBasals = treatments.filter(function(treatment) {
+      return treatment.eventType == "Temp Basal";
     });
+    if (tempBasals.length && tempBasals[0]['duration'] && Date.now() < new Date(tempBasals[0]['mills']).getTime() + parseFloat(tempBasals[0]['duration']) * 60 * 1000) {
+      var start = new Date(tempBasals[0]['mills']);
+      var rate;
+      if (tempBasals[0]['percent'] && parseFloat(tempBasals[0]['percent']) === 0) {
+        rate = 0;
+      } else {
+        rate = parseFloat(tempBasals[0]['absolute']);
+      }
+      callback(null, {start: start, rate: rate});
+    } else {
+      callback(null, null);
+    }
   }
 
   function _roundBasal(n) {
@@ -264,7 +245,7 @@ var Data = function(c) {
   };
 
   d.getStatusText = function(config, callback) {
-    var defaultFn = d.getRawData;
+    var defaultFn = d.getIOB;
     var fn = {
       'pumpiob': d.getIOB,
       'basal': d.getCurrentBasal,
@@ -273,7 +254,7 @@ var Data = function(c) {
       'customtext': d.getCustomText,
       'customurl': d.getCustomUrl,
     }[config.statusContent];
-    (defaultFn)(config, callback);
+    (fn || defaultFn)(config, callback);
   };
 
   d.getSGVsDateDescending = function(config, callback) {
