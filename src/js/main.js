@@ -140,7 +140,7 @@ function main(c) {
       }
     }
 
-    data.getSGVsDateDescending(config, function(err, sgvs) {
+/*    data.getSGVsDateDescending(config, function(err, sgvs) {
       if (err) {
         // error fetching sgvs is unrecoverable
         sgvDataError(err);
@@ -154,7 +154,9 @@ function main(c) {
           onData(sgvs, statusText);
         });
       }
-    });
+    });*/
+
+    data.setupSocket(config, onData);
   }
 
   function sendPreferences() {
@@ -206,7 +208,6 @@ function main(c) {
       requestAndSendBGs();
     });
 
-    // Send data immediately after the watchface is launched
     requestAndSendBGs();
   });
 

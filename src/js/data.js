@@ -4,6 +4,50 @@
 
 var Data = function(c) {
   var d = {};
+  var sgvs = [];
+  var cal;
+  var treatments = [];
+  var deviceStatus = [];
+  var socket;
+
+  d.setupSocket = function(config, callback) {
+    socket = io(config.nightscout_url);
+    console.log("initing data "+ config.nightscout_url);
+    var sortByMillsDesc = function(rec1, rec2) {
+      return rec2["mills"] - rec1["mills"];
+    };
+    var mapMillsToDate = function(rec) {
+      rec["date"] = ~~(rec["mills"] / 1000);
+      return rec;
+    };
+
+    socket.on('dataUpdate', function(data) {
+      console.log('dataUpdate ' + JSON.stringify(data));
+      var sgvStart = Date.now()/1000 - c.SGV_FETCH_SECONDS;
+      console.log("sgvStart:" + sgvStart);
+      if (data["sgvs"]) {
+        sgvs = sgvs.concat(data["sgvs"]).map(mapMillsToDate).filter(function (sgv) {
+          return sgv["date"] >= sgvStart;
+        }).map(function (sgv) {
+          sgv["sgv"] = sgv["mgdl"];
+          return sgv;
+        }).sort(sortByMillsDesc);
+      }
+      if (data["cals"]) {
+        cal = data["cals"]
+            .map(mapMillsToDate)
+            .concat(cal)
+            .sort(sortByMillsDesc)[0];
+      }
+      if (data["devicestatus"]) {
+        deviceStatus = data["devicestatus"];
+      }
+      console.log('sgvs: '+sgvs);
+      console.log('cal: '+JSON.stringify(cal));
+      console.log('deviceStatus: '+JSON.stringify(deviceStatus));
+      callback(sgvs, "fromWS");
+    });
+  };
 
   // In PebbleKit JS, specifying a timeout works only for synchronous XHR,
   // except on Android, where synchronous XHR doesn't work at all.
@@ -177,7 +221,7 @@ var Data = function(c) {
   };
 
   d.getStatusText = function(config, callback) {
-    var defaultFn = d.getIOB;
+    var defaultFn = d.getRawData;
     var fn = {
       'pumpiob': d.getIOB,
       'basal': d.getCurrentBasal,
@@ -185,7 +229,7 @@ var Data = function(c) {
       'customtext': d.getCustomText,
       'customurl': d.getCustomUrl,
     }[config.statusContent];
-    (fn || defaultFn)(config, callback);
+    (defaultFn)(config, callback);
   };
 
   d.getSGVsDateDescending = function(config, callback) {
