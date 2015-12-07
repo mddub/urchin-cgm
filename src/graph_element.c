@@ -77,7 +77,7 @@ void draw_graph_sdk3(GContext *ctx, GSize *size, GraphData *data,
       bg_path_info.num_points = 0;
       continue;
     }
-    point_segments[i].x = size->w - GRAPH_POINT_SIZE * (1 + i + padding);
+    point_segments[i].x = size->w - GRAPH_POINT_SIZE * (i + padding);
     point_segments[i].y = bg_to_y_for_point(size->h, bg);
     bg_path_info.num_points += 1;
   }
