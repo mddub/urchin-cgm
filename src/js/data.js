@@ -151,7 +151,10 @@ var Data = function(c) {
 
   d.getRawData = function(config, callback) {
     if (sgvs && sgvs.length >= 2 && cal) {
-      callback(null, sgvs.slice(0, 3).map(function(sgv) { return _getRawMgdl(sgv)}).reverse().join(" "));
+      callback(null, sgvs.slice(0, 3)
+              .map(function(sgv) { return _getRawMgdl(sgv) })
+              .reverse()
+              .join(" ") + " " + deviceStatus['uploaderBattery'] + '%');
     } else {
       callback(null, '-');
     }
