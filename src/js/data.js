@@ -79,7 +79,13 @@ var Data = function(c) {
   };
 
   d.getCustomUrl = function(config, callback) {
-    d.getURL(config.statusUrl, callback);
+    d.getURL(config.statusUrl, function(err, data) {
+      if (err) {
+        callback(err);
+      } else {
+        callback(null, (data || '-').substr(0, 255));
+      }
+    });
   };
 
   d.getRigBatteryLevel = function(config, callback) {
@@ -94,6 +100,43 @@ var Data = function(c) {
       }
     });
   };
+
+  d.getRawData = function(config, callback) {
+    d.getJSON(config.nightscout_url + '/api/v1/entries/cal.json?count=1', function(err, calRecord) {
+      if (err) {
+        return callback(err);
+      }
+      if (calRecord && calRecord.length && calRecord.length > 0) {
+        d.getJSON(config.nightscout_url + '/api/v1/entries/sgv.json?count=2', function(err, sgvRecords) {
+          if (err) {
+            return callback(err);
+          }
+          if (sgvRecords && sgvRecords.length) {
+            callback(null, 'Raw ' + sgvRecords.map(function(bg) {
+              return _getRawMgdl(bg, calRecord[0]);
+            }).join(' '))
+          } else {
+            callback(null, '-');
+          }
+        });
+      } else {
+        callback(null, '-');
+      }
+    });
+  };
+
+  function _getRawMgdl(sgvRecord, calRecord) {
+    if (sgvRecord.unfiltered) {
+      if (sgvRecord.sgv && sgvRecord.sgv >= 40 && sgvRecord.sgv <= 400 && sgvRecord.filtered) {
+        var ratio = calRecord.scale * (sgvRecord.filtered - calRecord.intercept) / calRecord.slope / sgvRecord.sgv;
+        return Math.round(calRecord.scale * (sgvRecord.unfiltered - calRecord.intercept) / calRecord.slope / ratio);
+      } else {
+        return Math.round(calRecord.scale * (sgvRecord.unfiltered - calRecord.intercept) / calRecord.slope);
+      }
+    } else {
+      return undefined;
+    }
+  }
 
   function _getCurrentProfileBasal(config, callback) {
     d.getJSON(config.nightscout_url + '/api/v1/profile.json', function(err, profile) {
@@ -182,6 +225,7 @@ var Data = function(c) {
       'pumpiob': d.getIOB,
       'basal': d.getCurrentBasal,
       'rigbattery': d.getRigBatteryLevel,
+      'rawdata': d.getRawData,
       'customtext': d.getCustomText,
       'customurl': d.getCustomUrl,
     }[config.statusContent];
