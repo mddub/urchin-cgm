@@ -4,12 +4,30 @@
 
 var Data = function(c) {
   var d = {};
-  var sgvs = [];
-  var cal;
-  var treatments = [];
-  var deviceStatus = [];
-  var profiles = [];
+
+  function _reviveItem(key) {
+    try {
+      return JSON.parse(localStorage.getItem(key));
+    } catch (e) {
+      return undefined;
+    }
+  }
+
+  var sgvs = _reviveItem("sgvs") || [];
+  var cal = _reviveItem("cal") || undefined;
+  var treatments = _reviveItem("treatments") || [];
+  var deviceStatus = _reviveItem("deviceStatus") || [];
+  var profiles = _reviveItem("profiles") || [];
+
   var socket;
+
+  function _storeCache() {
+    localStorage.setItem("sgvs", JSON.stringify(sgvs));
+    localStorage.setItem("cal", JSON.stringify(cal));
+    localStorage.setItem("treatments", JSON.stringify(treatments));
+    localStorage.setItem("deviceStatus", JSON.stringify(deviceStatus));
+    localStorage.setItem("profiles", JSON.stringify(profiles));
+  }
 
   d.setupWebSocket = function(config, callback) {
     var sortByMillsDesc = function(rec1, rec2) {
@@ -22,11 +40,19 @@ var Data = function(c) {
     };
 
     if (!socket) {
-      socket = io(config.nightscout_url);
+      console.log("restart detected");
+      socket = io(config.nightscout_url, {reconnect: true});
+      socket.id = _reviveItem("socketId");
+      socket.on('error', function (data) {
+        console.log('Error:', JSON.stringify(data));
+        callback(data, sgvs);
+      });
       socket.on('dataUpdate', function (data) {
-        console.log('dataUpdate ' + JSON.stringify(data));
+        console.log(Object.getOwnPropertyNames(socket.io));
+        console.log("incoming data: "+ Object.getOwnPropertyNames(data));
         var sgvStart = Date.now() / 1000 - c.SGV_FETCH_SECONDS;
         if (data["sgvs"]) {
+          console.log("incoming data with sgv count: " + data["sgvs"].length);
           sgvs = sgvs.concat(data["sgvs"]).map(millsToSeconds).filter(function (sgv) {
             return sgv["date"] >= sgvStart;
           }).map(function (sgv) {
@@ -41,8 +67,9 @@ var Data = function(c) {
               .sort(sortByMillsDesc)[0];
         }
         if (data["treatments"]) {
-          // TODO: does this need filtering?
-          treatments = treatments.concat(treatments, data["treatments"]);
+          treatments = treatments.concat(treatments, data["treatments"])
+              .sort(sortByMillsDesc)
+              .slice(0, 100);
         }
         if (data["devicestatus"]) {
           deviceStatus = data["devicestatus"];
@@ -51,6 +78,7 @@ var Data = function(c) {
           profiles = data["profiles"];
         }
         callback(null, sgvs);
+        _storeCache();
       });
     }
     if (sgvs.length > 0)
