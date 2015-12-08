@@ -12,6 +12,8 @@ static BatteryComponent *s_component;
 static int battery_icon_id(BatteryChargeState charge_state) {
   if (charge_state.is_charging) {
     return RESOURCE_ID_BATTERY_CHARGING;
+  } else if (charge_state.charge_percent <= 10) {
+    return RESOURCE_ID_BATTERY_10;
   } else if (charge_state.charge_percent <= 20) {
     return RESOURCE_ID_BATTERY_25;
   } else if (charge_state.charge_percent <= 50) {
