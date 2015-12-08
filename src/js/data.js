@@ -94,7 +94,7 @@ var Data = function(c) {
         return callback(err);
       }
       if (deviceStatus && deviceStatus.length && new Date(deviceStatus[0]['created_at']) >= new Date() - c.DEVICE_STATUS_RECENCY_THRESHOLD_SECONDS * 1000) {
-        callback(null, 'Rig ' + deviceStatus[0]['uploaderBattery'] + '%');
+        callback(null, deviceStatus[0]['uploaderBattery'] + '%');
       } else {
         callback(null, '-');
       }
@@ -146,6 +146,20 @@ var Data = function(c) {
       return undefined;
     }
   }
+
+  d.getRigBatteryAndRawData = function(config, callback) {
+    d.getRigBatteryLevel(config, function(err, battery) {
+      if (err) {
+        return callback(err);
+      }
+      d.getRawData(config, function(err, raw) {
+        if (err) {
+          return callback(err);
+        }
+        callback(null, battery + ' ' + raw);
+      });
+    });
+  };
 
   function _getCurrentProfileBasal(config, callback) {
     d.getJSON(config.nightscout_url + '/api/v1/profile.json', function(err, profile) {
@@ -205,7 +219,7 @@ var Data = function(c) {
     }
   }
 
-  d.getCurrentBasal = function(config, callback) {
+  d.getActiveBasal = function(config, callback) {
     // adapted from @audiefile: https://github.com/mddub/nightscout-graph-pebble/pull/1
     _getCurrentProfileBasal(config, function(err, profileBasal) {
       if (err) {
@@ -229,14 +243,15 @@ var Data = function(c) {
   };
 
   d.getStatusText = function(config, callback) {
-    var defaultFn = d.getIOB;
+    var defaultFn = d.getRigBatteryLevel;
     var fn = {
-      'pumpiob': d.getIOB,
-      'basal': d.getCurrentBasal,
       'rigbattery': d.getRigBatteryLevel,
       'rawdata': d.getRawData,
-      'customtext': d.getCustomText,
+      'rig-raw': d.getRigBatteryAndRawData,
+      'basal': d.getActiveBasal,
+      'pumpiob': d.getIOB,
       'customurl': d.getCustomUrl,
+      'customtext': d.getCustomText,
     }[config.statusContent];
     (fn || defaultFn)(config, callback);
   };
