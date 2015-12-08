@@ -2,12 +2,14 @@
 /* globals describe, it */
 "use strict";
 
+var fs = require('fs');
+
 var expect = require('expect.js'),
   timekeeper = require('timekeeper');
 
 var Data = require('../../src/js/data.js').Data;
 
-var constants = {};
+var defaultConstants = JSON.parse(fs.readFileSync('../../src/js/constants.json', 'utf8'));
 var config = {};
 
 function mockAPI(data, urlToData) {
@@ -82,7 +84,7 @@ describe('getCurrentBasal', function() {
   }
 
   it('should report a temp basal with the difference from current basal and recency', function(done) {
-    var d = Data(constants);
+    var d = Data(defaultConstants);
     mockBasals(d, "2015-12-03T14:12:25-08:00");
     timekeeper.freeze(new Date("2015-12-03T14:20:25-08:00"));
 
@@ -93,7 +95,7 @@ describe('getCurrentBasal', function() {
   });
 
   it('should compute recency correctly', function(done) {
-    var d = Data(constants);
+    var d = Data(defaultConstants);
     mockBasals(d, "2015-12-03T14:12:25-08:00");
     timekeeper.freeze(new Date("2015-12-03T14:28:25-08:00"));
 
@@ -104,7 +106,7 @@ describe('getCurrentBasal', function() {
   });
 
   it('should report the profile basal rate if it is past the duration of the most recent temp basal', function(done) {
-    var d = Data(constants);
+    var d = Data(defaultConstants);
     mockBasals(d, "2015-12-03T14:12:25-08:00");
     timekeeper.freeze(new Date("2015-12-03T14:50:25-08:00"));
 
@@ -115,7 +117,7 @@ describe('getCurrentBasal', function() {
   });
 
   it('should report the correct profile basal rate at any time', function(done) {
-    var d = Data(constants);
+    var d = Data(defaultConstants);
     mockBasals(d, "2015-12-03T14:12:25-08:00");
     timekeeper.freeze(new Date("2015-12-03T20:50:25-08:00"));
 
@@ -152,6 +154,69 @@ describe('getRigBatteryLevel', function() {
 
     d.getRigBatteryLevel(config, function(err, battery) {
       expect(battery).to.be('-');
+      done();
+    });
+  });
+});
+
+describe('getRawData', function() {
+  function SGVS(lastNoise) {
+    return [
+      {
+        "date" : 1449535203000,
+        "dateString" : "2015-12-08T00:40:03+00:00",
+        "direction" : "FortyFiveDown",
+        "filtered" : 180352,
+        "noise" : lastNoise,
+        "sgv" : 146,
+        "type" : "sgv",
+        "unfiltered" : 172672
+      },
+      {
+        "date" : 1449534904000,
+        "dateString" : "2015-12-08T00:35:04+00:00",
+        "direction" : "FortyFiveDown",
+        "filtered" : 186240,
+        "noise" : 1,
+        "sgv" : 153,
+        "type" : "sgv",
+        "unfiltered" : 178528
+      }
+    ];
+  }
+
+  var CAL = [{
+    "date" : 1449309612000,
+    "dateString" : "2015-12-05T10:00:12+00:00",
+    "intercept" : 27370.3970783194,
+    "scale" : 1,
+    "slope" : 786.670463685642,
+    "type" : "cal"
+  }];
+
+  it('should report raw sgvs in ascending date order, plus sensor noise on most recent sgv', function(done) {
+    var d = Data(defaultConstants);
+    mockAPI(d, {
+      'sgv.json': SGVS(1),
+      'cal.json': CAL,
+    });
+
+    d.getRawData(config, function(err, raw) {
+      expect(raw).to.be('Cln 146 139');
+      done();
+    });
+  });
+
+  it('should report raw sgvs in mmol when that preference is set, plus sensor noise on most recent sgv', function(done) {
+    var d = Data(defaultConstants);
+    mockAPI(d, {
+      'sgv.json': SGVS(2),
+      'cal.json': CAL,
+    });
+
+    var config = {mmol: true};
+    d.getRawData(config, function(err, raw) {
+      expect(raw).to.be('Lgt 8.1 7.7');
       done();
     });
   });

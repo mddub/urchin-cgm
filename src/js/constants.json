@@ -45,5 +45,12 @@
    "REQUEST_TIMEOUT" : 5000,
 
    "NO_DELTA_VALUE" : 65536,
-   "DEXCOM_ERROR_CODE_MAX" : 12
+   "DEXCOM_ERROR_CODE_MAX" : 12,
+
+   "DEXCOM_NOISE_STRINGS": {
+       "1": "Cln",
+       "2": "Lgt",
+       "3": "Med",
+       "4": "Hvy"
+    }
 }

@@ -112,9 +112,18 @@ var Data = function(c) {
             return callback(err);
           }
           if (sgvRecords && sgvRecords.length) {
-            callback(null, 'Raw ' + sgvRecords.map(function(bg) {
+            var noiseStr = c.DEXCOM_NOISE_STRINGS[sgvRecords[0]['noise']];
+
+            sgvRecords.sort(function(a, b) {
+              return a['date'] - b['date'];
+            });
+            var sgvString = sgvRecords.map(function(bg) {
               return _getRawMgdl(bg, calRecord[0]);
-            }).join(' '))
+            }).map(function(mgdl) {
+              return (config.mmol && !isNaN(mgdl)) ? (mgdl / 18.0).toFixed(1) : mgdl;
+            }).join(' ');
+
+            callback(null, (noiseStr ? noiseStr + ' ' : '') + sgvString);
           } else {
             callback(null, '-');
           }
