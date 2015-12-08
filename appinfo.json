@@ -84,6 +84,11 @@
       },
       {
         "type": "pbi",
+        "name": "BATTERY_10",
+        "file": "images/battery_10.png"
+      },
+      {
+        "type": "pbi",
         "name": "BATTERY_25",
         "file": "images/battery_25.png"
       },
