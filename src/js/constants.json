@@ -6,7 +6,7 @@
 
    "DEFAULT_CONFIG" : {
       "hGridlines" : 50,
-      "statusContent" : "pumpiob",
+      "statusContent" : "rigbattery",
       "batteryLoc" : "statusRight",
       "nightscout_url" : "",
       "topOfGraph" : 250,
