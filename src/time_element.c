@@ -68,15 +68,17 @@ void time_element_destroy(TimeElement* el) {
 void time_element_update(TimeElement *el, DictionaryIterator *data) {}
 
 void time_element_tick(TimeElement *el) {
-  static char time_buffer[16];
+  static char buffer[16];
+  clock_copy_time_string(buffer, 16);
 
-  time_t now = time(NULL);
-  struct tm *time_now = localtime(&now);
-  strftime(time_buffer, sizeof(time_buffer), "%l:%M", time_now);
-  // Remove leading space if present
-  if(time_buffer[0] == ' ') {
-    memmove(time_buffer, &time_buffer[1], sizeof(time_buffer) - 1);
-  };
+  if (!clock_is_24h_style()) {
+    // remove " AM" suffix
+    if(buffer[4] == ' ') {
+      buffer[4] = 0;
+    } else {
+      buffer[5] = 0;
+    };
+  }
 
-  text_layer_set_text(el->time_text, time_buffer);
+  text_layer_set_text(el->time_text, buffer);
 }
