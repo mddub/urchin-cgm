@@ -12,6 +12,8 @@ static BatteryComponent *s_component;
 static int battery_icon_id(BatteryChargeState charge_state) {
   if (charge_state.is_charging) {
     return RESOURCE_ID_BATTERY_CHARGING;
+  } else if (charge_state.charge_percent <= 10) {
+    return RESOURCE_ID_BATTERY_10;
   } else if (charge_state.charge_percent <= 20) {
     return RESOURCE_ID_BATTERY_25;
   } else if (charge_state.charge_percent <= 50) {
@@ -29,6 +31,10 @@ static void battery_handler(BatteryChargeState charge_state) {
   }
   s_component->icon_bitmap = gbitmap_create_with_resource(battery_icon_id(charge_state));
   bitmap_layer_set_bitmap(s_component->icon_layer, s_component->icon_bitmap);
+
+  // bitmap_layer_set_bitmap is supposed to trigger this automatically.
+  // https://forums.getpebble.com/discussion/comment/129517/#Comment_129517
+  layer_mark_dirty(bitmap_layer_get_layer(s_component->icon_layer));
 }
 
 int battery_component_width() {
