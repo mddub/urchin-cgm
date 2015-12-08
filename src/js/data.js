@@ -184,7 +184,7 @@ var Data = function(c) {
               .map(function(mgdl) {
                 return (config.mmol && !isNaN(mgdl)) ? (mgdl / 18.0).toFixed(1) : mgdl;
               }).reverse()
-              .join(" ") + " " + deviceStatus['uploaderBattery'] + '%');
+              .join(" "));
     } else {
       callback(null, '-');
     }
