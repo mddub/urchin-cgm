@@ -13,6 +13,10 @@ var Data = function(c) {
     }
   }
 
+  function _cacheItem(key, value) {
+    localStorage.setItem(key, JSON.stringify(value));
+  }
+
   var sgvs = _reviveItem("sgvs") || [];
   var cal = _reviveItem("cal") || undefined;
   var treatments = _reviveItem("treatments") || [];
@@ -20,14 +24,6 @@ var Data = function(c) {
   var profiles = _reviveItem("profiles") || [];
 
   var socket;
-
-  function _storeCache() {
-    localStorage.setItem("sgvs", JSON.stringify(sgvs));
-    localStorage.setItem("cal", JSON.stringify(cal));
-    localStorage.setItem("treatments", JSON.stringify(treatments));
-    localStorage.setItem("deviceStatus", JSON.stringify(deviceStatus));
-    localStorage.setItem("profiles", JSON.stringify(profiles));
-  }
 
   d.setupWebSocket = function(config, callback) {
     var sortByMillsDesc = function(rec1, rec2) {
@@ -59,26 +55,30 @@ var Data = function(c) {
             sgv["sgv"] = sgv["mgdl"];
             return sgv;
           }).sort(sortByMillsDesc);
+          _cacheItem('sgvs', sgvs);
         }
         if (data["cals"]) {
           cal = data["cals"]
               .map(millsToSeconds)
               .concat(cal)
               .sort(sortByMillsDesc)[0];
+          _cacheItem('cal', cal);
         }
         if (data["treatments"]) {
           treatments = treatments.concat(treatments, data["treatments"])
               .sort(sortByMillsDesc)
               .slice(0, 100);
+          _cacheItem('treatments', treatments);
         }
         if (data["devicestatus"]) {
           deviceStatus = data["devicestatus"];
+          _cacheItem('devicestatus', deviceStatus);
         }
         if (data["profiles"]) {
           profiles = data["profiles"];
+          _cacheItem('profiles', profiles);
         }
         callback(null, sgvs);
-        _storeCache();
       });
     }
     if (sgvs.length > 0)
@@ -307,18 +307,29 @@ var Data = function(c) {
   };
 
   d.getSGVsDateDescending = function(config, callback) {
-    var fetchStart = Date.now() - c.SGV_FETCH_SECONDS * 1000;
-    var points = c.SGV_FETCH_SECONDS / c.INTERVAL_SIZE_SECONDS + c.FETCH_EXTRA;
-    var url = config.nightscout_url + '/api/v1/entries/sgv.json?find[date][$gte]=' + fetchStart + '&count=' + points;
-    d.getJSON(url, function(err, entries) {
-      if (err) {
-        return callback(err);
-      }
-      callback(null, entries.map(function(e) {
-        e['date'] = e['date'] / 1000;
-        return e;
-      }));
-    });
+    var fetchStart = sgvs[0] ? sgvs[0]['mills'] : Date.now() - c.SGV_FETCH_SECONDS * 1000;
+    var filterStart = Date.now() - c.SGV_FETCH_SECONDS * 1000;
+    var points = ~~((Date.now() - sgvs[0]['mills']) / 1000 / c.INTERVAL_SIZE_SECONDS + c.FETCH_EXTRA);
+    var url = config.nightscout_url + '/api/v1/entries/sgv.json?find[date][$gt]=' + fetchStart + '&count=' + points;
+    if (points > c.FETCH_EXTRA) {
+      d.getJSON(url, function (err, entries) {
+        if (err) {
+          return callback(err);
+        }
+        sgvs = entries.map(function (e) {
+          e['mgdl'] = e['sgv'];
+          e['mills'] = e['date'];
+          e['date'] = e['date'] / 1000;
+          return e;
+        }).concat(sgvs).filter(function (e) {
+          return e['mills'] >= filterStart;
+        });
+        _cacheItem('sgvs', sgvs);
+        callback(null, sgvs);
+      });
+    } else {
+      callback(null, sgvs);
+    }
   };
 
   return d;
