@@ -156,7 +156,8 @@ var Data = function(c) {
         if (err) {
           return callback(err);
         }
-        callback(null, battery + ' ' + raw);
+        var line = [battery, raw].filter(function(v) { return v !== '-'; }).join(' ') || '-';
+        callback(null, line);
       });
     });
   };
