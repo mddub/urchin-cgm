@@ -113,6 +113,7 @@ static void data_callback(DictionaryIterator *received) {
   } else if (msg_type == MSG_TYPE_PREFERENCES) {
     set_prefs(received);
     // recreate the window in case layout preferences have changed
+    window_stack_remove(s_window, false);
     window_destroy(s_window);
     s_window = create_main_window();
   }
