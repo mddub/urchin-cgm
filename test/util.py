@@ -128,7 +128,8 @@ class SummaryFile(object):
               </td>
             </tr>
             """.format(
-                filename=test_instance.filename(),
+                # Assume images are in the same directory
+                filename=os.path.split(test_instance.filename())[-1],
                 classname=test_instance.__class__.__name__,
                 doc=test_instance.__class__.__doc__,
                 config=json.dumps(test_instance.config),
