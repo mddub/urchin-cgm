@@ -37,6 +37,12 @@
       document.getElementById('units-mgdl').className += ' active';
     }
 
+    if (current.websocket == true) {
+      document.getElementById('transport-websocket').className += ' active';
+    } else {
+      document.getElementById('transport-rest').className += ' active';
+    }
+
     SLIDER_KEYS.forEach(function(key) {
       document.getElementById(key).value = current[key] || '';
       document.getElementById(key + '-val').value = current[key] || '';
@@ -54,8 +60,10 @@
 
   function buildConfig() {
     var mmol = document.getElementById('units-mgdl').className.indexOf('active') === -1;
+    var websocket = document.getElementById('transport-rest').className.indexOf('active') == -1;
     var out = {
       mmol: mmol,
+      websocket: websocket,
       nightscout_url: document.getElementById('ns-url').value.replace(/\/$/, ''),
       hGridlines: tryParseInt(document.getElementById('hGridlines').value),
       statusContent: document.getElementById('statusContent').value,

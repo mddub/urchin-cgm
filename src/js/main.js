@@ -140,7 +140,7 @@ function main(c) {
       }
     }
 
-    data.getSGVsDateDescending(config, function(err, sgvs) {
+    var dataCallback = function(err, sgvs) {
       if (err) {
         // error fetching sgvs is unrecoverable
         sgvDataError(err);
@@ -154,7 +154,13 @@ function main(c) {
           onData(sgvs, statusText);
         });
       }
-    });
+    };
+
+    if (config.websocket) {
+      data.setupWebSocket(config, dataCallback);
+    } else {
+      data.getSGVsDateDescending(config, dataCallback);
+    }
   }
 
   function sendPreferences() {
@@ -203,10 +209,10 @@ function main(c) {
     });
 
     Pebble.addEventListener('appmessage', function() {
+      console.log('appmessage received');
       requestAndSendBGs();
     });
 
-    // Send data immediately after the watchface is launched
     requestAndSendBGs();
   });
 
