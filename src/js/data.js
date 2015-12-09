@@ -44,17 +44,29 @@ var Data = function(c) {
         callback(data, sgvs);
       });
       socket.on('dataUpdate', function (data) {
-        console.log(Object.getOwnPropertyNames(socket.io));
         console.log("incoming data: "+ Object.getOwnPropertyNames(data));
         var sgvStart = Date.now() / 1000 - c.SGV_FETCH_SECONDS;
+        if (!data["delta"]) {
+          sgvs = [];
+          treatments = [];
+          cal = undefined;
+          deviceStatus = [];
+          profiles = [];
+        }
         if (data["sgvs"]) {
           console.log("incoming data with sgv count: " + data["sgvs"].length);
-          sgvs = sgvs.concat(data["sgvs"]).map(millsToSeconds).filter(function (sgv) {
-            return sgv["date"] >= sgvStart;
-          }).map(function (sgv) {
-            sgv["sgv"] = sgv["mgdl"];
-            return sgv;
-          }).sort(sortByMillsDesc);
+          data["sgvs"].map(millsToSeconds)
+            .filter(function (sgv) {
+              return sgv["date"] >= sgvStart && sgvs.indexOf(sgv) < 0;
+            })
+            .map(function (sgv) {
+              sgv["sgv"] = sgv["mgdl"];
+              return sgv;
+            })
+            .forEach(function (sgv) {
+              sgvs.push(sgv);
+            });
+          sgvs = sgvs.sort(sortByMillsDesc);
           _cacheItem('sgvs', sgvs);
         }
         if (data["cals"]) {
@@ -72,7 +84,7 @@ var Data = function(c) {
         }
         if (data["devicestatus"]) {
           deviceStatus = data["devicestatus"];
-          _cacheItem('devicestatus', deviceStatus);
+          _cacheItem('deviceStatus', deviceStatus);
         }
         if (data["profiles"]) {
           profiles = data["profiles"];
@@ -180,7 +192,7 @@ var Data = function(c) {
   d.getRawData = function(config, callback) {
     if (sgvs && sgvs.length >= 2 && cal) {
       callback(null, sgvs.slice(0, 3)
-              .map(function(sgv) { return _getRawMgdl(sgv) })
+              .map(_getRawMgdl)
               .map(function(mgdl) {
                 return (config.mmol && !isNaN(mgdl)) ? (mgdl / 18.0).toFixed(1) : mgdl;
               }).reverse()
