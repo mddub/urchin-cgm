@@ -1,4 +1,5 @@
 build
+src/generated
 test/output
 .lock-waf*
 *.pyc

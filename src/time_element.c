@@ -8,6 +8,9 @@
 #define PADDING_TOP_42 12
 #define PADDING_BOTTOM_42 8
 
+#include "generated/test_maybe.h"
+#define TESTING_TIME_DISPLAY "11:23"
+
 static BatteryComponent *create_battery_component(Layer *parent, unsigned int battery_loc) {
   GRect bounds = element_get_bounds(parent);
   int x = -1;
@@ -69,6 +72,10 @@ void time_element_update(TimeElement *el, DictionaryIterator *data) {}
 
 void time_element_tick(TimeElement *el) {
   static char buffer[16];
+
+#ifdef IS_TEST_BUILD
+  strcpy(buffer, TESTING_TIME_DISPLAY);
+#else
   clock_copy_time_string(buffer, 16);
 
   if (!clock_is_24h_style()) {
@@ -79,6 +86,7 @@ void time_element_tick(TimeElement *el) {
       buffer[5] = 0;
     };
   }
+#endif
 
   text_layer_set_text(el->time_text, buffer);
 }
