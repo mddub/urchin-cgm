@@ -1,12 +1,10 @@
-# Urchin CGM
-
 A Pebble watchface for showing [Nightscout](https://github.com/nightscout/cgm-remote-monitor) CGM data in graph format, like this:
 
 ![Screenshot](http://i.imgur.com/9aYMsCn.png)
 
 To install, enable Developer Mode in the Pebble app on your phone, then open [this pbw file][pbw] in the Pebble app.
 
-Urchin is an **U**nopinionated, **R**idiculously **C**onfigurable **H**uman **I**nterface to **N**ightscout. It's still a work-in-progress.
+Urchin CGM is an **U**nopinionated, **R**idiculously **C**onfigurable **H**uman **I**nterface to **N**ightscout. It's still a work-in-progress.
 
 ## To configure (for now):
 * Set your Nightscout host and display units on the phone. You can customize the graph:
