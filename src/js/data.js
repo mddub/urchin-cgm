@@ -221,7 +221,7 @@ var Data = function(c) {
   }
 
   d.getActiveBasal = function(config, callback) {
-    // adapted from @audiefile: https://github.com/mddub/nightscout-graph-pebble/pull/1
+    // adapted from @audiefile: https://github.com/mddub/urchin-cgm/pull/1
     _getCurrentProfileBasal(config, function(err, profileBasal) {
       if (err) {
         callback(err);

@@ -1,7 +1,7 @@
 {
    "VERSION" : "0.0.3",
 
-   "CONFIG_URL" : "https://mddub.github.io/nightscout-graph-pebble/config/",
+   "CONFIG_URL" : "https://mddub.github.io/urchin-cgm/config/",
    "LOCAL_STORAGE_KEY_CONFIG" : "config",
 
    "DEFAULT_CONFIG" : {

@@ -1,7 +1,7 @@
 {
   "uuid": "ea361603-0373-4865-9824-8f52c65c6e07",
-  "shortName": "nightscout-graph-pebble",
-  "longName": "nightscout-graph-pebble",
+  "shortName": "Urchin CGM",
+  "longName": "Urchin CGM",
   "companyName": "Mark Wilson",
   "versionLabel": "0.1",
   "sdkVersion": "3",
