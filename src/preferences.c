@@ -1,5 +1,4 @@
 #include "app_keys.h"
-#include "config.h"
 #include "preferences.h"
 
 static Preferences *s_prefs = NULL;
@@ -7,6 +6,80 @@ static Preferences *s_prefs = NULL;
 static void save_prefs() {
   persist_write_int(PERSIST_KEY_VERSION, PREFERENCES_SCHEMA_VERSION);
   persist_write_data(PERSIST_KEY_PREFERENCES_OBJECT, s_prefs, sizeof(Preferences));
+}
+
+static void set_layout_option_a(Preferences* dest) {
+  int i = 0;
+  dest->elements[i++] = (ElementConfig) {
+    .el = TIME_AREA_ELEMENT,
+    .w = 0,
+    .h = 0,
+    .bottom = true,
+    .right = false,
+    .black = false,
+  };
+  dest->elements[i++] = (ElementConfig) {
+    .el = GRAPH_ELEMENT,
+    .w = 3 * 36,
+    .h = 87,
+    .bottom = true,
+    .right = true,
+    .black = false,
+  };
+  dest->elements[i++] = (ElementConfig) {
+    .el = SIDEBAR_ELEMENT,
+    .w = 0,
+    .h = 87,
+    .bottom = true,
+    .right = false,
+    .black = false,
+  };
+  dest->elements[i++] = (ElementConfig) {
+    .el = STATUS_BAR_ELEMENT,
+    .w = 0,
+    .h = 22,
+    .bottom = false,
+    .right = false,
+    .black = false,
+  };
+  dest->num_elements = i;
+}
+
+void set_layout_option_b(Preferences *dest) {
+  int i = 0;
+  dest->elements[i++] = (ElementConfig) {
+    .el = GRAPH_ELEMENT,
+    .w = 0,
+    .h = 75,
+    .bottom = false,
+    .right = false,
+    .black = false,
+  };
+  dest->elements[i++] = (ElementConfig) {
+    .el = BG_ROW_ELEMENT,
+    .w = 0,
+    .h = 32,
+    .bottom = false,
+    .right = false,
+    .black = true,
+  };
+  dest->elements[i++] = (ElementConfig) {
+    .el = STATUS_BAR_ELEMENT,
+    .w = 0,
+    .h = 17,
+    .bottom = false,
+    .right = false,
+    .black = false,
+  };
+  dest->elements[i++] = (ElementConfig) {
+    .el = TIME_AREA_ELEMENT,
+    .w = 0,
+    .h = 0,
+    .bottom = false,
+    .right = false,
+    .black = false,
+  };
+  dest->num_elements = i;
 }
 
 static void set_default_prefs() {
@@ -20,14 +93,26 @@ static void set_default_prefs() {
   s_prefs->h_gridlines = 50;
   s_prefs->time_align = ALIGN_CENTER;
   s_prefs->battery_loc = BATTERY_LOC_STATUS_RIGHT;
+
+  // TODO
+  if (LAYOUT == LAYOUT_OPTION_A) {
+    set_layout_option_a(s_prefs);
+  } else if (LAYOUT == LAYOUT_OPTION_B) {
+    set_layout_option_b(s_prefs);
+  }
+
   save_prefs();
 }
 
+static int preferences_size() {
+  return sizeof(Preferences);
+}
+
 void init_prefs() {
-  if (sizeof(Preferences) > PERSIST_DATA_MAX_LENGTH) {
+  if (preferences_size() > PERSIST_DATA_MAX_LENGTH) {
     APP_LOG(APP_LOG_LEVEL_ERROR, "Preferences data too big!");
   }
-  s_prefs = malloc(sizeof(Preferences));
+  s_prefs = malloc(preferences_size());
 
   if (
       persist_exists(PERSIST_KEY_VERSION) && \
@@ -57,5 +142,13 @@ void set_prefs(DictionaryIterator *data) {
   s_prefs->h_gridlines = dict_find(data, APP_KEY_H_GRIDLINES)->value->uint8;
   s_prefs->time_align = dict_find(data, APP_KEY_TIME_ALIGN)->value->uint8;
   s_prefs->battery_loc = dict_find(data, APP_KEY_BATTERY_LOC)->value->uint8;
+
+  // TODO
+  if (LAYOUT == LAYOUT_OPTION_A) {
+    set_layout_option_a(s_prefs);
+  } else if (LAYOUT == LAYOUT_OPTION_B) {
+    set_layout_option_b(s_prefs);
+  }
+
   save_prefs();
 }

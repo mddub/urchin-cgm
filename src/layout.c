@@ -1,6 +1,5 @@
 #include "layout.h"
 
-static LayoutConfig *s_config;
 static Layer** s_layers;
 
 GColor element_bg(Layer* layer) {
@@ -16,7 +15,7 @@ GCompOp element_comp_op(Layer* layer) {
 }
 
 static Layer* get_layer_for_element(int element) {
-  for(int i = 0; i < s_config->num_elements; i++) {
+  for(int i = 0; i < get_prefs()->num_elements; i++) {
     if(get_element_data(s_layers[i])->el == element) {
       return s_layers[i];
     }
@@ -72,13 +71,13 @@ static Layer* position_layer(Layer *parent, GPoint *pos, ElementConfig *config, 
 
 static int compute_auto_height(Layer *parent) {
   GPoint pos = {.x = 0, .y = 0};
-  for(int i = 0; i < s_config->num_elements; i++) {
-    position_layer(parent, &pos, &s_config->elements[i], false);
+  for(int i = 0; i < get_prefs()->num_elements; i++) {
+    position_layer(parent, &pos, &get_prefs()->elements[i], false);
   }
   int remaining_height = layer_get_bounds(parent).size.h - pos.y;
   int num_elements_auto_height = 0;
-  for(int i = 0; i < s_config->num_elements; i++) {
-    num_elements_auto_height += s_config->elements[i].h == 0;
+  for(int i = 0; i < get_prefs()->num_elements; i++) {
+    num_elements_auto_height += get_prefs()->elements[i].h == 0;
   }
   return remaining_height / num_elements_auto_height;
 }
@@ -100,22 +99,21 @@ GRect element_get_bounds(Layer* layer) {
   return bounds;
 }
 
-LayoutLayers init_layout(Window* window, int layout_option) {
-  s_config = layout_config_create(layout_option);
-  s_layers = malloc(s_config->num_elements * sizeof(Layer*));
+LayoutLayers init_layout(Window* window) {
+  s_layers = malloc(get_prefs()->num_elements * sizeof(Layer*));
 
   Layer *window_layer = window_get_root_layer(window);
 
   int auto_height = compute_auto_height(window_layer);
-  for(int i = 0; i < s_config->num_elements; i++) {
-    if (s_config->elements[i].h == 0) {
-      s_config->elements[i].h = auto_height;
+  for(int i = 0; i < get_prefs()->num_elements; i++) {
+    if (get_prefs()->elements[i].h == 0) {
+      get_prefs()->elements[i].h = auto_height;
     }
   }
 
   GPoint pos = {.x = 0, .y = 0};
-  for(int i = 0; i < s_config->num_elements; i++) {
-    s_layers[i] = position_layer(window_layer, &pos, &s_config->elements[i], true);
+  for(int i = 0; i < get_prefs()->num_elements; i++) {
+    s_layers[i] = position_layer(window_layer, &pos, &get_prefs()->elements[i], true);
   }
 
   return (LayoutLayers) {
@@ -128,9 +126,8 @@ LayoutLayers init_layout(Window* window, int layout_option) {
 }
 
 void deinit_layout() {
-  for(int i = 0; i < s_config->num_elements; i++) {
+  for(int i = 0; i < get_prefs()->num_elements; i++) {
     layer_destroy(s_layers[i]);
   }
   free(s_layers);
-  layout_config_destroy(s_config);
 }

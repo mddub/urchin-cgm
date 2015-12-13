@@ -38,7 +38,7 @@ static void minute_handler(struct tm *tick_time, TimeUnits units_changed) {
 }
 
 static void window_load(Window *window) {
-  LayoutLayers layout = init_layout(window, LAYOUT);
+  LayoutLayers layout = init_layout(window);
 
   if (layout.time_area != NULL) {
     // ensure the time is drawn before anything else

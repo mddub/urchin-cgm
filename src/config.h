@@ -45,34 +45,9 @@
 #define TIME_AREA_ELEMENT 3
 #define BG_ROW_ELEMENT 4
 
-#define MAX_LAYOUT_ELEMENTS 4
+#define MAX_LAYOUT_ELEMENTS 5
 
 #define NO_ICON -1
 
 #define PERSIST_KEY_VERSION 0
 #define PERSIST_KEY_PREFERENCES_OBJECT 1
-
-typedef struct ElementConfig {
-  int el;
-  int w;
-  int h;
-  bool bottom;
-  bool right;
-  bool black;
-} ElementConfig;
-
-typedef struct LayoutConfig {
-  int num_elements;
-  ElementConfig* elements;
-} LayoutConfig;
-
-typedef struct LayoutLayers {
-  Layer *graph;
-  Layer *sidebar;
-  Layer *status_bar;
-  Layer *time_area;
-  Layer *bg_row;
-} LayoutLayers;
-
-LayoutConfig* layout_config_create(int layout_option);
-void layout_config_destroy(LayoutConfig* l_config);
