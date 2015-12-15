@@ -8,6 +8,7 @@
     'topOfRange',
     'bottomOfRange',
     'bottomOfGraph',
+    'statusRawCount',
   ];
 
   // https://developer.getpebble.com/guides/pebble-apps/pebblekit-js/app-configuration/
@@ -80,6 +81,7 @@
   $('#statusContent').on('change', function(evt) {
     $('#status-text-container').toggle(evt.currentTarget.value === 'customtext');
     $('#status-url-container').toggle(evt.currentTarget.value === 'customurl');
+    $('#status-raw-count-container').toggle(evt.currentTarget.value === 'rawdata' || evt.currentTarget.value === 'rig-raw');
   });
   $('#statusContent').trigger('change');
 

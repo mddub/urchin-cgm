@@ -107,7 +107,7 @@ var Data = function(c) {
         return callback(err);
       }
       if (calRecord && calRecord.length && calRecord.length > 0) {
-        d.getJSON(config.nightscout_url + '/api/v1/entries/sgv.json?count=2', function(err, sgvRecords) {
+        d.getJSON(config.nightscout_url + '/api/v1/entries/sgv.json?count=' + config.statusRawCount, function(err, sgvRecords) {
           if (err) {
             return callback(err);
           }
