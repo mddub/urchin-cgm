@@ -1,3 +1,4 @@
+import errno
 import os
 
 from waflib.Task import Task
@@ -23,8 +24,16 @@ TEST_HEADERS = """
 #define IS_TEST_BUILD 1
 """
 
+def ensure_dir(filename):
+    try:
+        os.makedirs(os.path.dirname(filename))
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
+
 def generate_testing_headers_maybe(ctx):
     target = 'src/generated/test_maybe.h'
+    ensure_dir(target)
     if BUILD_ENV == 'test':
         with open(target, 'w') as f:
             f.write(TEST_HEADERS)
