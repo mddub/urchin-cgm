@@ -48,12 +48,12 @@ def pebble_set_config():
     Nothing crazy about that.
     """
     _call(
-      'pebble emu-app-config',
+      'pebble emu-app-config --emulator aplite',
       env=dict(os.environ, BROWSER=os.path.join(os.path.dirname(__file__), 'background_curl.sh'))
     )
 
 def pebble_screenshot(filename):
-    _call('pebble screenshot --no-open {}'.format(filename))
+    _call('pebble screenshot --emulator aplite --no-open {}'.format(filename))
 
 def _call(command_str, **kwargs):
     print command_str
