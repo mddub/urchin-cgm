@@ -5,19 +5,107 @@
    "LOCAL_STORAGE_KEY_CONFIG" : "config",
 
    "DEFAULT_CONFIG" : {
+      "nightscout_url" : "",
+      "mmol" : false,
+      "topOfGraph" : 250,
+      "topOfRange" : 200,
+      "bottomOfRange" : 70,
+      "bottomOfGraph" : 40,
       "hGridlines" : 50,
       "statusContent" : "rigbattery",
       "statusRawCount" : 2,
-      "batteryLoc" : "statusRight",
-      "nightscout_url" : "",
-      "topOfGraph" : 250,
-      "mmol" : false,
-      "timeAlign" : "center",
       "statusUrl" : "",
-      "topOfRange" : 200,
-      "bottomOfRange" : 70,
-      "bottomOfGraph" : 40
+      "statusText" : "",
+      "layout" : "a",
+      "advancedLayout": false,
+      "customLayout": {
+         "elements": [
+            {"el": 3, "enabled": true, "width": 100, "height": 20, "black": false, "bottom": false, "right": false},
+            {"el": 0, "enabled": true, "width": 100, "height": 0, "black": false, "bottom": true, "right": false},
+            {"el": 1, "enabled": false, "width": 100, "height": 0, "black": false, "bottom": false, "right": false},
+            {"el": 4, "enabled": true, "width": 100, "height": 20, "black": true, "bottom": false, "right": false},
+            {"el": 2, "enabled": true, "width": 100, "height": 32, "black": false, "bottom": false, "right": false}
+         ],
+         "batteryLoc" : "timeBottomLeft",
+         "timeAlign" : "right"
+      }
    },
+
+   "LAYOUTS": {
+      "a": {
+         "elements": [
+            {"el": 3, "enabled": true, "width": 100, "height": 0, "black": false, "bottom": true, "right": false},
+            {"el": 0, "enabled": true, "width": 75, "height": 52, "black": false, "bottom": true, "right": true},
+            {"el": 1, "enabled": true, "width": 25, "height": 52, "black": false, "bottom": true, "right": false},
+            {"el": 2, "enabled": true, "width": 100, "height": 13, "black": false, "bottom": false, "right": false},
+            {"el": 4, "enabled": false, "width": 100, "height": 0, "black": false, "bottom": false, "right": false}
+         ],
+         "batteryLoc" : "statusRight",
+         "timeAlign" : "center"
+      },
+      "b": {
+         "elements": [
+            {"el": 0, "enabled": true, "width": 75, "height": 52, "black": false, "bottom": true, "right": true},
+            {"el": 1, "enabled": true, "width": 25, "height": 52, "black": false, "bottom": true, "right": false},
+            {"el": 2, "enabled": true, "width": 100, "height": 13, "black": false, "bottom": false, "right": false},
+            {"el": 3, "enabled": true, "width": 100, "height": 0, "black": false, "bottom": false, "right": false},
+            {"el": 4, "enabled": false, "width": 100, "height": 0, "black": false, "bottom": false, "right": false}
+         ],
+         "batteryLoc" : "statusRight",
+         "timeAlign" : "center"
+      },
+      "c": {
+         "elements": [
+            {"el": 0, "enabled": true, "width": 100, "height": 35, "black": false, "bottom": false, "right": false},
+            {"el": 1, "enabled": false, "width": 100, "height": 35, "black": false, "bottom": false, "right": false},
+            {"el": 4, "enabled": true, "width": 100, "height": 25, "black": true, "bottom": false, "right": false},
+            {"el": 2, "enabled": true, "width": 100, "height": 13, "black": false, "bottom": false, "right": false},
+            {"el": 3, "enabled": true, "width": 100, "height": 0, "black": false, "bottom": false, "right": false}
+         ],
+         "batteryLoc" : "statusRight",
+         "timeAlign" : "center"
+      },
+      "d": {
+         "elements": [
+            {"el": 3, "enabled": true, "width": 100, "height": 23, "black": false, "bottom": true, "right": false},
+            {"el": 0, "enabled": true, "width": 100, "height": 0, "black": false, "bottom": true, "right": false},
+            {"el": 1, "enabled": false, "width": 100, "height": 0, "black": false, "bottom": true, "right": false},
+            {"el": 4, "enabled": true, "width": 100, "height": 25, "black": false, "bottom": false, "right": false},
+            {"el": 2, "enabled": false, "width": 100, "height": 0, "black": false, "bottom": false, "right": false}
+         ],
+         "batteryLoc" : "timeTopRight",
+         "timeAlign" : "left"
+      },
+      "e": {
+         "elements": [
+            {"el": 0, "enabled": true, "width": 75, "height": 0, "black": false, "bottom": true, "right": true},
+            {"el": 1, "enabled": true, "width": 25, "height": 0, "black": false, "bottom": true, "right": false},
+            {"el": 2, "enabled": true, "width": 100, "height": 44, "black": false, "bottom": false, "right": false},
+            {"el": 3, "enabled": true, "width": 100, "height": 19, "black": false, "bottom": false, "right": false},
+            {"el": 4, "enabled": false, "width": 100, "height": 0, "black": false, "bottom": false, "right": false}
+         ],
+         "batteryLoc" : "timeBottomLeft",
+         "timeAlign" : "right"
+      }
+   },
+
+   "ELEMENTS": [
+      "GRAPH_ELEMENT",
+      "SIDEBAR_ELEMENT",
+      "STATUS_BAR_ELEMENT",
+      "TIME_AREA_ELEMENT",
+      "BG_ROW_ELEMENT"
+   ],
+
+   "PROPERTIES": [
+      "el",
+      "enabled",
+      "width",
+      "height",
+      "black",
+      "bottom",
+      "right"
+   ],
 
    "ALIGN" : {
       "left" : 0,

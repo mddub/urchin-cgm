@@ -8,76 +8,41 @@ static void save_prefs() {
   persist_write_data(PERSIST_KEY_PREFERENCES_OBJECT, s_prefs, sizeof(Preferences));
 }
 
-static void set_layout_option_a(Preferences* dest) {
+static void set_default_layout(Preferences *dest) {
+  // XXX duplicate layout "a" here
+  // this is temporary - need a way to request prefs from phone
   int i = 0;
   dest->elements[i++] = (ElementConfig) {
     .el = TIME_AREA_ELEMENT,
-    .w = 0,
+    .w = 100,
     .h = 0,
+    .black = false,
     .bottom = true,
     .right = false,
-    .black = false,
   };
   dest->elements[i++] = (ElementConfig) {
     .el = GRAPH_ELEMENT,
-    .w = 3 * 36,
-    .h = 87,
+    .w = 75,
+    .h = 52,
+    .black = false,
     .bottom = true,
     .right = true,
-    .black = false,
   };
   dest->elements[i++] = (ElementConfig) {
     .el = SIDEBAR_ELEMENT,
-    .w = 0,
-    .h = 87,
+    .w = 25,
+    .h = 52,
+    .black = false,
     .bottom = true,
     .right = false,
-    .black = false,
   };
   dest->elements[i++] = (ElementConfig) {
     .el = STATUS_BAR_ELEMENT,
-    .w = 0,
-    .h = 22,
-    .bottom = false,
-    .right = false,
+    .w = 100,
+    .h = 13,
     .black = false,
-  };
-  dest->num_elements = i;
-}
-
-void set_layout_option_b(Preferences *dest) {
-  int i = 0;
-  dest->elements[i++] = (ElementConfig) {
-    .el = GRAPH_ELEMENT,
-    .w = 0,
-    .h = 75,
     .bottom = false,
     .right = false,
-    .black = false,
-  };
-  dest->elements[i++] = (ElementConfig) {
-    .el = BG_ROW_ELEMENT,
-    .w = 0,
-    .h = 32,
-    .bottom = false,
-    .right = false,
-    .black = true,
-  };
-  dest->elements[i++] = (ElementConfig) {
-    .el = STATUS_BAR_ELEMENT,
-    .w = 0,
-    .h = 17,
-    .bottom = false,
-    .right = false,
-    .black = false,
-  };
-  dest->elements[i++] = (ElementConfig) {
-    .el = TIME_AREA_ELEMENT,
-    .w = 0,
-    .h = 0,
-    .bottom = false,
-    .right = false,
-    .black = false,
   };
   dest->num_elements = i;
 }
@@ -94,12 +59,7 @@ static void set_default_prefs() {
   s_prefs->time_align = ALIGN_CENTER;
   s_prefs->battery_loc = BATTERY_LOC_STATUS_RIGHT;
 
-  // TODO
-  if (LAYOUT == LAYOUT_OPTION_A) {
-    set_layout_option_a(s_prefs);
-  } else if (LAYOUT == LAYOUT_OPTION_B) {
-    set_layout_option_b(s_prefs);
-  }
+  set_default_layout(s_prefs);
 
   save_prefs();
 }
@@ -133,6 +93,24 @@ Preferences* get_prefs() {
   return s_prefs;
 }
 
+static ElementConfig decode_layout_element(const char *encoded, int offset) {
+  ElementConfig decoded;
+  decoded.el = encoded[offset + ELEMENT_TYPE];
+  decoded.w = encoded[offset + ELEMENT_WIDTH];
+  decoded.h = encoded[offset + ELEMENT_HEIGHT];
+  decoded.black = encoded[offset + ELEMENT_BLACK];
+  decoded.bottom = encoded[offset + ELEMENT_BOTTOM];
+  decoded.right = encoded[offset + ELEMENT_RIGHT];
+  return decoded;
+}
+
+static void decode_layout_elements(Preferences *prefs, int num_elements, const char * encoded) {
+  for(int i = 0; i < num_elements; i++) {
+    ElementConfig el = decode_layout_element(encoded, NUM_ELEMENT_PROPERTIES * i);
+    memcpy(&prefs->elements[i], &el, sizeof(ElementConfig));
+  }
+}
+
 void set_prefs(DictionaryIterator *data) {
   s_prefs->mmol = (bool)dict_find(data, APP_KEY_MMOL)->value->uint8;
   s_prefs->top_of_graph = dict_find(data, APP_KEY_TOP_OF_GRAPH)->value->uint16;
@@ -142,13 +120,9 @@ void set_prefs(DictionaryIterator *data) {
   s_prefs->h_gridlines = dict_find(data, APP_KEY_H_GRIDLINES)->value->uint8;
   s_prefs->time_align = dict_find(data, APP_KEY_TIME_ALIGN)->value->uint8;
   s_prefs->battery_loc = dict_find(data, APP_KEY_BATTERY_LOC)->value->uint8;
+  s_prefs->num_elements = dict_find(data, APP_KEY_NUM_ELEMENTS)->value->uint8;
 
-  // TODO
-  if (LAYOUT == LAYOUT_OPTION_A) {
-    set_layout_option_a(s_prefs);
-  } else if (LAYOUT == LAYOUT_OPTION_B) {
-    set_layout_option_b(s_prefs);
-  }
+  decode_layout_elements(s_prefs, s_prefs->num_elements, dict_find(data, APP_KEY_ELEMENTS)->value->cstring);
 
   save_prefs();
 }

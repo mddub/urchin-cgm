@@ -1,10 +1,12 @@
 import errno
+import json
 import os
 
 from waflib.Task import Task
 
 DEFAULT_BUILD_ENV = 'production'
 BUILD_ENV = os.environ.get('BUILD_ENV', DEFAULT_BUILD_ENV)
+CONSTANTS_FILE = 'src/js/constants.json'
 
 ENV_CONSTANTS_OVERRIDES = {
     'test': {
@@ -31,6 +33,15 @@ def ensure_dir(filename):
         if e.errno != errno.EEXIST:
             raise
 
+def override_constants_str_for_env_maybe(constants_json_str):
+    if BUILD_ENV in ENV_CONSTANTS_OVERRIDES.keys():
+        return json.dumps(dict(
+            json.loads(constants_json_str),
+            **ENV_CONSTANTS_OVERRIDES[BUILD_ENV]
+        ))
+    else:
+        return constants_json_str
+
 def generate_testing_headers_maybe(ctx):
     target = 'src/generated/test_maybe.h'
     ensure_dir(target)
@@ -40,15 +51,17 @@ def generate_testing_headers_maybe(ctx):
     else:
         open(target, 'w').close()
 
+def include_constants_for_config_page(ctx):
+    target = 'config/js/generated/constants.js'
+    ensure_dir(target)
+    constants_json_str = override_constants_str_for_env_maybe(open(CONSTANTS_FILE).read())
+    constants_definition = "window.CONSTANTS = {};".format(constants_json_str)
+    with open(target, 'w') as f:
+        f.write(constants_definition)
+
 class concat_and_invoke_js(Task):
     def run(self):
-        constants_json_str = self.inputs[0].read()
-        if BUILD_ENV in ENV_CONSTANTS_OVERRIDES.keys():
-            import json
-            constants_json_str = json.dumps(dict(
-                json.loads(constants_json_str),
-                **ENV_CONSTANTS_OVERRIDES[BUILD_ENV]
-            ))
+        constants_json_str = override_constants_str_for_env_maybe(self.inputs[0].read())
         main_call = "main({});".format(constants_json_str)
 
         all_js = "\n".join([node.read() for node in self.inputs[1:]])
@@ -66,7 +79,9 @@ def configure(ctx):
 def build(ctx):
     ctx.load('pebble_sdk')
 
+    # TODO: specify these the right way so that they can be rebuilt without `pebble clean`
     ctx.add_pre_fun(generate_testing_headers_maybe)
+    ctx.add_pre_fun(include_constants_for_config_page)
 
     binaries = []
 
@@ -83,7 +98,7 @@ def build(ctx):
 
     out_js_node = ctx.path.find_or_declare('pebble-js-app.js')
     js = concat_and_invoke_js(env=ctx.env)
-    js.set_inputs([ctx.path.find_resource('src/js/constants.json')] + ctx.path.ant_glob('src/js/**/*.js'))
+    js.set_inputs([ctx.path.find_resource(CONSTANTS_FILE)] + ctx.path.ant_glob('src/js/**/*.js'))
     js.set_outputs(out_js_node)
     ctx.add_to_group(js)
 

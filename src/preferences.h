@@ -3,15 +3,15 @@
 #include <pebble.h>
 #include "config.h"
 
-#define PREFERENCES_SCHEMA_VERSION 6
+#define PREFERENCES_SCHEMA_VERSION 7
 
 typedef struct __attribute__((__packed__)) ElementConfig {
   int el;
   int w;
   int h;
+  bool black;
   bool bottom;
   bool right;
-  bool black;
 } ElementConfig;
 
 typedef struct __attribute__((__packed__)) Preferences {

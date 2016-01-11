@@ -2,14 +2,8 @@
 
 #include <pebble.h>
 
-#define LAYOUT_OPTION_A 0
-#define LAYOUT_OPTION_B 1
-
 ///////////////////////////////////////////////////////
 // CONFIGURATION: edit any of these values
-
-// The details of the layout can be set in config.c
-#define LAYOUT LAYOUT_OPTION_A
 
 #define SGV_UPDATE_FREQUENCY (60*1000*5 + 30*1000)
 
@@ -39,13 +33,27 @@
 #define GRAPH_POINT_SIZE 3
 #define GRAPH_INTERVAL_SIZE_SECONDS (5*60)
 
-#define GRAPH_ELEMENT 0
-#define SIDEBAR_ELEMENT 1
-#define STATUS_BAR_ELEMENT 2
-#define TIME_AREA_ELEMENT 3
-#define BG_ROW_ELEMENT 4
+enum {
+  GRAPH_ELEMENT,
+  SIDEBAR_ELEMENT,
+  STATUS_BAR_ELEMENT,
+  TIME_AREA_ELEMENT,
+  BG_ROW_ELEMENT,
+  MAX_LAYOUT_ELEMENTS,
+};
 
-#define MAX_LAYOUT_ELEMENTS 5
+// These are used to encode/decode layout preferences.
+// The order should match constants.PROPERTIES.
+enum {
+  ELEMENT_TYPE,
+  ELEMENT_ENABLED,
+  ELEMENT_WIDTH,
+  ELEMENT_HEIGHT,
+  ELEMENT_BLACK,
+  ELEMENT_BOTTOM,
+  ELEMENT_RIGHT,
+  NUM_ELEMENT_PROPERTIES,
+};
 
 #define NO_ICON -1
 

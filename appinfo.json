@@ -28,7 +28,9 @@
     "bottomOfGraph": 5,
     "hGridlines": 6,
     "timeAlign": 7,
-    "batteryLoc": 8
+    "batteryLoc": 8,
+    "numElements": 9,
+    "elements": 10
   },
   "resources": {
     "media": [

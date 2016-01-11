@@ -13,11 +13,11 @@
 
 static Window *s_window;
 
-static TimeElement *s_time_element;
-static GraphElement *s_graph_element;
-static SidebarElement *s_sidebar_element;
-static StatusBarElement *s_status_bar_element;
-static BGRowElement *s_bg_row_element;
+static TimeElement *s_time_element = NULL;
+static GraphElement *s_graph_element = NULL;
+static SidebarElement *s_sidebar_element = NULL;
+static StatusBarElement *s_status_bar_element = NULL;
+static BGRowElement *s_bg_row_element = NULL;
 
 static void minute_handler(struct tm *tick_time, TimeUnits units_changed) {
   if (s_time_element != NULL) {
@@ -65,18 +65,23 @@ static void window_load(Window *window) {
 static void window_unload(Window *window) {
   if (s_time_element != NULL) {
     time_element_destroy(s_time_element);
+    s_time_element = NULL;
   }
   if (s_graph_element != NULL) {
     graph_element_destroy(s_graph_element);
+    s_graph_element = NULL;
   }
   if (s_sidebar_element != NULL) {
     sidebar_element_destroy(s_sidebar_element);
+    s_sidebar_element = NULL;
   }
   if (s_status_bar_element != NULL) {
     status_bar_element_destroy(s_status_bar_element);
+    s_status_bar_element = NULL;
   }
   if (s_bg_row_element != NULL) {
     bg_row_element_destroy(s_bg_row_element);
+    s_bg_row_element = NULL;
   }
 
   deinit_layout();

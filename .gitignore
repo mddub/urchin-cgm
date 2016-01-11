@@ -1,5 +1,6 @@
 build
 src/generated
+config/js/generated
 test/output
 .lock-waf*
 *.pyc

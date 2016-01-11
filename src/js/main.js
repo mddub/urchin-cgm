@@ -157,6 +157,28 @@ function main(c) {
     });
   }
 
+  function getLayout(config) {
+    return config.layout === 'custom' ? config.customLayout : c.LAYOUTS[config.layout];
+  }
+
+  function countElementsForPebble(layout) {
+    return layout.elements.filter(function(elementConfig) {
+      return elementConfig['enabled'];
+    }).length;
+  }
+
+  function encodeElementsForPebble(layout) {
+    var out = [];
+    layout.elements.forEach(function(elementConfig) {
+      if (elementConfig['enabled']) {
+        out = out.concat(c.PROPERTIES.map(function(prop) {
+          return elementConfig[prop];
+        }));
+      }
+    });
+    return out;
+  }
+
   function sendPreferences() {
     sendMessage({
       msgType: c.MSG_TYPE_PREFERENCES,
@@ -166,8 +188,10 @@ function main(c) {
       bottomOfRange: config.bottomOfRange,
       bottomOfGraph: config.bottomOfGraph,
       hGridlines: config.hGridlines,
-      timeAlign: c.ALIGN[config.timeAlign],
-      batteryLoc: c.BATTERY_LOC[config.batteryLoc],
+      timeAlign: c.ALIGN[getLayout(config).timeAlign],
+      batteryLoc: c.BATTERY_LOC[getLayout(config).batteryLoc],
+      numElements: countElementsForPebble(getLayout(config)),
+      elements: encodeElementsForPebble(getLayout(config)),
     });
   }
 

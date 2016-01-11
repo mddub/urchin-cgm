@@ -42,6 +42,12 @@
       </div>
 
       <div class="item-container">
+        <div class="button-container">
+          <input id="submit-button" type="submit" class="item-button" value="SAVE">
+        </div>
+      </div>
+
+      <div class="item-container">
         <h3>GRAPH SETTINGS:</h3>
         <div class="item-container-footer">
           All numbers must be in mg/dL.
@@ -175,6 +181,202 @@
       </div>
 
       <div class="item-container">
+        <div class="item-container-header">Layout</div>
+        <div class="item-container-content">
+          <div class="item tab-buttons">
+            <a name="layout" value="a" class="tab-button">A</a>
+            <a name="layout" value="b" class="tab-button">B</a>
+            <a name="layout" value="c" class="tab-button">C</a>
+            <a name="layout" value="d" class="tab-button">D</a>
+            <a name="layout" value="e" class="tab-button">E</a>
+            <a name="layout" value="custom" class="tab-button">Custom</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="item-container">
+        <div class="item-container-content">
+          <label class="item">
+            Show advanced layout settings
+            <input type="checkbox" class="item-toggle" name="advancedLayout">
+          </label>
+        </div>
+      </div>
+
+      <div class="item-container advanced-layout">
+        <div class="item-container-header">Layout order</div>
+        <div class="item-container-content">
+          <div class="layout-order">
+            <label class="item" data-element="GRAPH_ELEMENT">
+              <input type="checkbox" class="item-checkbox">
+              Graph
+            </label>
+            <label class="item" data-element="SIDEBAR_ELEMENT">
+              <input type="checkbox" class="item-checkbox">
+              Sidebar
+            </label>
+            <label class="item" data-element="STATUS_BAR_ELEMENT">
+              <input type="checkbox" class="item-checkbox">
+              Status bar
+            </label>
+            <label class="item" data-element="TIME_AREA_ELEMENT">
+              <input type="checkbox" class="item-checkbox">
+              Time area
+            </label>
+            <label class="item" data-element="BG_ROW_ELEMENT">
+              <input type="checkbox" class="item-checkbox">
+              BG row
+            </label>
+          </div>
+        </div>
+        <div class="item-container-footer">
+          Sidebar must come before or after graph.
+        </div>
+      </div>
+
+      <div class="item-container advanced-layout">
+        <div class="item-container-header">Height (0% - 100%)</div>
+        <div class="item-container-content layout-height">
+          <label class="item" data-element="GRAPH_ELEMENT">
+            Graph
+            <div class="item-input-wrapper item-slider-text">
+              <input type="tel" min="0" max="100" class="item-input">
+            </div>
+          </label>
+          <label class="item" data-element="SIDEBAR_ELEMENT">
+            Sidebar
+            <div class="item-input-wrapper item-slider-text">
+              <input type="tel" min="0" max="100" class="item-input" disabled="disabled">
+            </div>
+          </label>
+          <label class="item" data-element="STATUS_BAR_ELEMENT">
+            Status bar
+            <div class="item-input-wrapper item-slider-text">
+              <input type="tel" min="0" max="100" class="item-input">
+            </div>
+          </label>
+          <label class="item" data-element="TIME_AREA_ELEMENT">
+            Time area
+            <div class="item-input-wrapper item-slider-text">
+              <input type="tel" min="0" max="100" class="item-input">
+            </div>
+          </label>
+          <label class="item" data-element="BG_ROW_ELEMENT">
+            BG row
+            <div class="item-input-wrapper item-slider-text">
+              <input type="tel" min="0" max="100" class="item-input">
+            </div>
+          </label>
+        </div>
+        <div class="item-container-footer">
+          All elements with a height of 0% will share the space remaining from elements with non-zero height. The sidebar always has the same height as the graph.
+        </div>
+      </div>
+
+      <div class="layout-element-config advanced-layout">
+        <div class="item-container" data-element="GRAPH_ELEMENT">
+          <div class="item-container-header">
+            Graph
+          </div>
+          <div class="item-container-content">
+            <label class="item">
+              <input type="checkbox" class="item-checkbox" name="black">
+              Black background
+            </label>
+            <label class="item">
+              <input type="checkbox" class="item-checkbox" name="bottom">
+              Bottom border
+            </label>
+            <label class="item">
+              <input type="checkbox" class="item-checkbox" name="right">
+              Right border
+            </label>
+          </div>
+        </div>
+
+        <div class="item-container" data-element="SIDEBAR_ELEMENT">
+          <div class="item-container-header">
+            Sidebar
+          </div>
+          <div class="item-container-content">
+            <label class="item">
+              <input type="checkbox" class="item-checkbox" name="black">
+              Black background
+            </label>
+            <label class="item">
+              <input type="checkbox" class="item-checkbox" name="bottom">
+              Bottom border
+            </label>
+            <label class="item">
+              <input type="checkbox" class="item-checkbox" name="right">
+              Right border
+            </label>
+          </div>
+        </div>
+
+        <div class="item-container" data-element="STATUS_BAR_ELEMENT">
+          <div class="item-container-header">
+            Status bar
+          </div>
+          <div class="item-container-content">
+            <label class="item">
+              <input type="checkbox" class="item-checkbox" name="black">
+              Black background
+            </label>
+            <label class="item">
+              <input type="checkbox" class="item-checkbox" name="bottom">
+              Bottom border
+            </label>
+            <label class="item">
+              <input type="checkbox" class="item-checkbox" name="right">
+              Right border
+            </label>
+          </div>
+        </div>
+
+        <div class="item-container" data-element="TIME_AREA_ELEMENT">
+          <div class="item-container-header">
+            Time area
+          </div>
+          <div class="item-container-content">
+            <label class="item">
+              <input type="checkbox" class="item-checkbox" name="black">
+              Black background
+            </label>
+            <label class="item">
+              <input type="checkbox" class="item-checkbox" name="bottom">
+              Bottom border
+            </label>
+            <label class="item">
+              <input type="checkbox" class="item-checkbox" name="right">
+              Right border
+            </label>
+          </div>
+        </div>
+
+        <div class="item-container" data-element="BG_ROW_ELEMENT">
+          <div class="item-container-header">
+            BG row
+          </div>
+          <div class="item-container-content">
+            <label class="item">
+              <input type="checkbox" class="item-checkbox" name="black">
+              Black background
+            </label>
+            <label class="item">
+              <input type="checkbox" class="item-checkbox" name="bottom">
+              Bottom border
+            </label>
+            <label class="item">
+              <input type="checkbox" class="item-checkbox" name="right">
+              Right border
+            </label>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="item-container advanced-layout">
         <div class="item-container-header">Time alignment</div>
         <div class="item-container-content">
           <label class="item">
@@ -188,7 +390,7 @@
         </div>
       </div>
 
-      <div class="item-container">
+      <div class="item-container advanced-layout">
         <div class="item-container-header">Battery</div>
         <div class="item-container-content">
           <label class="item">
@@ -212,7 +414,9 @@
       </div>
 
     </form>
+    <!-- TODO this page really needs templating and proper inclusion in the build process //-->
     <script src="js/slate.min.js"></script>
+    <script src="js/generated/constants.js"></script>
     <script src="js/config.js"></script>
   </body>
 </html>
