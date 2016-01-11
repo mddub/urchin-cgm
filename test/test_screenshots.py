@@ -1,7 +1,10 @@
+import copy
 import math
 from datetime import datetime
 from datetime import timedelta
 
+from util import BASE_CONFIG
+from util import CONSTANTS
 from util import MOCK_HOST
 from util import ScreenshotTest
 
@@ -41,27 +44,30 @@ def default_entries(direction, count=50):
         in zip(default_sgv_series(count), default_dates(count))
     ]
 
+def some_real_life_entries():
+    sgvs = [190, 188, 180, 184, 184, 177, 174, 163, 152, 141, 134, 127, 124, 121, 117, 109, 103, 97, 94, 88, 79, 79, 75, 79, 84, 87, 88, 91, 91, 91, 94, 99, 102, 107, 106, 108, 107, 108, 115, 111, 114, 113, 115, 118, 120, 119, 120, 122, 123, 126, 122, 125, 125, 126, 125, 122, 122, 122, 119, 118, 118, 118, 117, 116, 115, 114, 114, 115, 114, 113, 114, 115, 111, 114, 115, 114, 114, 116, 117, 117, 118, 119, 121, 124, 125, 128, 126, 128, 131, 133, 135, 136, 135, 134, 132, 130]
+    return [
+        {
+            'type': 'sgv',
+            'sgv': sgv,
+            'date': date,
+            'direction': 'Flat',
+            'trend': 4,
+        }
+        for sgv, date
+        in zip(sgvs, default_dates(len(sgvs)))
+    ]
+
 
 class TestBasicIntegration(ScreenshotTest):
     """Test that the graph, delta, trend, etc. all work."""
     sgvs = default_entries('FortyFiveDown')
 
 
-class TestMmolAndTimeAndBatteryPositioning(ScreenshotTest):
-    """Test mmol, plus repositioning time and battery."""
+class TestMmol(ScreenshotTest):
+    """Test mmol."""
     config = {
         'mmol': True,
-        'timeAlign': 'right',
-        'batteryLoc': 'timeBottomLeft',
-    }
-    sgvs = default_entries('Flat')
-
-
-class TestTimeLeftBatteryTopRight(ScreenshotTest):
-    """Test left-aligning time and putting battery in top right of time area."""
-    config = {
-        'timeAlign': 'left',
-        'batteryLoc': 'timeTopRight',
     }
     sgvs = default_entries('Flat')
 
@@ -143,6 +149,84 @@ class TestDegenerateEntries(ScreenshotTest):
         return s
 
 
-class TestNoSGVs(ScreenshotTest):
-    """Test that the watchface indicates when there are no recent SGV entries."""
-    sgvs = []
+class TestBlackBackground(ScreenshotTest):
+    """Test that the time, status bar, sidebar, and graph elements can be set to a black background."""
+    @property
+    def config(self):
+        layout = copy.deepcopy(CONSTANTS['LAYOUTS']['a'])
+        elements_under_test = [CONSTANTS['ELEMENTS'][el['el']] for el in layout['elements']]
+        assert all([
+            el in elements_under_test
+            for el
+            in ('TIME_AREA_ELEMENT', 'STATUS_BAR_ELEMENT', 'SIDEBAR_ELEMENT', 'GRAPH_ELEMENT')
+        ])
+
+        for el in layout['elements']:
+            el['black'] = True
+        return {
+            'layout': 'custom',
+            'customLayout': layout,
+            'statusContent': 'customtext',
+            'statusText': 'black as coal',
+        }
+
+    sgvs = default_entries('Flat')
+
+
+class TestLayoutA(ScreenshotTest):
+    """Test layout A."""
+    sgvs = some_real_life_entries()
+    config = {
+        'layout': 'a',
+        'statusContent': 'customtext',
+        'statusText': 'Cln 179 186 187',
+    }
+
+
+class TestLayoutB(ScreenshotTest):
+    """Test layout B."""
+    sgvs = some_real_life_entries()
+    config = {
+        'layout': 'b',
+        'statusContent': 'customtext',
+        'statusText': 'Cln 179 186 187',
+    }
+
+
+class TestLayoutC(ScreenshotTest):
+    """Test layout C."""
+    sgvs = some_real_life_entries()
+    config = {
+        'layout': 'c',
+        'statusContent': 'customtext',
+        'statusText': 'Cln 179 186 187',
+    }
+
+
+class TestLayoutD(ScreenshotTest):
+    """Test layout D."""
+    sgvs = some_real_life_entries()
+    config = {
+        'layout': 'd',
+    }
+
+
+class TestLayoutE(ScreenshotTest):
+    """Test layout E."""
+    sgvs = some_real_life_entries()
+    config = {
+        'layout': 'e',
+        'statusContent': 'customtext',
+        'statusText': 'More space for extra long text. Monitoring a DIY artificial pancreas, perhaps?',
+    }
+
+
+class TestLayoutCustom(ScreenshotTest):
+    """Test the default custom layout."""
+    sgvs = some_real_life_entries()
+    config = {
+        'layout': 'custom',
+        'customLayout': BASE_CONFIG['customLayout'],
+        'statusContent': 'customtext',
+        'statusText': 'You are marvelous. The gods wait to delight in you.'
+    }

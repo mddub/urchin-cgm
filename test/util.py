@@ -1,18 +1,19 @@
 import errno
+import json
 import os
 import subprocess
 import time
 from datetime import datetime
 
 import requests
-import simplejson as json
 
 PORT = os.environ['MOCK_SERVER_PORT']
 MOCK_HOST = 'http://localhost:{}'.format(PORT)
 
-BASE_CONFIG = json.loads(
+CONSTANTS = json.loads(
     open(os.path.join(os.path.dirname(__file__), '../src/js/constants.json')).read()
-)['DEFAULT_CONFIG']
+)
+BASE_CONFIG = CONSTANTS['DEFAULT_CONFIG']
 
 def set_config(config):
     _post_mock_server('/set-config', config)

@@ -1,4 +1,5 @@
 import os
+import urllib
 
 import requests
 from flask import Flask, request
@@ -26,7 +27,7 @@ def auto_config():
     in the cache by the most recent POST to /set-config.
     """
     return_to = request.args.get('return_to')
-    requests.get(return_to + cache.get('config'))
+    requests.get(return_to + urllib.quote(cache.get('config')))
     return ''
 
 @app.route('/set-config', methods=['post'])
