@@ -9,7 +9,7 @@
 #define PADDING_BOTTOM_42 8
 
 #include "generated/test_maybe.h"
-#define TESTING_TIME_DISPLAY "11:23"
+#define TESTING_TIME_DISPLAY "13:37"
 
 static BatteryComponent *create_battery_component(Layer *parent, unsigned int battery_loc) {
   GRect bounds = element_get_bounds(parent);

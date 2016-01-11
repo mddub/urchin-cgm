@@ -9,7 +9,7 @@ python "$TEST_DIR/server.py" & PID=$!
 sleep 0.5
 
 # Run tests
-py.test -v $@
+py.test $@
 pebble kill
 
 # Kill Flask server
