@@ -2,7 +2,8 @@
 
 #include <pebble.h>
 
-#define CONTENT_SIZE 256
+// Size can be up to ~390 when status bar text is 255 bytes long (as of fa6984)
+#define CONTENT_SIZE 512
 
 // There are many failure modes...
 #define INITIAL_TIMEOUT 1000

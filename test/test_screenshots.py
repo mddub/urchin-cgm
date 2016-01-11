@@ -173,6 +173,15 @@ class TestBlackBackground(ScreenshotTest):
     sgvs = default_entries('Flat')
 
 
+class TestStatusTextTooLong(ScreenshotTest):
+    """Test that the watchface doesn't crash when the status text is too long."""
+    config = {
+        'statusContent': 'customtext',
+        'statusText': '^_^ ' * 100,
+    }
+    sgvs = default_entries('Flat')
+
+
 class TestLayoutA(ScreenshotTest):
     """Test layout A."""
     sgvs = some_real_life_entries()

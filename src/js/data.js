@@ -75,7 +75,7 @@ var Data = function(c) {
   };
 
   d.getCustomText = function(config, callback) {
-    callback(null, config.statusText);
+    callback(null, (config.statusText || '').substr(0, 255));
   };
 
   d.getCustomUrl = function(config, callback) {

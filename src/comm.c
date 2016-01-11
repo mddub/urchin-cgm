@@ -80,6 +80,9 @@ static void in_received_handler(DictionaryIterator *received, void *context) {
 }
 
 static void in_dropped_handler(AppMessageResult reason, void *context) {
+  // https://developer.getpebble.com/docs/c/Foundation/AppMessage/#AppMessageResult
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Incoming AppMessage dropped, %d", reason);
+
   update_in_progress = false;
   schedule_update(IN_RETRY_DELAY);
 }
