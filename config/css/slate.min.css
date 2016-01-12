@@ -31,3 +31,34 @@
   color: #a8a8a8;
   border: 1px solid #a8a8a8;
 }
+
+#layout-preview {
+  width: 144px;
+  height: 168px;
+  border: 1px solid #DEDEDE;
+  margin: 0 auto 10px;
+}
+
+.layout-preview-a {
+  background: url(../images/layouts.png) 0 0;
+}
+
+.layout-preview-b {
+  background: url(../images/layouts.png) -144px 0;
+}
+
+.layout-preview-c {
+  background: url(../images/layouts.png) -288px 0;
+}
+
+.layout-preview-d {
+  background: url(../images/layouts.png) -432px 0;
+}
+
+.layout-preview-e {
+  background: url(../images/layouts.png) -576px 0;
+}
+
+.layout-preview-custom {
+  background: url(../images/layouts.png) -720px 0;
+}

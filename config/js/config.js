@@ -195,12 +195,18 @@
     });
   }
 
+  function showLayoutPreview(layout) {
+    $('#layout-preview').removeClass(function(i, oldClass) { return oldClass; });
+    $('#layout-preview').addClass('layout-preview-' + layout);
+  }
+
   function onLayoutChoiceChange() {
     if (currentLayoutChoice === 'custom') {
       // if switching from custom to a preset, save the custom layout
       customLayout = encodeLayout();
     }
     currentLayoutChoice = $('[name=layout].active').attr('value');
+    showLayoutPreview(currentLayoutChoice);
     decodeLayout(currentLayoutChoice);
     updateLayoutUpDownEnabledState();
     reorderLayoutInputs();
