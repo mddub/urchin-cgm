@@ -37,7 +37,7 @@
             {"el": 3, "enabled": true, "width": 100, "height": 0, "black": false, "bottom": true, "right": false},
             {"el": 0, "enabled": true, "width": 75, "height": 52, "black": false, "bottom": true, "right": true},
             {"el": 1, "enabled": true, "width": 25, "height": 52, "black": false, "bottom": true, "right": false},
-            {"el": 2, "enabled": true, "width": 100, "height": 13, "black": false, "bottom": false, "right": false},
+            {"el": 2, "enabled": true, "width": 100, "height": 12, "black": false, "bottom": false, "right": false},
             {"el": 4, "enabled": false, "width": 100, "height": 0, "black": false, "bottom": false, "right": false}
          ],
          "batteryLoc" : "statusRight",
@@ -47,7 +47,7 @@
          "elements": [
             {"el": 0, "enabled": true, "width": 75, "height": 52, "black": false, "bottom": true, "right": true},
             {"el": 1, "enabled": true, "width": 25, "height": 52, "black": false, "bottom": true, "right": false},
-            {"el": 2, "enabled": true, "width": 100, "height": 13, "black": false, "bottom": false, "right": false},
+            {"el": 2, "enabled": true, "width": 100, "height": 10, "black": false, "bottom": false, "right": false},
             {"el": 3, "enabled": true, "width": 100, "height": 0, "black": false, "bottom": false, "right": false},
             {"el": 4, "enabled": false, "width": 100, "height": 0, "black": false, "bottom": false, "right": false}
          ],
@@ -59,7 +59,7 @@
             {"el": 0, "enabled": true, "width": 100, "height": 35, "black": false, "bottom": false, "right": false},
             {"el": 1, "enabled": false, "width": 100, "height": 35, "black": false, "bottom": false, "right": false},
             {"el": 4, "enabled": true, "width": 100, "height": 25, "black": true, "bottom": false, "right": false},
-            {"el": 2, "enabled": true, "width": 100, "height": 13, "black": false, "bottom": false, "right": false},
+            {"el": 2, "enabled": true, "width": 100, "height": 10, "black": false, "bottom": false, "right": false},
             {"el": 3, "enabled": true, "width": 100, "height": 0, "black": false, "bottom": false, "right": false}
          ],
          "batteryLoc" : "statusRight",
