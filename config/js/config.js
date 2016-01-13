@@ -239,9 +239,13 @@
     return match !== undefined ? match : 'custom';
   }
 
-  function maybeHighlightCustomLayout() {
-    $('[name=layout]').removeClass('active');
-    $('[name=layout][value=' + deriveLayoutChoiceFromInputs() + ']').addClass('active');
+  function maybeUpdateSelectedLayout() {
+    var layout = deriveLayoutChoiceFromInputs();
+    if (layout !== $('[name=layout].active').attr('value')) {
+      $('[name=layout]').removeClass('active');
+      $('[name=layout][value=' + layout + ']').addClass('active');
+      showLayoutPreview(layout);
+    }
   }
 
   function populateValues(current) {
@@ -325,13 +329,13 @@
       onLayoutUpDownButtonClick(evt);
       updateLayoutUpDownEnabledState();
       reorderLayoutInputs();
-      maybeHighlightCustomLayout();
+      maybeUpdateSelectedLayout();
     });
 
     $('.layout-order input').on('change', function() {
       updateLayoutUpDownEnabledState();
       reorderLayoutInputs();
-      maybeHighlightCustomLayout();
+      maybeUpdateSelectedLayout();
     });
 
     $('[name=advancedLayout]').on('change', toggleAdvancedLayout);
@@ -352,7 +356,7 @@
       '.layout-element-config input',
       '[name=timeAlign]',
       '[name=batteryLoc]',
-    ].join(', ')).on('change', maybeHighlightCustomLayout);
+    ].join(', ')).on('change', maybeUpdateSelectedLayout);
 
     document.getElementById('config-form').addEventListener('submit', onSubmit);
 
