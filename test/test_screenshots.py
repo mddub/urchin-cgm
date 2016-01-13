@@ -89,9 +89,16 @@ class TestStaleServerData(ScreenshotTest):
     sgvs = default_entries('SingleDown')[7:]
 
 
-class TestNotRecentButNotYetStale(ScreenshotTest):
-    """Test that trend and delta are not shown when data is not recent."""
+class TestNotRecentButNotYetStaleSidebar(ScreenshotTest):
+    """Test that trend and delta are not shown in the sidebar when data is not recent."""
     sgvs = default_entries('SingleDown')[2:]
+    config = {'layout': 'a'}
+
+
+class TestNotRecentButNotYetStaleBGRow(ScreenshotTest):
+    """Test that trend and delta are not shown in the BG row when data is not recent."""
+    sgvs = default_entries('SingleDown')[2:]
+    config = {'layout': 'c'}
 
 
 class TestErrorCodes(ScreenshotTest):
