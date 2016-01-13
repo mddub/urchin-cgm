@@ -3,8 +3,6 @@
 
 (function($, c) {
 
-  var VERSION = '0.0.3';
-
   var SLIDER_KEYS = [
     'topOfGraph',
     'topOfRange',
@@ -282,6 +280,7 @@
     }
     var mmol = document.getElementById('units-mgdl').className.indexOf('active') === -1;
     var out = {
+      version: c.VERSION,
       mmol: mmol,
       nightscout_url: document.getElementById('ns-url').value.replace(/\/$/, ''),
       hGridlines: tryParseInt(document.getElementById('hGridlines').value),
@@ -309,8 +308,8 @@
     populateValues(current);
 
     $('#update-available #running-version').text(getQueryParam('version') || '0.0.0');
-    $('#update-available #available-version').text(VERSION);
-    $('#update-available').toggle(VERSION !== getQueryParam('version'));
+    $('#update-available #available-version').text(c.VERSION);
+    $('#update-available').toggle(c.VERSION !== getQueryParam('version'));
 
     $('#statusContent').on('change', function(evt) {
       $('#status-text-container').toggle(evt.currentTarget.value === 'customtext');
