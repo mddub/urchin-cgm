@@ -14,6 +14,14 @@
   var customLayout;
   var currentLayoutChoice;
 
+  function upgradeConfig(config) {
+    if (config.layout === undefined) {
+      // config is un-versioned and older than v0.0.4
+      config.layout = 'a';
+    }
+    return config;
+  }
+
   // https://developer.getpebble.com/guides/pebble-apps/pebblekit-js/app-configuration/
   function getQueryParam(variable, defaultValue) {
     var query = document.location.search.substring(1);
@@ -304,7 +312,8 @@
 
   $(function() {
 
-    var current = JSON.parse(getQueryParam('current', '{}'));
+    var phoneConfig = JSON.parse(getQueryParam('current', '{}'));
+    var current = upgradeConfig(phoneConfig);
     populateValues(current);
 
     $('#update-available #running-version').text(getQueryParam('version') || '0.0.0');
