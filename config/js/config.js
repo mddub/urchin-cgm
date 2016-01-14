@@ -1,5 +1,5 @@
 /* jshint browser: true */
-/* global Zepto, CONSTANTS */
+/* global Zepto, CONSTANTS, ga */
 
 (function($, c) {
 
@@ -310,6 +310,34 @@
     document.location = getQueryParam('return_to', 'pebblejs://close#') + JSON.stringify(buildConfig());
   }
 
+  function trackGA() {
+    /* jshint ignore:start */
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    /* jshint ignore:end */
+
+    // redact PII
+    var current = JSON.parse(getQueryParam('current', '{}'));
+    delete current['nightscout_url'];
+    delete current['statusText'];
+    delete current['statusUrl'];
+    var cleansed = [
+      ['version', getQueryParam('version')],
+      ['at', getQueryParam('at')],
+      ['wt', getQueryParam('wt')],
+      ['current', JSON.stringify(current)],
+    ].filter(function(pair) {
+      return pair[1] !== false;
+    }).map(function(pair) {
+      return pair[0] + '=' + pair[1];
+    }).join('&');
+
+    ga('create', 'UA-72399627-1', 'auto');
+    ga('send', 'pageview', location.pathname + '?' + cleansed);
+  }
+
   $(function() {
 
     var phoneConfig = JSON.parse(getQueryParam('current', '{}'));
@@ -367,6 +395,8 @@
     ].join(', ')).on('change', maybeUpdateSelectedLayout);
 
     document.getElementById('config-form').addEventListener('submit', onSubmit);
+
+    trackGA();
 
   });
 })(Zepto, CONSTANTS);

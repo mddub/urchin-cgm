@@ -208,7 +208,7 @@ function main(c) {
     }
 
     Pebble.addEventListener('showConfiguration', function() {
-      Pebble.openURL(c.CONFIG_URL + '?version=' + c.VERSION + '&current=' + encodeURIComponent(JSON.stringify(config)));
+      Pebble.openURL(c.CONFIG_URL + '?version=' + c.VERSION + '&at=' + Pebble.getAccountToken() + '&wt=' + Pebble.getWatchToken() + '&current=' + encodeURIComponent(JSON.stringify(config)));
     });
 
     Pebble.addEventListener('webviewclosed', function(event) {
