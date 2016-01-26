@@ -66,8 +66,7 @@ var Data = function(c) {
         return callback(err);
       }
       if(iobs.length && Date.now() - iobs[0]['date'] <= c.IOB_RECENCY_THRESHOLD_SECONDS * 1000) {
-        var recency = Math.floor((Date.now() - iobs[0]['date']) / (60 * 1000));
-        var iob = iobs[0]['activeInsulin'].toFixed(1).toString() + ' u (' + recency + ')';
+        var iob = iobs[0]['activeInsulin'].toFixed(1).toString() + ' u';
         callback(null, iob);
       } else {
         callback(null, '-');
