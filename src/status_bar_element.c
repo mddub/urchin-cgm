@@ -14,19 +14,20 @@ StatusBarElement* status_bar_element_create(Layer *parent) {
 
   int sm_text_margin = 2;
 
-  int y, height;
+  int text_y, height;
   if (bounds.size.h <= ACTUAL_TEXT_HEIGHT_18 + PADDING_TOP_18 + PADDING_BOTTOM_18) {
     // vertically center text if there is only room for one line
-    y = (bounds.size.h - ACTUAL_TEXT_HEIGHT_18) / 2 - PADDING_TOP_18;
+    text_y = (bounds.size.h - ACTUAL_TEXT_HEIGHT_18) / 2 - PADDING_TOP_18;
     height = ACTUAL_TEXT_HEIGHT_18 + PADDING_TOP_18 + PADDING_BOTTOM_18;
   } else {
     // otherwise take up all the space, with half the default padding
-    y = -1 * PADDING_TOP_18 / 2;
-    height = bounds.size.h - y;
+    text_y = -1 * PADDING_TOP_18 / 2;
+    height = bounds.size.h - text_y;
   }
+
   TextLayer *text = text_layer_create(GRect(
     sm_text_margin,
-    y,
+    text_y,
     bounds.size.w - sm_text_margin,
     height
   ));
@@ -40,7 +41,15 @@ StatusBarElement* status_bar_element_create(Layer *parent) {
 
   BatteryComponent *battery = NULL;
   if (get_prefs()->battery_loc == BATTERY_LOC_STATUS_RIGHT) {
-    battery = battery_component_create(parent, bounds.size.w - battery_component_width() - battery_component_vertical_padding(), (bounds.size.h - battery_component_height()) / 2);
+    // align the battery to the middle of the lowest line of text
+    int lines = (bounds.size.h - text_y) / (ACTUAL_TEXT_HEIGHT_18 + PADDING_TOP_18);
+    int battery_y = text_y + (ACTUAL_TEXT_HEIGHT_18 + PADDING_TOP_18) * (lines - 1) + PADDING_TOP_18 + ACTUAL_TEXT_HEIGHT_18 / 2 - battery_component_height() / 2 + 1;
+    // ...unless that places it too close to the bottom
+    if (battery_y + battery_component_height() - battery_component_vertical_padding() > bounds.size.h - sm_text_margin) {
+      battery_y = bounds.size.h - battery_component_height() + battery_component_vertical_padding() - sm_text_margin;
+    }
+
+    battery = battery_component_create(parent, bounds.size.w - battery_component_width() - sm_text_margin, battery_y);
   }
 
   StatusBarElement *el = malloc(sizeof(StatusBarElement));

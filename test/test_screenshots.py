@@ -58,6 +58,11 @@ def some_real_life_entries():
         in zip(sgvs, default_dates(len(sgvs)))
     ]
 
+def mutate_element(layout, el_name, props):
+    for el in layout['elements']:
+        if CONSTANTS['ELEMENTS'][el['el']] == el_name:
+            el.update(props)
+
 
 class TestBasicIntegration(ScreenshotTest):
     """Test that the graph, delta, trend, etc. all work."""
@@ -246,3 +251,38 @@ class TestLayoutCustom(ScreenshotTest):
         'statusContent': 'customtext',
         'statusText': 'You are marvelous. The gods wait to delight in you.'
     }
+
+
+class BaseBatteryLocInStatusTest(ScreenshotTest):
+    status_props = None
+    status_text = None
+
+    @property
+    def __test__(self):
+        return not self.__class__ == BaseBatteryLocInStatusTest
+
+    @property
+    def config(self):
+        layout = copy.deepcopy(CONSTANTS['LAYOUTS']['e'])
+        layout['batteryLoc'] = 'statusRight'
+        mutate_element(layout, 'STATUS_BAR_ELEMENT', self.status_props)
+        return {
+            'layout': 'custom',
+            'customLayout': layout,
+            'statusContent': 'customtext',
+            'statusText': self.status_text,
+        }
+
+    sgvs = default_entries('FortyFiveDown')
+
+
+class TestBatteryLocInStatusAlignedWithLastLineOfText(BaseBatteryLocInStatusTest):
+    """Test that the battery is aligned to the bottom line of text in the status bar."""
+    status_props = {'height': 28}
+    status_text = 'Battery is level with last completely visible line of text'
+
+
+class TestBatteryLocInStatusMinimumPadding(BaseBatteryLocInStatusTest):
+    """Test that the battery has a minimum bottom padding."""
+    status_props = {'height': 21, 'bottom': True}
+    status_text = 'Should not be flush against the bottom'
