@@ -14,6 +14,7 @@ var Data = function(c) {
 
     var xhr = new XMLHttpRequest();
     xhr.open('GET', url, true);
+    xhr.setRequestHeader('Cache-Control', 'no-cache');
     xhr.onreadystatechange = function () {
       if (timedOut) {
         return;
