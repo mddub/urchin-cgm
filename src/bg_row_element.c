@@ -11,9 +11,8 @@
 #define PADDING_TOP_28 10
 #define PADDING_BOTTOM_28 4
 
-#define BG_EDGE_PADDING 2
-#define BG_TREND_PADDING 4
-#define TREND_DELTA_PADDING 3
+#define BG_TREND_PADDING 8
+#define TREND_DELTA_PADDING 5
 #define MISSING_TREND_BG_DELTA_PADDING 10
 
 static void bg_row_element_rearrange(BGRowElement *el) {
