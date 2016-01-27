@@ -15,21 +15,26 @@ static BatteryComponent *create_battery_component(Layer *parent, unsigned int ba
   GRect bounds = element_get_bounds(parent);
   int x = -1;
   int y = -1;
+  bool align_right;
   if (get_prefs()->battery_loc == BATTERY_LOC_TIME_TOP_LEFT) {
     x = battery_component_vertical_padding();
     y = 0;
+    align_right = false;
   } else if (get_prefs()->battery_loc == BATTERY_LOC_TIME_TOP_RIGHT) {
     x = bounds.size.w - battery_component_width() - battery_component_vertical_padding();
     y = 0;
+    align_right = true;
   } else if (get_prefs()->battery_loc == BATTERY_LOC_TIME_BOTTOM_LEFT) {
     x = battery_component_vertical_padding();
     y = bounds.size.h - battery_component_height();
+    align_right = false;
   } else if (get_prefs()->battery_loc == BATTERY_LOC_TIME_BOTTOM_RIGHT) {
     x = bounds.size.w - battery_component_width() - battery_component_vertical_padding();
     y = bounds.size.h - battery_component_height();
+    align_right = true;
   }
   if (x != -1) {
-    return battery_component_create(parent, x, y);
+    return battery_component_create(parent, x, y, align_right);
   } else {
     return NULL;
   }

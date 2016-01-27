@@ -274,6 +274,12 @@
     document.getElementById('statusText').value = current['statusText'] || '';
     document.getElementById('statusUrl').value = current['statusUrl'] || '';
 
+    if (current.batteryAsNumber === true) {
+      $('[name=batteryAsNumber][value=number]').addClass('active');
+    } else {
+      $('[name=batteryAsNumber][value=icon]').addClass('active');
+    }
+
     $('[name=layout][value=' + current.layout + ']').addClass('active');
     $('[name=advancedLayout]').prop('checked', !!current['advancedLayout']);
 
@@ -295,6 +301,7 @@
       statusContent: document.getElementById('statusContent').value,
       statusText: document.getElementById('statusText').value,
       statusUrl: document.getElementById('statusUrl').value,
+      batteryAsNumber: $('[name=batteryAsNumber][value=number]').hasClass('active'),
       layout: $('[name=layout].active').attr('value'),
       advancedLayout: $('[name=advancedLayout]').is(':checked'),
       customLayout: customLayout,
@@ -307,7 +314,7 @@
 
   function onSubmit(e) {
     e.preventDefault();
-    document.location = getQueryParam('return_to', 'pebblejs://close#') + JSON.stringify(buildConfig());
+    document.location = getQueryParam('return_to', 'pebblejs://close#') + encodeURIComponent(JSON.stringify(buildConfig()));
   }
 
   function trackGA() {

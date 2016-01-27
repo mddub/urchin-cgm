@@ -16,6 +16,7 @@
       "statusRawCount" : 2,
       "statusUrl" : "",
       "statusText" : "",
+      "batteryAsNumber": false,
       "layout" : "a",
       "advancedLayout": false,
       "customLayout": {

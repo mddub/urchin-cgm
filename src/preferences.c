@@ -56,6 +56,7 @@ static void set_default_prefs() {
   s_prefs->bottom_of_range = 75;
   s_prefs->bottom_of_graph = 40;
   s_prefs->h_gridlines = 50;
+  s_prefs->battery_as_number = false;
   s_prefs->time_align = ALIGN_CENTER;
   s_prefs->battery_loc = BATTERY_LOC_STATUS_RIGHT;
 
@@ -118,6 +119,7 @@ void set_prefs(DictionaryIterator *data) {
   s_prefs->bottom_of_range = dict_find(data, APP_KEY_BOTTOM_OF_RANGE)->value->uint8;
   s_prefs->bottom_of_graph = dict_find(data, APP_KEY_BOTTOM_OF_GRAPH)->value->uint8;
   s_prefs->h_gridlines = dict_find(data, APP_KEY_H_GRIDLINES)->value->uint8;
+  s_prefs->battery_as_number = (bool)dict_find(data, APP_KEY_BATTERY_AS_NUMBER)->value->uint8;
   s_prefs->time_align = dict_find(data, APP_KEY_TIME_ALIGN)->value->uint8;
   s_prefs->battery_loc = dict_find(data, APP_KEY_BATTERY_LOC)->value->uint8;
   s_prefs->num_elements = dict_find(data, APP_KEY_NUM_ELEMENTS)->value->uint8;

@@ -43,13 +43,13 @@ StatusBarElement* status_bar_element_create(Layer *parent) {
   if (get_prefs()->battery_loc == BATTERY_LOC_STATUS_RIGHT) {
     // align the battery to the middle of the lowest line of text
     int lines = (bounds.size.h - text_y) / (ACTUAL_TEXT_HEIGHT_18 + PADDING_TOP_18);
-    int battery_y = text_y + (ACTUAL_TEXT_HEIGHT_18 + PADDING_TOP_18) * (lines - 1) + PADDING_TOP_18 + ACTUAL_TEXT_HEIGHT_18 / 2 - battery_component_height() / 2 + 1;
+    int battery_y = text_y + (ACTUAL_TEXT_HEIGHT_18 + PADDING_TOP_18) * (lines - 1) + PADDING_TOP_18 + ACTUAL_TEXT_HEIGHT_18 / 2 - battery_component_height() / 2;
     // ...unless that places it too close to the bottom
     if (battery_y + battery_component_height() - battery_component_vertical_padding() > bounds.size.h - sm_text_margin) {
       battery_y = bounds.size.h - battery_component_height() + battery_component_vertical_padding() - sm_text_margin;
     }
 
-    battery = battery_component_create(parent, bounds.size.w - battery_component_width() - sm_text_margin, battery_y);
+    battery = battery_component_create(parent, bounds.size.w - battery_component_width() - sm_text_margin, battery_y, true);
   }
 
   StatusBarElement *el = malloc(sizeof(StatusBarElement));

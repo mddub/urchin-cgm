@@ -27,10 +27,11 @@
     "bottomOfRange": 4,
     "bottomOfGraph": 5,
     "hGridlines": 6,
-    "timeAlign": 7,
-    "batteryLoc": 8,
-    "numElements": 9,
-    "elements": 10
+    "batteryAsNumber": 7,
+    "timeAlign": 8,
+    "batteryLoc": 9,
+    "numElements": 10,
+    "elements": 11
   },
   "resources": {
     "media": [

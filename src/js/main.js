@@ -188,6 +188,7 @@ function main(c) {
       bottomOfRange: config.bottomOfRange,
       bottomOfGraph: config.bottomOfGraph,
       hGridlines: config.hGridlines,
+      batteryAsNumber: config.batteryAsNumber,
       timeAlign: c.ALIGN[getLayout(config).timeAlign],
       batteryLoc: c.BATTERY_LOC[getLayout(config).batteryLoc],
       numElements: countElementsForPebble(getLayout(config)),

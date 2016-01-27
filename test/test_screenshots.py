@@ -286,3 +286,13 @@ class TestBatteryLocInStatusMinimumPadding(BaseBatteryLocInStatusTest):
     """Test that the battery has a minimum bottom padding."""
     status_props = {'height': 21, 'bottom': True}
     status_text = 'Should not be flush against the bottom'
+
+
+class TestBatteryAsNumber(ScreenshotTest):
+    sgvs = default_entries('FortyFiveUp')
+    config = {
+        'layout': 'a',
+        'statusContent': 'customtext',
+        'statusText': 'battery ------>',
+        'batteryAsNumber': True,
+    }
