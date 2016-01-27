@@ -8,68 +8,15 @@ static void save_prefs() {
   persist_write_data(PERSIST_KEY_PREFERENCES_OBJECT, s_prefs, sizeof(Preferences));
 }
 
-static void set_default_layout(Preferences *dest) {
-  // XXX duplicate layout "a" here
-  // this is temporary - need a way to request prefs from phone
-  int i = 0;
-  dest->elements[i++] = (ElementConfig) {
-    .el = TIME_AREA_ELEMENT,
-    .w = 100,
-    .h = 0,
-    .black = false,
-    .bottom = true,
-    .right = false,
-  };
-  dest->elements[i++] = (ElementConfig) {
-    .el = GRAPH_ELEMENT,
-    .w = 75,
-    .h = 52,
-    .black = false,
-    .bottom = true,
-    .right = true,
-  };
-  dest->elements[i++] = (ElementConfig) {
-    .el = SIDEBAR_ELEMENT,
-    .w = 25,
-    .h = 52,
-    .black = false,
-    .bottom = true,
-    .right = false,
-  };
-  dest->elements[i++] = (ElementConfig) {
-    .el = STATUS_BAR_ELEMENT,
-    .w = 100,
-    .h = 13,
-    .black = false,
-    .bottom = false,
-    .right = false,
-  };
-  dest->num_elements = i;
-}
-
-static void set_default_prefs() {
-  // TODO don't duplicate this here; if watch doesn't have valid prefs,
-  // request from phone and don't render anything until they are received
-  s_prefs->mmol = false;
-  s_prefs->top_of_graph = 250;
-  s_prefs->top_of_range = 200;
-  s_prefs->bottom_of_range = 75;
-  s_prefs->bottom_of_graph = 40;
-  s_prefs->h_gridlines = 50;
-  s_prefs->battery_as_number = false;
-  s_prefs->time_align = ALIGN_CENTER;
-  s_prefs->battery_loc = BATTERY_LOC_STATUS_RIGHT;
-
-  set_default_layout(s_prefs);
-
-  save_prefs();
+static void set_empty_prefs() {
+  s_prefs->num_elements = 0;
 }
 
 static int preferences_size() {
   return sizeof(Preferences);
 }
 
-void init_prefs() {
+bool init_prefs() {
   if (preferences_size() > PERSIST_DATA_MAX_LENGTH) {
     APP_LOG(APP_LOG_LEVEL_ERROR, "Preferences data too big!");
   }
@@ -80,9 +27,15 @@ void init_prefs() {
       persist_exists(PERSIST_KEY_PREFERENCES_OBJECT) && \
       persist_read_int(PERSIST_KEY_VERSION) == PREFERENCES_SCHEMA_VERSION
   ) {
+
     persist_read_data(PERSIST_KEY_PREFERENCES_OBJECT, s_prefs, sizeof(Preferences));
+    return true;
+
   } else {
-    set_default_prefs();
+
+    set_empty_prefs();
+    return false;
+
   }
 }
 

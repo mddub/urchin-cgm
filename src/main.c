@@ -99,7 +99,7 @@ static Window *create_main_window() {
 
 static void data_callback(DictionaryIterator *received) {
   int msg_type = dict_find(received, APP_KEY_MSG_TYPE)->value->uint8;
-  if (msg_type == MSG_TYPE_DATA) {
+  if (msg_type == MSG_TYPE_RESPONSE_DATA) {
     if (s_time_element != NULL) {
       time_element_update(s_time_element, received);
     }
@@ -115,7 +115,7 @@ static void data_callback(DictionaryIterator *received) {
     if (s_bg_row_element != NULL) {
       bg_row_element_update(s_bg_row_element, received);
     }
-  } else if (msg_type == MSG_TYPE_PREFERENCES) {
+  } else if (msg_type == MSG_TYPE_RESPONSE_PREFERENCES) {
     set_prefs(received);
     // recreate the window in case layout preferences have changed
     window_stack_remove(s_window, false);
@@ -125,8 +125,8 @@ static void data_callback(DictionaryIterator *received) {
 }
 
 static void init(void) {
-  init_prefs();
-  init_comm(data_callback);
+  bool have_prefs = init_prefs();
+  init_comm(data_callback, have_prefs);
   s_window = create_main_window();
 }
 

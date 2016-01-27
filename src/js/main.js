@@ -20,7 +20,7 @@ function main(c) {
 
   function sgvDataError(e) {
     console.log(e);
-    sendMessage({msgType: c.MSG_TYPE_ERROR});
+    sendMessage({msgType: c.MSG_TYPE_RESPONSE_ERROR});
   }
 
   function graphArray(sgvs) {
@@ -125,7 +125,7 @@ function main(c) {
       try {
         var ys = graphArray(sgvs);
         sendMessage({
-          msgType: c.MSG_TYPE_DATA,
+          msgType: c.MSG_TYPE_RESPONSE_DATA,
           recency: recency(sgvs),
           sgvCount: ys.length,
           // XXX: divide BG by 2 to fit into 1 byte
@@ -181,7 +181,7 @@ function main(c) {
 
   function sendPreferences() {
     sendMessage({
-      msgType: c.MSG_TYPE_PREFERENCES,
+      msgType: c.MSG_TYPE_RESPONSE_PREFERENCES,
       mmol: config.mmol,
       topOfGraph: config.topOfGraph,
       topOfRange: config.topOfRange,
@@ -227,8 +227,13 @@ function main(c) {
       }
     });
 
-    Pebble.addEventListener('appmessage', function() {
-      requestAndSendBGs();
+    Pebble.addEventListener('appmessage', function(event) {
+      if (event.payload.msgType === c.MSG_TYPE_REQUEST_PREFERENCES) {
+        sendPreferences();
+        requestAndSendBGs();
+      } else if (event.payload.msgType === c.MSG_TYPE_REQUEST_DATA) {
+        requestAndSendBGs();
+      }
     });
 
     // Send data immediately after the watchface is launched
