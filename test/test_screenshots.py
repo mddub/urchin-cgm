@@ -89,6 +89,22 @@ class TestGraphBoundsAndGridlines(ScreenshotTest):
     sgvs = default_entries('DoubleUp')
 
 
+class TestSGVsAtBoundsAndGridlines(ScreenshotTest):
+    """Test that the placement of target range bounds and gridlines is consistent with the placement of SGV points."""
+    @property
+    def sgvs(self):
+        sgvs = default_entries('Flat')
+        for i, s in enumerate(sgvs):
+            if i < 9:
+                s['sgv'] = BASE_CONFIG['topOfRange']
+            elif i < 18:
+                s['sgv'] = BASE_CONFIG['topOfRange'] - BASE_CONFIG['hGridlines']
+            elif i < 27:
+                s['sgv'] = BASE_CONFIG['topOfRange'] - BASE_CONFIG['hGridlines'] * 2
+            else:
+                s['sgv'] = BASE_CONFIG['bottomOfRange']
+        return sgvs
+
 class TestStaleServerData(ScreenshotTest):
     """Test that when server data is stale, an icon appears."""
     sgvs = default_entries('SingleDown')[7:]

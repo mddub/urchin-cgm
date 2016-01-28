@@ -9,27 +9,25 @@ static void plot_point(int x, int y, GContext *ctx) {
   graphics_fill_rect(ctx, GRect(x, y, GRAPH_POINT_SIZE, GRAPH_POINT_SIZE), 0, GCornerNone);
 }
 
-static int bg_to_y(int height, int bg, int min, int max, bool fit_in_bounds) {
+static int bg_to_y(int height, int bg) {
   // Graph lower bound, graph upper bound
   int graph_min = get_prefs()->bottom_of_graph;
   int graph_max = get_prefs()->top_of_graph;
-  int y = (float)height - (float)(bg - graph_min) / (float)(graph_max - graph_min) * (float)height - 1.0f;
-  if (fit_in_bounds) {
-    if (y < min) {
-      y = min;
-    } else if (y > max) {
-      y = max;
-    }
-  }
-  return y;
+  return (float)height - (float)(bg - graph_min) / (float)(graph_max - graph_min) * (float)height + 0.5f;
 }
 
 static int bg_to_y_for_point(int height, int bg) {
-  return bg_to_y(height, bg, 0, height - GRAPH_POINT_SIZE, true);
-}
+  int min = 0;
+  int max = height - GRAPH_POINT_SIZE;
 
-static int bg_to_y_for_line(int height, int bg) {
-  return bg_to_y(height, bg, -1, height - 1, false);
+  int y = (float)bg_to_y(height, bg) - GRAPH_POINT_SIZE / 2.0f + 0.5f;
+  if (y < min) {
+    return min;
+  } else if (y > max) {
+    return max;
+  } else {
+    return y;
+  }
 }
 
 static void graph_update_proc(Layer *layer, GContext *ctx) {
@@ -55,7 +53,7 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
   uint16_t limits[2] = {get_prefs()->top_of_range, get_prefs()->bottom_of_range};
   bool is_top[2] = {true, false};
   for(i = 0; i < (int)ARRAY_LENGTH(limits); i++) {
-    y = bg_to_y_for_line(size.h, limits[i]);
+    y = bg_to_y(size.h, limits[i]);
     for(x = 0; x < size.w; x += 2) {
       graphics_draw_pixel(ctx, GPoint(x + 1, y - 1));
       graphics_draw_pixel(ctx, GPoint(x, y));
@@ -78,7 +76,7 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
       if (g <= graph_min || g == limits[0] || g == limits[1]) {
         continue;
       }
-      y = bg_to_y_for_line(size.h, g);
+      y = bg_to_y(size.h, g);
       for(x = 2; x < size.w; x += 8) {
         graphics_draw_line(ctx, GPoint(x, y), GPoint(x + 1, y));
       }
