@@ -59,12 +59,13 @@ void connection_status_component_destroy(ConnectionStatusComponent *c) {
 static char* staleness_text(int staleness_seconds) {
   static char buf[8];
   int minutes = staleness_seconds / 60;
+  int hours = minutes / 60;
   if (minutes < 60) {
     snprintf(buf, sizeof(buf), "%d", minutes);
-  } else if (minutes < 120) {
-    snprintf(buf, sizeof(buf), "1h%d", minutes - 60);
-  } else if (minutes / 60 <= 6) {
-    snprintf(buf, sizeof(buf), "%dhr", minutes / 60);
+  } else if (hours < 10) {
+    snprintf(buf, sizeof(buf), "%dh%d", hours, minutes - 60 * hours);
+  } else if (hours < 100) {
+    snprintf(buf, sizeof(buf), "%dh", hours);
   } else {
     strcpy(buf, "!");
   }

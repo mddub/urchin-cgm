@@ -108,7 +108,7 @@ function main(c) {
   function recency(sgvs) {
     if (sgvs.length === 0) {
       // TODO
-      return 99 * 60 * 60;
+      return 999 * 60 * 60;
     } else {
       var seconds = Date.now() / 1000 - sgvs[0]['date'];
       return Math.floor(seconds);
