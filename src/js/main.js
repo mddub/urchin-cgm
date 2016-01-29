@@ -182,13 +182,13 @@ function main(c) {
   function sendPreferences() {
     sendMessage({
       msgType: c.MSG_TYPE_RESPONSE_PREFERENCES,
-      mmol: config.mmol,
+      mmol: config.mmol ? 1 : 0,
       topOfGraph: config.topOfGraph,
       topOfRange: config.topOfRange,
       bottomOfRange: config.bottomOfRange,
       bottomOfGraph: config.bottomOfGraph,
       hGridlines: config.hGridlines,
-      batteryAsNumber: config.batteryAsNumber,
+      batteryAsNumber: config.batteryAsNumber ? 1 : 0,
       timeAlign: c.ALIGN[getLayout(config).timeAlign],
       batteryLoc: c.BATTERY_LOC[getLayout(config).batteryLoc],
       numElements: countElementsForPebble(getLayout(config)),
