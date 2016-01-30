@@ -3,6 +3,7 @@
 static int s_num_elements;
 static Layer** s_layers;
 static GSize *s_pixel_sizes;
+static TextLayer* s_need_prefs_message;
 
 GColor element_bg(Layer* layer) {
   return get_element_data(layer)->black ? GColorBlack : GColorWhite;
@@ -110,6 +111,21 @@ GRect element_get_bounds(Layer* layer) {
   return bounds;
 }
 
+static TextLayer* maybe_create_need_prefs_message(Layer* parent) {
+  if (s_num_elements > 0) {
+    return NULL;
+  } else {
+    TextLayer *t = text_layer_create(layer_get_bounds(parent));
+    text_layer_set_text(t, "Urchin CGM\n\nWaiting for settings from phone...");
+    text_layer_set_text_alignment(t, GTextAlignmentCenter);
+    text_layer_set_background_color(t, GColorClear);
+    text_layer_set_text_color(t, GColorBlack);
+    text_layer_set_font(t, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
+    layer_add_child(parent, text_layer_get_layer(t));
+    return t;
+  }
+}
+
 LayoutLayers init_layout(Window* window) {
   s_num_elements = get_prefs()->num_elements;
   s_layers = malloc(s_num_elements * sizeof(Layer*));
@@ -131,6 +147,8 @@ LayoutLayers init_layout(Window* window) {
     s_layers[i] = position_layer(window_layer, &pos, get_prefs()->elements[i], s_pixel_sizes[i], true);
   }
 
+  s_need_prefs_message = maybe_create_need_prefs_message(window_layer);
+
   return (LayoutLayers) {
     .graph = get_layer_for_element(GRAPH_ELEMENT),
     .sidebar = get_layer_for_element(SIDEBAR_ELEMENT),
@@ -143,6 +161,9 @@ LayoutLayers init_layout(Window* window) {
 void deinit_layout() {
   for(int i = 0; i < s_num_elements; i++) {
     layer_destroy(s_layers[i]);
+  }
+  if (s_need_prefs_message != NULL) {
+    text_layer_destroy(s_need_prefs_message);
   }
   free(s_layers);
   free(s_pixel_sizes);
