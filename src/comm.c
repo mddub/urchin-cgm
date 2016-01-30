@@ -6,9 +6,6 @@
 
 static bool phone_contact = false;
 static bool update_in_progress;
-static bool need_prefs;
-static uint16_t no_phone_contact_timeout = INITIAL_NO_PHONE_CONTACT_TIMEOUT;
-static uint16_t network_error_retry_delay = INITIAL_NETWORK_ERROR_RETRY_DELAY;
 static AppTimer *request_timer = NULL;
 static AppTimer *timeout_timer = NULL;
 
@@ -24,21 +21,30 @@ static void clear_timer(AppTimer **timer) {
   }
 }
 
-static uint16_t advance_exponential_delay(uint16_t *delay) {
-  uint16_t current_delay = *delay;
-  *delay = *delay * 2 < MAX_EXPONENTIAL_DELAY ? *delay * 2 : MAX_EXPONENTIAL_DELAY;
-  return current_delay;
+static int timeout_length() {
+  // Start with extra short timeouts on launch to get data showing as soon as possible.
+  static int exponential_timeout = INITIAL_TIMEOUT;
+
+  if (phone_contact) {
+    return DEFAULT_TIMEOUT;
+  } else {
+    exponential_timeout = exponential_timeout * 2 < DEFAULT_TIMEOUT ? exponential_timeout * 2 : DEFAULT_TIMEOUT;
+    return exponential_timeout;
+  }
 }
 
 static void timeout_handler() {
   timeout_timer = NULL;
   if (update_in_progress) {
     update_in_progress = false;
-    schedule_update(0);
+    schedule_update(TIMEOUT_RETRY_DELAY);
   }
 }
 
 static void schedule_update(uint32_t delay) {
+  if (update_in_progress) {
+    return;
+  }
   clear_timer(&request_timer);
   clear_timer(&timeout_timer);
   request_timer = app_timer_register(delay, request_update, NULL);
@@ -46,56 +52,31 @@ static void schedule_update(uint32_t delay) {
 }
 
 static void request_update() {
-  uint8_t request_type = need_prefs ? MSG_TYPE_REQUEST_PREFERENCES : MSG_TYPE_REQUEST_DATA;
-
   DictionaryIterator *send_message;
   app_message_outbox_begin(&send_message);
-  dict_write_uint8(send_message, APP_KEY_MSG_TYPE, request_type);
   app_message_outbox_send();
 
   request_timer = NULL;
   update_in_progress = true;
-
-  // Start with extra short timeouts on launch to get data showing as soon as possible.
-  int timeout = phone_contact ? DEFAULT_APP_MESSAGE_TIMEOUT : advance_exponential_delay(&no_phone_contact_timeout);
-
-  timeout_timer = app_timer_register(timeout, timeout_handler, NULL);
+  timeout_timer = app_timer_register(timeout_length(), timeout_handler, NULL);
 }
 
 static void in_received_handler(DictionaryIterator *received, void *context) {
   phone_contact = true;
+  update_in_progress = false;
   staleness_update(received);
   int msg_type = dict_find(received, APP_KEY_MSG_TYPE)->value->uint8;
-
-  if (need_prefs && msg_type != MSG_TYPE_RESPONSE_PREFERENCES) {
-
-    update_in_progress = false;
-    schedule_update(0);
-
-  } else if (msg_type == MSG_TYPE_RESPONSE_PREFERENCES) {
-
-    // Expect the phone to send data right after sending preferences.
-    update_in_progress = true;
-    need_prefs = false;
-
-  } else if (msg_type == MSG_TYPE_RESPONSE_DATA) {
-
-    update_in_progress = false;
+  if (msg_type == MSG_TYPE_DATA) {
     uint32_t recency = dict_find(received, APP_KEY_RECENCY)->value->uint32;
     int32_t next_update = SGV_UPDATE_FREQUENCY - recency * 1000;
     int32_t delay = next_update < LATE_DATA_UPDATE_FREQUENCY ? LATE_DATA_UPDATE_FREQUENCY : next_update;
     schedule_update((uint32_t) delay);
-
-    network_error_retry_delay = INITIAL_NETWORK_ERROR_RETRY_DELAY;
-
-  } else if (msg_type == MSG_TYPE_RESPONSE_ERROR) {
-
-    update_in_progress = false;
-    schedule_update(advance_exponential_delay(&network_error_retry_delay));
-
   }
-
-  data_callback(received);
+  if (msg_type == MSG_TYPE_ERROR) {
+    schedule_update(ERROR_RETRY_DELAY);
+  } else {
+    data_callback(received);
+  }
 }
 
 static void in_dropped_handler(AppMessageResult reason, void *context) {
@@ -111,7 +92,7 @@ static void out_failed_handler(DictionaryIterator *failed, AppMessageResult reas
   schedule_update(OUT_RETRY_DELAY);
 }
 
-void init_comm(void (*callback)(DictionaryIterator *received), bool have_prefs) {
+void init_comm(void (*callback)(DictionaryIterator *received)) {
   data_callback = callback;
   app_message_register_inbox_received(in_received_handler);
   app_message_register_inbox_dropped(in_dropped_handler);
@@ -120,14 +101,9 @@ void init_comm(void (*callback)(DictionaryIterator *received), bool have_prefs) 
   const uint32_t inbound_size = CONTENT_SIZE;
   const uint32_t outbound_size = 64;
 
-  need_prefs = !have_prefs;
-  if (need_prefs) {
-    schedule_update(0);
-  } else {
-    // We expect the JS to initiate sending data first.
-    update_in_progress = true;
-    timeout_timer = app_timer_register(advance_exponential_delay(&no_phone_contact_timeout), timeout_handler, NULL);
-  }
+  // We expect the JS to initiate sending data first.
+  update_in_progress = true;
+  timeout_timer = app_timer_register(timeout_length(), timeout_handler, NULL);
 
   app_message_open(inbound_size, outbound_size);
 }

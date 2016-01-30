@@ -28,7 +28,7 @@ typedef struct __attribute__((__packed__)) Preferences {
   ElementConfig elements[MAX_LAYOUT_ELEMENTS];
 } Preferences;
 
-bool init_prefs();
+void init_prefs();
 void deinit_prefs();
 Preferences* get_prefs();
 void set_prefs(DictionaryIterator *data);
