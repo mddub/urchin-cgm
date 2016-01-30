@@ -1,6 +1,5 @@
 /* jshint browser: true */
-/* global exports */
-/* exported Data */
+/* global module */
 
 var Data = function(c) {
   var d = {};
@@ -275,6 +274,6 @@ var Data = function(c) {
   return d;
 };
 
-if (typeof(exports) !== 'undefined') {
-  exports.Data = Data;
+if (typeof(module) !== 'undefined') {
+  module.exports = Data;
 }

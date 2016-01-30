@@ -7,7 +7,7 @@ var fs = require('fs');
 var expect = require('expect.js'),
   timekeeper = require('timekeeper');
 
-var Data = require('../../src/js/data.js').Data;
+var Data = require('../../src/js/data.js');
 
 var defaultConstants = JSON.parse(fs.readFileSync('../../src/js/constants.json', 'utf8'));
 var config = {};
@@ -22,7 +22,7 @@ function mockAPI(data, urlToData) {
   };
 }
 
-describe('getCurrentBasal', function() {
+describe('getActiveBasal', function() {
 
   var PROFILE = [{
     "created_at" : "2015-10-22T17:58-0700",
@@ -88,7 +88,7 @@ describe('getCurrentBasal', function() {
     mockBasals(d, "2015-12-03T14:12:25-08:00");
     timekeeper.freeze(new Date("2015-12-03T14:20:25-08:00"));
 
-    d.getCurrentBasal(config, function(err, basal) {
+    d.getActiveBasal(config, function(err, basal) {
       expect(basal).to.be('0u/h -0.65 (8)');
       done();
     });
@@ -99,7 +99,7 @@ describe('getCurrentBasal', function() {
     mockBasals(d, "2015-12-03T14:12:25-08:00");
     timekeeper.freeze(new Date("2015-12-03T14:28:25-08:00"));
 
-    d.getCurrentBasal(config, function(err, basal) {
+    d.getActiveBasal(config, function(err, basal) {
       expect(basal).to.be('0u/h -0.65 (16)');
       done();
     });
@@ -110,7 +110,7 @@ describe('getCurrentBasal', function() {
     mockBasals(d, "2015-12-03T14:12:25-08:00");
     timekeeper.freeze(new Date("2015-12-03T14:50:25-08:00"));
 
-    d.getCurrentBasal(config, function(err, basal) {
+    d.getActiveBasal(config, function(err, basal) {
       expect(basal).to.be('0.65u/h');
       done();
     });
@@ -121,7 +121,7 @@ describe('getCurrentBasal', function() {
     mockBasals(d, "2015-12-03T14:12:25-08:00");
     timekeeper.freeze(new Date("2015-12-03T20:50:25-08:00"));
 
-    d.getCurrentBasal(config, function(err, basal) {
+    d.getActiveBasal(config, function(err, basal) {
       expect(basal).to.be('0.55u/h');
       done();
     });
@@ -141,7 +141,7 @@ describe('getRigBatteryLevel', function() {
     timekeeper.freeze(new Date("2015-12-04T01:25:18.994Z"));
 
     d.getRigBatteryLevel(config, function(err, battery) {
-      expect(battery).to.be('Rig 37%');
+      expect(battery).to.be('37%');
       done();
     });
   });
