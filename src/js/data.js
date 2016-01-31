@@ -1,134 +1,112 @@
 /* jshint browser: true */
-/* global module */
+/* global module, Promise */
 
 var Data = function(c) {
   var d = {};
 
-  // In PebbleKit JS, specifying a timeout works only for synchronous XHR,
-  // except on Android, where synchronous XHR doesn't work at all.
-  // https://forums.getpebble.com/discussion/13224/problem-with-xmlhttprequest-timeout
-  d.getURL = function(url, callback) {
-    var received = false;
-    var timedOut = false;
+  d.getURL = function(url) {
+    return new Promise(function(resolve, reject) {
+      var received = false;
+      var timedOut = false;
 
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', url, true);
-    xhr.setRequestHeader('Cache-Control', 'no-cache');
-    xhr.onreadystatechange = function () {
-      if (timedOut) {
-        return;
-      }
-      if (xhr.readyState === 4) {
-        received = true;
-        if (xhr.status === 200) {
-          callback(null, xhr.responseText);
-        } else {
-          callback(new Error('Request failed, status ' + xhr.status + ': ' + url));
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', url, true);
+      xhr.setRequestHeader('Cache-Control', 'no-cache');
+      xhr.onreadystatechange = function () {
+        if (timedOut) {
+          return;
         }
-      }
-    };
-
-    function onTimeout() {
-      if (received) {
-        return;
-      }
-      timedOut = true;
-      xhr.abort();
-      callback(new Error('Request timed out: ' + url));
-    }
-
-    // On iOS, PebbleKit JS will throw an error on send() for an invalid URL
-    try {
-      xhr.send();
-      setTimeout(onTimeout, c.REQUEST_TIMEOUT);
-    } catch (e) {
-      callback(e);
-    }
-  };
-
-  d.getJSON = function(url, callback) {
-    d.getURL(url, function(err, result) {
-      if (err) {
-        return callback(err);
-      }
-      try {
-        callback(null, JSON.parse(result));
-      } catch (e) {
-        callback(e);
-      }
-    });
-  };
-
-  d.getIOB = function(config, callback) {
-    d.getJSON(config.nightscout_url + '/api/v1/entries.json?find[activeInsulin][$exists]=true&count=1', function(err, iobs) {
-      if (err) {
-        return callback(err);
-      }
-      if(iobs.length && Date.now() - iobs[0]['date'] <= c.IOB_RECENCY_THRESHOLD_SECONDS * 1000) {
-        var iob = iobs[0]['activeInsulin'].toFixed(1).toString() + ' u';
-        callback(null, iob);
-      } else {
-        callback(null, '-');
-      }
-    });
-  };
-
-  d.getCustomText = function(config, callback) {
-    callback(null, (config.statusText || '').substr(0, 255));
-  };
-
-  d.getCustomUrl = function(config, callback) {
-    d.getURL(config.statusUrl, function(err, data) {
-      if (err) {
-        callback(err);
-      } else {
-        callback(null, (data || '-').substr(0, 255));
-      }
-    });
-  };
-
-  d.getRigBatteryLevel = function(config, callback) {
-    d.getJSON(config.nightscout_url + '/api/v1/devicestatus.json?find[uploaderBattery][$exists]=true&count=1', function(err, deviceStatus) {
-      if (err) {
-        return callback(err);
-      }
-      if (deviceStatus && deviceStatus.length && new Date(deviceStatus[0]['created_at']) >= new Date() - c.DEVICE_STATUS_RECENCY_THRESHOLD_SECONDS * 1000) {
-        callback(null, deviceStatus[0]['uploaderBattery'] + '%');
-      } else {
-        callback(null, '-');
-      }
-    });
-  };
-
-  d.getRawData = function(config, callback) {
-    d.getJSON(config.nightscout_url + '/api/v1/entries/cal.json?count=1', function(err, calRecord) {
-      if (err) {
-        return callback(err);
-      }
-      if (calRecord && calRecord.length && calRecord.length > 0) {
-        d.getJSON(config.nightscout_url + '/api/v1/entries/sgv.json?count=' + config.statusRawCount, function(err, sgvRecords) {
-          if (err) {
-            return callback(err);
-          }
-          if (sgvRecords && sgvRecords.length) {
-            var noiseStr = c.DEXCOM_NOISE_STRINGS[sgvRecords[0]['noise']];
-
-            sgvRecords.sort(function(a, b) {
-              return a['date'] - b['date'];
-            });
-            var sgvString = sgvRecords.map(function(bg) {
-              return _getRawMgdl(bg, calRecord[0]);
-            }).map(function(mgdl) {
-              return (config.mmol && !isNaN(mgdl)) ? (mgdl / 18.0).toFixed(1) : mgdl;
-            }).join(' ');
-
-            callback(null, (noiseStr ? noiseStr + ' ' : '') + sgvString);
+        if (xhr.readyState === 4) {
+          received = true;
+          if (xhr.status === 200) {
+            resolve(xhr.responseText);
           } else {
-            callback(null, '-');
+            reject(new Error('Request failed, status ' + xhr.status + ': ' + url));
           }
-        });
+        }
+      };
+
+      // In PebbleKit JS, specifying a timeout works only for synchronous XHR,
+      // except on Android, where synchronous XHR doesn't work at all.
+      // https://forums.getpebble.com/discussion/13224/problem-with-xmlhttprequest-timeout
+      function onTimeout() {
+        if (received) {
+          return;
+        }
+        timedOut = true;
+        xhr.abort();
+        reject(new Error('Request timed out: ' + url));
+      }
+
+      // On iOS, PebbleKit JS will throw an error on send() for an invalid URL
+      try {
+        xhr.send();
+        setTimeout(onTimeout, c.REQUEST_TIMEOUT);
+      } catch (e) {
+        reject(e);
+      }
+    });
+  };
+
+  d.getJSON = function(url) {
+    return d.getURL(url).then(function(result) {
+      return JSON.parse(result);
+    });
+  };
+
+  d.getIOB = function(config) {
+    return d.getJSON(config.nightscout_url + '/api/v1/entries.json?find[activeInsulin][$exists]=true&count=1').then(function(iobs) {
+      if(iobs.length && Date.now() - iobs[0]['date'] <= c.IOB_RECENCY_THRESHOLD_SECONDS * 1000) {
+        return iobs[0]['activeInsulin'].toFixed(1).toString() + ' u';
       } else {
-        callback(null, '-');
+        return '-';
+      }
+    });
+  };
+
+  d.getCustomText = function(config) {
+    return Promise.resolve((config.statusText || '').substr(0, 255));
+  };
+
+  d.getCustomUrl = function(config) {
+    return d.getURL(config.statusUrl).then(function(data) {
+      return (data || '-').substr(0, 255);
+    });
+  };
+
+  d.getRigBatteryLevel = function(config) {
+    return d.getJSON(config.nightscout_url + '/api/v1/devicestatus.json?find[uploaderBattery][$exists]=true&count=1').then(function(deviceStatus) {
+      if (deviceStatus && deviceStatus.length && new Date(deviceStatus[0]['created_at']) >= new Date() - c.DEVICE_STATUS_RECENCY_THRESHOLD_SECONDS * 1000) {
+        return deviceStatus[0]['uploaderBattery'] + '%';
+      } else {
+        return '-';
+      }
+    });
+  };
+
+  d.getRawData = function(config) {
+    return Promise.all([
+      d.getJSON(config.nightscout_url + '/api/v1/entries/cal.json?count=1'),
+      d.getJSON(config.nightscout_url + '/api/v1/entries/sgv.json?count=' + config.statusRawCount),
+    ]).then(function(results) {
+      var calRecord = results[0],
+        sgvRecords = results[1];
+
+      if (calRecord && calRecord.length && sgvRecords && sgvRecords.length) {
+        var noiseStr = c.DEXCOM_NOISE_STRINGS[sgvRecords[0]['noise']];
+
+        sgvRecords.sort(function(a, b) {
+          return a['date'] - b['date'];
+        });
+        var sgvString = sgvRecords.map(function(bg) {
+          return _getRawMgdl(bg, calRecord[0]);
+        }).map(function(mgdl) {
+          return (config.mmol && !isNaN(mgdl)) ? (mgdl / 18.0).toFixed(1) : mgdl;
+        }).join(' ');
+
+        return (noiseStr ? noiseStr + ' ' : '') + sgvString;
+      } else {
+        return '-';
       }
     });
   };
@@ -146,27 +124,19 @@ var Data = function(c) {
     }
   }
 
-  d.getRigBatteryAndRawData = function(config, callback) {
-    d.getRigBatteryLevel(config, function(err, battery) {
-      if (err) {
-        return callback(err);
-      }
-      d.getRawData(config, function(err, raw) {
-        if (err) {
-          return callback(err);
-        }
-        var line = [battery, raw].filter(function(v) { return v !== '-'; }).join(' ') || '-';
-        callback(null, line);
-      });
+  d.getRigBatteryAndRawData = function(config) {
+    return Promise.all([
+      d.getRigBatteryLevel(config),
+      d.getRawData(config),
+    ]).then(function(results) {
+      return results.filter(
+        function(v) { return v !== '-'; }
+      ).join(' ') || '-';
     });
   };
 
-  function _getCurrentProfileBasal(config, callback) {
-    d.getJSON(config.nightscout_url + '/api/v1/profile.json', function(err, profile) {
-      if (err) {
-        return callback(err);
-      }
-
+  function _getCurrentProfileBasal(config) {
+    return d.getJSON(config.nightscout_url + '/api/v1/profile.json').then(function(profile) {
       // Handle different treatment API formats
       var basals;
       if (profile.length && profile[0]['basal']) {
@@ -182,18 +152,15 @@ var Data = function(c) {
         var currentBasal = basals.filter(function(basal, i) {
           return (basal['time'] <= now && (i === basals.length - 1 || now < basals[i + 1]['time']));
         })[0];
-        callback(null, parseFloat(currentBasal['value']));
+        return parseFloat(currentBasal['value']);
       } else {
-        callback(null, null);
+        return null;
       }
     });
   }
 
-  function _getActiveTempBasal(config, callback) {
-    d.getJSON(config.nightscout_url + '/api/v1/treatments.json?find[eventType]=Temp+Basal&count=1', function(err, treatments) {
-      if (err) {
-        return callback(err);
-      }
+  function _getActiveTempBasal(config) {
+    return d.getJSON(config.nightscout_url + '/api/v1/treatments.json?find[eventType]=Temp+Basal&count=1').then(function(treatments) {
       if (treatments.length && treatments[0]['duration'] && Date.now() < new Date(treatments[0]['created_at']).getTime() + parseFloat(treatments[0]['duration']) * 60 * 1000) {
         var start = new Date(treatments[0]['created_at']);
         var rate;
@@ -202,9 +169,9 @@ var Data = function(c) {
         } else {
           rate = parseFloat(treatments[0]['absolute']);
         }
-        callback(null, {start: start, rate: rate});
+        return {start: start, rate: rate};
       } else {
-        callback(null, null);
+        return null;
       }
     });
   }
@@ -219,30 +186,28 @@ var Data = function(c) {
     }
   }
 
-  d.getActiveBasal = function(config, callback) {
+  d.getActiveBasal = function(config) {
     // adapted from @audiefile: https://github.com/mddub/urchin-cgm/pull/1
-    _getCurrentProfileBasal(config, function(err, profileBasal) {
-      if (err) {
-        callback(err);
+    return Promise.all([
+      _getCurrentProfileBasal(config),
+      _getActiveTempBasal(config),
+    ]).then(function(results) {
+      var profileBasal = results[0],
+        tempBasal = results[1];
+
+      if (profileBasal === null && tempBasal === null) {
+        return '-';
+      } else if (tempBasal !== null) {
+        var diff = tempBasal.rate - profileBasal;
+        var minutesAgo = Math.round((new Date() - tempBasal.start) / (60 * 1000));
+        return _roundBasal(tempBasal.rate) + 'u/h ' + (diff >= 0 ? '+' : '') + _roundBasal(diff) + ' (' + minutesAgo + ')';
+      } else {
+        return _roundBasal(profileBasal) + 'u/h';
       }
-      _getActiveTempBasal(config, function(err, tempBasal) {
-        if (err) {
-          callback(err);
-        }
-        if (profileBasal === null && tempBasal === null) {
-          callback(null, '-');
-        } else if (tempBasal !== null) {
-          var diff = tempBasal.rate - profileBasal;
-          var minutesAgo = Math.round((new Date() - tempBasal.start) / (60 * 1000));
-          callback(null, _roundBasal(tempBasal.rate) + 'u/h ' + (diff >= 0 ? '+' : '') + _roundBasal(diff) + ' (' + minutesAgo + ')');
-        } else {
-          callback(null, _roundBasal(profileBasal) + 'u/h');
-        }
-      });
     });
   };
 
-  d.getStatusText = function(config, callback) {
+  d.getStatusText = function(config) {
     var defaultFn = d.getRigBatteryLevel;
     var fn = {
       'rigbattery': d.getRigBatteryLevel,
@@ -253,21 +218,18 @@ var Data = function(c) {
       'customurl': d.getCustomUrl,
       'customtext': d.getCustomText,
     }[config.statusContent];
-    (fn || defaultFn)(config, callback);
+    return (fn || defaultFn)(config);
   };
 
-  d.getSGVsDateDescending = function(config, callback) {
+  d.getSGVsDateDescending = function(config) {
     var fetchStart = Date.now() - c.SGV_FETCH_SECONDS * 1000;
     var points = c.SGV_FETCH_SECONDS / c.INTERVAL_SIZE_SECONDS + c.FETCH_EXTRA;
     var url = config.nightscout_url + '/api/v1/entries/sgv.json?find[date][$gte]=' + fetchStart + '&count=' + points;
-    d.getJSON(url, function(err, entries) {
-      if (err) {
-        return callback(err);
-      }
-      callback(null, entries.map(function(e) {
+    return d.getJSON(url).then(function(entries) {
+      return entries.map(function(e) {
         e['date'] = e['date'] / 1000;
         return e;
-      }));
+      });
     });
   };
 

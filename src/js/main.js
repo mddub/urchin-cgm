@@ -140,21 +140,18 @@ function main(c) {
       }
     }
 
-    data.getSGVsDateDescending(config, function(err, sgvs) {
-      if (err) {
-        // error fetching sgvs is unrecoverable
-        sgvDataError(err);
-      } else {
-        data.getStatusText(config, function(err, statusText) {
-          if (err) {
-            // error fetching status bar text is okay
-            console.log(err);
-            statusText = '-';
-          }
-          onData(sgvs, statusText);
-        });
-      }
+    // recover from status text errors, but not sgv errors
+    var sgvs = data.getSGVsDateDescending(config);
+    var statusText = data.getStatusText(config).catch(function(e) {
+      console.log(e);
+      return '-';
     });
+
+    Promise.all([sgvs, statusText])
+      .then(function(results) {
+        onData(results[0], results[1]);
+      })
+      .catch(sgvDataError);
   }
 
   function getLayout(config) {

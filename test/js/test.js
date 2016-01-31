@@ -13,11 +13,13 @@ var defaultConstants = JSON.parse(fs.readFileSync('../../src/js/constants.json',
 var config = {};
 
 function mockAPI(data, urlToData) {
-  data.getJSON = function(url, callback) {
-    Object.keys(urlToData).forEach(function(key) {
-      if (url.indexOf(key) !== -1) {
-        callback(null, urlToData[key]);
-      }
+  data.getJSON = function(url) {
+    return new Promise(function(resolve) {
+      Object.keys(urlToData).forEach(function(key) {
+        if (url.indexOf(key) !== -1) {
+          resolve(urlToData[key]);
+        }
+      });
     });
   };
 }
@@ -83,47 +85,43 @@ describe('getActiveBasal', function() {
     });
   }
 
-  it('should report a temp basal with the difference from current basal and recency', function(done) {
+  it('should report a temp basal with the difference from current basal and recency', function() {
     var d = Data(defaultConstants);
     mockBasals(d, "2015-12-03T14:12:25-08:00");
     timekeeper.freeze(new Date("2015-12-03T14:20:25-08:00"));
 
-    d.getActiveBasal(config, function(err, basal) {
+    return d.getActiveBasal(config).then(function(basal) {
       expect(basal).to.be('0u/h -0.65 (8)');
-      done();
     });
   });
 
-  it('should compute recency correctly', function(done) {
+  it('should compute recency correctly', function() {
     var d = Data(defaultConstants);
     mockBasals(d, "2015-12-03T14:12:25-08:00");
     timekeeper.freeze(new Date("2015-12-03T14:28:25-08:00"));
 
-    d.getActiveBasal(config, function(err, basal) {
+    return d.getActiveBasal(config).then(function(basal) {
       expect(basal).to.be('0u/h -0.65 (16)');
-      done();
     });
   });
 
-  it('should report the profile basal rate if it is past the duration of the most recent temp basal', function(done) {
+  it('should report the profile basal rate if it is past the duration of the most recent temp basal', function() {
     var d = Data(defaultConstants);
     mockBasals(d, "2015-12-03T14:12:25-08:00");
     timekeeper.freeze(new Date("2015-12-03T14:50:25-08:00"));
 
-    d.getActiveBasal(config, function(err, basal) {
+    return d.getActiveBasal(config).then(function(basal) {
       expect(basal).to.be('0.65u/h');
-      done();
     });
   });
 
-  it('should report the correct profile basal rate at any time', function(done) {
+  it('should report the correct profile basal rate at any time', function() {
     var d = Data(defaultConstants);
     mockBasals(d, "2015-12-03T14:12:25-08:00");
     timekeeper.freeze(new Date("2015-12-03T20:50:25-08:00"));
 
-    d.getActiveBasal(config, function(err, basal) {
+    return d.getActiveBasal(config).then(function(basal) {
       expect(basal).to.be('0.55u/h');
-      done();
     });
   });
 });
@@ -134,27 +132,25 @@ describe('getRigBatteryLevel', function() {
     "created_at": "2015-12-04T01:05:18.994Z"
   }];
 
-  it('should report the rig battery level if it is recent enough', function(done) {
+  it('should report the rig battery level if it is recent enough', function() {
     var constants = {DEVICE_STATUS_RECENCY_THRESHOLD_SECONDS: 1800};
     var d = Data(constants);
     mockAPI(d, {'devicestatus.json': DEVICE_STATUS});
     timekeeper.freeze(new Date("2015-12-04T01:25:18.994Z"));
 
-    d.getRigBatteryLevel(config, function(err, battery) {
+    return d.getRigBatteryLevel(config).then(function(battery) {
       expect(battery).to.be('37%');
-      done();
     });
   });
 
-  it('should not report the rig battery level if it is stale', function(done) {
+  it('should not report the rig battery level if it is stale', function() {
     var constants = {DEVICE_STATUS_RECENCY_THRESHOLD_SECONDS: 60};
     var d = Data(constants);
     mockAPI(d, {'devicestatus.json': DEVICE_STATUS});
     timekeeper.freeze(new Date("2015-12-04T01:25:18.994Z"));
 
-    d.getRigBatteryLevel(config, function(err, battery) {
+    return d.getRigBatteryLevel(config).then(function(battery) {
       expect(battery).to.be('-');
-      done();
     });
   });
 });
@@ -194,20 +190,19 @@ describe('getRawData', function() {
     "type" : "cal"
   }];
 
-  it('should report raw sgvs in ascending date order, plus sensor noise on most recent sgv', function(done) {
+  it('should report raw sgvs in ascending date order, plus sensor noise on most recent sgv', function() {
     var d = Data(defaultConstants);
     mockAPI(d, {
       'sgv.json': SGVS(1),
       'cal.json': CAL,
     });
 
-    d.getRawData(config, function(err, raw) {
+    return d.getRawData(config).then(function(raw) {
       expect(raw).to.be('Cln 146 139');
-      done();
     });
   });
 
-  it('should report raw sgvs in mmol when that preference is set, plus sensor noise on most recent sgv', function(done) {
+  it('should report raw sgvs in mmol when that preference is set, plus sensor noise on most recent sgv', function() {
     var d = Data(defaultConstants);
     mockAPI(d, {
       'sgv.json': SGVS(2),
@@ -215,9 +210,8 @@ describe('getRawData', function() {
     });
 
     var config = {mmol: true};
-    d.getRawData(config, function(err, raw) {
+    return d.getRawData(config).then(function(raw) {
       expect(raw).to.be('Lgt 8.1 7.7');
-      done();
     });
   });
 });
