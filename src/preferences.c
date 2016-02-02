@@ -41,7 +41,7 @@ Preferences* get_prefs() {
   return s_prefs;
 }
 
-static ElementConfig decode_layout_element(const char *encoded, int offset) {
+static ElementConfig decode_layout_element(uint8_t *encoded, int offset) {
   ElementConfig decoded;
   decoded.el = encoded[offset + ELEMENT_TYPE];
   decoded.w = encoded[offset + ELEMENT_WIDTH];
@@ -52,7 +52,7 @@ static ElementConfig decode_layout_element(const char *encoded, int offset) {
   return decoded;
 }
 
-static void decode_layout_elements(Preferences *prefs, int num_elements, const char * encoded) {
+static void decode_layout_elements(Preferences *prefs, int num_elements, uint8_t *encoded) {
   for(int i = 0; i < num_elements; i++) {
     ElementConfig el = decode_layout_element(encoded, NUM_ELEMENT_PROPERTIES * i);
     memcpy(&prefs->elements[i], &el, sizeof(ElementConfig));
@@ -60,18 +60,18 @@ static void decode_layout_elements(Preferences *prefs, int num_elements, const c
 }
 
 void set_prefs(DictionaryIterator *data) {
-  s_prefs->mmol = (bool)dict_find(data, APP_KEY_MMOL)->value->uint8;
-  s_prefs->top_of_graph = dict_find(data, APP_KEY_TOP_OF_GRAPH)->value->uint16;
-  s_prefs->top_of_range = dict_find(data, APP_KEY_TOP_OF_RANGE)->value->uint16;
-  s_prefs->bottom_of_range = dict_find(data, APP_KEY_BOTTOM_OF_RANGE)->value->uint8;
-  s_prefs->bottom_of_graph = dict_find(data, APP_KEY_BOTTOM_OF_GRAPH)->value->uint8;
-  s_prefs->h_gridlines = dict_find(data, APP_KEY_H_GRIDLINES)->value->uint8;
-  s_prefs->battery_as_number = (bool)dict_find(data, APP_KEY_BATTERY_AS_NUMBER)->value->uint8;
-  s_prefs->time_align = dict_find(data, APP_KEY_TIME_ALIGN)->value->uint8;
-  s_prefs->battery_loc = dict_find(data, APP_KEY_BATTERY_LOC)->value->uint8;
-  s_prefs->num_elements = dict_find(data, APP_KEY_NUM_ELEMENTS)->value->uint8;
+  s_prefs->mmol = dict_find(data, APP_KEY_MMOL)->value->int32;
+  s_prefs->top_of_graph = dict_find(data, APP_KEY_TOP_OF_GRAPH)->value->int32;
+  s_prefs->top_of_range = dict_find(data, APP_KEY_TOP_OF_RANGE)->value->int32;
+  s_prefs->bottom_of_range = dict_find(data, APP_KEY_BOTTOM_OF_RANGE)->value->int32;
+  s_prefs->bottom_of_graph = dict_find(data, APP_KEY_BOTTOM_OF_GRAPH)->value->int32;
+  s_prefs->h_gridlines = dict_find(data, APP_KEY_H_GRIDLINES)->value->int32;
+  s_prefs->battery_as_number = dict_find(data, APP_KEY_BATTERY_AS_NUMBER)->value->int32;
+  s_prefs->time_align = dict_find(data, APP_KEY_TIME_ALIGN)->value->int32;
+  s_prefs->battery_loc = dict_find(data, APP_KEY_BATTERY_LOC)->value->int32;
+  s_prefs->num_elements = dict_find(data, APP_KEY_NUM_ELEMENTS)->value->int32;
 
-  decode_layout_elements(s_prefs, s_prefs->num_elements, dict_find(data, APP_KEY_ELEMENTS)->value->cstring);
+  decode_layout_elements(s_prefs, s_prefs->num_elements, dict_find(data, APP_KEY_ELEMENTS)->value->data);
 
   save_prefs();
 }

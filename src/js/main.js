@@ -169,7 +169,11 @@ function main(c) {
     layout.elements.forEach(function(elementConfig) {
       if (elementConfig['enabled']) {
         out = out.concat(c.PROPERTIES.map(function(prop) {
-          return elementConfig[prop];
+          if (typeof elementConfig[prop] === 'boolean') {
+            return elementConfig[prop] ? 1 : 0;
+          } else {
+            return elementConfig[prop];
+          }
         }));
       }
     });
