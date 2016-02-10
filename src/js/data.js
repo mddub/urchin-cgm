@@ -1,8 +1,25 @@
 /* jshint browser: true */
-/* global module, Promise */
+/* global module, Promise, Cache, debounce */
 
 var Data = function(c) {
+  var MAX_SGVS = c.SGV_FETCH_SECONDS / c.INTERVAL_SIZE_SECONDS + c.FETCH_EXTRA;
+  var MAX_TEMP_BASALS = MAX_SGVS;
+  var MAX_UPLOADER_BATTERIES = 1;
+  var MAX_CALIBRATIONS = 1;
+
+  var sgvCache = new Cache('sgv', MAX_SGVS);
+  var tempBasalCache = new Cache('tempBasal', MAX_TEMP_BASALS);
+  var uploaderBatteryCache = new Cache('uploaderBattery', MAX_UPLOADER_BATTERIES);
+  var calibrationCache = new Cache('calibration', MAX_CALIBRATIONS);
+
   var d = {};
+
+  d.clearCache = function() {
+    sgvCache.clear();
+    tempBasalCache.clear();
+    uploaderBatteryCache.clear();
+    calibrationCache.clear();
+  };
 
   d.getURL = function(url) {
     return new Promise(function(resolve, reject) {
@@ -75,9 +92,9 @@ var Data = function(c) {
   };
 
   d.getRigBatteryLevel = function(config) {
-    return d.getJSON(config.nightscout_url + '/api/v1/devicestatus.json?find[uploaderBattery][$exists]=true&count=1').then(function(deviceStatus) {
-      if (deviceStatus && deviceStatus.length && new Date(deviceStatus[0]['created_at']) >= new Date() - c.DEVICE_STATUS_RECENCY_THRESHOLD_SECONDS * 1000) {
-        return deviceStatus[0]['uploaderBattery'] + '%';
+    return d.getLastUploaderBattery(config).then(function(latest) {
+      if (latest && latest.length && new Date(latest[0]['created_at']) >= new Date() - c.DEVICE_STATUS_RECENCY_THRESHOLD_SECONDS * 1000) {
+        return latest[0]['uploaderBattery'] + '%';
       } else {
         return '-';
       }
@@ -86,8 +103,8 @@ var Data = function(c) {
 
   d.getRawData = function(config) {
     return Promise.all([
-      d.getJSON(config.nightscout_url + '/api/v1/entries/cal.json?count=1'),
-      d.getJSON(config.nightscout_url + '/api/v1/entries/sgv.json?count=' + config.statusRawCount),
+      d.getLastCalibration(config),
+      d.getSGVsDateDescending(config),
     ]).then(function(results) {
       var calRecord = results[0],
         sgvRecords = results[1];
@@ -95,9 +112,13 @@ var Data = function(c) {
       if (calRecord && calRecord.length && sgvRecords && sgvRecords.length) {
         var noiseStr = c.DEXCOM_NOISE_STRINGS[sgvRecords[0]['noise']];
 
-        sgvRecords.sort(function(a, b) {
-          return a['date'] - b['date'];
-        });
+        // make shallow copy since this array is shared
+        sgvRecords = sgvRecords.slice(0)
+          .sort(function(a, b) {
+            return a['date'] - b['date'];
+          })
+          .slice(sgvRecords.length - config.statusRawCount);
+
         var sgvString = sgvRecords.map(function(bg) {
           return _getRawMgdl(bg, calRecord[0]);
         }).map(function(mgdl) {
@@ -136,6 +157,7 @@ var Data = function(c) {
   };
 
   function _getCurrentProfileBasal(config) {
+    // Nightscout API does not accept a document query for this endpoint, so no way to cache
     return d.getJSON(config.nightscout_url + '/api/v1/profile.json').then(function(profile) {
       // Handle different treatment API formats
       var basals;
@@ -160,7 +182,7 @@ var Data = function(c) {
   }
 
   function _getActiveTempBasal(config) {
-    return d.getJSON(config.nightscout_url + '/api/v1/treatments.json?find[eventType]=Temp+Basal&count=1').then(function(treatments) {
+    return d.getTempBasals(config).then(function(treatments) {
       if (treatments.length && treatments[0]['duration'] && Date.now() < new Date(treatments[0]['created_at']).getTime() + parseFloat(treatments[0]['duration']) * 60 * 1000) {
         var start = new Date(treatments[0]['created_at']);
         var rate;
@@ -221,17 +243,47 @@ var Data = function(c) {
     return (fn || defaultFn)(config);
   };
 
-  d.getSGVsDateDescending = function(config) {
-    var fetchStart = Date.now() - c.SGV_FETCH_SECONDS * 1000;
-    var points = c.SGV_FETCH_SECONDS / c.INTERVAL_SIZE_SECONDS + c.FETCH_EXTRA;
-    var url = config.nightscout_url + '/api/v1/entries/sgv.json?find[date][$gte]=' + fetchStart + '&count=' + points;
-    return d.getJSON(url).then(function(entries) {
-      return entries.map(function(e) {
-        e['date'] = e['date'] / 1000;
-        return e;
-      });
+  function getUsingCache(baseUrl, cache, dateKey) {
+    var url = baseUrl;
+    if (cache.entries.length) {
+      url += '&find[' + dateKey + '][$gt]=' + encodeURIComponent(cache.entries[0][dateKey]);
+    }
+    return d.getJSON(url).then(function(newEntries) {
+      return cache.update(newEntries);
     });
-  };
+  }
+
+  d.getSGVsDateDescending = debounce(function(config) {
+    return getUsingCache(
+      config.nightscout_url + '/api/v1/entries/sgv.json?count=' + MAX_SGVS,
+      sgvCache,
+      'date'
+    );
+  });
+
+  d.getTempBasals = debounce(function(config) {
+    return getUsingCache(
+      config.nightscout_url + '/api/v1/treatments.json?find[eventType]=Temp+Basal&count=' + MAX_TEMP_BASALS,
+      tempBasalCache,
+      'timestamp'
+    );
+  });
+
+  d.getLastUploaderBattery = debounce(function(config) {
+    return getUsingCache(
+      config.nightscout_url + '/api/v1/devicestatus.json?find[uploaderBattery][$exists]=true&count=' + MAX_UPLOADER_BATTERIES,
+      uploaderBatteryCache,
+      'created_at'
+    );
+  });
+
+  d.getLastCalibration = debounce(function(config) {
+    return getUsingCache(
+      config.nightscout_url + '/api/v1/entries/cal.json?count=' + MAX_CALIBRATIONS,
+      calibrationCache,
+      'date'
+    );
+  });
 
   return d;
 };

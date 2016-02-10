@@ -121,8 +121,16 @@ function main(c) {
   }
 
   function requestAndSendBGs() {
-    function onData(sgvs, statusText) {
+    function onData(rawSGVs, statusText) {
       try {
+        sgvs = rawSGVs.map(function(e) {
+          return {
+            date: e['date'] / 1000,
+            sgv: e['sgv'],
+            trend: e['trend'],
+            direction: e['direction'],
+          };
+        });
         var ys = graphArray(sgvs);
         sendMessage({
           msgType: c.MSG_TYPE_DATA,
@@ -215,16 +223,23 @@ function main(c) {
 
     Pebble.addEventListener('webviewclosed', function(event) {
       var configStr = decodeURIComponent(event.response);
+      var newConfig;
       try {
-        var newConfig = JSON.parse(configStr);
+        newConfig = JSON.parse(configStr);
+      } catch (e) {
+        console.log(e);
+        console.log('Bad config from webview: ' + configStr);
+      }
+
+      if (newConfig) {
+        if (newConfig.nightscout_url !== config.nightscout_url) {
+          data.clearCache();
+        }
         config = mergeConfig(newConfig, c.DEFAULT_CONFIG);
         localStorage.setItem(c.LOCAL_STORAGE_KEY_CONFIG, JSON.stringify(config));
         console.log('Preferences updated: ' + JSON.stringify(config));
         sendPreferences();
         requestAndSendBGs();
-      } catch (e) {
-        console.log(e);
-        console.log('Bad config from webview: ' + configStr);
       }
     });
 

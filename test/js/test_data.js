@@ -1,5 +1,5 @@
 /* jshint node: true */
-/* globals describe, it */
+/* globals describe, it, beforeEach */
 "use strict";
 
 var fs = require('fs');
@@ -23,6 +23,14 @@ function mockAPI(data, urlToData) {
     });
   };
 }
+
+beforeEach(function() {
+  // XXX need browserify and real `require`s
+  global.Cache = require('../../src/js/cache.js');
+  global.debounce = require('../../src/js/debounce.js');
+
+  global.localStorage = require('./make_mock_local_storage.js')();
+});
 
 describe('getActiveBasal', function() {
 
@@ -199,6 +207,19 @@ describe('getRawData', function() {
 
     return d.getRawData(config).then(function(raw) {
       expect(raw).to.be('Cln 146 139');
+    });
+  });
+
+  it('should show only the number of raw readings configured', function() {
+    var d = Data(defaultConstants);
+    mockAPI(d, {
+      'sgv.json': SGVS(3),
+      'cal.json': CAL,
+    });
+
+    var config = {statusRawCount: 1};
+    return d.getRawData(config).then(function(raw) {
+      expect(raw).to.be('Med 139');
     });
   });
 
