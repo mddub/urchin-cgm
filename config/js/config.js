@@ -332,6 +332,8 @@
     delete current['statusUrl'];
     var cleansed = [
       ['version', getQueryParam('version')],
+      ['pf', getQueryParam('pf')],
+      ['fw', getQueryParam('fw')],
       ['at', getQueryParam('at')],
       ['wt', getQueryParam('wt')],
       ['current', JSON.stringify(current)],

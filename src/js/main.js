@@ -218,7 +218,28 @@ function main(c) {
     }
 
     Pebble.addEventListener('showConfiguration', function() {
-      Pebble.openURL(c.CONFIG_URL + '?version=' + c.VERSION + '&at=' + Pebble.getAccountToken() + '&wt=' + Pebble.getWatchToken() + '&current=' + encodeURIComponent(JSON.stringify(config)));
+      var platform = 'unknown';
+      var firmware = '0.0.0';
+      if (Pebble.getActiveWatchInfo) {
+        platform = Pebble.getActiveWatchInfo()['platform'];
+        firmware = ['major', 'minor', 'patch'].map(function(part) {
+          return Pebble.getActiveWatchInfo()['firmware'][part];
+        }).join('.');
+        if (Pebble.getActiveWatchInfo()['firmware']['suffix']) {
+          firmware += '.' + Pebble.getActiveWatchInfo()['firmware']['suffix'];
+        }
+      }
+      var query = [
+        ['version', c.VERSION],
+        ['pf', platform],
+        ['fw', firmware],
+        ['at', Pebble.getAccountToken()],
+        ['wt', Pebble.getWatchToken()],
+        ['current', encodeURIComponent(JSON.stringify(config))],
+      ].map(function(pair) {
+        return pair.join('=');
+      }).join('&');
+      Pebble.openURL(c.CONFIG_URL + '?' + query);
     });
 
     Pebble.addEventListener('webviewclosed', function(event) {
