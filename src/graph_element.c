@@ -9,6 +9,10 @@ static void plot_point(int x, int y, GContext *ctx) {
   graphics_fill_rect(ctx, GRect(x, y, GRAPH_POINT_SIZE, GRAPH_POINT_SIZE), 0, GCornerNone);
 }
 
+static void plot_tick(int x, int bottom_y, GContext *ctx) {
+  graphics_fill_rect(ctx, GRect(x, bottom_y - BOLUS_TICK_HEIGHT, BOLUS_TICK_WIDTH, BOLUS_TICK_HEIGHT), 0, GCornerNone);
+}
+
 static int bg_to_y(int height, int bg) {
   // Graph lower bound, graph upper bound
   int graph_min = get_prefs()->bottom_of_graph;
@@ -38,6 +42,8 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
   graphics_context_set_stroke_color(ctx, data->color);
   graphics_context_set_fill_color(ctx, data->color);
   int padding = graph_staleness_padding();
+
+  // SGVs
   for(i = 0; i < data->count; i++) {
     // XXX: JS divides by 2 to fit into 1 byte
     int bg = data->sgvs[i] * 2;
@@ -47,6 +53,15 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
     x = size.w - GRAPH_POINT_SIZE * (1 + i + padding);
     y = bg_to_y_for_point(size.h, bg);
     plot_point(x, y, ctx);
+  }
+
+  // Boluses
+  for(i = 0; i < data->count; i++) {
+    bool bolus = data->boluses[i];
+    if (bolus) {
+      x = size.w - GRAPH_POINT_SIZE * (1 + i + padding);
+      plot_tick(x, size.h, ctx);
+    }
   }
 
   // Target range bounds
@@ -93,6 +108,7 @@ GraphElement* graph_element_create(Layer *parent) {
   );
   ((GraphData*)layer_get_data(graph_layer))->color = element_fg(parent);
   ((GraphData*)layer_get_data(graph_layer))->sgvs = malloc(GRAPH_MAX_SGV_COUNT * sizeof(char));
+  ((GraphData*)layer_get_data(graph_layer))->boluses = malloc(GRAPH_MAX_SGV_COUNT * sizeof(char));
   layer_set_update_proc(graph_layer, graph_update_proc);
   layer_add_child(parent, graph_layer);
 
@@ -106,6 +122,7 @@ GraphElement* graph_element_create(Layer *parent) {
 
 void graph_element_destroy(GraphElement *el) {
   free(((GraphData*)layer_get_data(el->graph_layer))->sgvs);
+  free(((GraphData*)layer_get_data(el->graph_layer))->boluses);
   layer_destroy(el->graph_layer);
   connection_status_component_destroy(el->conn_status);
   free(el);
@@ -118,6 +135,11 @@ void graph_element_update(GraphElement *el, DictionaryIterator *data) {
   memcpy(
     ((GraphData*)layer_get_data(el->graph_layer))->sgvs,
     (char*)dict_find(data, APP_KEY_SGVS)->value->cstring,
+    count * sizeof(char)
+  );
+  memcpy(
+    ((GraphData*)layer_get_data(el->graph_layer))->boluses,
+    (char*)dict_find(data, APP_KEY_BOLUSES)->value->cstring,
     count * sizeof(char)
   );
   layer_mark_dirty(el->graph_layer);

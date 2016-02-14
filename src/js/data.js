@@ -6,11 +6,14 @@ var Data = function(c) {
   var MAX_TEMP_BASALS = MAX_SGVS;
   var MAX_UPLOADER_BATTERIES = 1;
   var MAX_CALIBRATIONS = 1;
+  var MAX_BOLUSES_PER_HOUR_AVERAGE = 6;
+  var MAX_BOLUSES = c.SGV_FETCH_SECONDS / (60 * 60) * MAX_BOLUSES_PER_HOUR_AVERAGE;
 
   var sgvCache = new Cache('sgv', MAX_SGVS);
   var tempBasalCache = new Cache('tempBasal', MAX_TEMP_BASALS);
   var uploaderBatteryCache = new Cache('uploaderBattery', MAX_UPLOADER_BATTERIES);
   var calibrationCache = new Cache('calibration', MAX_CALIBRATIONS);
+  var bolusCache = new Cache('bolus', MAX_BOLUSES);
 
   var d = {};
 
@@ -19,6 +22,7 @@ var Data = function(c) {
     tempBasalCache.clear();
     uploaderBatteryCache.clear();
     calibrationCache.clear();
+    bolusCache.clear();
   };
 
   d.getURL = function(url) {
@@ -282,6 +286,14 @@ var Data = function(c) {
       config.nightscout_url + '/api/v1/entries/cal.json?count=' + MAX_CALIBRATIONS,
       calibrationCache,
       'date'
+    );
+  });
+
+  d.getBolusHistory = debounce(function(config) {
+    return getUsingCache(
+      config.nightscout_url + '/api/v1/treatments.json?find[insulin][$exists]=true&count=' + MAX_BOLUSES,
+      bolusCache,
+      'created_at'
     );
   });
 

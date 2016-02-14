@@ -23,8 +23,7 @@ function main(c) {
     sendMessage({msgType: c.MSG_TYPE_ERROR});
   }
 
-  function graphArray(sgvs) {
-    var endTime = sgvs.length > 0 ? sgvs[0]['date'] : new Date();
+  function graphArray(endTime, sgvs) {
     var noEntry = {
       'date': Infinity,
       'sgv': 0
@@ -115,15 +114,32 @@ function main(c) {
     }
   }
 
+  function bolusArray(endTime, bolusHistory) {
+    var out = [];
+    for(var i = 0; i <= c.SGV_FETCH_SECONDS; i += c.INTERVAL_SIZE_SECONDS) {
+      var intervalStart = endTime - i - c.INTERVAL_SIZE_SECONDS / 2;
+      var intervalEnd = endTime - i + c.INTERVAL_SIZE_SECONDS / 2;
+      var bolusInInterval = false;
+      for(var j = 0; j < bolusHistory.length; j++) {
+        var bolusTime = new Date(bolusHistory[j]['created_at']).getTime() / 1000;
+        if (intervalStart < bolusTime && bolusTime < intervalEnd) {
+          bolusInInterval = true;
+        }
+      }
+      out.push(bolusInInterval);
+    }
+    return out;
+  }
+
   function sendMessage(data) {
     console.log('sending ' + JSON.stringify(data));
     Pebble.sendAppMessage(data);
   }
 
   function requestAndSendBGs() {
-    function onData(rawSGVs, statusText) {
+    function onData(rawSGVs, statusText, bolusHistory) {
       try {
-        sgvs = rawSGVs.map(function(e) {
+        var sgvs = rawSGVs.map(function(e) {
           return {
             date: e['date'] / 1000,
             sgv: e['sgv'],
@@ -131,7 +147,10 @@ function main(c) {
             direction: e['direction'],
           };
         });
-        var ys = graphArray(sgvs);
+        var endTime = sgvs.length > 0 ? sgvs[0]['date'] : new Date();
+        var ys = graphArray(endTime, sgvs);
+        var boluses = bolusArray(endTime, bolusHistory);
+
         sendMessage({
           msgType: c.MSG_TYPE_DATA,
           recency: recency(sgvs),
@@ -142,22 +161,25 @@ function main(c) {
           trend: lastTrendNumber(sgvs),
           delta: lastDelta(ys),
           statusText: statusText,
+          // TODO can pack these bits much more efficiently
+          boluses: boluses.map(function(b) { return b ? 1 : 0; }),
         });
       } catch (e) {
         sgvDataError(e);
       }
     }
 
-    // recover from status text errors, but not sgv errors
+    // recover from status text errors, but not sgv or bolus history errors
     var sgvs = data.getSGVsDateDescending(config);
     var statusText = data.getStatusText(config).catch(function(e) {
       console.log(e);
       return '-';
     });
+    var bolusHistory = config.bolusTicks ? data.getBolusHistory(config) : Promise.resolve([]);
 
-    Promise.all([sgvs, statusText])
+    Promise.all([sgvs, statusText, bolusHistory])
       .then(function(results) {
-        onData(results[0], results[1]);
+        onData.apply(this, results);
       })
       .catch(sgvDataError);
   }

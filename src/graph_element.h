@@ -12,6 +12,7 @@ typedef struct GraphData {
   GColor color;
   int count;
   char* sgvs;
+  char* boluses;
 } GraphData;
 
 GraphElement* graph_element_create(Layer *parent);

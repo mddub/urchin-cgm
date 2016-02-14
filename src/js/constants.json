@@ -17,6 +17,7 @@
       "statusUrl" : "",
       "statusText" : "",
       "batteryAsNumber": false,
+      "bolusTicks": false,
       "layout" : "a",
       "advancedLayout": false,
       "customLayout": {

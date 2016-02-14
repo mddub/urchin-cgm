@@ -280,6 +280,8 @@
       $('[name=batteryAsNumber][value=icon]').addClass('active');
     }
 
+    $('[name=bolusTicks]').prop('checked', !!current['bolusTicks']);
+
     $('[name=layout][value=' + current.layout + ']').addClass('active');
     $('[name=advancedLayout]').prop('checked', !!current['advancedLayout']);
 
@@ -302,6 +304,7 @@
       statusText: document.getElementById('statusText').value,
       statusUrl: document.getElementById('statusUrl').value,
       batteryAsNumber: $('[name=batteryAsNumber][value=number]').hasClass('active'),
+      bolusTicks: $('[name=bolusTicks]').is(':checked'),
       layout: $('[name=layout].active').attr('value'),
       advancedLayout: $('[name=advancedLayout]').is(':checked'),
       customLayout: customLayout,
