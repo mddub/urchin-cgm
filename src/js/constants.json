@@ -138,6 +138,21 @@
    "NO_DELTA_VALUE" : 65536,
    "DEXCOM_ERROR_CODE_MAX" : 12,
 
+   "NIGHTSCOUT_DIRECTION_TO_TREND": {
+      "NONE": 0,
+      "DoubleUp": 1,
+      "SingleUp": 2,
+      "FortyFiveUp": 3,
+      "Flat": 4,
+      "FortyFiveDown": 5,
+      "SingleDown": 6,
+      "DoubleDown": 7,
+      "NOT COMPUTABLE": 8,
+      "NOT_COMPUTABLE": 8,
+      "RATE OUT OF RANGE": 9,
+      "RATE_OUT_OF_RANGE": 9
+   },
+
    "DEXCOM_NOISE_STRINGS": {
        "1": "Cln",
        "2": "Lgt",
