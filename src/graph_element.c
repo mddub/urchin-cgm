@@ -5,6 +5,14 @@
 #include "preferences.h"
 #include "staleness.h"
 
+#ifdef PBL_SDK_3
+static GPoint point_segments[GRAPH_MAX_SGV_COUNT+1];
+static GPathInfo bg_path_info = {
+  .num_points = 0,
+  .points = point_segments
+};
+#endif
+
 static void plot_point(int x, int y, GContext *ctx) {
   graphics_fill_rect(ctx, GRect(x, y, GRAPH_POINT_SIZE, GRAPH_POINT_SIZE), 0, GCornerNone);
 }
@@ -30,6 +38,54 @@ static int bg_to_y_for_point(int height, int bg) {
   }
 }
 
+#ifdef PBL_SDK_2
+void draw_graph_sdk2(GContext *ctx, GSize *size, GraphData *data, int padding) {
+  int i, x, y;
+  for(i = 0; i < data->count; i++) {
+    // XXX: JS divides by 2 to fit into 1 byte
+    int bg = data->sgvs[i] * 2;
+    if(bg == 0) {
+      continue;
+    }
+    x = size->w - GRAPH_POINT_SIZE * (1 + i + padding);
+    y = bg_to_y_for_point(size->h, bg);
+    plot_point(x, y, ctx);
+  }
+}
+#endif
+
+#ifdef PBL_SDK_3
+void draw_graph_sdk3(GContext *ctx, GSize *size, GraphData *data,
+                  int padding) {
+  int i;
+  int segment_start = 0;
+  bg_path_info.num_points = 0;
+  graphics_context_set_stroke_width(ctx, 3);
+  for(i = 0; i < data->count && (unsigned int) i <= GRAPH_MAX_SGV_COUNT; i++) {
+    // XXX: JS divides by 2 to fit into 1 byte
+    int bg = data->sgvs[i] * 2;
+    if(bg == 0) {
+      if (segment_start != i) {
+        bg_path_info.points = &point_segments[segment_start];
+        GPath *path = gpath_create(&bg_path_info);
+        gpath_draw_outline_open(ctx, path);
+        gpath_destroy(path);
+      }
+      segment_start = i+1;
+      bg_path_info.num_points = 0;
+      continue;
+    }
+    point_segments[i].x = size->w - GRAPH_POINT_SIZE * (i + padding);
+    point_segments[i].y = bg_to_y_for_point(size->h, bg);
+    bg_path_info.num_points += 1;
+  }
+  bg_path_info.points = &point_segments[segment_start];
+  GPath *path = gpath_create(&bg_path_info);
+  gpath_draw_outline_open(ctx, path);
+  gpath_destroy(path);
+}
+#endif
+
 static void graph_update_proc(Layer *layer, GContext *ctx) {
   int i, x, y;
   GSize size = layer_get_bounds(layer).size;
@@ -37,18 +93,16 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
   GraphData *data = layer_get_data(layer);
   graphics_context_set_stroke_color(ctx, data->color);
   graphics_context_set_fill_color(ctx, data->color);
-  int padding = graph_staleness_padding();
-  for(i = 0; i < data->count; i++) {
-    // XXX: JS divides by 2 to fit into 1 byte
-    int bg = data->sgvs[i] * 2;
-    if(bg == 0) {
-      continue;
-    }
-    x = size.w - GRAPH_POINT_SIZE * (1 + i + padding);
-    y = bg_to_y_for_point(size.h, bg);
-    plot_point(x, y, ctx);
-  }
 
+  int padding = graph_staleness_padding();
+  graphics_context_set_fill_color(ctx, GColorBlack);
+
+#ifdef PBL_SDK_3
+  draw_graph_sdk3(ctx, &size, data, padding);
+#endif
+#ifdef PBL_SDK_2
+  draw_graph_sdk2(ctx, &size, data, padding);
+#endif
   // Target range bounds
   uint16_t limits[2] = {get_prefs()->top_of_range, get_prefs()->bottom_of_range};
   bool is_top[2] = {true, false};
@@ -68,6 +122,9 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
   }
 
   // Horizontal gridlines
+#ifdef PBL_SDK_3
+  graphics_context_set_stroke_width(ctx, 1);
+#endif
   int h_gridline_frequency = get_prefs()->h_gridlines;
   if (h_gridline_frequency > 0) {
     int graph_min = get_prefs()->bottom_of_graph;
