@@ -2,9 +2,8 @@
 /* globals describe, it, beforeEach */
 "use strict";
 
-var fs = require('fs');
-
 var expect = require('expect.js'),
+  fs = require('fs'),
   timekeeper = require('timekeeper');
 
 var Data = require('../../src/js/data.js');
@@ -32,8 +31,7 @@ beforeEach(function() {
   global.localStorage = require('./make_mock_local_storage.js')();
 });
 
-describe('getActiveBasal', function() {
-
+describe('basals', function() {
   var PROFILE = [{
     "created_at" : "2015-10-22T17:58-0700",
     "startDate" : "2015-10-22T17:57-0700",
@@ -54,82 +52,177 @@ describe('getActiveBasal', function() {
     ]
   }];
 
-  function TREATMENTS(timestamp) {
-    return [{
-      "raw_rate": {
-        "_type": "TempBasal",
-        "temp": "absolute",
-        "_description": "TempBasal 2015-12-03T14:12:25 head[2], body[1] op[0x33]",
-        "timestamp": timestamp,
-        "_body": "00",
-        "_head": "3300",
-        "rate": 0,
-        "_date": "d90c0e430f"
-      },
-      "raw_duration": {
-        "_type": "TempBasalDuration",
-        "_description": "TempBasalDuration 2015-12-03T14:12:25 head[2], body[0] op[0x16]",
-        "timestamp": timestamp,
-        "_body": "",
-        "_head": "1601",
-        "duration (min)": 30,
-        "_date": "d90c0e430f"
-      },
-      "created_at": "2015-12-03T14:12:25-08:00",
-      "enteredBy": "openaps://medtronic/522",
-      "rate": 0,
+  function tempBasal(timestamp, duration, absolute) {
+    return {
       "eventType": "Temp Basal",
-      "timestamp": timestamp,
-      "duration": "30",
-      "medtronic": "mm://openaps/mm-format-ns-treatments/Temp Basal",
-      "absolute": "0"
-    }];
+      "created_at": timestamp,
+      "duration": duration,
+      "absolute": absolute,
+    };
   }
 
-  function mockBasals(data, tempBasalTimestamp) {
+  function mockSingleTempBasal(data, tempBasalTimestamp) {
     mockAPI(data, {
       'profile.json': PROFILE,
-      'treatments.json': TREATMENTS(tempBasalTimestamp),
+      'treatments.json': [tempBasal(tempBasalTimestamp, "30", "0")],
     });
   }
 
-  it('should report a temp basal with the difference from current basal and recency', function() {
-    var d = Data(defaultConstants);
-    mockBasals(d, "2015-12-03T14:12:25-08:00");
-    timekeeper.freeze(new Date("2015-12-03T14:20:25-08:00"));
+  describe('getActiveBasal', function() {
+    it('should report a temp basal with the difference from current basal and recency', function() {
+      var d = Data(defaultConstants);
+      mockSingleTempBasal(d, "2015-12-03T14:12:25-08:00");
+      timekeeper.freeze(new Date("2015-12-03T14:20:25-08:00"));
 
-    return d.getActiveBasal(config).then(function(basal) {
-      expect(basal).to.be('0u/h -0.65 (8)');
+      return d.getActiveBasal(config).then(function(basal) {
+        expect(basal).to.be('0u/h -0.65 (8)');
+      });
+    });
+
+    it('should compute recency correctly', function() {
+      var d = Data(defaultConstants);
+      mockSingleTempBasal(d, "2015-12-03T14:12:25-08:00");
+      timekeeper.freeze(new Date("2015-12-03T14:28:25-08:00"));
+
+      return d.getActiveBasal(config).then(function(basal) {
+        expect(basal).to.be('0u/h -0.65 (16)');
+      });
+    });
+
+    it('should report the profile basal rate if it is past the duration of the most recent temp basal', function() {
+      var d = Data(defaultConstants);
+      mockSingleTempBasal(d, "2015-12-03T14:12:25-08:00");
+      timekeeper.freeze(new Date("2015-12-03T14:50:25-08:00"));
+
+      return d.getActiveBasal(config).then(function(basal) {
+        expect(basal).to.be('0.65u/h');
+      });
+    });
+
+    it('should report the correct profile basal rate at any time', function() {
+      var d = Data(defaultConstants);
+      mockSingleTempBasal(d, "2015-12-03T14:12:25-08:00");
+      timekeeper.freeze(new Date("2015-12-03T20:50:25-08:00"));
+
+      return d.getActiveBasal(config).then(function(basal) {
+        expect(basal).to.be('0.55u/h');
+      });
     });
   });
 
-  it('should compute recency correctly', function() {
-    var d = Data(defaultConstants);
-    mockBasals(d, "2015-12-03T14:12:25-08:00");
-    timekeeper.freeze(new Date("2015-12-03T14:28:25-08:00"));
+  describe('getBasalHistory', function() {
+    it('should report 24 hours of profile basals if no temps have occurred', function() {
+      var d = Data(defaultConstants);
+      mockAPI(d, {
+        'profile.json': PROFILE,
+        'treatments.json': [],
+      });
 
-    return d.getActiveBasal(config).then(function(basal) {
-      expect(basal).to.be('0u/h -0.65 (16)');
+      timekeeper.freeze(new Date("2016-02-18T17:31:25-08:00"));
+
+      return d.getBasalHistory(config).then(function(basals) {
+        expect(basals.length).to.be(6);
+        [
+          {start: Date.now() - 24 * 60 * 60 * 1000, duration: 0},
+          {start: Date.now() - 24 * 60 * 60 * 1000, absolute: 0.65},
+          {start: new Date("2016-02-17T18:00:00-08:00").getTime(), absolute: 0.55},
+          {start: new Date("2016-02-18T00:00:00-08:00").getTime(), absolute: 0.45},
+          {start: new Date("2016-02-18T08:00:00-08:00").getTime(), absolute: 0.65},
+          {start: Date.now(), duration: 0},
+        ].forEach(function(basal, i) {
+          expect(basals[i]).to.eql(basal);
+        });
+      });
     });
-  });
 
-  it('should report the profile basal rate if it is past the duration of the most recent temp basal', function() {
-    var d = Data(defaultConstants);
-    mockBasals(d, "2015-12-03T14:12:25-08:00");
-    timekeeper.freeze(new Date("2015-12-03T14:50:25-08:00"));
+    it('should interpose profile basals if there is a gap between two temp basals', function() {
+      var d = Data(defaultConstants);
+      mockAPI(d, {
+        'profile.json': PROFILE,
+        'treatments.json': [
+          tempBasal("2016-02-18T07:11:00-08:00", "30", "0.2"),
+          tempBasal("2016-02-18T08:23:00-08:00", "19", "0"),
+        ],
+      });
 
-    return d.getActiveBasal(config).then(function(basal) {
-      expect(basal).to.be('0.65u/h');
+      timekeeper.freeze(new Date("2016-02-18T17:31:25-08:00"));
+
+      return d.getBasalHistory(config).then(function(basals) {
+        expect(basals.length).to.be(10);
+        [
+          {start: Date.now() - 24 * 60 * 60 * 1000, duration: 0},
+          {start: Date.now() - 24 * 60 * 60 * 1000, absolute: 0.65},
+          {start: new Date("2016-02-17T18:00:00-08:00").getTime(), absolute: 0.55},
+          {start: new Date("2016-02-18T00:00:00-08:00").getTime(), absolute: 0.45},
+          {start: new Date("2016-02-18T07:11:00-08:00").getTime(), absolute: 0.2, duration: 30 * 60 * 1000},
+          {start: new Date("2016-02-18T07:41:00-08:00").getTime(), absolute: 0.45},
+          {start: new Date("2016-02-18T08:00:00-08:00").getTime(), absolute: 0.65},
+          {start: new Date("2016-02-18T08:23:00-08:00").getTime(), absolute: 0, duration: 19 * 60 * 1000},
+          {start: new Date("2016-02-18T08:42:00-08:00").getTime(), absolute: 0.65},
+          {start: Date.now(), duration: 0},
+        ].forEach(function(basal, i) {
+          expect(basals[i]).to.eql(basal);
+        });
+      });
     });
-  });
 
-  it('should report the correct profile basal rate at any time', function() {
-    var d = Data(defaultConstants);
-    mockBasals(d, "2015-12-03T14:12:25-08:00");
-    timekeeper.freeze(new Date("2015-12-03T20:50:25-08:00"));
+    it('should not interpose profile basals if two temp basals overlap', function() {
+      var d = Data(defaultConstants);
+      mockAPI(d, {
+        'profile.json': PROFILE,
+        'treatments.json': [
+          tempBasal("2016-02-18T07:52:00-08:00", "30", "0.9"),
+          tempBasal("2016-02-18T08:02:00-08:00", "15", "0.1"),
+        ],
+      });
 
-    return d.getActiveBasal(config).then(function(basal) {
-      expect(basal).to.be('0.55u/h');
+      timekeeper.freeze(new Date("2016-02-18T17:31:25-08:00"));
+
+      return d.getBasalHistory(config).then(function(basals) {
+        expect(basals.length).to.be(8);
+        [
+          {start: Date.now() - 24 * 60 * 60 * 1000, duration: 0},
+          {start: Date.now() - 24 * 60 * 60 * 1000, absolute: 0.65},
+          {start: new Date("2016-02-17T18:00:00-08:00").getTime(), absolute: 0.55},
+          {start: new Date("2016-02-18T00:00:00-08:00").getTime(), absolute: 0.45},
+          {start: new Date("2016-02-18T07:52:00-08:00").getTime(), absolute: 0.9, duration: 30 * 60 * 1000},
+          {start: new Date("2016-02-18T08:02:00-08:00").getTime(), absolute: 0.1, duration: 15 * 60 * 1000},
+          {start: new Date("2016-02-18T08:17:00-08:00").getTime(), absolute: 0.65},
+          {start: Date.now(), duration: 0},
+        ].forEach(function(basal, i) {
+          expect(basals[i]).to.eql(basal);
+        });
+      });
+    });
+
+    it('should treat an empty "Temp Basal" treatment recorded by Nightscout Care Portal as having duration 0', function() {
+      var d = Data(defaultConstants);
+      mockAPI(d, {
+        'profile.json': PROFILE,
+        'treatments.json': [
+          tempBasal("2016-02-18T16:50:00-08:00", "30", "0.8"),
+          tempBasal("2016-02-18T16:55:00-08:00", undefined, undefined),
+        ],
+      });
+
+      timekeeper.freeze(new Date("2016-02-18T17:31:25-08:00"));
+
+      return d.getBasalHistory(config).then(function(basals) {
+        expect(basals.length).to.be(9);
+        [
+          {start: Date.now() - 24 * 60 * 60 * 1000, duration: 0},
+          {start: Date.now() - 24 * 60 * 60 * 1000, absolute: 0.65},
+          {start: new Date("2016-02-17T18:00:00-08:00").getTime(), absolute: 0.55},
+          {start: new Date("2016-02-18T00:00:00-08:00").getTime(), absolute: 0.45},
+          {start: new Date("2016-02-18T08:00:00-08:00").getTime(), absolute: 0.65},
+          {start: new Date("2016-02-18T16:50:00-08:00").getTime(), absolute: 0.8, duration: 30 * 60 * 1000},
+          {start: new Date("2016-02-18T16:55:00-08:00").getTime(), absolute: 0, duration: 0},
+          {start: new Date("2016-02-18T16:55:00-08:00").getTime(), absolute: 0.65},
+          {start: Date.now(), duration: 0},
+        ].forEach(function(basal, i) {
+          expect(basals[i]).to.eql(basal);
+        });
+      });
     });
   });
 });

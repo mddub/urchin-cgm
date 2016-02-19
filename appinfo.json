@@ -20,7 +20,7 @@
     "trend": 5,
     "delta": 6,
     "statusText": 7,
-    "boluses": 8,
+    "graphExtra": 8,
 
     "mmol": 1,
     "topOfGraph": 2,

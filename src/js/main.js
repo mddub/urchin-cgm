@@ -19,8 +19,8 @@ function main(c) {
     return out;
   }
 
-  function sgvDataError(e) {
-    console.log(e);
+  function dataFetchError(e) {
+    console.log(e.stack);
     sendMessage({msgType: c.MSG_TYPE_ERROR});
   }
 
@@ -29,20 +29,15 @@ function main(c) {
     Pebble.sendAppMessage(data);
   }
 
-  function requestAndSendBGs() {
-    function onData(rawSGVs, statusText, bolusHistory) {
+  function requestAndSendData() {
+    function onData(sgvs, bolusHistory, basalHistory, statusText) {
       try {
-        var sgvs = rawSGVs.map(function(e) {
-          return {
-            date: e['date'] / 1000,
-            sgv: e['sgv'],
-            trend: e['trend'],
-            direction: e['direction'],
-          };
-        });
         var endTime = sgvs.length > 0 ? sgvs[0]['date'] : new Date();
         var ys = format.sgvArray(endTime, sgvs);
-        var boluses = format.bolusArray(endTime, bolusHistory);
+
+        var boluses = format.bolusGraphArray(endTime, bolusHistory);
+        var basals = format.basalGraphArray(endTime, basalHistory, config);
+        var graphExtra = format.graphExtraArray(boluses, basals);
 
         sendMessage({
           msgType: c.MSG_TYPE_DATA,
@@ -54,27 +49,31 @@ function main(c) {
           trend: format.lastTrendNumber(sgvs),
           delta: format.lastDelta(ys),
           statusText: statusText,
-          // TODO can pack these bits much more efficiently
-          boluses: boluses.map(function(b) { return b ? 1 : 0; }),
+          graphExtra: graphExtra,
         });
       } catch (e) {
-        sgvDataError(e);
+        dataFetchError(e);
       }
     }
 
-    // recover from status text errors, but not sgv or bolus history errors
+    // TODO
+    config.basalGraph = true;
+    config.basalHeight = 15;
+
     var sgvs = data.getSGVsDateDescending(config);
+    var bolusHistory = config.bolusTicks ? data.getBolusHistory(config) : Promise.resolve([]);
+    var basalHistory = config.basalGraph ? data.getBasalHistory(config) : Promise.resolve([]);
+    // recover from status text errors
     var statusText = data.getStatusText(config).catch(function(e) {
-      console.log(e);
+      console.log(e.stack);
       return '-';
     });
-    var bolusHistory = config.bolusTicks ? data.getBolusHistory(config) : Promise.resolve([]);
 
-    Promise.all([sgvs, statusText, bolusHistory])
+    Promise.all([sgvs, bolusHistory, basalHistory, statusText])
       .then(function(results) {
         onData.apply(this, results);
       })
-      .catch(sgvDataError);
+      .catch(dataFetchError);
   }
 
   function getLayout(config) {
@@ -175,16 +174,16 @@ function main(c) {
         localStorage.setItem(c.LOCAL_STORAGE_KEY_CONFIG, JSON.stringify(config));
         console.log('Preferences updated: ' + JSON.stringify(config));
         sendPreferences();
-        requestAndSendBGs();
+        requestAndSendData();
       }
     });
 
     Pebble.addEventListener('appmessage', function() {
-      requestAndSendBGs();
+      requestAndSendData();
     });
 
     // Send data immediately after the watchface is launched
-    requestAndSendBGs();
+    requestAndSendData();
   });
 
 }

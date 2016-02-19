@@ -44,6 +44,18 @@ def set_sgv():
     cache.set('sgv', _get_post_data(request))
     return ''
 
+@app.route('/api/v1/devicestatus.json')
+def devicestatus():
+    return '[]'
+
+@app.route('/api/v1/treatments.json')
+def treatments():
+    return '[]'
+
+@app.route('/api/v1/profile.json')
+def profile():
+    return '[]'
+
 if __name__ == "__main__":
     app.run(
         debug=True,
