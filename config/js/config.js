@@ -9,6 +9,7 @@
     'bottomOfRange',
     'bottomOfGraph',
     'statusRawCount',
+    'basalHeight',
   ];
 
   var customLayout;
@@ -35,8 +36,8 @@
     return defaultValue || false;
   }
 
-  function tryParseInt(s) {
-    return parseInt(s, 10) >= 0 ? parseInt(s, 10) : undefined;
+  function tryParseInt(s, defaultValue) {
+    return parseInt(s, 10) >= 0 ? parseInt(s, 10) : defaultValue;
   }
 
   function enabledLayoutElements() {
@@ -281,6 +282,7 @@
     }
 
     $('[name=bolusTicks]').prop('checked', !!current['bolusTicks']);
+    $('[name=basalGraph]').prop('checked', !!current['basalGraph']);
 
     $('[name=layout][value=' + current.layout + ']').addClass('active');
     $('[name=advancedLayout]').prop('checked', !!current['advancedLayout']);
@@ -305,12 +307,21 @@
       statusUrl: document.getElementById('statusUrl').value,
       batteryAsNumber: $('[name=batteryAsNumber][value=number]').hasClass('active'),
       bolusTicks: $('[name=bolusTicks]').is(':checked'),
+      basalGraph: $('[name=basalGraph]').is(':checked'),
       layout: $('[name=layout].active').attr('value'),
       advancedLayout: $('[name=advancedLayout]').is(':checked'),
       customLayout: customLayout,
     };
     SLIDER_KEYS.forEach(function(key) {
-      out[key] = tryParseInt(document.getElementById(key + '-val').value);
+      var val = tryParseInt($('#' + key + '-val').val(), 0);
+      var $slider = $('#' + key);
+      if ($slider.attr('max')) {
+        val = Math.min(val, parseInt($slider.attr('max'), 10));
+      }
+      if ($slider.attr('min')) {
+        val = Math.max(val, parseInt($slider.attr('min'), 10));
+      }
+      out[key] = val;
     });
     return out;
   }
@@ -366,6 +377,11 @@
       $('#status-raw-count-container').toggle(evt.currentTarget.value === 'rawdata' || evt.currentTarget.value === 'rig-raw');
     });
     $('#statusContent').trigger('change');
+
+    $('#basalGraph').on('change', function(evt) {
+      $('#basal-height-container').toggle($(evt.currentTarget).is(':checked'));
+    });
+    $('#basalGraph').trigger('change');
 
     $('.layout-order').children('label').append([
       '<div class="up-down-buttons">',

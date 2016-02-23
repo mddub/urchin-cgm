@@ -31,8 +31,10 @@
     "batteryAsNumber": 7,
     "timeAlign": 8,
     "batteryLoc": 9,
-    "numElements": 10,
-    "elements": 11
+    "basalGraph": 10,
+    "basalHeight": 11,
+    "numElements": 12,
+    "elements": 13
   },
   "resources": {
     "media": [

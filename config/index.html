@@ -192,6 +192,13 @@
       </div>
 
       <div class="item-container">
+        <h3>PUMP DATA SETTINGS:</h3>
+        <div class="item-container-footer">
+          You can enter pump data in Nightscout Care Portal, or upload it automatically with an OpenAPS uploader.
+        </div>
+      </div>
+
+      <div class="item-container">
         <div class="item-container-header">Bolus history</div>
         <div class="item-container-content">
           <label class="item">
@@ -200,7 +207,35 @@
           </label>
         </div>
         <div class="item-container-footer">
-          Bolus treatments from Nightscout Care Portal appear as ticks along the bottom of the graph. You can enter these manually in Nightscout or upload them automatically from your pump with an OpenAPS uploader.
+          Bolus treatments from Nightscout Care Portal appear as ticks along the bottom of the graph.
+        </div>
+      </div>
+
+      <div class="item-container">
+        <div class="item-container-header">Basal rate graph</div>
+        <div class="item-container-content">
+          <label class="item">
+            <input name="basalGraph" id="basalGraph" type="checkbox" class="item-checkbox">
+            Show basal rate history
+          </label>
+        </div>
+        <div class="item-container-footer">
+          Basal rate history appears as a bar graph below the graph of glucose readings.
+        </div>
+      </div>
+
+      <div class="item-container" id="basal-height-container">
+        <div class="item-container-header">Basal rate graph height</div>
+        <div class="item-container-content">
+          <label class="item">
+            <input id="basalHeight" name="basalHeight" type="range" class="item-slider" min="2" max="30" step="1">
+            <div class="item-input-wrapper item-slider-text">
+              <input id="basalHeight-val" name="basalHeight" type="tel" class="item-input">
+            </div>
+          </label>
+        </div>
+        <div class="item-container-footer">
+          NOTE: This height is in pixels, but the heights for layout elements (below) are percentages.
         </div>
       </div>
 

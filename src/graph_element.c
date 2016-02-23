@@ -56,14 +56,10 @@ static uint8_t decode_bits(uint8_t value, uint8_t offset, uint8_t bits) {
 }
 
 static void graph_update_proc(Layer *layer, GContext *ctx) {
-  // TODO
-  bool basal_graph = true;
-  uint8_t basal_height = 15;
-
   int i, x, y;
   GSize layer_size = layer_get_bounds(layer).size;
   uint8_t graph_width = layer_size.w;
-  uint8_t graph_height = basal_graph ? layer_size.h - basal_height : layer_size.h;
+  uint8_t graph_height = get_prefs()->basal_graph ? layer_size.h - get_prefs()->basal_height : layer_size.h;
 
   GraphData *data = layer_get_data(layer);
   graphics_context_set_stroke_color(ctx, data->color);
@@ -92,7 +88,7 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
   }
 
   // Basals
-  if (basal_graph) {
+  if (get_prefs()->basal_graph) {
     graphics_draw_line(ctx, GPoint(0, graph_height), GPoint(graph_width, graph_height));
     for(i = 0; i < data->count; i++) {
       uint8_t basal = decode_bits(data->extra[i], GRAPH_EXTRA_BASAL_OFFSET, GRAPH_EXTRA_BASAL_BITS);

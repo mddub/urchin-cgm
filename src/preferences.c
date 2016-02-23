@@ -67,6 +67,8 @@ void set_prefs(DictionaryIterator *data) {
   s_prefs->bottom_of_graph = dict_find(data, APP_KEY_BOTTOM_OF_GRAPH)->value->int32;
   s_prefs->h_gridlines = dict_find(data, APP_KEY_H_GRIDLINES)->value->int32;
   s_prefs->battery_as_number = dict_find(data, APP_KEY_BATTERY_AS_NUMBER)->value->int32;
+  s_prefs->basal_graph = dict_find(data, APP_KEY_BASAL_GRAPH)->value->int32;
+  s_prefs->basal_height = dict_find(data, APP_KEY_BASAL_HEIGHT)->value->int32;
   s_prefs->time_align = dict_find(data, APP_KEY_TIME_ALIGN)->value->int32;
   s_prefs->battery_loc = dict_find(data, APP_KEY_BATTERY_LOC)->value->int32;
   s_prefs->num_elements = dict_find(data, APP_KEY_NUM_ELEMENTS)->value->int32;

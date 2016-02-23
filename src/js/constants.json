@@ -18,6 +18,8 @@
       "statusText" : "",
       "batteryAsNumber": false,
       "bolusTicks": false,
+      "basalGraph": false,
+      "basalHeight": 15,
       "layout" : "a",
       "advancedLayout": false,
       "customLayout": {

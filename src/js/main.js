@@ -56,10 +56,6 @@ function main(c) {
       }
     }
 
-    // TODO
-    config.basalGraph = true;
-    config.basalHeight = 15;
-
     var sgvs = data.getSGVsDateDescending(config);
     var bolusHistory = config.bolusTicks ? data.getBolusHistory(config) : Promise.resolve([]);
     var basalHistory = config.basalGraph ? data.getBasalHistory(config) : Promise.resolve([]);
@@ -114,6 +110,8 @@ function main(c) {
       batteryAsNumber: config.batteryAsNumber ? 1 : 0,
       timeAlign: c.ALIGN[getLayout(config).timeAlign],
       batteryLoc: c.BATTERY_LOC[getLayout(config).batteryLoc],
+      basalGraph: config.basalGraph ? 1 : 0,
+      basalHeight: config.basalHeight,
       numElements: countElementsForPebble(getLayout(config)),
       elements: encodeElementsForPebble(getLayout(config)),
     });
