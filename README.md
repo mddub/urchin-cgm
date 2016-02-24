@@ -19,7 +19,7 @@ The status bar can display content from a variety of sources:
 * **Uploader battery level** - if your Nightscout data comes from a wired rig/xDrip. (e.g. `36%`)
 * **Raw Dexcom readings** - [raw sensor readings][raw-dexcom-readings] plus noise level. (e.g. `Cln 97 104 106`)
 * **Uploader battery, Dexcom raw** - combination of the above two. (e.g. `36% Cln 97 104 106`)
-* **Active basal - OpenAPS** - the currently-active basal rate based on treatments in Nightscout Care Portal. If a temp basal is currently active, shows the difference from normal basal and how many minutes ago the temp basal began. (e.g. `1.5u/h +0.6 (19)`)
+* **Active basal - OpenAPS** - the currently-active basal rate based on treatments in [Nightscout Care Portal][care-portal]. If a temp basal is currently active, shows the difference from normal basal and how many minutes ago the temp basal began. (e.g. `1.5u/h +0.6 (19)`)
 * **Pump IOB - MiniMed Connect** - the bolus IOB reported by a [MiniMed Connect][minimed-connect]. (e.g. `2.3u`)
 * **Custom URL** - if you want to summarize your data in a custom way.
 * **Custom text** - remind yourself whose glucose readings you're looking at, or leave a terse inspirational message.
@@ -52,19 +52,13 @@ For the adventurous, any layout can be customized: reorder the elements, change 
 
 ![](http://i.imgur.com/sANZi9C.png) ![](http://i.imgur.com/648FVQB.png)
 
-## To do (ordered vaguely by priority):
-* Cache data
-* High/low BG alerts
-* Stale data alerts
-* Show date when space allows
-* Color support for Pebble Time
-* A fixed layout which supports Pebble Time Round
-* Recency indicator (like Dexcom's warm-up pie chart)
-* Ability to view longer time scale
-* More dynamic sizing of content (e.g. bigger/smaller time and BG)
-* Additional layout elements (bolus visualization, basal visualization, second status)
-* Integration tests based on visual diffs
-* etc.
+## Pump data
+
+If you are using Nightscout to track data from an insulin pump, you may choose to display **bolus history** (as ticks) and/or **basal history** (as a bar graph):
+
+![](http://i.imgur.com/quJuxYL.png)
+
+You can enter this data manually in [Nightcout Care Portal][care-portal] or with the ["CarePortal" Pebble app][pebble-care-portal]. Alternatively, you can set up an [OpenAPS uploader][openaps] to upload it automatically.
 
 ## Contributing
 
@@ -156,17 +150,24 @@ pip install -r requirements.txt
   npm test
   ```
 
-```
-cd test/js
-npm install
-npm test
-```
+## To do:
+* High/low BG alerts
+* Stale data alerts
+* Show date when space allows
+* Color support for Pebble Time
+* A fixed layout which supports Pebble Time Round
+* Use data directly from Dexcom Share (no Nightscout site required)
+* Recency indicator (like Dexcom's warm-up pie chart)
+* Ability to view longer time scale
+* More dynamic sizing of content (e.g. bigger/smaller time and BG)
+* etc.
 
 ## Disclaimer
 
 This project is intended for educational and informational purposes only. It is not FDA approved and should not be used to make medical decisions. It is neither affiliated with nor endorsed by Dexcom.
 
 [build-env-development]: https://github.com/mddub/urchin-cgm/blob/ede29c/wscript#L17
+[care-portal]: http://www.nightscout.info/wiki/welcome/website-features/cgm-remote-monitor-care-portal
 [emu-app-config-file]: https://github.com/pebble/pebble-tool/blob/0e51fa/pebble_tool/commands/emucontrol.py#L116
 [emu-app-config-magic]: https://github.com/mddub/urchin-cgm/blob/ea2831/test/util.py#L36
 [file-issue]: https://github.com/mddub/urchin-cgm/issues
@@ -175,7 +176,9 @@ This project is intended for educational and informational purposes only. It is 
 [minimed-connect]: http://www.nightscout.info/wiki/welcome/website-features/funnel-cake-0-8-features/minimed-connect-and-nightscout
 [Mocha]: https://mochajs.org/
 [Node]: https://nodejs.org/
+[openaps]: https://openaps.gitbooks.io/building-an-open-artificial-pancreas-system/content/
 [pbw]: https://raw.githubusercontent.com/mddub/urchin-cgm/master/release/urchin-cgm.pbw
 [Pebble SDK Tool]: https://developer.getpebble.com/sdk/
+[pebble-care-portal]: https://apps.getpebble.com/en_US/application/568fb97705f633b362000045
 [raw-dexcom-readings]: http://www.nightscout.info/wiki/labs/interpreting-raw-dexcom-data
 [Syntastic]: https://github.com/scrooloose/syntastic
