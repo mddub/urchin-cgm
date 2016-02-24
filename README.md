@@ -66,72 +66,95 @@ For the adventurous, any layout can be customized: reorder the elements, change 
 * Integration tests based on visual diffs
 * etc.
 
-File an issue to report a bug or provide feedback for future development.
+## Contributing
+
+Contributions are welcome in the form of bugs and pull requests. To report a bug or provide feedback, please [file an issue][file-issue]. To contribute code, please use the instructions below to build and test the watchface.
+
+* Install the [Pebble SDK Tool].
+
+* Install and activate Pebble SDK 3.7. (For now, it is necessary to build the app with this older version of the SDK, since it is the latest version which can build pbw files for Pebble Time and Steel running firmware 2.9.1. In the near future, the app will be migrated to use the latest SDK, which will require users of those Pebbles to upgrade their firmware.)
+  ```
+  pebble sdk install 3.7
+  pebble sdk activate 3.7
+  ```
+
+* Build and run the watchface with a command like:
+  ```
+  pebble clean && pebble build && pebble install --emulator aplite && pebble logs
+  ```
+
+**Tips:**
+
+* **Testing the configuration page**: If you make changes to the configuration page, you must build the watchface to point to your local copy of the page (`file:///...`). To do this, set `BUILD_ENV` to `development`. (More info [here][build-env-development].)
+  ```
+  BUILD_ENV=development pebble build
+  pebble install --emulator aplite
+  pebble emu-app-config --emulator aplite
+  ```
+
+* **Syntax checking:** If you use Vim, I highly recommend using [Syntastic] to display syntax errors. On my OS X system running Pebble Tool v4.1.1, these lines make Syntastic aware of Pebble's header files and suppress warnings generated within those files:
+
+  ```
+  let g:syntastic_c_include_dirs = ['/Users/<user>/Library/Application Support/Pebble SDK/SDKs/3.7/sdk-core/pebble/aplite/include', 'build/aplite']
+  let g:syntastic_c_remove_include_errors = 1
+  ```
 
 ## Testing
 
-Since this software displays real-time health data, it is important to be able to verify that it works as expected. This project includes two tools to aid testing: a mock Nightscout server and automated screenshot testing.
+Since this software displays real-time health data, it is important to be able to verify that it works as expected. This project includes two tools to aid testing: a mock Nightscout server and automated screenshot testing. There is also a suite of JavaScript unit tests.
 
 To install testing dependencies, use `pip`:
 ```
 pip install -r requirements.txt
 ```
 
-These instructions assume you are using the [Pebble SDK]. You can build and run the project with a command like:
-```
-pebble clean && pebble build && pebble install --emulator aplite && pebble logs
-```
+* **Mock Nightscout server**
 
-### Mock Nightscout server
+  The `test/` directory includes a server which uses the [Flask] framework. To run it:
+  ```
+  MOCK_SERVER_PORT=5555 python test/server.py
+  ```
 
-The `test/` directory includes a server which uses the [Flask] framework. To run it:
-```
-MOCK_SERVER_PORT=5555 python test/server.py
-```
+  Then open the configuration page to set your Nightscout host to `http://localhost:5555`:
+  ```
+  pebble emu-app-config
+  # ...make configuration changes in web browser...
+  ```
 
-Then open the configuration page to set your Nightscout host to `http://localhost:5555`:
-```
-pebble emu-app-config
-# ...make configuration changes in web browser...
-```
+  To set the data that will be returned by the `sgv.json` endpoint:
+  ```
+  vi sgv-data.json
+  # ...edit mock data...
+  curl -d @sgv-data.json http://localhost:5555/set-sgv
+  ```
 
-To set the data that will be returned by the `sgv.json` endpoint:
-```
-vi sgv-data.json
-# ...edit mock data...
-curl -d @sgv-data.json http://localhost:5555/set-sgv
-```
+  Verify:
+  ```
+  curl http://localhost:5555/api/v1/entries/sgv.json
+  ```
 
-Verify:
-```
-curl http://localhost:5555/api/v1/entries/sgv.json
-```
+* **Automated screenshot testing**
 
-### Automated screenshot testing
+  Writing integration tests for Pebble is not simple. The best method I have found is to take screenshots. Each test case provides watchface configuration and SGV data to the mock server, triggers the emulator to open a configuration page hosted on the mock server, and [does magic][emu-app-config-magic] to pass the stored configuration back to the emulator. By design, receiving new configuration causes the watchface to request new data from the mock server. A screenshot can then be saved for that combination of configuration and data.
 
-Writing integration tests for Pebble is not simple. The best method I have found is to take screenshots. Each test case provides watchface configuration and SGV data to the mock server, triggers the emulator to open a configuration page hosted on the mock server, and [does magic][emu-app-config-magic] to pass the stored configuration back to the emulator. By design, receiving new configuration causes the watchface to request new data from the mock server. A screenshot can then be saved for that combination of configuration and data.
+  To run tests:
+  ```
+  bash test/do_screenshots.sh
+  ```
 
-To run tests:
-```
-bash test/do_screenshots.sh
-```
+  This will build the watchface, run it in the emulator, take a screenshot for each test, and generate an HTML file with the results. To add a new test case, follow the examples in `test/test_screenshots.py`.
 
-This will build the watchface, run it in the emulator, take a screenshot for each test, and generate an HTML file with the results. To add a new test case, follow the examples in `test/test_screenshots.py`.
+  Automated verification of the screenshots and CI are coming soon. For now, you manually inspect them.
 
-Automated verification of the screenshots and CI are coming soon. For now, you manually inspect them.
+* **JavaScript unit tests**
 
-### Testing the configuration page
+  There is a suite of [JavaScript unit tests][js-unit-tests] to verify the transformation of Nightscout data in PebbleKit JS. These are run with [Node] + [Mocha].
 
-To test changes to the configuration page locally, set `BUILD_ENV` to `development`. This will build the watchface to point to the local config page (`file:///...`). Using `emu-app-config --file` won't work because it [bypasses the PebbleKit JS][emu-app-config-file] which adds the current config to the query string.
-```
-BUILD_ENV=development pebble build
-pebble install --emulator aplite
-pebble emu-app-config --emulator aplite
-```
-
-### JavaScript unit tests
-
-There are a few [Mocha] unit tests to verify the transformation of Nightscout data in PebbleKit JS. These are run with [Node].
+  ```
+  cd test/js
+  npm install
+  npm test
+  ```
 
 ```
 cd test/js
@@ -143,12 +166,16 @@ npm test
 
 This project is intended for educational and informational purposes only. It is not FDA approved and should not be used to make medical decisions. It is neither affiliated with nor endorsed by Dexcom.
 
+[build-env-development]: https://github.com/mddub/urchin-cgm/blob/ede29c/wscript#L17
 [emu-app-config-file]: https://github.com/pebble/pebble-tool/blob/0e51fa/pebble_tool/commands/emucontrol.py#L116
 [emu-app-config-magic]: https://github.com/mddub/urchin-cgm/blob/ea2831/test/util.py#L36
+[file-issue]: https://github.com/mddub/urchin-cgm/issues
 [Flask]: http://flask.pocoo.org/
+[js-unit-tests]: https://github.com/mddub/urchin-cgm/tree/master/test/js
 [minimed-connect]: http://www.nightscout.info/wiki/welcome/website-features/funnel-cake-0-8-features/minimed-connect-and-nightscout
 [Mocha]: https://mochajs.org/
 [Node]: https://nodejs.org/
 [pbw]: https://raw.githubusercontent.com/mddub/urchin-cgm/master/release/urchin-cgm.pbw
-[Pebble SDK]: https://developer.getpebble.com/sdk/
+[Pebble SDK Tool]: https://developer.getpebble.com/sdk/
 [raw-dexcom-readings]: http://www.nightscout.info/wiki/labs/interpreting-raw-dexcom-data
+[Syntastic]: https://github.com/scrooloose/syntastic
