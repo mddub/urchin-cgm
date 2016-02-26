@@ -108,10 +108,11 @@ function main(c) {
       bottomOfGraph: config.bottomOfGraph,
       hGridlines: config.hGridlines,
       batteryAsNumber: config.batteryAsNumber ? 1 : 0,
-      timeAlign: c.ALIGN[getLayout(config).timeAlign],
-      batteryLoc: c.BATTERY_LOC[getLayout(config).batteryLoc],
       basalGraph: config.basalGraph ? 1 : 0,
       basalHeight: config.basalHeight,
+      updateEveryMinute: config.updateEveryMinute ? 1 : 0,
+      timeAlign: c.ALIGN[getLayout(config).timeAlign],
+      batteryLoc: c.BATTERY_LOC[getLayout(config).batteryLoc],
       numElements: countElementsForPebble(getLayout(config)),
       elements: encodeElementsForPebble(getLayout(config)),
     });

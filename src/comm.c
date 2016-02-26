@@ -2,6 +2,7 @@
 #include "app_keys.h"
 #include "config.h"
 #include "comm.h"
+#include "preferences.h"
 #include "staleness.h"
 
 static bool phone_contact = false;
@@ -67,9 +68,14 @@ static void in_received_handler(DictionaryIterator *received, void *context) {
   staleness_update(received);
   int msg_type = dict_find(received, APP_KEY_MSG_TYPE)->value->uint8;
   if (msg_type == MSG_TYPE_DATA) {
-    uint32_t recency = dict_find(received, APP_KEY_RECENCY)->value->uint32;
-    int32_t next_update = SGV_UPDATE_FREQUENCY - recency * 1000;
-    int32_t delay = next_update < LATE_DATA_UPDATE_FREQUENCY ? LATE_DATA_UPDATE_FREQUENCY : next_update;
+    int32_t delay;
+    if (get_prefs()->update_every_minute) {
+      delay = 60 * 1000;
+    } else {
+      uint32_t recency = dict_find(received, APP_KEY_RECENCY)->value->uint32;
+      int32_t next_update = SGV_UPDATE_FREQUENCY - recency * 1000;
+      delay = next_update < 0 ? LATE_DATA_UPDATE_FREQUENCY : next_update;
+    }
     schedule_update((uint32_t) delay);
   }
   if (msg_type == MSG_TYPE_ERROR) {

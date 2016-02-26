@@ -20,6 +20,7 @@
       "bolusTicks": false,
       "basalGraph": false,
       "basalHeight": 15,
+      "updateEveryMinute": false,
       "layout" : "a",
       "advancedLayout": false,
       "customLayout": {

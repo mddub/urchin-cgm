@@ -29,12 +29,13 @@
     "bottomOfGraph": 5,
     "hGridlines": 6,
     "batteryAsNumber": 7,
-    "timeAlign": 8,
-    "batteryLoc": 9,
-    "basalGraph": 10,
-    "basalHeight": 11,
-    "numElements": 12,
-    "elements": 13
+    "basalGraph": 8,
+    "basalHeight": 9,
+    "updateEveryMinute": 10,
+    "timeAlign": 11,
+    "batteryLoc": 12,
+    "numElements": 13,
+    "elements": 14
   },
   "resources": {
     "media": [

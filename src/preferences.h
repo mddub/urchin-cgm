@@ -24,6 +24,7 @@ typedef struct __attribute__((__packed__)) Preferences {
   bool battery_as_number;
   bool basal_graph;
   unsigned int basal_height:5;
+  bool update_every_minute;
   unsigned int time_align:2;
   unsigned int battery_loc:3;
   unsigned int num_elements:3;

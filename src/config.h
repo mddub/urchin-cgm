@@ -5,8 +5,6 @@
 ///////////////////////////////////////////////////////
 // CONFIGURATION: edit any of these values
 
-#define SGV_UPDATE_FREQUENCY (60*1000*5 + 30*1000)
-
 // STALENESS ALERTS:
 // Show an icon if there is unacceptable lag between any component of:
 // Rig -> Nightscout -> Phone -> Pebble

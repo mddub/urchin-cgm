@@ -284,6 +284,8 @@
     $('[name=bolusTicks]').prop('checked', !!current['bolusTicks']);
     $('[name=basalGraph]').prop('checked', !!current['basalGraph']);
 
+    $('[name=updateEveryMinute]').val(current['updateEveryMinute'] ? 'true' : 'false');
+
     $('[name=layout][value=' + current.layout + ']').addClass('active');
     $('[name=advancedLayout]').prop('checked', !!current['advancedLayout']);
 
@@ -308,6 +310,7 @@
       batteryAsNumber: $('[name=batteryAsNumber][value=number]').hasClass('active'),
       bolusTicks: $('[name=bolusTicks]').is(':checked'),
       basalGraph: $('[name=basalGraph]').is(':checked'),
+      updateEveryMinute: $('[name=updateEveryMinute]').val() === 'true',
       layout: $('[name=layout].active').attr('value'),
       advancedLayout: $('[name=advancedLayout]').is(':checked'),
       customLayout: customLayout,
