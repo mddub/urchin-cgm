@@ -77,6 +77,11 @@ Contributions are welcome in the form of bugs and pull requests. To report a bug
   pebble clean && pebble build && pebble install --emulator aplite && pebble logs
   ```
 
+* The watchface will ask for settings from the "phone." Open the configuration page with this command and hit "save" in your browser (you'll need to do this only once):
+  ```
+  pebble emu-app-config --emulator aplite
+  ```
+
 **Tips:**
 
 * **Testing the configuration page**: If you make changes to the configuration page, you must build the watchface to point to your local copy of the page (`file:///...`). To do this, set `BUILD_ENV` to `development`. (More info [here][build-env-development].)
