@@ -29,6 +29,9 @@ static BatteryComponent *create_battery_component(Layer *parent, unsigned int ba
     y = bounds.size.h - battery_component_height();
     align_right = true;
   }
+  if (bounds.size.h <= battery_component_height()) {
+    y = (bounds.size.h - battery_component_height()) / 2 - 1;
+  }
   if (x != -1) {
     return battery_component_create(parent, x, y, align_right);
   } else {
@@ -36,11 +39,21 @@ static BatteryComponent *create_battery_component(Layer *parent, unsigned int ba
   }
 }
 
+static uint8_t choose_font_for_height(uint8_t height) {
+  uint8_t choices[] = {FONT_42_BOLD, FONT_34_NUMBERS, FONT_28_BOLD, FONT_24_BOLD, FONT_18_BOLD};
+  for(uint8_t i = 0; i < ARRAY_LENGTH(choices); i++) {
+    if (get_font(choices[i]).height < height) {
+      return choices[i];
+    }
+  }
+  return choices[ARRAY_LENGTH(choices) - 1];
+}
+
 TimeElement* time_element_create(Layer* parent) {
   GRect bounds = element_get_bounds(parent);
 
   const int time_margin = 2;
-  FontChoice font = get_font(FONT_42_BOLD);
+  FontChoice font = get_font(choose_font_for_height(bounds.size.h));
 
   TextLayer* time_text = text_layer_create(GRect(time_margin, (bounds.size.h - font.height) / 2 - font.padding_top, bounds.size.w - 2 * time_margin, font.height + font.padding_top + font.padding_bottom));
   text_layer_set_font(time_text, fonts_get_system_font(font.key));

@@ -312,3 +312,37 @@ class TestBatteryAsNumber(ScreenshotTest):
         'statusText': 'battery ------>',
         'batteryAsNumber': True,
     }
+
+class BaseDynamicTimeFontTest(ScreenshotTest):
+    sgvs = default_entries('Flat')
+    time_height = None
+
+    @property
+    def __test__(self):
+        return not self.__class__ == BaseDynamicTimeFontTest
+
+    @property
+    def config(self):
+        layout = copy.deepcopy(CONSTANTS['LAYOUTS']['e'])
+        mutate_element(layout, 'TIME_AREA_ELEMENT', {
+            'black': True,
+            'height': self.time_height,
+        })
+        return {
+            'layout': 'custom',
+            'customLayout': layout,
+            'statusContent': 'customtext',
+            'statusText': 'time height: %s%%' % self.time_height
+        }
+
+class TestDynamicTimeFont18(BaseDynamicTimeFontTest):
+    time_height = 18
+
+class TestDynamicTimeFont14(BaseDynamicTimeFontTest):
+    time_height = 14
+
+class TestDynamicTimeFont10(BaseDynamicTimeFontTest):
+    time_height = 10
+
+class TestDynamicTimeFont6(BaseDynamicTimeFontTest):
+    time_height = 6
