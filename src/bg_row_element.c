@@ -1,15 +1,7 @@
 #include "bg_row_element.h"
+#include "fonts.h"
 #include "layout.h"
 #include "text_updates.h"
-
-// https://forums.getpebble.com/discussion/7147/text-layer-padding
-#define ACTUAL_TEXT_HEIGHT_34 24
-#define PADDING_TOP_34 10
-// because it's a numbers-only font
-#define PADDING_BOTTOM_34 0
-#define ACTUAL_TEXT_HEIGHT_28 18
-#define PADDING_TOP_28 10
-#define PADDING_BOTTOM_28 4
 
 #define BG_TREND_PADDING 8
 #define TREND_DELTA_PADDING 5
@@ -53,13 +45,14 @@ static void bg_row_element_rearrange(BGRowElement *el) {
 BGRowElement* bg_row_element_create(Layer *parent) {
   GRect bounds = element_get_bounds(parent);
 
+  FontChoice bg_font = get_font(FONT_34_NUMBERS);
   TextLayer *bg_text = text_layer_create(GRect(
     0,
-    (bounds.size.h - ACTUAL_TEXT_HEIGHT_34) / 2 - PADDING_TOP_34,
+    (bounds.size.h - bg_font.height) / 2 - bg_font.padding_top,
     bounds.size.w,
-    ACTUAL_TEXT_HEIGHT_34 + PADDING_TOP_34 + PADDING_BOTTOM_34
+    bg_font.height + bg_font.padding_top + bg_font.padding_bottom
   ));
-  text_layer_set_font(bg_text, fonts_get_system_font(FONT_KEY_BITHAM_34_MEDIUM_NUMBERS));
+  text_layer_set_font(bg_text, fonts_get_system_font(bg_font.key));
   text_layer_set_text_alignment(bg_text, GTextAlignmentLeft);
   text_layer_set_background_color(bg_text, GColorClear);
   text_layer_set_text_color(bg_text, element_fg(parent));
@@ -71,13 +64,14 @@ BGRowElement* bg_row_element_create(Layer *parent) {
     (bounds.size.h - trend_arrow_component_height()) / 2
   );
 
+  FontChoice delta_font = get_font(FONT_28_BOLD);
   TextLayer *delta_text = text_layer_create(GRect(
     0, // set by bg_row_element_rearrange
-    (bounds.size.h - ACTUAL_TEXT_HEIGHT_28) / 2 - PADDING_TOP_28,
+    (bounds.size.h - delta_font.height) / 2 - delta_font.padding_top,
     bounds.size.w,
-    ACTUAL_TEXT_HEIGHT_28 + PADDING_TOP_28 + PADDING_BOTTOM_28
+    delta_font.height + delta_font.padding_top + delta_font.padding_bottom
   ));
-  text_layer_set_font(delta_text, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
+  text_layer_set_font(delta_text, fonts_get_system_font(delta_font.key));
   text_layer_set_text_alignment(delta_text, GTextAlignmentLeft);
   text_layer_set_background_color(delta_text, GColorClear);
   text_layer_set_text_color(delta_text, element_fg(parent));
@@ -102,7 +96,7 @@ void bg_row_element_update(BGRowElement *el, DictionaryIterator *data) {
   last_bg_text_layer_update(el->bg_text, data);
   text_layer_set_font(
     el->bg_text,
-    fonts_get_system_font(is_bg_special_value(data) ? FONT_KEY_GOTHIC_28_BOLD : FONT_KEY_BITHAM_34_MEDIUM_NUMBERS)
+    fonts_get_system_font(is_bg_special_value(data) ? get_font(FONT_28_BOLD).key : get_font(FONT_34_NUMBERS).key)
   );
   trend_arrow_component_update(el->trend, data);
   delta_text_layer_update(el->delta_text, data);

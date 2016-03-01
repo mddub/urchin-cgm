@@ -1,12 +1,8 @@
 #include "app_keys.h"
+#include "fonts.h"
 #include "layout.h"
 #include "preferences.h"
 #include "time_element.h"
-
-// https://forums.getpebble.com/discussion/7147/text-layer-padding
-#define ACTUAL_TEXT_HEIGHT_42 30
-#define PADDING_TOP_42 12
-#define PADDING_BOTTOM_42 8
 
 #include "generated/test_maybe.h"
 #define TESTING_TIME_DISPLAY "13:37"
@@ -42,9 +38,12 @@ static BatteryComponent *create_battery_component(Layer *parent, unsigned int ba
 
 TimeElement* time_element_create(Layer* parent) {
   GRect bounds = element_get_bounds(parent);
+
   const int time_margin = 2;
-  TextLayer* time_text = text_layer_create(GRect(time_margin, (bounds.size.h - ACTUAL_TEXT_HEIGHT_42) / 2 - PADDING_TOP_42, bounds.size.w - 2 * time_margin, ACTUAL_TEXT_HEIGHT_42 + PADDING_TOP_42 + PADDING_BOTTOM_42));
-  text_layer_set_font(time_text, fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD));
+  FontChoice font = get_font(FONT_42_BOLD);
+
+  TextLayer* time_text = text_layer_create(GRect(time_margin, (bounds.size.h - font.height) / 2 - font.padding_top, bounds.size.w - 2 * time_margin, font.height + font.padding_top + font.padding_bottom));
+  text_layer_set_font(time_text, fonts_get_system_font(font.key));
   text_layer_set_background_color(time_text, GColorClear);
   text_layer_set_text_color(time_text, element_fg(parent));
 

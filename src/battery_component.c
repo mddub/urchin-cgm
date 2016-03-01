@@ -1,5 +1,6 @@
 #include "battery_component.h"
 #include "config.h"
+#include "fonts.h"
 #include "layout.h"
 #include "preferences.h"
 
@@ -8,12 +9,8 @@
 #define BATTERY_ICON_PADDING 4
 #define BATTERY_ICON_TOP_FUDGE 1
 
-// https://forums.getpebble.com/discussion/7147/text-layer-padding
-#define ACTUAL_TEXT_HEIGHT_18 11
-#define PADDING_TOP_18 7
-#define PADDING_BOTTOM_18 3
-
 #define BATTERY_TEXT_WIDTH 50
+#define BATTERY_FONT FONT_18_BOLD
 
 // XXX need to keep reference to this for battery_handler
 static BatteryComponent *s_component;
@@ -66,11 +63,11 @@ int battery_component_width() {
 }
 
 int battery_component_height() {
-  return get_prefs()->battery_as_number ? ACTUAL_TEXT_HEIGHT_18 + 2 * PADDING_BOTTOM_18 : BATTERY_ICON_HEIGHT;
+  return get_prefs()->battery_as_number ? get_font(BATTERY_FONT).height + 2 * get_font(BATTERY_FONT).padding_bottom : BATTERY_ICON_HEIGHT;
 }
 
 int battery_component_vertical_padding() {
-  return get_prefs()->battery_as_number ? PADDING_BOTTOM_18 : BATTERY_ICON_PADDING;
+  return get_prefs()->battery_as_number ? get_font(BATTERY_FONT).padding_bottom : BATTERY_ICON_PADDING;
 }
 
 BatteryComponent* battery_component_create(Layer *parent, int x, int y, bool align_right) {
@@ -83,11 +80,12 @@ BatteryComponent* battery_component_create(Layer *parent, int x, int y, bool ali
 
   if (get_prefs()->battery_as_number) {
 
-    c->text_layer = text_layer_create(GRect(x, y - PADDING_TOP_18 + PADDING_BOTTOM_18, BATTERY_TEXT_WIDTH, ACTUAL_TEXT_HEIGHT_18 + PADDING_TOP_18 + PADDING_BOTTOM_18));
+    FontChoice font = get_font(BATTERY_FONT);
+    c->text_layer = text_layer_create(GRect(x, y - font.padding_top + font.padding_bottom, BATTERY_TEXT_WIDTH, font.height + font.padding_top + font.padding_bottom));
     text_layer_set_text_alignment(c->text_layer, align_right ? GTextAlignmentRight : GTextAlignmentLeft);
     text_layer_set_background_color(c->text_layer, GColorClear);
     text_layer_set_text_color(c->text_layer, element_fg(parent));
-    text_layer_set_font(c->text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
+    text_layer_set_font(c->text_layer, fonts_get_system_font(font.key));
     layer_add_child(parent, text_layer_get_layer(c->text_layer));
 
   } else {

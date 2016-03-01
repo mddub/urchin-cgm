@@ -1,16 +1,12 @@
 #include "config.h"
 #include "connection_status_component.h"
+#include "fonts.h"
 #include "layout.h"
 #include "staleness.h"
 
 #define REASON_ICON_WIDTH 25
 #define INITIAL_TEXT_SIZE 40
 #define TEXT_PADDING_R 2
-
-// https://forums.getpebble.com/discussion/7147/text-layer-padding
-#define ACTUAL_TEXT_HEIGHT_18 11
-#define PADDING_TOP_18 7
-#define PADDING_BOTTOM_18 3
 
 // This matches STALENESS_REASON_*
 const int CONN_ISSUE_ICONS[] = {
@@ -27,13 +23,14 @@ ConnectionStatusComponent* connection_status_component_create(Layer *parent, int
   layer_set_hidden(bitmap_layer_get_layer(icon_layer), true);
   layer_add_child(parent, bitmap_layer_get_layer(icon_layer));
 
+  FontChoice font = get_font(FONT_18_BOLD);
   TextLayer *staleness_text = text_layer_create(GRect(
     x + REASON_ICON_WIDTH + 1,
-    y + (REASON_ICON_WIDTH - ACTUAL_TEXT_HEIGHT_18) / 2 - PADDING_TOP_18,
+    y + (REASON_ICON_WIDTH - font.height) / 2 - font.padding_top,
     INITIAL_TEXT_SIZE,
-    ACTUAL_TEXT_HEIGHT_18 + PADDING_TOP_18 + PADDING_BOTTOM_18
+    font.height + font.padding_top + font.padding_bottom
   ));
-  text_layer_set_font(staleness_text, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
+  text_layer_set_font(staleness_text, fonts_get_system_font(font.key));
   text_layer_set_background_color(staleness_text, element_bg(parent));
   text_layer_set_text_color(staleness_text, element_fg(parent));
   text_layer_set_text_alignment(staleness_text, GTextAlignmentLeft);

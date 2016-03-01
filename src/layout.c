@@ -1,3 +1,4 @@
+#include "fonts.h"
 #include "layout.h"
 
 static int s_num_elements;
@@ -120,7 +121,7 @@ static TextLayer* maybe_create_need_prefs_message(Layer* parent) {
     text_layer_set_text_alignment(t, GTextAlignmentCenter);
     text_layer_set_background_color(t, GColorClear);
     text_layer_set_text_color(t, GColorBlack);
-    text_layer_set_font(t, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
+    text_layer_set_font(t, fonts_get_system_font(get_font(FONT_28_BOLD).key));
     layer_add_child(parent, text_layer_get_layer(t));
     return t;
   }
