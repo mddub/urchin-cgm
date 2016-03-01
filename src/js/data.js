@@ -92,7 +92,9 @@ var Data = function(c) {
   };
 
   d.getCustomUrl = function(config) {
-    return d.getURL(config.statusUrl).then(function(data) {
+    // XXX: No combination of request headers seems capable of achieving this on all platforms
+    var cacheBustUrl = config.statusUrl + (config.statusUrl.indexOf('?') !== -1 ? '&' : '?') + '_=' + Date.now();
+    return d.getURL(cacheBustUrl).then(function(data) {
       return (data || '-').substr(0, 255);
     });
   };
