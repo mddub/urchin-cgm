@@ -99,6 +99,10 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
         fill_rect_gray(ctx, GRect(x, y + 1, GRAPH_POINT_SIZE, basal - 1), data->color);
       }
     }
+    if (padding > 0) {
+      x = graph_width - GRAPH_POINT_SIZE * padding - 1;
+      graphics_fill_rect(ctx, GRect(x, graph_height, graph_width - x, get_prefs()->basal_height), 0, GCornerNone);
+    }
   }
 
   // Target range bounds
