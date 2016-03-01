@@ -47,7 +47,7 @@ By default, the `phone->Pebble` and `Nightscout->phone` icons appear after 10 mi
 
 The configuration page includes a handful of layout options, such as:
 
-![](http://i.imgur.com/dOxW8UY.png) ![](http://i.imgur.com/0p89kGG.png) ![](http://i.imgur.com/i9T91Ci.png)
+![](http://i.imgur.com/dOxW8UY.png) ![](http://i.imgur.com/0p89kGG.png) ![](http://i.imgur.com/qsUxN2f.png)
 
 For the adventurous, any layout can be customized: reorder the elements, change their heights, set a different background color...
 
