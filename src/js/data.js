@@ -87,6 +87,16 @@ var Data = function(c) {
     });
   };
 
+  d.getCarePortalIOB = function(config) {
+    return d.getJSON(config.nightscout_url + '/pebble').then(function(pebbleData) {
+      if(pebbleData['bgs'] !== undefined && pebbleData['bgs'].length && !isNaN(parseFloat(pebbleData['bgs'][0]['iob']))) {
+        return parseFloat(pebbleData['bgs'][0]['iob']).toFixed(1).toString() + ' u';
+      } else {
+        return '-';
+      }
+    });
+  };
+
   d.getCustomText = function(config) {
     return Promise.resolve((config.statusText || '').substr(0, 255));
   };
@@ -252,6 +262,7 @@ var Data = function(c) {
       'rig-raw': d.getRigBatteryAndRawData,
       'basal': d.getActiveBasal,
       'pumpiob': d.getIOB,
+      'careportaliob': d.getCarePortalIOB,
       'customurl': d.getCustomUrl,
       'customtext': d.getCustomText,
     }[config.statusContent];

@@ -329,3 +329,19 @@ describe('getRawData', function() {
     });
   });
 });
+
+describe('getCarePortalIOB', function() {
+  it('should report IOB from the Nightscout /pebble endpoint', function() {
+    var PEBBLE_DATA = {
+      "bgs": [{"iob": 1.27}]
+    };
+    var d = Data(defaultConstants);
+    mockAPI(d, {
+      'pebble': PEBBLE_DATA
+    });
+
+    return d.getCarePortalIOB({}).then(function(iob) {
+      expect(iob).to.be('1.3 u');
+    });
+  });
+});

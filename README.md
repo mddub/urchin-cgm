@@ -20,7 +20,8 @@ The status bar can display content from a variety of sources:
 * **Raw Dexcom readings** - [raw sensor readings][raw-dexcom-readings] plus noise level. (e.g. `Cln 97 104 106`)
 * **Uploader battery, Dexcom raw** - combination of the above two. (e.g. `36% Cln 97 104 106`)
 * **Active basal - OpenAPS** - the currently-active basal rate based on treatments in [Nightscout Care Portal][care-portal]. If a temp basal is currently active, shows the difference from normal basal and how many minutes ago the temp basal began. (e.g. `1.5u/h +0.6 (19)`)
-* **Pump IOB - MiniMed Connect** - the bolus IOB reported by a [MiniMed Connect][minimed-connect]. (e.g. `2.3u`)
+* **IOB - NS Care Portal** - IOB calculated based on treatments in [Nightscout Care Portal][care-portal]. (e.g. `2.3 u`)
+* **Pump IOB - MiniMed Connect** - the bolus IOB reported by a [MiniMed Connect][minimed-connect]. (e.g. `2.3 u`)
 * **Custom URL** - if you want to summarize your data in a custom way.
 * **Custom text** - remind yourself whose glucose readings you're looking at, or leave a terse inspirational message.
 
