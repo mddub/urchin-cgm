@@ -66,6 +66,37 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
   graphics_context_set_fill_color(ctx, data->color);
   int padding = graph_staleness_padding();
 
+  // Target range bounds
+  uint16_t limits[2] = {get_prefs()->top_of_range, get_prefs()->bottom_of_range};
+  bool is_top[2] = {true, false};
+  for(i = 0; i < (int)ARRAY_LENGTH(limits); i++) {
+    y = bg_to_y(graph_height, limits[i]);
+    for(x = 0; x < graph_width; x += 2) {
+      // Draw bounds symmetrically, on the inside of the range
+      if (is_top[i]) {
+        fill_rect_gray(ctx, GRect(0, y - 1, graph_width, 4), data->color);
+      } else {
+        fill_rect_gray(ctx, GRect(0, y - 2, graph_width, 4), data->color);
+      }
+    }
+  }
+
+  // Horizontal gridlines
+  int h_gridline_frequency = get_prefs()->h_gridlines;
+  if (h_gridline_frequency > 0) {
+    int graph_min = get_prefs()->bottom_of_graph;
+    int graph_max = get_prefs()->top_of_graph;
+    for(int g = 0; g < graph_max; g += h_gridline_frequency) {
+      if (g <= graph_min || g == limits[0] || g == limits[1]) {
+        continue;
+      }
+      y = bg_to_y(graph_height, g);
+      for(x = 2; x < graph_width; x += 8) {
+        graphics_draw_line(ctx, GPoint(x, y), GPoint(x + 1, y));
+      }
+    }
+  }
+
   // SGVs
   for(i = 0; i < data->count; i++) {
     // XXX: JS divides by 2 to fit into 1 byte
@@ -102,37 +133,6 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
     if (padding > 0) {
       x = graph_width - GRAPH_POINT_SIZE * padding - 1;
       graphics_fill_rect(ctx, GRect(x, graph_height, graph_width - x, get_prefs()->basal_height), 0, GCornerNone);
-    }
-  }
-
-  // Target range bounds
-  uint16_t limits[2] = {get_prefs()->top_of_range, get_prefs()->bottom_of_range};
-  bool is_top[2] = {true, false};
-  for(i = 0; i < (int)ARRAY_LENGTH(limits); i++) {
-    y = bg_to_y(graph_height, limits[i]);
-    for(x = 0; x < graph_width; x += 2) {
-      // Draw bounds symmetrically, on the inside of the range
-      if (is_top[i]) {
-        fill_rect_gray(ctx, GRect(0, y - 1, graph_width, 4), data->color);
-      } else {
-        fill_rect_gray(ctx, GRect(0, y - 2, graph_width, 4), data->color);
-      }
-    }
-  }
-
-  // Horizontal gridlines
-  int h_gridline_frequency = get_prefs()->h_gridlines;
-  if (h_gridline_frequency > 0) {
-    int graph_min = get_prefs()->bottom_of_graph;
-    int graph_max = get_prefs()->top_of_graph;
-    for(int g = 0; g < graph_max; g += h_gridline_frequency) {
-      if (g <= graph_min || g == limits[0] || g == limits[1]) {
-        continue;
-      }
-      y = bg_to_y(graph_height, g);
-      for(x = 2; x < graph_width; x += 8) {
-        graphics_draw_line(ctx, GPoint(x, y), GPoint(x + 1, y));
-      }
     }
   }
 }
