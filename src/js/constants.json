@@ -16,6 +16,7 @@
       "statusRawCount" : 2,
       "statusUrl" : "",
       "statusText" : "",
+      "statusOpenAPSEvBG": false,
       "batteryAsNumber": false,
       "bolusTicks": false,
       "basalGraph": false,

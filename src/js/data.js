@@ -6,6 +6,7 @@ var Data = function(c) {
   var MAX_TEMP_BASALS = MAX_SGVS;
   var MAX_UPLOADER_BATTERIES = 1;
   var MAX_CALIBRATIONS = 1;
+  var MAX_OPENAPS_STATUSES = 24;
   var MAX_BOLUSES_PER_HOUR_AVERAGE = 6;
   var MAX_BOLUSES = c.SGV_FETCH_SECONDS / (60 * 60) * MAX_BOLUSES_PER_HOUR_AVERAGE;
 
@@ -14,6 +15,7 @@ var Data = function(c) {
   var uploaderBatteryCache = new Cache('uploaderBattery', MAX_UPLOADER_BATTERIES);
   var calibrationCache = new Cache('calibration', MAX_CALIBRATIONS);
   var bolusCache = new Cache('bolus', MAX_BOLUSES);
+  var openAPSStatusCache = new Cache('openAPSStatus', MAX_OPENAPS_STATUSES);
   var profileCache;
 
   var d = {};
@@ -24,6 +26,7 @@ var Data = function(c) {
     uploaderBatteryCache.clear();
     calibrationCache.clear();
     bolusCache.clear();
+    openAPSStatusCache.clear();
     profileCache = undefined;
   };
 
@@ -216,7 +219,7 @@ var Data = function(c) {
         } else {
           rate = parseFloat(treatments[0]['absolute']);
         }
-        return {start: start, rate: rate};
+        return {start: start, rate: rate, duration: treatments[0]['duration']};
       } else {
         return null;
       }
@@ -254,6 +257,169 @@ var Data = function(c) {
     });
   };
 
+  function roundOrZero(x) {
+    if (x === 0 || x.toFixed(1) === '-0.0') {
+      return '0';
+    } else {
+      return x.toFixed(1);
+    }
+  }
+
+  function openAPSIsFresh(entries, key) {
+    var last = entries[0];
+    var secondToLast = entries[1];
+    return (
+      secondToLast &&
+      last['openaps'][key] &&
+      (
+        !secondToLast['openaps'][key] ||
+        new Date(last['openaps'][key]['timestamp']) > new Date(secondToLast['created_at'])
+      )
+    );
+  }
+
+  function openAPSIsSuccess(entries) {
+    return openAPSIsFresh(entries, 'suggested');
+  }
+
+  function openAPSEntriesFromLastSuccessfulDevice(allEntries) {
+    var entriesByDevice = allEntries.reduce(function(acc, entry) {
+      if (entry['device'] in acc) {
+        acc[entry['device']].push(entry);
+      } else {
+        acc[entry['device']] = [entry];
+      }
+      return acc;
+    }, {});
+
+    var mostRecentSuccess;
+    Object.keys(entriesByDevice).forEach(function(device) {
+      entriesByDevice[device].forEach(function(entry, i, entries) {
+        if (openAPSIsSuccess(entries.slice(i))) {
+          if (mostRecentSuccess === undefined) {
+            mostRecentSuccess = entry;
+          } else {
+            mostRecentSuccess = new Date(mostRecentSuccess['created_at']) > new Date(entry['created_at']) ? mostRecentSuccess : entry;
+          }
+        }
+      });
+    });
+
+    if (mostRecentSuccess !== undefined) {
+      return entriesByDevice[mostRecentSuccess['device']];
+    } else if (allEntries.length > 0) {
+      return entriesByDevice[allEntries[0]['device']];
+    } else {
+      return [];
+    }
+  }
+
+  function openAPSTempBasal(entries, activeTemp) {
+    var last = entries[0];
+    var enacted = last['openaps']['enacted'];
+
+    var rate;
+    var remaining;
+    if (
+        openAPSIsFresh(entries, 'enacted') &&
+        enacted['rate'] !== undefined && enacted['duration'] !== undefined &&
+        (enacted['recieved'] === true || enacted['received'] === true)
+    ) {
+      // if last enacted is a "cancel", don't show an active rate and don't consider last temp basal
+      if (enacted['duration'] > 0) {
+        rate = enacted['rate'];
+        remaining = Math.ceil(enacted['duration'] - (Date.now() - new Date(enacted['timestamp']).getTime()) / (60 * 1000));
+      }
+    } else if (activeTemp && activeTemp.duration > 0) {
+      rate = activeTemp.rate;
+      remaining = Math.ceil(activeTemp.duration - (Date.now() - activeTemp.start) / (60 * 1000));
+    }
+
+    if (rate !== undefined && remaining > 0) {
+      return roundOrZero(rate) + 'x' + remaining;
+    } else {
+      return '';
+    }
+  }
+
+  function openAPSIOB(entries) {
+    var iob = entries[0]['openaps']['iob'];
+    if (openAPSIsFresh(entries, 'iob') && iob['iob'] !== undefined) {
+      return roundOrZero(iob['iob']) + 'u';
+    } else {
+      return '';
+    }
+  }
+
+  function openAPSEventualBG(entries) {
+    var suggested = entries[0]['openaps']['suggested'];
+    if (openAPSIsFresh(entries, 'suggested')) {
+      if (suggested['eventualBG'] !== undefined) {
+        return '->' + suggested['eventualBG'];
+      } else {
+        return '';
+      }
+    }
+  }
+
+  function openAPSTimeSinceLastSuccess(entries) {
+    for (var i = 0; i < entries.length; i++) {
+      if (openAPSIsSuccess(entries.slice(i))) {
+        var lastSuccess = new Date(entries[i]['openaps']['suggested']['timestamp']).getTime();
+        var minutes = Math.round((Date.now() - lastSuccess) / (60 * 1000));
+        return (minutes < 60) ? minutes + 'm' : Math.floor(minutes / 60) + 'h' + (minutes % 60);
+      }
+    }
+    return '?';
+  }
+
+  function openAPSLoopRecency(entries) {
+    var last = entries[0];
+
+    var latest;
+    if (openAPSIsFresh(entries, 'enacted')) {
+      latest = last['openaps']['enacted']['timestamp'];
+    } else if (openAPSIsFresh(entries, 'suggested')) {
+      latest = last['openaps']['suggested']['timestamp'];
+    } else {
+      latest = last['created_at'];
+    }
+
+    var minutes = Math.round((Date.now() - new Date(latest).getTime()) / (60 * 1000));
+    return (minutes < 60) ? minutes : Math.floor(minutes / 60) + 'h';
+  }
+
+  d.getOpenAPSStatus = function(config) {
+    return Promise.all([
+      d.getOpenAPSStatusHistory(config),
+      _getActiveTempBasal(config),
+    ]).then(function(results) {
+      var allEntries = results[0],
+        activeTemp = results[1];
+
+      var entries = openAPSEntriesFromLastSuccessfulDevice(allEntries);
+      if (entries.length < 2) {
+        return '-';
+      }
+
+      var summary;
+      if (openAPSIsSuccess(entries)) {
+        var temp = openAPSTempBasal(entries, activeTemp);
+        var iob = openAPSIOB(entries);
+        var eventualBG = config.statusOpenAPSEvBG ? openAPSEventualBG(entries) : '';
+        summary = iob + eventualBG + (temp !== '' ? ' ' + temp : '');
+      } else {
+        summary = 'waiting | ' + openAPSTimeSinceLastSuccess(entries);
+      }
+
+      // Eventual BG takes up too much space to show recency as "(4)"
+      var recency = openAPSLoopRecency(entries);
+      var recencyDisplay = config.statusOpenAPSEvBG ? (recency + ': ') : ('(' + recency + ') ');
+
+      return recencyDisplay + summary;
+    });
+  };
+
   d.getStatusText = function(config) {
     var defaultFn = d.getRigBatteryLevel;
     var fn = {
@@ -263,6 +429,7 @@ var Data = function(c) {
       'basal': d.getActiveBasal,
       'pumpiob': d.getIOB,
       'careportaliob': d.getCarePortalIOB,
+      'openaps': d.getOpenAPSStatus,
       'customurl': d.getCustomUrl,
       'customtext': d.getCustomText,
     }[config.statusContent];
@@ -315,6 +482,14 @@ var Data = function(c) {
     return getUsingCache(
       config.nightscout_url + '/api/v1/treatments.json?find[insulin][$exists]=true&count=' + MAX_BOLUSES,
       bolusCache,
+      'created_at'
+    );
+  });
+
+  d.getOpenAPSStatusHistory = debounce(function(config) {
+    return getUsingCache(
+      config.nightscout_url + '/api/v1/devicestatus.json?find[openaps][$exists]=true&count=' + MAX_OPENAPS_STATUSES,
+      openAPSStatusCache,
       'created_at'
     );
   });

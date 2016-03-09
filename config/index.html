@@ -138,9 +138,10 @@
               <option value="rigbattery" class="item-select-option">Uploader battery level</option>
               <option value="rawdata" class="item-select-option">Raw Dexcom reading</option>
               <option value="rig-raw" class="item-select-option">Uploader battery, Dexcom raw</option>
-              <option value="basal" class="item-select-option">Active basal - OpenAPS</option>
+              <option value="basal" class="item-select-option">Active basal - NS Care Portal</option>
               <option value="careportaliob" class="item-select-option">IOB - NS Care Portal</option>
               <option value="pumpiob" class="item-select-option">Pump IOB - MM Connect</option>
+              <option value="openaps" class="item-select-option">IOB and temp - OpenAPS</option>
               <option value="customurl" class="item-select-option">Custom URL</option>
               <option value="customtext" class="item-select-option">Custom text</option>
             </select>
@@ -178,6 +179,16 @@
             <div class="item-input-wrapper item-slider-text">
               <input id="statusRawCount-val" name="statusRawCount" type="tel" class="item-input">
             </div>
+          </label>
+        </div>
+      </div>
+
+      <div id="status-openaps-ev-bg-container" class="item-container">
+        <div class="item-container-header">OpenAPS</div>
+        <div class="item-container-content">
+          <label class="item">
+            <input name="statusOpenAPSEvBG" type="checkbox" class="item-checkbox">
+            Show "eventual BG"
           </label>
         </div>
       </div>

@@ -19,9 +19,10 @@ The status bar can display content from a variety of sources:
 * **Uploader battery level** - if your Nightscout data comes from a wired rig/xDrip. (e.g. `36%`)
 * **Raw Dexcom readings** - [raw sensor readings][raw-dexcom-readings] plus noise level. (e.g. `Cln 97 104 106`)
 * **Uploader battery, Dexcom raw** - combination of the above two. (e.g. `36% Cln 97 104 106`)
-* **Active basal - OpenAPS** - the currently-active basal rate based on treatments in [Nightscout Care Portal][care-portal]. If a temp basal is currently active, shows the difference from normal basal and how many minutes ago the temp basal began. (e.g. `1.5u/h +0.6 (19)`)
+* **Active basal - NS Care Portal** - the currently-active basal rate based on treatments in [Nightscout Care Portal][care-portal]. If a temp basal is currently active, shows the difference from normal basal and how many minutes ago the temp basal began. (e.g. `1.5u/h +0.6 (19)`)
 * **IOB - NS Care Portal** - IOB calculated based on treatments in [Nightscout Care Portal][care-portal]. (e.g. `2.3 u`)
 * **Pump IOB - MiniMed Connect** - the bolus IOB reported by a [MiniMed Connect][minimed-connect]. (e.g. `2.3 u`)
+* **IOB and temp - OpenAPS** - IOB and currently-active temp basal rate from the most recent [OpenAPS status upload][openaps-status-uploads], or time since last successful status if the most recent upload indicates the loop failed to run. (e.g. `(2) 1.1u 1.9x13` or `(4) waiting | 23m`)
 * **Custom URL** - if you want to summarize your data in a custom way.
 * **Custom text** - remind yourself whose glucose readings you're looking at, or leave a terse inspirational message.
 
@@ -182,7 +183,8 @@ This project is intended for educational and informational purposes only. It is 
 [minimed-connect]: http://www.nightscout.info/wiki/welcome/website-features/funnel-cake-0-8-features/minimed-connect-and-nightscout
 [Mocha]: https://mochajs.org/
 [Node]: https://nodejs.org/
-[openaps]: https://openaps.gitbooks.io/building-an-open-artificial-pancreas-system/content/
+[openaps]: https://github.com/openaps/docs
+[openaps-status-uploads]: https://github.com/openaps/docs/blob/master/docs/Automate-system/vizualization.md#nightscout-integration
 [pbw]: https://raw.githubusercontent.com/mddub/urchin-cgm/master/release/urchin-cgm.pbw
 [Pebble SDK Tool]: https://developer.getpebble.com/sdk/
 [pebble-care-portal]: https://apps.getpebble.com/en_US/application/568fb97705f633b362000045

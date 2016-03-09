@@ -274,6 +274,7 @@
     document.getElementById('statusContent').value = current['statusContent'];
     document.getElementById('statusText').value = current['statusText'] || '';
     document.getElementById('statusUrl').value = current['statusUrl'] || '';
+    $('[name=statusOpenAPSEvBG]').prop('checked', !!current['statusOpenAPSEvBG']);
 
     if (current.batteryAsNumber === true) {
       $('[name=batteryAsNumber][value=number]').addClass('active');
@@ -307,6 +308,7 @@
       statusContent: document.getElementById('statusContent').value,
       statusText: document.getElementById('statusText').value,
       statusUrl: document.getElementById('statusUrl').value,
+      statusOpenAPSEvBG: $('[name=statusOpenAPSEvBG]').is(':checked'),
       batteryAsNumber: $('[name=batteryAsNumber][value=number]').hasClass('active'),
       bolusTicks: $('[name=bolusTicks]').is(':checked'),
       basalGraph: $('[name=basalGraph]').is(':checked'),
@@ -378,6 +380,7 @@
       $('#status-text-container').toggle(evt.currentTarget.value === 'customtext');
       $('#status-url-container').toggle(evt.currentTarget.value === 'customurl');
       $('#status-raw-count-container').toggle(evt.currentTarget.value === 'rawdata' || evt.currentTarget.value === 'rig-raw');
+      $('#status-openaps-ev-bg-container').toggle(evt.currentTarget.value === 'openaps');
     });
     $('#statusContent').trigger('change');
 

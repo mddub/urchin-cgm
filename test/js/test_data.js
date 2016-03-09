@@ -345,3 +345,318 @@ describe('getCarePortalIOB', function() {
     });
   });
 });
+
+describe('getOpenAPSStatus', function() {
+  function lastTwoOpenAPS() {
+    return [
+      {
+        "openaps" : {
+          "iob" : {
+            "iob" : 1.08,
+            "timestamp" : "2016-03-01T16:43:54.000Z"
+          },
+          // different from "suggested" below
+          "suggested" : {
+            "eventualBG" : 129,
+             "timestamp" : "2016-03-01T16:43:58.000Z",
+          },
+          // identical to "enacted" below
+          "enacted" : {
+            "rate" : 1.95,
+            "duration" : 30,
+            "recieved" : true,
+            "timestamp" : "2016-03-01T16:34:14.000Z",
+          }
+        },
+        "device" : "device1",
+        "created_at" : "2016-03-01T16:44:22.069Z",
+      },
+      {
+        "openaps" : {
+          "iob" : {
+            "iob" : 0.938,
+            "timestamp" : "2016-03-01T16:33:54.000Z",
+          },
+          "suggested" : {
+            "eventualBG" : 165,
+            "timestamp" : "2016-03-01T16:34:01.000Z",
+          },
+          "enacted" : {
+            "rate" : 1.95,
+            "duration" : 30,
+            "recieved" : true,
+            "timestamp" : "2016-03-01T16:34:14.000Z",
+          }
+        },
+        "device" : "device1",
+        "created_at" : "2016-03-01T16:34:39.692Z",
+      }
+    ];
+  }
+
+  function tempBasal() {
+    return [{
+      "duration" : 30,
+      "absolute": 1.45,
+      "created_at" : "2016-03-01T16:23:05Z",
+    }];
+  }
+
+  describe('last "enacted" is stale but "suggested" is fresh', function() {
+    var d;
+    beforeEach(function() {
+      d = Data(defaultConstants);
+      mockAPI(d, {
+        'treatments': tempBasal(),
+        'devicestatus': lastTwoOpenAPS(),
+      });
+      timekeeper.freeze(new Date('2016-03-01T16:48:00Z'));
+    });
+
+    it('should report the time since the last "suggested" if enacted is stale', function() {
+      return d.getOpenAPSStatus({}).then(function(result) {
+        expect(result).to.contain('(4)');
+      });
+    });
+
+    it('should report the time remaining in the last temp basal relative to now', function() {
+      return d.getOpenAPSStatus({}).then(function(result) {
+        expect(result).to.contain('1.4x6');
+      });
+    });
+
+    it('should not report a temp if the last temp basal is over', function() {
+      timekeeper.freeze(new Date('2016-03-01T16:56:00Z'));
+      return d.getOpenAPSStatus({}).then(function(result) {
+        expect(result).not.to.contain('1.4x');
+      });
+    });
+
+    it('should report IOB', function() {
+      return d.getOpenAPSStatus({}).then(function(result) {
+        expect(result).to.contain('1.1u');
+      });
+    });
+
+    it('should not report eventual BG', function() {
+      return d.getOpenAPSStatus({}).then(function(result) {
+        expect(result).not.to.contain('->129');
+      });
+    });
+  });
+
+  describe('last "enacted" is fresh', function() {
+    var d;
+    beforeEach(function() {
+      var statuses = lastTwoOpenAPS();
+      statuses[0]['openaps']['enacted'] = {
+        'rate': 0.2,
+        'duration': 30,
+        'recieved': true,
+        'timestamp': '2016-03-01T16:45:00Z',
+      };
+      d = Data(defaultConstants);
+      mockAPI(d, {
+        'treatments': tempBasal(),
+        'devicestatus': statuses,
+      });
+      timekeeper.freeze(new Date('2016-03-01T16:48:00Z'));
+    });
+
+    it('should report the time since the last "enacted"', function() {
+      return d.getOpenAPSStatus({}).then(function(result) {
+        expect(result).to.contain('(3)');
+      });
+    });
+
+    it('should report the time remaining in the enacted temp basal relative to now', function() {
+      return d.getOpenAPSStatus({}).then(function(result) {
+        expect(result).to.contain('0.2x27');
+      });
+    });
+
+    it('should not report a temp if the last enacted temp is over', function() {
+      timekeeper.freeze(new Date('2016-03-01T17:20:00Z'));
+      return d.getOpenAPSStatus({}).then(function(result) {
+        expect(result).not.to.contain('0.2x');
+      });
+    });
+
+    it('should report IOB', function() {
+      return d.getOpenAPSStatus({}).then(function(result) {
+        expect(result).to.contain('1.1u');
+      });
+    });
+
+    it('should not report eventual BG', function() {
+      return d.getOpenAPSStatus({}).then(function(result) {
+        expect(result).not.to.contain('->129');
+      });
+    });
+  });
+
+  it('should not report a basal rate if the enacted temp has duration 0', function() {
+    var statuses = lastTwoOpenAPS();
+    statuses[0]['openaps']['enacted'] = {
+      'rate': 0,
+      'duration': 0,
+      'recieved': true,
+      'timestamp': '2016-03-01T16:45:00Z',
+    };
+    var d = Data(defaultConstants);
+    mockAPI(d, {
+      'treatments': tempBasal(),
+      'devicestatus': statuses,
+    });
+    timekeeper.freeze(new Date('2016-03-01T16:48:00Z'));
+
+    return d.getOpenAPSStatus({}).then(function(result) {
+      expect(result).to.be('(3) 1.1u');
+    });
+  });
+
+  it('should not report IOB if it is stale', function() {
+    var statuses = lastTwoOpenAPS();
+    statuses[0]['openaps']['iob'] = statuses[1]['openaps']['iob'];
+    var d = Data(defaultConstants);
+    mockAPI(d, {
+      'treatments': tempBasal(),
+      'devicestatus': statuses,
+    });
+    timekeeper.freeze(new Date('2016-03-01T16:48:00Z'));
+
+    return d.getOpenAPSStatus({}).then(function(result) {
+      expect(result).not.to.contain('1.1u');
+    });
+  });
+
+  it('should report eventualBG if configured', function() {
+    var d = Data(defaultConstants);
+    mockAPI(d, {
+      'treatments': tempBasal(),
+      'devicestatus': lastTwoOpenAPS(),
+    });
+    timekeeper.freeze(new Date('2016-03-01T16:48:00Z'));
+
+    return d.getOpenAPSStatus({statusOpenAPSEvBG: true}).then(function(result) {
+      expect(result).to.contain('->129');
+    });
+  });
+
+  it('should use the created_at time of the device status and report the time since last success if everything is stale', function() {
+    var statuses = lastTwoOpenAPS();
+    statuses[0]['openaps'] = statuses[1]['openaps'];
+    statuses.push({
+      'openaps': {
+        'suggested': {
+          'timestamp': '2016-03-01T16:29:00'
+        },
+      },
+      'device': statuses[0]['device'],
+    });
+    statuses.push({
+      'openaps': {},
+      'device': statuses[0]['device'],
+    });
+    var d = Data(defaultConstants);
+    mockAPI(d, {
+      'treatments': tempBasal(),
+      'devicestatus': statuses,
+    });
+    timekeeper.freeze(new Date('2016-03-01T16:58:00Z'));
+
+    return d.getOpenAPSStatus({}).then(function(result) {
+      expect(result).to.be('(14) waiting | 29m');
+    });
+  });
+  
+  it('should not crash if no data', function() {
+    var d = Data(defaultConstants);
+    mockAPI(d, {
+      'treatments': [],
+      'devicestatus': [],
+    });
+    return d.getOpenAPSStatus({}).then(function(result) {
+      expect(result).to.be('-');
+    });
+  });
+
+  describe('multiple devices', function() {
+    function goodStatus(device, minAgo) {
+      var dateString = new Date(Date.now() - minAgo * 60 * 1000);
+      return {
+        "openaps": {
+          "iob": {
+            "iob": 1.08,
+            "timestamp": dateString,
+          },
+          "suggested": {
+            "timestamp": dateString,
+          }
+        },
+        "device": device,
+        "created_at": dateString,
+      };
+    }
+    function badStatus(device, minAgo) {
+      var dateString = new Date(Date.now() - minAgo * 60 * 1000);
+      return {
+        "openaps": {},
+        "device": device,
+        "created_at": dateString,
+      };
+    }
+
+    beforeEach(function() {
+      timekeeper.freeze(new Date());
+    });
+
+    it('should report the last success even if a different device has failed since then', function() {
+      var d = Data(defaultConstants);
+      mockAPI(d, {
+        'treatments': [],
+        'devicestatus': [
+          badStatus('device1', 0),
+          goodStatus('device2', 7),
+          goodStatus('device2', 15),
+        ],
+      });
+      return d.getOpenAPSStatus({}).then(function(result) {
+        expect(result).to.contain('(7) 1.1u');
+      });
+    });
+
+    it('should report failure from the most recently successful device', function() {
+      var d = Data(defaultConstants);
+      mockAPI(d, {
+        'treatments': [],
+        'devicestatus': [
+          badStatus('device1', 0),
+          badStatus('device2', 7),
+          goodStatus('device2', 15),
+          goodStatus('device2', 20),
+        ],
+      });
+      return d.getOpenAPSStatus({}).then(function(result) {
+        expect(result).to.be('(7) waiting | 15m');
+      });
+    });
+
+    it('should report the most recent failure if there are no successes', function() {
+      var d = Data(defaultConstants);
+      mockAPI(d, {
+        'treatments': [],
+        'devicestatus': [
+          badStatus('device1', 1),
+          badStatus('device2', 7),
+          badStatus('device2', 15),
+          badStatus('device1', 22),
+        ],
+      });
+      return d.getOpenAPSStatus({}).then(function(result) {
+        expect(result).to.be('(1) waiting | ?');
+      });
+    });
+  });
+
+});
