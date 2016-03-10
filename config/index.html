@@ -142,7 +142,8 @@
               <option value="careportaliob" class="item-select-option">IOB - NS Care Portal</option>
               <option value="pumpiob" class="item-select-option">Pump IOB - MM Connect</option>
               <option value="openaps" class="item-select-option">IOB and temp - OpenAPS</option>
-              <option value="customurl" class="item-select-option">Custom URL</option>
+              <option value="customurl" class="item-select-option">Custom URL - text</option>
+              <option value="customjson" class="item-select-option">Custom URL - JSON</option>
               <option value="customtext" class="item-select-option">Custom text</option>
             </select>
           </label>
@@ -161,13 +162,27 @@
       </div>
 
       <div id="status-url-container" class="item-container">
-        <div class="item-container-header">Custom URL</div>
+        <div class="item-container-header">Custom URL - text</div>
         <div class="item-container-content">
           <label class="item">
             <div class="item-input-wrapper">
               <input id="statusUrl" type="url" class="item-input">
             </div>
           </label>
+        </div>
+      </div>
+
+      <div id="status-json-container" class="item-container">
+        <div class="item-container-header">Custom URL - JSON</div>
+        <div class="item-container-content">
+          <label class="item">
+            <div class="item-input-wrapper">
+              <input id="statusJsonUrl" type="url" class="item-input">
+            </div>
+          </label>
+        </div>
+        <div class="item-container-footer">
+          This URL should return a single object or an array containing a single object like <code>{"content": "your text"}</code>. If it has a <code>timestamp</code> field with epoch time in seconds or milliseconds, the watch will also display the recency of the data.
         </div>
       </div>
 

@@ -104,11 +104,33 @@ var Data = function(c) {
     return Promise.resolve((config.statusText || '').substr(0, 255));
   };
 
+  function uncacheableUrl(url) {
+    // XXX: No combination of request headers seems capable of circumventing bad caching behavior for Pebble on iOS
+    return url + (url.indexOf('?') !== -1 ? '&' : '?') + '_=' + Date.now();
+  }
+
   d.getCustomUrl = function(config) {
-    // XXX: No combination of request headers seems capable of achieving this on all platforms
-    var cacheBustUrl = config.statusUrl + (config.statusUrl.indexOf('?') !== -1 ? '&' : '?') + '_=' + Date.now();
-    return d.getURL(cacheBustUrl).then(function(data) {
+    return d.getURL(uncacheableUrl(config.statusUrl)).then(function(data) {
       return (data || '-').substr(0, 255);
+    });
+  };
+
+  d.getCustomJsonUrl = function(config) {
+    return d.getURL(uncacheableUrl(config.statusJsonUrl)).then(function(raw) {
+      var data = JSON.parse(raw);
+      if (data instanceof Array) {
+        data = data[0];
+      }
+      if (data['content'] === undefined) {
+        return '-';
+      }
+
+      var out = data['content'];
+      if (data['timestamp'] !== undefined) {
+        var ms = (Math.log(data['timestamp']) / Math.log(10) < 12 ? 1000 : 1) * data['timestamp'];
+        out = '(' + ago(ms) + ') ' + out;
+      }
+      return out.substr(0, 255);
     });
   };
 
@@ -265,6 +287,15 @@ var Data = function(c) {
     }
   }
 
+  function ago(timestamp, addM) {
+    var minutes = Math.round((Date.now() - timestamp) / (60 * 1000));
+    if (minutes < 60) {
+      return minutes + (addM ? 'm' : '');
+    } else {
+      return Math.floor(minutes / 60) + 'h' + (minutes % 60);
+    }
+  }
+
   function openAPSIsFresh(entries, key) {
     var last = entries[0];
     var secondToLast = entries[1];
@@ -365,9 +396,7 @@ var Data = function(c) {
   function openAPSTimeSinceLastSuccess(entries) {
     for (var i = 0; i < entries.length; i++) {
       if (openAPSIsSuccess(entries.slice(i))) {
-        var lastSuccess = new Date(entries[i]['openaps']['suggested']['timestamp']).getTime();
-        var minutes = Math.round((Date.now() - lastSuccess) / (60 * 1000));
-        return (minutes < 60) ? minutes + 'm' : Math.floor(minutes / 60) + 'h' + (minutes % 60);
+        return ago(new Date(entries[i]['openaps']['suggested']['timestamp']).getTime(), true);
       }
     }
     return '?';
@@ -384,9 +413,7 @@ var Data = function(c) {
     } else {
       latest = last['created_at'];
     }
-
-    var minutes = Math.round((Date.now() - new Date(latest).getTime()) / (60 * 1000));
-    return (minutes < 60) ? minutes : Math.floor(minutes / 60) + 'h';
+    return ago(new Date(latest).getTime());
   }
 
   d.getOpenAPSStatus = function(config) {
@@ -431,6 +458,7 @@ var Data = function(c) {
       'careportaliob': d.getCarePortalIOB,
       'openaps': d.getOpenAPSStatus,
       'customurl': d.getCustomUrl,
+      'customjson': d.getCustomJsonUrl,
       'customtext': d.getCustomText,
     }[config.statusContent];
     return (fn || defaultFn)(config);

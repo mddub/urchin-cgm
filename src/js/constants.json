@@ -15,6 +15,7 @@
       "statusContent" : "rigbattery",
       "statusRawCount" : 2,
       "statusUrl" : "",
+      "statusJsonUrl" : "",
       "statusText" : "",
       "statusOpenAPSEvBG": false,
       "batteryAsNumber": false,

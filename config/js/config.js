@@ -274,6 +274,7 @@
     document.getElementById('statusContent').value = current['statusContent'];
     document.getElementById('statusText').value = current['statusText'] || '';
     document.getElementById('statusUrl').value = current['statusUrl'] || '';
+    document.getElementById('statusJsonUrl').value = current['statusJsonUrl'] || '';
     $('[name=statusOpenAPSEvBG]').prop('checked', !!current['statusOpenAPSEvBG']);
 
     if (current.batteryAsNumber === true) {
@@ -308,6 +309,7 @@
       statusContent: document.getElementById('statusContent').value,
       statusText: document.getElementById('statusText').value,
       statusUrl: document.getElementById('statusUrl').value,
+      statusJsonUrl: document.getElementById('statusJsonUrl').value,
       statusOpenAPSEvBG: $('[name=statusOpenAPSEvBG]').is(':checked'),
       batteryAsNumber: $('[name=batteryAsNumber][value=number]').hasClass('active'),
       bolusTicks: $('[name=bolusTicks]').is(':checked'),
@@ -349,6 +351,7 @@
     delete current['nightscout_url'];
     delete current['statusText'];
     delete current['statusUrl'];
+    delete current['statusJsonUrl'];
     var cleansed = [
       ['version', getQueryParam('version')],
       ['pf', getQueryParam('pf')],
@@ -379,6 +382,7 @@
     $('#statusContent').on('change', function(evt) {
       $('#status-text-container').toggle(evt.currentTarget.value === 'customtext');
       $('#status-url-container').toggle(evt.currentTarget.value === 'customurl');
+      $('#status-json-container').toggle(evt.currentTarget.value === 'customjson');
       $('#status-raw-count-container').toggle(evt.currentTarget.value === 'rawdata' || evt.currentTarget.value === 'rig-raw');
       $('#status-openaps-ev-bg-container').toggle(evt.currentTarget.value === 'openaps');
     });

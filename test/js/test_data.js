@@ -569,7 +569,7 @@ describe('getOpenAPSStatus', function() {
       expect(result).to.be('(14) waiting | 29m');
     });
   });
-  
+
   it('should not crash if no data', function() {
     var d = Data(defaultConstants);
     mockAPI(d, {
@@ -659,4 +659,51 @@ describe('getOpenAPSStatus', function() {
     });
   });
 
+});
+
+describe('getCustomJsonUrl', function() {
+  function testWith(data) {
+    timekeeper.freeze(new Date());
+    var d = Data(defaultConstants);
+    d.getURL = function() {
+      return Promise.resolve(JSON.stringify(data));
+    };
+    return d.getCustomJsonUrl({statusJsonUrl: ''});
+  }
+
+  it('should show the content', function() {
+    return testWith({content: 'hello'}).then(function(result) {
+      expect(result).to.be('hello');
+    });
+  });
+
+  it('should handle missing content', function() {
+    return testWith({}).then(function(result) {
+      expect(result).to.be('-');
+    });
+  });
+
+  it('should show recency for epoch time in ms', function() {
+    return testWith({
+      content: 'all clear',
+      timestamp: Date.now() - 8 * 60 * 1000,
+    }).then(function(result) {
+      expect(result).to.be('(8) all clear');
+    });
+  });
+
+  it('should show recency for epoch time in seconds', function() {
+    return testWith({
+      content: 'all clear',
+      timestamp: Math.floor(Date.now() / 1000 - 16 * 60),
+    }).then(function(result) {
+      expect(result).to.be('(16) all clear');
+    });
+  });
+
+  it('should handle an array', function() {
+    return testWith([{content: 'in array'}]).then(function(result) {
+      expect(result).to.be('in array');
+    });
+  });
 });
