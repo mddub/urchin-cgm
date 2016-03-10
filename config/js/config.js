@@ -255,6 +255,15 @@
     }
   }
 
+  function toggleStatusExtraOptions() {
+    var key = $('#statusContent').val();
+    $('.status-extra').each(function(i, el) {
+      $(el).toggle(
+        $(el).data('keys').split(' ').indexOf(key) !== -1
+      );
+    });
+  }
+
   function populateValues(current) {
     document.getElementById('ns-url').value = current['nightscout_url'] || '';
 
@@ -379,14 +388,8 @@
     $('#update-available #available-version').text(c.VERSION);
     $('#update-available').toggle(c.VERSION !== getQueryParam('version'));
 
-    $('#statusContent').on('change', function(evt) {
-      $('#status-text-container').toggle(evt.currentTarget.value === 'customtext');
-      $('#status-url-container').toggle(evt.currentTarget.value === 'customurl');
-      $('#status-json-container').toggle(evt.currentTarget.value === 'customjson');
-      $('#status-raw-count-container').toggle(evt.currentTarget.value === 'rawdata' || evt.currentTarget.value === 'rig-raw');
-      $('#status-openaps-ev-bg-container').toggle(evt.currentTarget.value === 'openaps');
-    });
-    $('#statusContent').trigger('change');
+    $('#statusContent').on('change', toggleStatusExtraOptions);
+    toggleStatusExtraOptions();
 
     $('#basalGraph').on('change', function(evt) {
       $('#basal-height-container').toggle($(evt.currentTarget).is(':checked'));
