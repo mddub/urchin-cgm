@@ -111,7 +111,8 @@ var Data = function(c) {
 
   d.getCustomUrl = function(config) {
     return d.getURL(uncacheableUrl(config.statusUrl)).then(function(data) {
-      return (data || '-').substr(0, 255);
+      var newlinesTrimmed = data.replace(/(^\n+|\n+$)/g, '');
+      return (newlinesTrimmed || '-').substr(0, 255);
     });
   };
 
