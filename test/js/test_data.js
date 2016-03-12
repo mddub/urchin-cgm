@@ -707,3 +707,55 @@ describe('getCustomJsonUrl', function() {
     });
   });
 });
+
+describe('getMultiple', function() {
+  var d;
+  beforeEach(function() {
+    d = Data(defaultConstants);
+    d.getRawData = function() { return Promise.resolve('raw data'); };
+    d.getCarePortalIOB = function() { return Promise.resolve('care portal iob'); };
+    d.getCustomUrl = function() { return Promise.resolve('custom url'); };
+    d.getCustomText = function() { return Promise.reject(new Error()); };
+  });
+
+  it('should get multiple status lines and join them with newlines', function() {
+    return d.getStatusText({ statusContent: 'multiple',
+      statusLine1: 'careportaliob',
+      statusLine2: 'rawdata',
+      statusLine3: 'customurl',
+    }).then(function(result) {
+      expect(result).to.be([
+        'care portal iob',
+        'raw data',
+        'custom url',
+      ].join('\n'));
+    });
+  });
+
+  it('should handle an error in one of the lines', function() {
+    return d.getStatusText({ statusContent: 'multiple',
+      statusLine1: 'customurl',
+      statusLine2: 'customtext',
+      statusLine3: 'rawdata',
+    }).then(function(result) {
+      expect(result).to.be([
+        'custom url',
+        '-',
+        'raw data',
+      ].join('\n'));
+    });
+  });
+
+  it('should skip "none" lines', function() {
+    return d.getStatusText({ statusContent: 'multiple',
+      statusLine1: 'rawdata',
+      statusLine2: 'none',
+      statusLine3: 'careportaliob',
+    }).then(function(result) {
+      expect(result).to.be([
+        'raw data',
+        'care portal iob',
+      ].join('\n'));
+    });
+  });
+});

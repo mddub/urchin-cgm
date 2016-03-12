@@ -129,12 +129,13 @@
         <h3>CONTENT SETTINGS:</h3>
       </div>
 
-      <div class="item-container">
+      <div class="item-container" id="main-status-option">
         <div class="item-container-header">Status bar</div>
         <div class="item-container-content">
           <label class="item">
             &nbsp;
-            <select id="statusContent" name="statusContent" dir="rtl" class="item-select">
+            <select id="statusContent" dir="rtl" class="item-select">
+              <option value="none" class="item-select-option">None</option>
               <option value="rigbattery" class="item-select-option">Uploader battery level</option>
               <option value="rawdata" class="item-select-option">Raw Dexcom reading</option>
               <option value="rig-raw" class="item-select-option">Uploader battery, Dexcom raw</option>
@@ -145,18 +146,42 @@
               <option value="customurl" class="item-select-option">Custom URL - text</option>
               <option value="customjson" class="item-select-option">Custom URL - JSON</option>
               <option value="customtext" class="item-select-option">Custom text</option>
+              <option value="multiple" class="item-select-option">Multiple</option>
             </select>
           </label>
         </div>
       </div>
 
-      <div class="item-container status-extra" data-keys="customtext">
-        <div class="item-container-header">Custom text</div>
+      <div class="item-container status-extra status-line-option" data-keys="multiple" data-field="statusLine1">
+        <div class="item-container-header">Status line 1</div>
+      </div>
+
+      <div class="item-container status-extra status-line-option" data-keys="multiple" data-field="statusLine2">
+        <div class="item-container-header">Status line 2</div>
+      </div>
+
+      <div class="item-container status-extra status-line-option" data-keys="multiple" data-field="statusLine3">
+        <div class="item-container-header">Status line 3</div>
+      </div>
+
+      <div class="item-container status-extra" data-keys="rawdata rig-raw">
+        <div class="item-container-header">Number of raw readings</div>
         <div class="item-container-content">
           <label class="item">
-            <div class="item-input-wrapper">
-              <input id="statusText" type="text" size="255" class="item-input">
+            <input id="statusRawCount" name="statusRawCount" type="range" class="item-slider" min="1" max="20" step="1">
+            <div class="item-input-wrapper item-slider-text">
+              <input id="statusRawCount-val" name="statusRawCount" type="tel" class="item-input">
             </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="item-container status-extra" data-keys="openaps">
+        <div class="item-container-header">OpenAPS</div>
+        <div class="item-container-content">
+          <label class="item">
+            <input name="statusOpenAPSEvBG" type="checkbox" class="item-checkbox">
+            Show "eventual BG"
           </label>
         </div>
       </div>
@@ -186,24 +211,13 @@
         </div>
       </div>
 
-      <div class="item-container status-extra" data-keys="rawdata rig-raw">
-        <div class="item-container-header">Number of raw readings</div>
+      <div class="item-container status-extra" data-keys="customtext">
+        <div class="item-container-header">Custom text</div>
         <div class="item-container-content">
           <label class="item">
-            <input id="statusRawCount" name="statusRawCount" type="range" class="item-slider" min="1" max="20" step="1">
-            <div class="item-input-wrapper item-slider-text">
-              <input id="statusRawCount-val" name="statusRawCount" type="tel" class="item-input">
+            <div class="item-input-wrapper">
+              <input id="statusText" type="text" size="255" class="item-input">
             </div>
-          </label>
-        </div>
-      </div>
-
-      <div class="item-container status-extra" data-keys="openaps">
-        <div class="item-container-header">OpenAPS</div>
-        <div class="item-container-content">
-          <label class="item">
-            <input name="statusOpenAPSEvBG" type="checkbox" class="item-checkbox">
-            Show "eventual BG"
           </label>
         </div>
       </div>

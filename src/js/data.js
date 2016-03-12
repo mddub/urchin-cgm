@@ -447,9 +447,27 @@ var Data = function(c) {
     });
   };
 
-  d.getStatusText = function(config) {
-    var defaultFn = d.getRigBatteryLevel;
-    var fn = {
+  d.getMultiple = function(config) {
+    var fetches = [config.statusLine1, config.statusLine2, config.statusLine3].filter(function(key) {
+      return key !== 'none';
+    }).map(function(key) {
+      return statusFn(key)(config).catch(function() {
+        return '-';
+      });
+    });
+    return Promise.all(fetches).then(function(lines) {
+      return lines.join('\n');
+    });
+  };
+
+  d.getNone = function() {
+    return Promise.resolve('');
+  };
+
+  function statusFn(key) {
+    var defaultFn = d.getNone;
+    return {
+      'none': d.getNone,
       'rigbattery': d.getRigBatteryLevel,
       'rawdata': d.getRawData,
       'rig-raw': d.getRigBatteryAndRawData,
@@ -460,8 +478,12 @@ var Data = function(c) {
       'customurl': d.getCustomUrl,
       'customjson': d.getCustomJsonUrl,
       'customtext': d.getCustomText,
-    }[config.statusContent];
-    return (fn || defaultFn)(config);
+      'multiple': d.getMultiple,
+    }[key] || defaultFn;
+  }
+
+  d.getStatusText = function(config) {
+    return statusFn(config.statusContent)(config);
   };
 
   function getUsingCache(baseUrl, cache, dateKey) {

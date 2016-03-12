@@ -255,11 +255,39 @@
     }
   }
 
+  function initializeStatusOptions(current) {
+    createMultipleStatusLineOptions(current);
+    $('#statusContent').on('change', toggleStatusExtraOptions);
+    toggleStatusExtraOptions();
+  }
+
+  function createMultipleStatusLineOptions(current) {
+    $('.status-line-option').each(function(i, el) {
+      var $cloned = $('#main-status-option .item-container-content').clone().appendTo(el);
+      var $select = $cloned.find('select');
+      var fieldName = $(el).data('field');
+      var selected = current[fieldName] === undefined ? 'none' : current[fieldName];
+      $select.attr('id', fieldName);
+      $select.find('[value=multiple]').remove();
+      $select.find('[value=' + selected + ']').prop('selected', true);
+      $select.on('change', toggleStatusExtraOptions);
+    });
+  }
+
   function toggleStatusExtraOptions() {
-    var key = $('#statusContent').val();
+    var mainKey = $('#statusContent').val();
+    var selected = [mainKey];
+    if (mainKey === 'multiple') {
+      selected = selected.concat($('#statusLine1, #statusLine2, #statusLine3').map(function(i, el) {
+        return $(el).val();
+      }));
+    }
     $('.status-extra').each(function(i, el) {
+      var keys = $(el).data('keys').split(' ');
       $(el).toggle(
-        $(el).data('keys').split(' ').indexOf(key) !== -1
+        selected.reduce(function(acc, key) {
+          return acc || keys.indexOf(key) !== -1;
+        }, false)
       );
     });
   }
@@ -320,6 +348,9 @@
       statusUrl: document.getElementById('statusUrl').value,
       statusJsonUrl: document.getElementById('statusJsonUrl').value,
       statusOpenAPSEvBG: $('[name=statusOpenAPSEvBG]').is(':checked'),
+      statusLine1: $('#statusLine1').val(),
+      statusLine2: $('#statusLine2').val(),
+      statusLine3: $('#statusLine3').val(),
       batteryAsNumber: $('[name=batteryAsNumber][value=number]').hasClass('active'),
       bolusTicks: $('[name=bolusTicks]').is(':checked'),
       basalGraph: $('[name=basalGraph]').is(':checked'),
@@ -388,8 +419,7 @@
     $('#update-available #available-version').text(c.VERSION);
     $('#update-available').toggle(c.VERSION !== getQueryParam('version'));
 
-    $('#statusContent').on('change', toggleStatusExtraOptions);
-    toggleStatusExtraOptions();
+    initializeStatusOptions(current);
 
     $('#basalGraph').on('change', function(evt) {
       $('#basal-height-container').toggle($(evt.currentTarget).is(':checked'));
