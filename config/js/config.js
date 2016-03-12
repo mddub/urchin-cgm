@@ -312,6 +312,7 @@
     document.getElementById('statusText').value = current['statusText'] || '';
     document.getElementById('statusUrl').value = current['statusUrl'] || '';
     document.getElementById('statusJsonUrl').value = current['statusJsonUrl'] || '';
+    $('[name=statusOpenAPSNetBasal]').val(current['statusOpenAPSNetBasal'] ? 'true' : 'false');
     $('[name=statusOpenAPSEvBG]').prop('checked', !!current['statusOpenAPSEvBG']);
 
     if (current.batteryAsNumber === true) {
@@ -347,6 +348,7 @@
       statusText: document.getElementById('statusText').value,
       statusUrl: document.getElementById('statusUrl').value,
       statusJsonUrl: document.getElementById('statusJsonUrl').value,
+      statusOpenAPSNetBasal: $('[name=statusOpenAPSNetBasal]').val() === 'true',
       statusOpenAPSEvBG: $('[name=statusOpenAPSEvBG]').is(':checked'),
       statusLine1: $('#statusLine1').val(),
       statusLine2: $('#statusLine2').val(),

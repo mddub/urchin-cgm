@@ -180,6 +180,15 @@
         <div class="item-container-header">OpenAPS</div>
         <div class="item-container-content">
           <label class="item">
+            Basal rate
+            <select name="statusOpenAPSNetBasal" dir="rtl" class="item-select">
+              <option value="false" class="item-select-option">Absolute</option>
+              <option value="true" class="item-select-option">Net</option>
+            </select>
+          </label>
+        </div>
+        <div class="item-container-content">
+          <label class="item">
             <input name="statusOpenAPSEvBG" type="checkbox" class="item-checkbox">
             Show "eventual BG"
           </label>

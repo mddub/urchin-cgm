@@ -20,6 +20,7 @@
       "statusUrl" : "",
       "statusJsonUrl" : "",
       "statusText" : "",
+      "statusOpenAPSNetBasal": false,
       "statusOpenAPSEvBG": false,
       "batteryAsNumber": false,
       "bolusTicks": false,

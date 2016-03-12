@@ -409,6 +409,7 @@ describe('getOpenAPSStatus', function() {
       mockAPI(d, {
         'treatments': tempBasal(),
         'devicestatus': lastTwoOpenAPS(),
+        'profile': [],
       });
       timekeeper.freeze(new Date('2016-03-01T16:48:00Z'));
     });
@@ -459,6 +460,7 @@ describe('getOpenAPSStatus', function() {
       mockAPI(d, {
         'treatments': tempBasal(),
         'devicestatus': statuses,
+        'profile': [],
       });
       timekeeper.freeze(new Date('2016-03-01T16:48:00Z'));
     });
@@ -507,6 +509,7 @@ describe('getOpenAPSStatus', function() {
     mockAPI(d, {
       'treatments': tempBasal(),
       'devicestatus': statuses,
+      'profile': [],
     });
     timekeeper.freeze(new Date('2016-03-01T16:48:00Z'));
 
@@ -522,6 +525,7 @@ describe('getOpenAPSStatus', function() {
     mockAPI(d, {
       'treatments': tempBasal(),
       'devicestatus': statuses,
+      'profile': [],
     });
     timekeeper.freeze(new Date('2016-03-01T16:48:00Z'));
 
@@ -535,6 +539,7 @@ describe('getOpenAPSStatus', function() {
     mockAPI(d, {
       'treatments': tempBasal(),
       'devicestatus': lastTwoOpenAPS(),
+      'profile': [],
     });
     timekeeper.freeze(new Date('2016-03-01T16:48:00Z'));
 
@@ -562,6 +567,7 @@ describe('getOpenAPSStatus', function() {
     mockAPI(d, {
       'treatments': tempBasal(),
       'devicestatus': statuses,
+      'profile': [],
     });
     timekeeper.freeze(new Date('2016-03-01T16:58:00Z'));
 
@@ -575,6 +581,7 @@ describe('getOpenAPSStatus', function() {
     mockAPI(d, {
       'treatments': [],
       'devicestatus': [],
+      'profile': [],
     });
     return d.getOpenAPSStatus({}).then(function(result) {
       expect(result).to.be('-');
@@ -615,6 +622,7 @@ describe('getOpenAPSStatus', function() {
       var d = Data(defaultConstants);
       mockAPI(d, {
         'treatments': [],
+        'profile': [],
         'devicestatus': [
           badStatus('device1', 0),
           goodStatus('device2', 7),
@@ -630,6 +638,7 @@ describe('getOpenAPSStatus', function() {
       var d = Data(defaultConstants);
       mockAPI(d, {
         'treatments': [],
+        'profile': [],
         'devicestatus': [
           badStatus('device1', 0),
           badStatus('device2', 7),
@@ -646,6 +655,7 @@ describe('getOpenAPSStatus', function() {
       var d = Data(defaultConstants);
       mockAPI(d, {
         'treatments': [],
+        'profile': [],
         'devicestatus': [
           badStatus('device1', 1),
           badStatus('device2', 7),

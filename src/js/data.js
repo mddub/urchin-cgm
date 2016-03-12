@@ -221,13 +221,12 @@ var Data = function(c) {
   }
 
   function _getCurrentProfileBasal(config) {
-    // Nightscout API does not accept a document query for this endpoint, so no way to cache
     return d.getProfile(config).then(function(profile) {
       var basals = _basalsFromProfile(profile);
       if (basals.length) {
         return _profileBasalRateAtTime(basals, Date.now());
       } else {
-        return null;
+        return undefined;
       }
     });
   }
@@ -244,7 +243,7 @@ var Data = function(c) {
         }
         return {start: start, rate: rate, duration: treatments[0]['duration']};
       } else {
-        return null;
+        return undefined;
       }
     });
   }
@@ -268,9 +267,9 @@ var Data = function(c) {
       var profileBasal = results[0],
         tempBasal = results[1];
 
-      if (profileBasal === null && tempBasal === null) {
+      if (profileBasal === undefined && tempBasal === undefined) {
         return '-';
-      } else if (tempBasal !== null) {
+      } else if (tempBasal !== undefined) {
         var diff = tempBasal.rate - profileBasal;
         var minutesAgo = Math.round((new Date() - tempBasal.start) / (60 * 1000));
         return _roundBasal(tempBasal.rate) + 'u/h ' + (diff >= 0 ? '+' : '') + _roundBasal(diff) + ' (' + minutesAgo + ')';
@@ -286,6 +285,10 @@ var Data = function(c) {
     } else {
       return x.toFixed(1);
     }
+  }
+
+  function addPlus(str) {
+    return (parseFloat(str) >= 0 ? '+' : '') + str;
   }
 
   function ago(timestamp, addM) {
@@ -346,7 +349,7 @@ var Data = function(c) {
     }
   }
 
-  function openAPSTempBasal(entries, activeTemp) {
+  function openAPSTempBasal(entries, activeTemp, relativeTo) {
     var last = entries[0];
     var enacted = last['openaps']['enacted'];
 
@@ -368,7 +371,8 @@ var Data = function(c) {
     }
 
     if (rate !== undefined && remaining > 0) {
-      return roundOrZero(rate) + 'x' + remaining;
+      var rateDisplay = relativeTo !== undefined ? addPlus(roundOrZero(rate - relativeTo)) : roundOrZero(rate);
+      return rateDisplay + 'x' + remaining;
     } else {
       return '';
     }
@@ -385,12 +389,8 @@ var Data = function(c) {
 
   function openAPSEventualBG(entries) {
     var suggested = entries[0]['openaps']['suggested'];
-    if (openAPSIsFresh(entries, 'suggested')) {
-      if (suggested['eventualBG'] !== undefined) {
-        return '->' + suggested['eventualBG'];
-      } else {
-        return '';
-      }
+    if (openAPSIsFresh(entries, 'suggested') && suggested['eventualBG'] !== undefined) {
+      return suggested['eventualBG'];
     }
   }
 
@@ -421,9 +421,11 @@ var Data = function(c) {
     return Promise.all([
       d.getOpenAPSStatusHistory(config),
       _getActiveTempBasal(config),
+      _getCurrentProfileBasal(config),
     ]).then(function(results) {
       var allEntries = results[0],
-        activeTemp = results[1];
+        activeTemp = results[1],
+        profileBasal = results[2];
 
       var entries = openAPSEntriesFromLastSuccessfulDevice(allEntries);
       if (entries.length < 2) {
@@ -432,10 +434,18 @@ var Data = function(c) {
 
       var summary;
       if (openAPSIsSuccess(entries)) {
-        var temp = openAPSTempBasal(entries, activeTemp);
+        var relativeTo = config.statusOpenAPSNetBasal ? profileBasal : undefined;
+        var temp = openAPSTempBasal(entries, activeTemp, relativeTo);
         var iob = openAPSIOB(entries);
-        var eventualBG = config.statusOpenAPSEvBG ? openAPSEventualBG(entries) : '';
-        summary = iob + eventualBG + (temp !== '' ? ' ' + temp : '');
+        var evBGDisplay = '';
+        if (config.statusOpenAPSEvBG) {
+          var evBG = openAPSEventualBG(entries);
+          if (evBG !== undefined) {
+            // If showing temp, eventual BG, and net +/-, we need all the space we can get
+            evBGDisplay = (temp !== '' && config.statusOpenAPSNetBasal ? '>' : '->') + evBG;
+          }
+        }
+        summary = iob + evBGDisplay + (temp !== '' ? ' ' + temp : '');
       } else {
         summary = 'waiting | ' + openAPSTimeSinceLastSuccess(entries);
       }
