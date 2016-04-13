@@ -385,10 +385,13 @@ var Data = function(c) {
   function openAPSIOB(entries) {
     var iob = entries[0]['openaps']['iob'];
 
-    //iob from OpenAPS with AMA is an array, and instead of timestamp the field is time
+    //iob from OpenAPS with AMA is an array
     if (iob instanceof Array && iob.length > 0) {
       iob = iob[0];
-      iob.timestamp = iob.time;
+      //instead of timestamp the field is currently time
+      if (iob.time) {
+        iob.timestamp = iob.time;
+      }
     }
     if (openAPSIsFresh(entries, 'iob') && iob['iob'] !== undefined) {
       return roundOrZero(iob['iob']) + 'u';
