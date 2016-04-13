@@ -307,12 +307,14 @@ var Data = function(c) {
     if (value instanceof Array && value.length > 0) {
       value = value[0];
     }
+    // for iob from oref0 with AMA, instead of timestamp the field is currently time
+    var timestamp = value && (value['timestamp'] || value['time']);
     return (
       secondToLast &&
       value &&
       (
         !secondToLast['openaps'][key] ||
-        new Date(value['timestamp']) > new Date(secondToLast['created_at'])
+        new Date(timestamp) > new Date(secondToLast['created_at'])
       )
     );
   }
@@ -388,10 +390,6 @@ var Data = function(c) {
     //iob from OpenAPS with AMA is an array
     if (iob instanceof Array && iob.length > 0) {
       iob = iob[0];
-      //instead of timestamp the field is currently time
-      if (iob.time) {
-        iob.timestamp = iob.time;
-      }
     }
     if (openAPSIsFresh(entries, 'iob') && iob['iob'] !== undefined) {
       return roundOrZero(iob['iob']) + 'u';
