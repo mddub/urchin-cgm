@@ -303,12 +303,16 @@ var Data = function(c) {
   function openAPSIsFresh(entries, key) {
     var last = entries[0];
     var secondToLast = entries[1];
+    var value = last['openaps'][key];
+    if (value instanceof Array && value.length > 0) {
+      value = value[0];
+    }
     return (
       secondToLast &&
-      last['openaps'][key] &&
+      value &&
       (
         !secondToLast['openaps'][key] ||
-        new Date(last['openaps'][key]['timestamp']) > new Date(secondToLast['created_at'])
+        new Date(value['timestamp']) > new Date(secondToLast['created_at'])
       )
     );
   }
@@ -380,6 +384,15 @@ var Data = function(c) {
 
   function openAPSIOB(entries) {
     var iob = entries[0]['openaps']['iob'];
+
+    //iob from OpenAPS with AMA is an array
+    if (iob instanceof Array && iob.length > 0) {
+      iob = iob[0];
+      //instead of timestamp the field is currently time
+      if (iob.time) {
+        iob.timestamp = iob.time;
+      }
+    }
     if (openAPSIsFresh(entries, 'iob') && iob['iob'] !== undefined) {
       return roundOrZero(iob['iob']) + 'u';
     } else {
