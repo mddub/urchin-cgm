@@ -85,6 +85,11 @@ Contributions are welcome in the form of bugs and pull requests. To report a bug
   pebble emu-app-config --emulator aplite
   ```
 
+* At some point you'll want to install your revisions on your watch. Flip the "Enable Developer Connections" switch in the Pebble app on your phone, then:
+  ```
+  pebble install --phone <phone ip address>
+  ```
+
 **Tips:**
 
 * **Testing the configuration page**: If you make changes to the configuration page, you must build the watchface to point to your local copy of the page (`file:///...`). To do this, set `BUILD_ENV` to `development`. (More info [here][build-env-development].)
@@ -100,6 +105,8 @@ Contributions are welcome in the form of bugs and pull requests. To report a bug
   let g:syntastic_c_include_dirs = ['/Users/<user>/Library/Application Support/Pebble SDK/SDKs/3.7/sdk-core/pebble/aplite/include', 'build/aplite']
   let g:syntastic_c_remove_include_errors = 1
   ```
+
+* **JavaScript errors:** If you see a JavaScript error in the console, the line numbers will be reported relative to `build/pebble-js-app.js`, which is the concatenation of all files in `src/js/**/*.js`.
 
 ## Testing
 
