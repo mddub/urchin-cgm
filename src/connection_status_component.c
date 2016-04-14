@@ -55,11 +55,11 @@ void connection_status_component_destroy(ConnectionStatusComponent *c) {
 
 static char* staleness_text(int staleness_seconds) {
   static char buf[8];
-  int minutes = staleness_seconds / 60;
+  int minutes = ((float)staleness_seconds / 60.0f) + 0.5f;
   int hours = minutes / 60;
   if (minutes < 60) {
     snprintf(buf, sizeof(buf), "%d", minutes);
-  } else if (hours < 10) {
+  } else if (hours < 10 && minutes % 60 > 0) {
     snprintf(buf, sizeof(buf), "%dh%d", hours, minutes - 60 * hours);
   } else if (hours < 100) {
     snprintf(buf, sizeof(buf), "%dh", hours);
@@ -67,6 +67,18 @@ static char* staleness_text(int staleness_seconds) {
     strcpy(buf, "!");
   }
   return buf;
+}
+
+static void resize_text_frame(ConnectionStatusComponent *c, int16_t width) {
+  GRect frame = layer_get_frame(text_layer_get_layer(c->staleness_text));
+  layer_set_frame(text_layer_get_layer(c->staleness_text), GRect(
+    frame.origin.x, frame.origin.y, width, frame.size.h
+  ));
+}
+
+static void trim_text_frame(void *callback_data) {
+  ConnectionStatusComponent *c = callback_data;
+  resize_text_frame(c, text_layer_get_content_size(c->staleness_text).w);
 }
 
 void connection_status_component_refresh(ConnectionStatusComponent *c) {
@@ -85,12 +97,9 @@ void connection_status_component_refresh(ConnectionStatusComponent *c) {
     layer_set_hidden(text_layer_get_layer(c->staleness_text), false);
     text_layer_set_text(c->staleness_text, staleness_text(issue.staleness));
 
-    GRect frame = layer_get_frame(text_layer_get_layer(c->staleness_text));
-    layer_set_frame(text_layer_get_layer(c->staleness_text), GRect(
-      frame.origin.x,
-      frame.origin.y,
-      text_layer_get_content_size(c->staleness_text).w + TEXT_PADDING_R,
-      frame.size.h
-    ));
+    // XXX: need this on Basalt, but not on Aplite or emulator
+    resize_text_frame(c, INITIAL_TEXT_SIZE);
+    layer_mark_dirty(text_layer_get_layer(c->staleness_text));
+    app_timer_register(100, trim_text_frame, c);
   }
 }
