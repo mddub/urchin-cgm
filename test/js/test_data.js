@@ -1,5 +1,5 @@
 /* jshint node: true */
-/* globals describe, it, beforeEach */
+/* globals describe, it, before, beforeEach */
 "use strict";
 
 var expect = require('expect.js'),
@@ -32,6 +32,12 @@ beforeEach(function() {
 });
 
 describe('basals', function() {
+  before(function() {
+    // TODO: _profileBasalRateAtTime and _profileBasalsInWindow assume that the
+    // basals from profile.json are in same timezone as the phone running Urchin
+    process.env.TZ = 'America/Los_Angeles';
+  });
+
   var PROFILE = [{
     "created_at" : "2015-10-22T17:58-0700",
     "startDate" : "2015-10-22T17:57-0700",

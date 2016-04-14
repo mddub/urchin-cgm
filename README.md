@@ -6,6 +6,8 @@ To install, enable Developer Mode in the Pebble app on your phone, then open [th
 
 Urchin CGM is an **U**nopinionated, **R**idiculously **C**onfigurable **H**uman **I**nterface to **N**ightscout. It's not released yet / in beta / a work-in-progress.
 
+[![Circle CI](https://circleci.com/gh/mddub/urchin-cgm.svg?style=shield)](https://circleci.com/gh/mddub/urchin-cgm)
+
 ## Setup
 
 Set your Nightscout host and display units on the phone. You can customize the graph:

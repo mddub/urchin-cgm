@@ -6,7 +6,7 @@
     "test": "node_modules/.bin/mocha test*.js"
   },
   "engines": {
-    "node": "0.10.x"
+    "node": "0.12.x"
   },
   "dependencies": {
     "expect.js": "0.3.x",
