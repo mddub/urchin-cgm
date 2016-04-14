@@ -43,8 +43,6 @@ The data that you see on your watch travels like this: `Rig -> Nightscout -> Pho
 
 ![](http://i.imgur.com/ayrbxEm.png) There is a problem with the Rig -> Nightscout connection; the most recent data point in your Nightscout server is from 26 minutes ago. Maybe there's a problem with your receiver or uploader. Maybe the sensor fell out.
 
-By default, the `phone->Pebble` and `Nightscout->phone` icons appear after 10 minutes, and the `rig->Nightscout` icon appears after 20 minutes. You can customize these thresholds in `config.h`.
-
 ## Layout
 
 The configuration page includes a handful of layout options, such as:

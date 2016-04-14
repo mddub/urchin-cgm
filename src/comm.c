@@ -73,7 +73,7 @@ static void in_received_handler(DictionaryIterator *received, void *context) {
       delay = 60 * 1000;
     } else {
       uint32_t recency = dict_find(received, APP_KEY_RECENCY)->value->uint32;
-      int32_t next_update = SGV_UPDATE_FREQUENCY - recency * 1000;
+      int32_t next_update = (SGV_UPDATE_FREQUENCY_SECONDS - recency) * 1000;
       delay = next_update < 0 ? LATE_DATA_UPDATE_FREQUENCY : next_update;
     }
     schedule_update((uint32_t) delay);

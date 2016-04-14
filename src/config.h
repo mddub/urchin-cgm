@@ -5,18 +5,9 @@
 ///////////////////////////////////////////////////////
 // CONFIGURATION: edit any of these values
 
-// STALENESS ALERTS:
-// Show an icon if there is unacceptable lag between any component of:
-// Rig -> Nightscout -> Phone -> Pebble
-
-// Longest time (minutes) phone can be unreachable by Bluetooth before alerting
-#define PHONE_TO_PEBBLE_MAX_ACCEPTABLE_DELAY 10
-
-// If Bluetooth is working, longest time (minutes) the network can be unreachable before alerting
-#define WEB_TO_PHONE_MAX_ACCEPTABLE_DELAY 10
-
-// Maximum age (minutes) of the data in Nightscout before alerting
-#define RIG_TO_WEB_MAX_ACCEPTABLE_DELAY 20
+// Default delay between the timestamp of the last SGV reading and the
+// next request for data
+#define SGV_UPDATE_FREQUENCY_SECONDS (5*60 + 30)
 
 // Even though the data is technically "stale" if we don't have a new
 // reading every 5 minutes, there is some lag between the components

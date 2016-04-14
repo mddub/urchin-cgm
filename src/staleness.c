@@ -41,6 +41,10 @@ int graph_staleness_padding() {
   return padding;
 }
 
+static int max(int a, int b) {
+  return a > b ? a : b;
+}
+
 ConnectionIssue connection_issue() {
   // TODO
   if (!ever_had_phone_contact()) {
@@ -50,25 +54,30 @@ ConnectionIssue connection_issue() {
     };
   }
 
-  if (phone_to_pebble_staleness() > PHONE_TO_PEBBLE_MAX_ACCEPTABLE_DELAY * 60) {
-    return (ConnectionIssue) {
-      .reason = CONNECTION_ISSUE_BLUETOOTH,
-      .staleness = phone_to_pebble_staleness(),
-    };
-  } else if (web_to_phone_staleness() > WEB_TO_PHONE_MAX_ACCEPTABLE_DELAY * 60) {
-    return (ConnectionIssue) {
-      .reason = CONNECTION_ISSUE_NETWORK,
-      .staleness = web_to_phone_staleness(),
-    };
-  } else if (rig_to_web_staleness() > RIG_TO_WEB_MAX_ACCEPTABLE_DELAY * 60) {
-    return (ConnectionIssue) {
-      .reason = CONNECTION_ISSUE_RIG,
-      .staleness = rig_to_web_staleness(),
-    };
-  } else {
+  if (graph_staleness_padding() == 0) {
     return (ConnectionIssue) {
       .reason = CONNECTION_ISSUE_NONE,
       .staleness = 0,
+    };
+  } else {
+    int max_staleness = max(phone_to_pebble_staleness(), web_to_phone_staleness());
+    // Blame total staleness on rig->web only if last SGV was stale when fetched
+    if (rig_to_web_staleness() > SGV_UPDATE_FREQUENCY_SECONDS) {
+      max_staleness = max(max_staleness, rig_to_web_staleness());
+    }
+
+    uint8_t reason;
+    if (phone_to_pebble_staleness() == max_staleness) {
+      reason = CONNECTION_ISSUE_BLUETOOTH;
+    } else if (web_to_phone_staleness() == max_staleness) {
+      reason = CONNECTION_ISSUE_NETWORK;
+    } else {
+      reason = CONNECTION_ISSUE_RIG;
+    }
+
+    return (ConnectionIssue) {
+      .reason = reason,
+      .staleness = max_staleness,
     };
   }
 }
