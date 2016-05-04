@@ -98,6 +98,12 @@ static void out_failed_handler(DictionaryIterator *failed, AppMessageResult reas
   schedule_update(OUT_RETRY_DELAY);
 }
 
+static void bluetooth_connection_handler(bool connected) {
+  if (connected) {
+    schedule_update(0);
+  }
+}
+
 void init_comm(void (*callback)(DictionaryIterator *received)) {
   data_callback = callback;
   app_message_register_inbox_received(in_received_handler);
@@ -112,4 +118,9 @@ void init_comm(void (*callback)(DictionaryIterator *received)) {
   timeout_timer = app_timer_register(timeout_length(), timeout_handler, NULL);
 
   app_message_open(inbound_size, outbound_size);
+
+  // Request data as soon as Bluetooth reconnects
+  connection_service_subscribe((ConnectionHandlers) {
+    .pebble_app_connection_handler = bluetooth_connection_handler
+  });
 }
