@@ -28,6 +28,7 @@ The status bar can display content from a variety of sources:
 * **Custom URL - text** - if you want to summarize your data in a custom way.
 * **Custom URL - JSON** - show custom text, with support for a `timestamp` field to display recency (e.g. `(3) your text`).
 * **Custom text** - remind yourself whose glucose readings you're looking at, or leave a terse inspirational message.
+* **Multiple** - Up to 3 of the above, one on each line.
 
 ## How can I tell how recent the data is?
 

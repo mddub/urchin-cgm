@@ -1,5 +1,5 @@
 /* jshint browser: true */
-/* global module, Promise, Cache, debounce */
+/* global console, module, Promise, Cache, debounce */
 
 var Data = function(c) {
   var MAX_SGVS = c.SGV_FETCH_SECONDS / c.INTERVAL_SIZE_SECONDS + c.FETCH_EXTRA;
@@ -484,12 +484,13 @@ var Data = function(c) {
     var fetches = [config.statusLine1, config.statusLine2, config.statusLine3].filter(function(key) {
       return key !== 'none';
     }).map(function(key) {
-      return statusFn(key)(config).catch(function() {
+      return statusFn(key)(config).catch(function(e) {
+        console.log(e.stack);
         return '-';
       });
     });
     return Promise.all(fetches).then(function(lines) {
-      return lines.join('\n');
+      return lines.join('\n').substr(0, 255);
     });
   };
 
