@@ -405,13 +405,28 @@ var Data = function(c) {
     }
   }
 
-  function openAPSTimeSinceLastSuccess(entries) {
-    for (var i = 0; i < entries.length; i++) {
-      if (openAPSIsSuccess(entries.slice(i))) {
-        return ago(new Date(entries[i]['openaps']['suggested']['timestamp']).getTime(), true);
+  function openAPSEventualBGDisplay(config, entries, abbreviate) {
+    if (config.statusOpenAPSEvBG) {
+      var evBG = openAPSEventualBG(entries);
+      if (evBG !== undefined) {
+        // If showing temp, eventual BG, and net +/-, we need all the space we can get
+        return (abbreviate ? '>' : '->') + evBG;
       }
     }
-    return '?';
+    return '';
+  }
+
+  function openAPSLastSuccess(config, entries) {
+    for (var i = 0; i < entries.length; i++) {
+      if (openAPSIsSuccess(entries.slice(i))) {
+        var success = entries.slice(i);
+        var iob = openAPSIOB(success);
+        var evBG = openAPSEventualBGDisplay(config, success, false);
+        var recency = openAPSLoopRecency(success);
+        var recencyDisplay = config.statusOpenAPSEvBG ? recency + ':' : '(' + recency + ')';
+        return recencyDisplay + ' ' + iob + evBG;
+      }
+    }
   }
 
   function openAPSLoopRecency(entries) {
@@ -448,17 +463,13 @@ var Data = function(c) {
         var relativeTo = config.statusOpenAPSNetBasal ? profileBasal : undefined;
         var temp = openAPSTempBasal(entries, activeTemp, relativeTo);
         var iob = openAPSIOB(entries);
-        var evBGDisplay = '';
-        if (config.statusOpenAPSEvBG) {
-          var evBG = openAPSEventualBG(entries);
-          if (evBG !== undefined) {
-            // If showing temp, eventual BG, and net +/-, we need all the space we can get
-            evBGDisplay = (temp !== '' && config.statusOpenAPSNetBasal ? '>' : '->') + evBG;
-          }
-        }
-        summary = iob + evBGDisplay + (temp !== '' ? ' ' + temp : '');
+        // If showing temp, eventual BG, and net +/-, we need all the space we can get
+        var abbreviate = temp !== '' && config.statusOpenAPSNetBasal;
+        var evBG = openAPSEventualBGDisplay(config, entries, abbreviate);
+        summary = iob + evBG + (temp !== '' ? ' ' + temp : '');
       } else {
-        summary = 'waiting | ' + openAPSTimeSinceLastSuccess(entries);
+        var lastSuccess = openAPSLastSuccess(config, entries);
+        summary = '--' + (lastSuccess ? ' | ' + lastSuccess : '');
       }
 
       // Eventual BG takes up too much space to show recency as "(4)"

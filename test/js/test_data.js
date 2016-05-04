@@ -559,6 +559,10 @@ describe('getOpenAPSStatus', function() {
     statuses[0]['openaps'] = statuses[1]['openaps'];
     statuses.push({
       'openaps': {
+        'iob': {
+          'iob': 3.14,
+          "timestamp": '2016-03-01T16:29:00',
+        },
         'suggested': {
           'timestamp': '2016-03-01T16:29:00'
         },
@@ -578,7 +582,7 @@ describe('getOpenAPSStatus', function() {
     timekeeper.freeze(new Date('2016-03-01T16:58:00Z'));
 
     return d.getOpenAPSStatus({}).then(function(result) {
-      expect(result).to.be('(14) waiting | 29m');
+      expect(result).to.be('(14) -- | (29) 3.1u');
     });
   });
 
@@ -653,7 +657,7 @@ describe('getOpenAPSStatus', function() {
         ],
       });
       return d.getOpenAPSStatus({}).then(function(result) {
-        expect(result).to.be('(7) waiting | 15m');
+        expect(result).to.be('(7) -- | (15) 1.1u');
       });
     });
 
@@ -670,7 +674,7 @@ describe('getOpenAPSStatus', function() {
         ],
       });
       return d.getOpenAPSStatus({}).then(function(result) {
-        expect(result).to.be('(1) waiting | ?');
+        expect(result).to.be('(1) --');
       });
     });
   });
