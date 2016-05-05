@@ -779,3 +779,107 @@ describe('getMultiple', function() {
     });
   });
 });
+
+describe('getShareSGVsDateDescending', function() {
+  var config = {source: 'dexcom'};
+  var MAX_COUNT = defaultConstants.SGV_FETCH_SECONDS / defaultConstants.INTERVAL_SIZE_SECONDS + defaultConstants.FETCH_EXTRA;
+
+  function mockDexcomAPI(data, sgvs) {
+    data.postJSON = function(url) {
+      urls.push(url);
+      if (url.indexOf('ReadPublisherLatestGlucoseValues') !== -1) {
+        return Promise.resolve(sgvs);
+      } else {
+        return Promise.resolve('fake-token');
+      }
+    };
+  }
+
+  var urls;
+  var d;
+  beforeEach(function() {
+    urls = [];
+    d = Data(defaultConstants);
+    mockDexcomAPI(d, []);
+  });
+
+  it('should request a token only once', function() {
+    function afterFirstFetch() {
+      expect(urls).to.have.length(2);
+      return d.getSGVsDateDescending(config);
+    }
+    function afterSecondFetch() {
+      expect(urls).to.have.length(3);
+    }
+    return d.getSGVsDateDescending(config).then(afterFirstFetch).then(afterSecondFetch);
+  });
+
+  it('should request a full history of SGVs when the cache is empty', function() {
+    return d.getSGVsDateDescending(config).then(function() {
+      expect(urls).to.have.length(2);
+      expect(urls[urls.length - 1]).to.contain('maxCount=' + MAX_COUNT);
+    });
+  });
+
+  function expectSecondFetchCount(delayFromFirstSGV, expectedCount) {
+    mockDexcomAPI(d, [{'Value': 108, 'Trend': 4, 'WT': '\/Date(1462420778000)\/'}]);
+    function afterFirstFetch() {
+      timekeeper.freeze(new Date(1462420778000 + delayFromFirstSGV));
+      return d.getSGVsDateDescending(config);
+    }
+    function afterSecondFetch() {
+      expect(urls[urls.length - 1]).to.contain('maxCount=' + expectedCount);
+    }
+    return d.getSGVsDateDescending(config).then(afterFirstFetch).then(afterSecondFetch);
+  }
+
+  it('should request 1 SGV when the last one is from less than 5 minutes ago', function() {
+    return expectSecondFetchCount(30 * 1000, 1);
+  });
+
+  it('should request 2 SGVs when the last one is from 14:59 minutes ago', function() {
+    return expectSecondFetchCount((14 * 60 + 59) * 1000, 2);
+  });
+
+  it('should request 3 SGVs when the last one is from 15:01 minutes ago', function() {
+    return expectSecondFetchCount((15 * 60 + 1) * 1000, 3);
+  });
+
+  it('should request a full history of SGVs when the last one is from 5 hours ago', function() {
+    return expectSecondFetchCount(5 * 60 * 60 * 1000, MAX_COUNT);
+  });
+
+  it('should properly transform and dedupe data', function() {
+    mockDexcomAPI(d, [
+      {'Value': 108, 'Trend': 4, 'WT': '\/Date(1462420778000)\/'},
+      {'Value': 102, 'Trend': 3, 'WT': '\/Date(1462420478000)\/'},
+    ]);
+    timekeeper.freeze(new Date(1462420778000 + 11 * 60 * 1000));
+    function afterFirstFetch(sgvs) {
+      expect(sgvs).to.have.length(2);
+      expect(sgvs[0]).to.eql({sgv: 108, trend: 4, date: 1462420778000});
+      expect(sgvs[1]).to.eql({sgv: 102, trend: 3, date: 1462420478000});
+      mockDexcomAPI(d, [
+        {'Value': 112, 'Trend': 4, 'WT': '\/Date(1462421078000)\/'},
+        {'Value': 108, 'Trend': 4, 'WT': '\/Date(1462420778000)\/'},
+      ]);
+      return d.getSGVsDateDescending(config);
+    }
+    function afterSecondFetch(sgvs) {
+      expect(urls[urls.length - 1]).to.contain('maxCount=2');
+      expect(sgvs).to.have.length(3);
+      mockDexcomAPI(d, [
+        {'Value': 112, 'Trend': 4, 'WT': '\/Date(1462421078000)\/'},
+      ]);
+      return d.getSGVsDateDescending(config);
+    }
+    function afterThirdFetch(sgvs) {
+      expect(urls[urls.length - 1]).to.contain('maxCount=1');
+      expect(sgvs).to.have.length(3);
+    }
+    return d.getSGVsDateDescending(config)
+      .then(afterFirstFetch)
+      .then(afterSecondFetch)
+      .then(afterThirdFetch);
+  });
+});

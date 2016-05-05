@@ -18,6 +18,21 @@ var Data = function(c) {
   var openAPSStatusCache = new Cache('openAPSStatus', MAX_OPENAPS_STATUSES);
   var profileCache;
 
+  // TODO this file should be split into several smaller modules
+  var DEXCOM_SERVER_US = 'https://share1.dexcom.com';
+  var DEXCOM_SERVER_NON_US = 'https://shareous1.dexcom.com';
+  var DEXCOM_LOGIN_PATH = '/ShareWebServices/Services/General/LoginPublisherAccountByName';
+  var DEXCOM_LATEST_GLUCOSE_PATH = '/ShareWebServices/Services/Publisher/ReadPublisherLatestGlucoseValues';
+  var DEXCOM_HEADERS = {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json',
+    'User-Agent': 'Dexcom Share/3.0.2.11 CFNetwork/711.2.23 Darwin/14.0.0',
+  };
+  // From the Dexcom Share iOS app, via @bewest and @shanselman:
+  // https://github.com/bewest/share2nightscout-bridge
+  var DEXCOM_APPLICATION_ID = 'd89443d2-327c-4a6f-89e5-496bbb0317db';
+  var dexcomToken;
+
   var d = {};
 
   d.clearCache = function() {
@@ -28,16 +43,19 @@ var Data = function(c) {
     bolusCache.clear();
     openAPSStatusCache.clear();
     profileCache = undefined;
+    dexcomToken = undefined;
   };
 
-  d.getURL = function(url) {
+  d.fetch = function(url, method, headers, body) {
     return new Promise(function(resolve, reject) {
       var received = false;
       var timedOut = false;
 
       var xhr = new XMLHttpRequest();
-      xhr.open('GET', url, true);
-      xhr.setRequestHeader('Cache-Control', 'no-cache');
+      xhr.open(method, url, true);
+      Object.keys(headers).forEach(function(h) {
+        xhr.setRequestHeader(h, headers[h]);
+      });
       xhr.onreadystatechange = function () {
         if (timedOut) {
           return;
@@ -66,7 +84,7 @@ var Data = function(c) {
 
       // On iOS, PebbleKit JS will throw an error on send() for an invalid URL
       try {
-        xhr.send();
+        xhr.send(body);
         setTimeout(onTimeout, c.REQUEST_TIMEOUT);
       } catch (e) {
         reject(e);
@@ -74,8 +92,23 @@ var Data = function(c) {
     });
   };
 
+  d.getURL = function(url) {
+    return d.fetch(url, 'GET', {'Cache-Control': 'no-cache'}, null);
+  };
+
   d.getJSON = function(url) {
     return d.getURL(url).then(function(result) {
+      return JSON.parse(result);
+    });
+  };
+
+  d.postURL = function(url, headers, body) {
+    return d.fetch(url, 'POST', headers, body);
+  };
+
+  d.postJSON = function(url, headers, data) {
+    var body = data === undefined ? undefined : JSON.stringify(data);
+    return d.postURL(url, headers, body).then(function(result) {
       return JSON.parse(result);
     });
   };
@@ -520,6 +553,14 @@ var Data = function(c) {
     return statusFn(config.statusContent)(config);
   };
 
+  d.getSGVsDateDescending = function(config) {
+    if (config.source === 'dexcom') {
+      return d.getShareSGVsDateDescending(config);
+    } else {
+      return d.getNightscoutSGVsDateDescending(config);
+    }
+  };
+
   function getUsingCache(baseUrl, cache, dateKey) {
     var url = baseUrl;
     if (cache.entries.length) {
@@ -530,7 +571,7 @@ var Data = function(c) {
     });
   }
 
-  d.getSGVsDateDescending = debounce(function(config) {
+  d.getNightscoutSGVsDateDescending = debounce(function(config) {
     return getUsingCache(
       config.nightscout_url + '/api/v1/entries/sgv.json?count=' + MAX_SGVS,
       sgvCache,
@@ -670,6 +711,69 @@ var Data = function(c) {
         out.push(temp);
       });
       return out;
+    });
+  };
+
+  d.getShareSGVsDateDescending = function(config) {
+    return d.getDexcomToken(config).then(d.requestDexcomSGVs.bind(this, config));
+  };
+
+  function dexcomServer(config) {
+    return config.dexcomIsUS ? DEXCOM_SERVER_US : DEXCOM_SERVER_NON_US;
+  }
+
+  d.getDexcomToken = function(config) {
+    if (dexcomToken !== undefined) {
+      return Promise.resolve(dexcomToken);
+    } else {
+      return d.postJSON(
+        dexcomServer(config) + DEXCOM_LOGIN_PATH,
+        DEXCOM_HEADERS,
+        {
+          'applicationId': DEXCOM_APPLICATION_ID,
+          'accountName': config.dexcomUsername,
+          'password': config.dexcomPassword,
+        }
+      ).then(function(token) {
+        dexcomToken = token;
+        return token;
+      });
+    }
+  };
+
+  d.requestDexcomSGVs = function(config, token) {
+    var count;
+    if (sgvCache.entries.length) {
+      var elapsed = Date.now() - sgvCache.entries[0]['date'];
+      count = Math.min(MAX_SGVS, Math.max(1, Math.floor(elapsed / (5 * 60 * 1000))));
+    } else {
+      count = MAX_SGVS;
+    }
+    var url = [
+      dexcomServer(config),
+      DEXCOM_LATEST_GLUCOSE_PATH,
+      '?sessionId=' + token,
+      '&minutes=' + 1440,
+      '&maxCount=' + count,
+    ].join('');
+    return d.postJSON(url, DEXCOM_HEADERS)
+      .then(d.convertShareSGVs)
+      .then(function(sgvs) {
+        var newSGVs = sgvs.filter(function(sgv) {
+          return sgvCache.entries.length === 0 || sgv['date'] > sgvCache.entries[0]['date'];
+        });
+        return sgvCache.update(newSGVs);
+      });
+  };
+
+  d.convertShareSGVs = function(sgvs) {
+    return sgvs.map(function(sgv) {
+      // {"Trend":4, "Value":128, "WT":"/Date(1462404576000)/"}
+      return {
+        'sgv': sgv['Value'],
+        'trend': sgv['Trend'],
+        'date': parseInt(sgv['WT'].match(/\((.*)\)/)[1], 10),
+      };
     });
   };
 
