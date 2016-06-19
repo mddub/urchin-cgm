@@ -443,6 +443,7 @@ var Data = function(c) {
       var evBG = openAPSEventualBG(entries);
       if (evBG !== undefined) {
         // If showing temp, eventual BG, and net +/-, we need all the space we can get
+        evBG = config.mmol ? (evBG / 18.0).toFixed(1) : evBG;
         return (abbreviate ? '>' : '->') + evBG;
       }
     }
