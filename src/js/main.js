@@ -156,13 +156,18 @@ function main(c) {
     });
 
     Pebble.addEventListener('webviewclosed', function(event) {
-      var configStr = decodeURIComponent(event.response);
       var newConfig;
       try {
+        var configStr = event.response;
+        if (configStr.substr(0, 1) !== '{') {
+          // XXX: on iOS and Android it's already been decoded; on Pebble emulator it hasn't
+          // See https://github.com/pebble/pebble-tool/pull/30
+          configStr = decodeURIComponent(configStr);
+        }
         newConfig = JSON.parse(configStr);
       } catch (e) {
         console.log(e);
-        console.log('Bad config from webview: ' + configStr);
+        console.log('Bad config from webview: ' + event.response);
       }
 
       if (newConfig) {
