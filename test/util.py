@@ -1,4 +1,3 @@
-import errno
 import json
 import os
 import subprocess
@@ -42,7 +41,8 @@ def pebble_set_config():
     https://github.com/pebble/pebble-tool/blob/e428a0/pebble_tool/util/browser.py#L24
 
     But specifying a command-line browser for webbrowser via BROWSER makes it a
-    blocking (non-"background") subprocess.
+    blocking (non-"background") subprocess, so the server it's attempting to hit
+    hasn't started yet.
     https://hg.python.org/cpython/file/5661480f7763/Lib/webbrowser.py#l180
 
     Solution: wrap `curl` in a script which briefly sleeps and runs it in the
@@ -59,7 +59,23 @@ def pebble_screenshot(filename):
 
 def _call(command_str, **kwargs):
     print command_str
-    subprocess.call(command_str.split(' '), **kwargs)
+    return subprocess.Popen(
+        command_str.split(' '),
+        stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        **kwargs
+    ).communicate()
+
+def ensure_empty_dir(dirname):
+    if os.path.isdir(dirname):
+        _, err = _call('rm -r {}'.format(dirname))
+        if err != '':
+            raise Exception(err)
+    os.mkdir(dirname)
+
+def image_diff(test_file, gold_file, out_file):
+    # requires ImageMagick
+    _, diff = _call('compare -metric AE {} {} {}'.format(test_file, gold_file, out_file))
+    return diff == '0'
 
 
 class ScreenshotTest(object):
@@ -68,19 +84,25 @@ class ScreenshotTest(object):
         return os.path.join(os.path.dirname(__file__), 'output')
 
     @classmethod
-    def filename(cls):
-        return os.path.join(cls.out_dir(), cls.__name__ + '.png')
+    def test_filename(cls):
+        return os.path.join(cls.out_dir(), 'img', cls.__name__ + '.png')
+
+    @classmethod
+    def gold_filename(cls):
+        return os.path.join(os.path.dirname(__file__), 'gold', cls.__name__ + '.png')
+
+    @classmethod
+    def diff_filename(cls):
+        return os.path.join(cls.out_dir(), 'diff', cls.__name__ + '.png')
 
     @classmethod
     def ensure_environment(cls):
         if hasattr(ScreenshotTest, '_loaded_environment'):
             return
         pebble_install_and_run()
-        try:
-            os.mkdir(cls.out_dir())
-        except OSError as e:
-            if e.errno != errno.EEXIST:
-                raise
+        ensure_empty_dir(cls.out_dir())
+        os.mkdir(os.path.join(cls.out_dir(), 'img'))
+        os.mkdir(os.path.join(cls.out_dir(), 'diff'))
         ScreenshotTest.summary_file = SummaryFile(os.path.join(cls.out_dir(), 'screenshots.html'))
         ScreenshotTest._loaded_environment = True
 
@@ -98,45 +120,77 @@ class ScreenshotTest(object):
         pebble_set_config()
         time.sleep(2)
 
-        pebble_screenshot(self.filename())
-        ScreenshotTest.summary_file.add_test_result(self)
+        pebble_screenshot(self.test_filename())
+        try:
+            os.stat(self.gold_filename())
+            images_match = image_diff(self.test_filename(), self.gold_filename(), self.diff_filename())
+            reason = 'Screenshot does not match expected'
+        except OSError:
+            images_match = False
+            reason = 'Missing gold image'
+        ScreenshotTest.summary_file.add_test_result(self, images_match)
+        assert images_match, reason
 
 
 class SummaryFile(object):
     """Generate summary file with screenshots, in a very janky way for now."""
     def __init__(self, out_file):
         self.out_file = out_file
+        self.fails = ''
+        self.passes = ''
+
+    def write(self):
         with open(self.out_file, 'w') as f:
             f.write("""
             <head>
               <style>
                 td { border: 1px solid #666; padding: 4px; vertical-align: top; }
-                table { border-collapse: collapse; }
-                img { border: 5px solid #aea; }
+                table { border-collapse: collapse; margin-bottom: 2em; }
+                img.pass { border: 5px solid #aea; }
+                img.fail { border: 5px solid red; }
                 code { display: block; border-top: 1px solid #999; margin-top: 0.5em; padding-top: 0.5em; }
               </style>
-            <table>
-            """)
+            </head>
+            <body>
+            """
+            +
+            """
+              <table>
+                {fails}
+              </table>
+              <table>
+                {passes}
+              </table>
+            """.format(fails=self.fails, passes=self.passes))
 
-    def add_test_result(self, test_instance):
-        with open(self.out_file, 'a') as f:
-            f.write("""
-            <tr>
-              <td><img src="{filename}"></td>
-              <td>
-                <strong>{classname}</strong> {doc}
-                <code>{config}</code>
-                <code>{sgvs}</code>
-              </td>
-            </tr>
-            """.format(
-                # Assume images are in the same directory
-                filename=os.path.split(test_instance.filename())[-1],
-                classname=test_instance.__class__.__name__,
-                doc=test_instance.__class__.__doc__,
-                config=json.dumps(test_instance.config),
-                sgvs=json.dumps(self.printed_sgvs(test_instance.sgvs))
-            ))
+    def add_test_result(self, test_instance, passed):
+        result = """
+        <tr>
+          <td><img src="{test_filename}" class="{klass}"></td>
+          <td><img src="{diff_filename}"></td>
+          <td>
+            <strong>{classname}</strong> {doc}
+            <code>{config}</code>
+            <code>{sgvs}</code>
+          </td>
+        </tr>
+        """.format(
+            test_filename=self.relative_path(test_instance.test_filename()),
+            klass=('pass' if passed else 'fail'),
+            diff_filename=self.relative_path(test_instance.diff_filename()),
+            classname=test_instance.__class__.__name__,
+            doc=test_instance.__class__.__doc__ or '',
+            config=json.dumps(test_instance.config),
+            sgvs=json.dumps(self.printed_sgvs(test_instance.sgvs))
+        )
+        if passed:
+            self.passes += result
+        else:
+            self.fails += result
+        self.write()
+
+    def relative_path(self, filename):
+        return os.path.relpath(filename, os.path.dirname(self.out_file))
 
     def printed_sgvs(self, sgvs):
         return [
