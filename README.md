@@ -118,6 +118,8 @@ To install testing dependencies, use `pip`:
 pip install -r requirements.txt
 ```
 
+Screenshot testing has an additional dependency on [ImageMagick] to compute visual diffs.
+
 * **Mock Nightscout server**
 
   The `test/` directory includes a server which uses the [Flask] framework. To run it:
@@ -152,9 +154,9 @@ pip install -r requirements.txt
   bash test/do_screenshots.sh
   ```
 
-  This will build the watchface, run it in the emulator, take a screenshot for each test, and generate an HTML file with the results. To add a new test case, follow the examples in `test/test_screenshots.py`.
+  This will build the watchface, run it in the emulator, take a screenshot for each test, and generate an HTML file with the results. It depends on [ImageMagick] to diff the expected and observed screenshots.
 
-  Automated verification of the screenshots and CI are coming soon. For now, you manually inspect them.
+  To add a new test case, follow the examples in `test/test_screenshots.py` and add a new "passing" screenshot to `test/gold/`.
 
 * **JavaScript unit tests**
 
@@ -184,10 +186,10 @@ This project is intended for educational and informational purposes only. It is 
 
 [build-env-development]: https://github.com/mddub/urchin-cgm/blob/ede29c/wscript#L17
 [care-portal]: http://www.nightscout.info/wiki/welcome/website-features/cgm-remote-monitor-care-portal
-[emu-app-config-file]: https://github.com/pebble/pebble-tool/blob/0e51fa/pebble_tool/commands/emucontrol.py#L116
-[emu-app-config-magic]: https://github.com/mddub/urchin-cgm/blob/ea2831/test/util.py#L36
+[emu-app-config-magic]: https://github.com/mddub/urchin-cgm/blob/c46e1f/test/util.py#L36-51
 [file-issue]: https://github.com/mddub/urchin-cgm/issues
 [Flask]: http://flask.pocoo.org/
+[ImageMagick]: http://www.imagemagick.org/
 [js-unit-tests]: https://github.com/mddub/urchin-cgm/tree/master/test/js
 [minimed-connect]: http://www.nightscout.info/wiki/welcome/website-features/funnel-cake-0-8-features/minimed-connect-and-nightscout
 [Mocha]: https://mochajs.org/
