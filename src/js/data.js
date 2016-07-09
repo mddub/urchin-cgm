@@ -13,6 +13,7 @@ var Data = function(c) {
   var sgvCache = new Cache('sgv', MAX_SGVS);
   var tempBasalCache = new Cache('tempBasal', MAX_TEMP_BASALS);
   var uploaderBatteryCache = new Cache('uploaderBattery', MAX_UPLOADER_BATTERIES);
+  var uploaderCache = new Cache('uploader', MAX_UPLOADER_BATTERIES);
   var calibrationCache = new Cache('calibration', MAX_CALIBRATIONS);
   var bolusCache = new Cache('bolus', MAX_BOLUSES);
   var openAPSStatusCache = new Cache('openAPSStatus', MAX_OPENAPS_STATUSES);
@@ -39,6 +40,7 @@ var Data = function(c) {
     sgvCache.clear();
     tempBasalCache.clear();
     uploaderBatteryCache.clear();
+    uploaderCache.clear();
     calibrationCache.clear();
     bolusCache.clear();
     openAPSStatusCache.clear();
@@ -168,10 +170,18 @@ var Data = function(c) {
     });
   };
 
+  d.isRigBatteryCurrent = function(latest) {
+    return latest && latest.length && new Date(latest[0]['created_at']) >= new Date() - c.DEVICE_STATUS_RECENCY_THRESHOLD_SECONDS * 1000;
+  };
+
   d.getRigBatteryLevel = function(config) {
     return d.getLastUploaderBattery(config).then(function(latest) {
-      if (latest && latest.length && new Date(latest[0]['created_at']) >= new Date() - c.DEVICE_STATUS_RECENCY_THRESHOLD_SECONDS * 1000) {
-        return latest[0]['uploaderBattery'] + '%';
+      if (d.isRigBatteryCurrent(latest)) {
+        if (latest[0].uploader) {
+          return latest[0].uploader.battery + '%';
+        } else {
+          return latest[0]['uploaderBattery'] + '%';
+        }
       } else {
         return '-';
       }
@@ -593,7 +603,17 @@ var Data = function(c) {
       config.nightscout_url + '/api/v1/devicestatus.json?find[uploaderBattery][$exists]=true&count=' + MAX_UPLOADER_BATTERIES,
       uploaderBatteryCache,
       'created_at'
-    );
+    ).then(function (uploaderBattery) {
+      if (d.isRigBatteryCurrent(uploaderBattery)) {
+        return uploaderBattery;
+      } else {
+        return getUsingCache(
+          config.nightscout_url + '/api/v1/devicestatus.json?find[uploader][$exists]=true&count=' + MAX_UPLOADER_BATTERIES,
+          uploaderCache,
+          'created_at'
+        );
+      }
+    });
   });
 
   d.getLastCalibration = debounce(function(config) {
