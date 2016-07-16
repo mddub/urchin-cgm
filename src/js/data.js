@@ -171,7 +171,11 @@ var Data = function(c) {
   d.getRigBatteryLevel = function(config) {
     return d.getLastUploaderBattery(config).then(function(latest) {
       if (latest && latest.length && new Date(latest[0]['created_at']) >= new Date() - c.DEVICE_STATUS_RECENCY_THRESHOLD_SECONDS * 1000) {
-        return latest[0]['uploaderBattery'] + '%';
+        if (latest[0].uploader) {
+          return latest[0].uploader.battery + '%';
+        } else {
+          return latest[0]['uploaderBattery'] + '%';
+        }
       } else {
         return '-';
       }
@@ -590,7 +594,7 @@ var Data = function(c) {
 
   d.getLastUploaderBattery = debounce(function(config) {
     return getUsingCache(
-      config.nightscout_url + '/api/v1/devicestatus.json?find[uploaderBattery][$exists]=true&count=' + MAX_UPLOADER_BATTERIES,
+      config.nightscout_url + '/api/v1/devicestatus.json?find[$or][0][uploaderBattery][$exists]=true&find[$or][1][uploader][$exists]=true&count=' + MAX_UPLOADER_BATTERIES,
       uploaderBatteryCache,
       'created_at'
     );
