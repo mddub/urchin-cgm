@@ -1,4 +1,3 @@
-#include "app_keys.h"
 #include "config.h"
 #include "layout.h"
 #include "staleness.h"
@@ -49,27 +48,26 @@ void trend_arrow_component_destroy(TrendArrowComponent *c) {
   free(c);
 }
 
-void trend_arrow_component_update(TrendArrowComponent *c, DictionaryIterator *data) {
+void trend_arrow_component_update(TrendArrowComponent *c, DataMessage *data) {
   if (graph_staleness_padding() > 0) {
     c->last_trend = -1;
     layer_set_hidden(bitmap_layer_get_layer(c->icon_layer), true);
     return;
   }
 
-  int trend = dict_find(data, APP_KEY_TREND)->value->int32;
-  if (trend == c->last_trend) {
+  if (data->trend == c->last_trend) {
     return;
   }
-  c->last_trend = trend;
+  c->last_trend = data->trend;
 
-  if (TREND_ICONS[trend] == NO_ICON) {
+  if (TREND_ICONS[data->trend] == NO_ICON) {
     layer_set_hidden(bitmap_layer_get_layer(c->icon_layer), true);
   } else {
     layer_set_hidden(bitmap_layer_get_layer(c->icon_layer), false);
     if (c->icon_bitmap != NULL) {
       gbitmap_destroy(c->icon_bitmap);
     }
-    c->icon_bitmap = gbitmap_create_with_resource(TREND_ICONS[trend]);
+    c->icon_bitmap = gbitmap_create_with_resource(TREND_ICONS[data->trend]);
     bitmap_layer_set_bitmap(c->icon_layer, c->icon_bitmap);
   }
 }

@@ -92,7 +92,7 @@ void bg_row_element_destroy(BGRowElement *el) {
   free(el);
 }
 
-void bg_row_element_update(BGRowElement *el, DictionaryIterator *data) {
+void bg_row_element_update(BGRowElement *el, DataMessage *data) {
   last_bg_text_layer_update(el->bg_text, data);
   text_layer_set_font(
     el->bg_text,

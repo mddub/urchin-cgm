@@ -1,6 +1,7 @@
 #pragma once
 
 #include <pebble.h>
+#include "app_messages.h"
 #include "trend_arrow_component.h"
 
 typedef struct BGRowElement {
@@ -12,5 +13,5 @@ typedef struct BGRowElement {
 
 BGRowElement* bg_row_element_create(Layer *parent);
 void bg_row_element_destroy(BGRowElement *el);
-void bg_row_element_update(BGRowElement *el, DictionaryIterator *data);
+void bg_row_element_update(BGRowElement *el, DataMessage *data);
 void bg_row_element_tick(BGRowElement *el);

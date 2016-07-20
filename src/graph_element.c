@@ -1,4 +1,3 @@
-#include "app_keys.h"
 #include "config.h"
 #include "graph_element.h"
 #include "layout.h"
@@ -166,20 +165,11 @@ void graph_element_destroy(GraphElement *el) {
   free(el);
 }
 
-void graph_element_update(GraphElement *el, DictionaryIterator *data) {
-  int count = dict_find(data, APP_KEY_SGV_COUNT)->value->int32;
-  count = count > GRAPH_MAX_SGV_COUNT ? GRAPH_MAX_SGV_COUNT : count;
-  ((GraphData*)layer_get_data(el->graph_layer))->count = count;
-  memcpy(
-    ((GraphData*)layer_get_data(el->graph_layer))->sgvs,
-    (uint8_t*)dict_find(data, APP_KEY_SGVS)->value->data,
-    count * sizeof(uint8_t)
-  );
-  memcpy(
-    ((GraphData*)layer_get_data(el->graph_layer))->extra,
-    (uint8_t*)dict_find(data, APP_KEY_GRAPH_EXTRA)->value->data,
-    count * sizeof(uint8_t)
-  );
+void graph_element_update(GraphElement *el, DataMessage *data) {
+  GraphData *graph_data = layer_get_data(el->graph_layer);
+  graph_data->count = data->sgv_count;
+  memcpy(graph_data->sgvs, data->sgvs, data->sgv_count * sizeof(uint8_t));
+  memcpy(graph_data->extra, data->graph_extra, data->sgv_count * sizeof(uint8_t));
   layer_mark_dirty(el->graph_layer);
   connection_status_component_refresh(el->conn_status);
 }

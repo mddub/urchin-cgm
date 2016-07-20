@@ -22,4 +22,5 @@ int rig_to_web_staleness();
 int total_data_staleness();
 int graph_staleness_padding();
 ConnectionIssue connection_issue();
-void staleness_update(DictionaryIterator *data);
+void staleness_update_message_received(time_t received_at);
+void staleness_update_data_received(time_t received_at, int32_t recency);

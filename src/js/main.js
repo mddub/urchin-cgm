@@ -42,7 +42,6 @@ function main(c) {
         sendMessage({
           msgType: c.MSG_TYPE_DATA,
           recency: format.recency(sgvs),
-          sgvCount: ys.length,
           // XXX: divide BG by 2 to fit into 1 byte
           sgvs: ys.map(function(y) { return Math.min(255, Math.floor(y / 2)); }),
           lastSgv: format.lastSgv(sgvs),

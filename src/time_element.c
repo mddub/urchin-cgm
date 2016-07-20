@@ -85,7 +85,7 @@ void time_element_destroy(TimeElement* el) {
   free(el);
 }
 
-void time_element_update(TimeElement *el, DictionaryIterator *data) {}
+void time_element_update(TimeElement *el, DataMessage *data) {}
 
 void time_element_tick(TimeElement *el) {
   static char buffer[16];

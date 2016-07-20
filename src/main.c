@@ -1,6 +1,6 @@
 #include <pebble.h>
 
-#include "app_keys.h"
+#include "app_messages.h"
 #include "bg_row_element.h"
 #include "comm.h"
 #include "config.h"
@@ -97,41 +97,41 @@ static Window *create_main_window() {
   return window;
 }
 
-static void data_callback(DictionaryIterator *received) {
-  int msg_type = dict_find(received, APP_KEY_MSG_TYPE)->value->uint8;
-  if (msg_type == MSG_TYPE_DATA) {
-    if (s_time_element != NULL) {
-      time_element_update(s_time_element, received);
-    }
-    if (s_graph_element != NULL) {
-      graph_element_update(s_graph_element, received);
-    }
-    if (s_sidebar_element != NULL) {
-      sidebar_element_update(s_sidebar_element, received);
-    }
-    if (s_status_bar_element != NULL) {
-      status_bar_element_update(s_status_bar_element, received);
-    }
-    if (s_bg_row_element != NULL) {
-      bg_row_element_update(s_bg_row_element, received);
-    }
-  } else if (msg_type == MSG_TYPE_PREFERENCES) {
-    set_prefs(received);
-    // recreate the window in case layout preferences have changed
-    window_stack_remove(s_window, false);
-    window_destroy(s_window);
-    s_window = create_main_window();
+static void data_callback(DataMessage *data) {
+  if (s_time_element != NULL) {
+    time_element_update(s_time_element, data);
   }
+  if (s_graph_element != NULL) {
+    graph_element_update(s_graph_element, data);
+  }
+  if (s_sidebar_element != NULL) {
+    sidebar_element_update(s_sidebar_element, data);
+  }
+  if (s_status_bar_element != NULL) {
+    status_bar_element_update(s_status_bar_element, data);
+  }
+  if (s_bg_row_element != NULL) {
+    bg_row_element_update(s_bg_row_element, data);
+  }
+}
+
+static void prefs_callback(DictionaryIterator *received) {
+  set_prefs(received);
+  // recreate the window in case layout preferences have changed
+  window_stack_remove(s_window, false);
+  window_destroy(s_window);
+  s_window = create_main_window();
 }
 
 static void init(void) {
   init_prefs();
-  init_comm(data_callback);
+  init_comm(data_callback, prefs_callback);
   s_window = create_main_window();
 }
 
 static void deinit(void) {
   window_destroy(s_window);
+  deinit_comm();
   deinit_prefs();
 }
 
