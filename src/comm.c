@@ -10,10 +10,13 @@ static bool update_in_progress;
 static AppTimer *request_timer = NULL;
 static AppTimer *timeout_timer = NULL;
 
-static void (*data_callback)(DictionaryIterator *received);
+static void (*data_callback)(DataMessage *data);
+static void (*prefs_callback)(DictionaryIterator *received);
 static void schedule_update(uint32_t delay);
 static void request_update();
 static void timeout_handler();
+
+static DataMessage *last_data_message;
 
 static void clear_timer(AppTimer **timer) {
   if (*timer != NULL) {
@@ -65,23 +68,37 @@ static void request_update() {
 static void in_received_handler(DictionaryIterator *received, void *context) {
   phone_contact = true;
   update_in_progress = false;
-  staleness_update(received);
-  int msg_type = dict_find(received, APP_KEY_MSG_TYPE)->value->uint8;
-  if (msg_type == MSG_TYPE_DATA) {
-    int32_t delay;
-    if (get_prefs()->update_every_minute) {
-      delay = 60 * 1000;
-    } else {
-      uint32_t recency = dict_find(received, APP_KEY_RECENCY)->value->uint32;
-      int32_t next_update = (SGV_UPDATE_FREQUENCY_SECONDS - recency) * 1000;
-      delay = next_update < 0 ? LATE_DATA_UPDATE_FREQUENCY : next_update;
-    }
-    schedule_update((uint32_t) delay);
+
+  time_t now = time(NULL);
+  staleness_update_message_received(now);
+
+  int32_t msg_type;
+  if (!get_int32(received, &msg_type, APP_KEY_MSG_TYPE, true, 0)) {
+    schedule_update(BAD_APP_MESSAGE_RETRY_DELAY);
+    return;
   }
-  if (msg_type == MSG_TYPE_ERROR) {
-    schedule_update(ERROR_RETRY_DELAY);
+
+  if (msg_type == MSG_TYPE_DATA) {
+    static DataMessage d;
+    if (validate_data_message(received, &d)) {
+      memcpy(last_data_message, &d, sizeof(DataMessage));
+      int32_t delay;
+      if (get_prefs()->update_every_minute) {
+        delay = 60 * 1000;
+      } else {
+        int32_t next_update = (SGV_UPDATE_FREQUENCY_SECONDS - last_data_message->recency) * 1000;
+        delay = next_update < 0 ? LATE_DATA_UPDATE_FREQUENCY : next_update;
+      }
+      schedule_update((uint32_t) delay);
+      staleness_update_data_received(now, last_data_message->recency);
+      data_callback(last_data_message);
+    } else {
+      schedule_update(BAD_APP_MESSAGE_RETRY_DELAY);
+    }
+  } else if (msg_type == MSG_TYPE_PREFERENCES) {
+    prefs_callback(received);
   } else {
-    data_callback(received);
+    schedule_update(ERROR_RETRY_DELAY);
   }
 }
 
@@ -104,8 +121,9 @@ static void bluetooth_connection_handler(bool connected) {
   }
 }
 
-void init_comm(void (*callback)(DictionaryIterator *received)) {
-  data_callback = callback;
+void init_comm(void (*callback_for_data)(DataMessage *data), void (*callback_for_prefs)(DictionaryIterator *received)) {
+  data_callback = callback_for_data;
+  prefs_callback = callback_for_prefs;
   app_message_register_inbox_received(in_received_handler);
   app_message_register_inbox_dropped(in_dropped_handler);
   app_message_register_outbox_failed(out_failed_handler);
@@ -117,10 +135,17 @@ void init_comm(void (*callback)(DictionaryIterator *received)) {
   update_in_progress = true;
   timeout_timer = app_timer_register(timeout_length(), timeout_handler, NULL);
 
+  last_data_message = malloc(sizeof(DataMessage));
+
   app_message_open(inbound_size, outbound_size);
 
   // Request data as soon as Bluetooth reconnects
   connection_service_subscribe((ConnectionHandlers) {
     .pebble_app_connection_handler = bluetooth_connection_handler
   });
+}
+
+void deinit_comm() {
+  app_message_deregister_callbacks();
+  free(last_data_message);
 }

@@ -82,13 +82,14 @@ ConnectionIssue connection_issue() {
   }
 }
 
-void staleness_update(DictionaryIterator *data) {
+void staleness_update_message_received(time_t received_at) {
   phone_contact = true;
-  time_t now = time(NULL);
-  last_phone_contact = now;
-  if (dict_find(data, APP_KEY_MSG_TYPE)->value->uint8 == MSG_TYPE_DATA) {
-    data_received = true;
-    last_successful_phone_contact = now;
-    last_data_staleness_wrt_phone = dict_find(data, APP_KEY_RECENCY)->value->int32;
-  }
+  last_phone_contact = received_at;
+}
+
+void staleness_update_data_received(time_t received_at, int32_t recency) {
+  phone_contact = true;
+  data_received = true;
+  last_successful_phone_contact = received_at;
+  last_data_staleness_wrt_phone = recency;
 }

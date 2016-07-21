@@ -63,12 +63,10 @@ void status_bar_element_destroy(StatusBarElement *el) {
   free(el);
 }
 
-void status_bar_element_update(StatusBarElement *el, DictionaryIterator *data) {
-  text_layer_set_text(
-    el->text,
-    dict_find(data, APP_KEY_STATUS_TEXT)->value->cstring
-  );
-  status_bar_element_tick(el);
+void status_bar_element_update(StatusBarElement *el, DataMessage *data) {
+  static char buffer[STATUS_BAR_MAX_LENGTH];
+  strcpy(buffer, data->status_text);
+  text_layer_set_text(el->text, buffer);
 }
 
 void status_bar_element_tick(StatusBarElement *el) {}

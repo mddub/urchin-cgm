@@ -1,6 +1,7 @@
 #pragma once
 
 #include <pebble.h>
+#include "app_messages.h"
 #include "connection_status_component.h"
 
 #define GRAPH_EXTRA_BOLUS_OFFSET 0
@@ -15,12 +16,12 @@ typedef struct GraphElement {
 
 typedef struct GraphData {
   GColor color;
-  int count;
+  uint16_t count;
   uint8_t* sgvs;
   uint8_t* extra;
 } GraphData;
 
 GraphElement* graph_element_create(Layer *parent);
 void graph_element_destroy(GraphElement *el);
-void graph_element_update(GraphElement *el, DictionaryIterator *data);
+void graph_element_update(GraphElement *el, DataMessage *data);
 void graph_element_tick(GraphElement *el);

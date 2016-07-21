@@ -41,7 +41,7 @@ void sidebar_element_destroy(SidebarElement *el) {
   free(el);
 }
 
-void sidebar_element_update(SidebarElement *el, DictionaryIterator *data) {
+void sidebar_element_update(SidebarElement *el, DataMessage *data) {
   last_bg_text_layer_update(el->last_bg_text, data);
   trend_arrow_component_update(el->trend, data);
   delta_text_layer_update(el->delta_text, data);
