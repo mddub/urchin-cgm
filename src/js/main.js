@@ -26,7 +26,9 @@ function main(c) {
 
   function sendMessage(data) {
     console.log('sending ' + JSON.stringify(data));
-    Pebble.sendAppMessage(data);
+    Pebble.sendAppMessage(data, function() {}, function(e) {
+      console.log('Message failed: ' + JSON.stringify(e));
+    });
   }
 
   function requestAndSendData() {
@@ -181,7 +183,8 @@ function main(c) {
       }
     });
 
-    Pebble.addEventListener('appmessage', function() {
+    Pebble.addEventListener('appmessage', function(e) {
+      console.log('Received message from watch: ' + JSON.stringify(e.payload));
       requestAndSendData();
     });
 
