@@ -49,7 +49,7 @@ function main(c) {
           lastSgv: format.lastSgv(sgvs),
           trend: format.lastTrendNumber(sgvs),
           delta: format.lastDelta(ys),
-          statusText: statusText,
+          statusText: statusText.substr(0, 255),
           graphExtra: graphExtra,
         });
       } catch (e) {
