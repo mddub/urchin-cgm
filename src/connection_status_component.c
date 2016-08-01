@@ -1,3 +1,4 @@
+#include "comm.h"
 #include "config.h"
 #include "connection_status_component.h"
 #include "fonts.h"
@@ -5,8 +6,8 @@
 #include "staleness.h"
 
 #define REASON_ICON_WIDTH 25
-#define INITIAL_TEXT_SIZE 40
-#define TEXT_PADDING_R 2
+#define TEXT_MARGIN_L 1
+#define REQUEST_STATE_MESSAGE_DURATION_MS 2000
 
 // This matches STALENESS_REASON_*
 const int CONN_ISSUE_ICONS[] = {
@@ -16,6 +17,8 @@ const int CONN_ISSUE_ICONS[] = {
   RESOURCE_ID_CONN_ISSUE_RIG,
 };
 
+static FontChoice font;
+
 ConnectionStatusComponent* connection_status_component_create(Layer *parent, int x, int y) {
   BitmapLayer *icon_layer = bitmap_layer_create(GRect(x, y, REASON_ICON_WIDTH, REASON_ICON_WIDTH));
   // draw the icon background over the graph
@@ -23,12 +26,15 @@ ConnectionStatusComponent* connection_status_component_create(Layer *parent, int
   layer_set_hidden(bitmap_layer_get_layer(icon_layer), true);
   layer_add_child(parent, bitmap_layer_get_layer(icon_layer));
 
-  FontChoice font = get_font(FONT_18_BOLD);
+  int16_t initial_text_width = element_get_bounds(parent).size.w - x - REASON_ICON_WIDTH - TEXT_MARGIN_L;
+  font = get_font(FONT_18_BOLD);
+  int16_t initial_text_height = 2 * (font.height + font.padding_top + font.padding_bottom);
+
   TextLayer *staleness_text = text_layer_create(GRect(
-    x + REASON_ICON_WIDTH + 1,
+    x + REASON_ICON_WIDTH + TEXT_MARGIN_L,
     y + (REASON_ICON_WIDTH - font.height) / 2 - font.padding_top,
-    INITIAL_TEXT_SIZE,
-    font.height + font.padding_top + font.padding_bottom
+    initial_text_width,
+    initial_text_height
   ));
   text_layer_set_font(staleness_text, fonts_get_system_font(font.key));
   text_layer_set_background_color(staleness_text, element_bg(parent));
@@ -41,6 +47,15 @@ ConnectionStatusComponent* connection_status_component_create(Layer *parent, int
   c->icon_layer = icon_layer;
   c->icon_bitmap = NULL;
   c->staleness_text = staleness_text;
+  c->background = element_bg(parent);
+  c->initial_text_width = initial_text_width;
+  c->initial_text_height = initial_text_height;
+  if (comm_is_update_in_progress()) {
+    c->is_showing_request_state = true;
+    connection_status_component_show_request_state(c, REQUEST_STATE_WAITING, 0);
+  } else {
+    c->is_showing_request_state = false;
+  }
   return c;
 }
 
@@ -69,19 +84,46 @@ static char* staleness_text(int staleness_seconds) {
   return buf;
 }
 
-static void resize_text_frame(ConnectionStatusComponent *c, int16_t width) {
-  GRect frame = layer_get_frame(text_layer_get_layer(c->staleness_text));
-  layer_set_frame(text_layer_get_layer(c->staleness_text), GRect(
-    frame.origin.x, frame.origin.y, width, frame.size.h
-  ));
+static void _resize_text_frame(ConnectionStatusComponent *c, int16_t width, int16_t height, bool fill_background) {
+  // Make the background transparent during the resizing to avoid a flash
+  text_layer_set_background_color(c->staleness_text, fill_background ? c->background : GColorClear);
+
+  TextLayer *t = c->staleness_text;
+  GRect frame = layer_get_frame(text_layer_get_layer(t));
+  layer_set_frame(
+    text_layer_get_layer(t),
+    GRect(frame.origin.x, frame.origin.y, width, height)
+  );
 }
 
-static void trim_text_frame(void *callback_data) {
+static void _trim_text_frame(void *callback_data) {
   ConnectionStatusComponent *c = callback_data;
-  resize_text_frame(c, text_layer_get_content_size(c->staleness_text).w);
+  _resize_text_frame(
+    c,
+    text_layer_get_content_size(c->staleness_text).w,
+    text_layer_get_content_size(c->staleness_text).h,
+    true
+  );
 }
 
-void connection_status_component_refresh(ConnectionStatusComponent *c) {
+static void fix_text_frame(ConnectionStatusComponent *c) {
+  // XXX: need this on Basalt, but not on Aplite or emulator
+  _resize_text_frame(c, c->initial_text_width, c->initial_text_height, false);
+  layer_mark_dirty(text_layer_get_layer(c->staleness_text));
+  app_timer_register(100, _trim_text_frame, c);
+}
+
+static void clear_request_state(void *callback_data) {
+  ConnectionStatusComponent *c = callback_data;
+  c->is_showing_request_state = false;
+  connection_status_component_tick(c);
+}
+
+void connection_status_component_tick(ConnectionStatusComponent *c) {
+  if (c->is_showing_request_state) {
+    return;
+  }
+
   ConnectionIssue issue = connection_issue();
   if (issue.reason == CONNECTION_ISSUE_NONE) {
     layer_set_hidden(bitmap_layer_get_layer(c->icon_layer), true);
@@ -97,9 +139,55 @@ void connection_status_component_refresh(ConnectionStatusComponent *c) {
     layer_set_hidden(text_layer_get_layer(c->staleness_text), false);
     text_layer_set_text(c->staleness_text, staleness_text(issue.staleness));
 
-    // XXX: need this on Basalt, but not on Aplite or emulator
-    resize_text_frame(c, INITIAL_TEXT_SIZE);
-    layer_mark_dirty(text_layer_get_layer(c->staleness_text));
-    app_timer_register(100, trim_text_frame, c);
+    fix_text_frame(c);
+  }
+}
+
+void connection_status_component_show_request_state(ConnectionStatusComponent *c, RequestState state, AppMessageResult reason) {
+  if (state == REQUEST_STATE_SUCCESS) {
+    clear_request_state(c);
+    return;
+  }
+
+  c->is_showing_request_state = true;
+
+  layer_set_hidden(bitmap_layer_get_layer(c->icon_layer), false);
+  if (c->icon_bitmap != NULL) {
+    gbitmap_destroy(c->icon_bitmap);
+  }
+  if (state == REQUEST_STATE_FETCH_ERROR) {
+    c->icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_CONN_ISSUE_NETWORK);
+  } else {
+    c->icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_CONN_REFRESHING);
+  }
+  bitmap_layer_set_bitmap(c->icon_layer, c->icon_bitmap);
+
+  if (state == REQUEST_STATE_WAITING || state == REQUEST_STATE_FETCH_ERROR) {
+    layer_set_hidden(text_layer_get_layer(c->staleness_text), true);
+  } else {
+    layer_set_hidden(text_layer_get_layer(c->staleness_text), false);
+
+    static char state_text[32];
+    switch(state) {
+      case REQUEST_STATE_BAD_APP_MESSAGE:   strcpy(state_text, "Bad app msg");    break;
+      case REQUEST_STATE_TIMED_OUT:         strcpy(state_text, "Timed out");      break;
+      case REQUEST_STATE_NO_BLUETOOTH:      strcpy(state_text, "No BT");          break;
+      case REQUEST_STATE_OUT_FAILED:        strcpy(state_text, "Msg failed");     break;
+      case REQUEST_STATE_IN_DROPPED:        strcpy(state_text, "Msg dropped");    break;
+      default:                              strcpy(state_text, "Msg error");      break;
+    }
+
+    if (reason != 0) {
+      static char reason_text[16];
+      snprintf(reason_text, sizeof(reason_text), "\nCode %d", reason);
+      strcat(state_text, reason_text);
+    }
+
+    text_layer_set_text(c->staleness_text, state_text);
+    fix_text_frame(c);
+  }
+
+  if (state != REQUEST_STATE_WAITING) {
+    app_timer_register(REQUEST_STATE_MESSAGE_DURATION_MS, clear_request_state, c);
   }
 }

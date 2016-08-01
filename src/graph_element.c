@@ -171,9 +171,13 @@ void graph_element_update(GraphElement *el, DataMessage *data) {
   memcpy(graph_data->sgvs, data->sgvs, data->sgv_count * sizeof(uint8_t));
   memcpy(graph_data->extra, data->graph_extra, data->sgv_count * sizeof(uint8_t));
   layer_mark_dirty(el->graph_layer);
-  connection_status_component_refresh(el->conn_status);
+  connection_status_component_tick(el->conn_status);
 }
 
 void graph_element_tick(GraphElement *el) {
-  connection_status_component_refresh(el->conn_status);
+  connection_status_component_tick(el->conn_status);
+}
+
+void graph_element_show_request_state(GraphElement *el, RequestState state, AppMessageResult reason) {
+  connection_status_component_show_request_state(el->conn_status, state, reason);
 }

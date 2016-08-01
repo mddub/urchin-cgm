@@ -2,6 +2,7 @@
 
 #include <pebble.h>
 #include "app_messages.h"
+#include "comm.h"
 #include "connection_status_component.h"
 
 #define GRAPH_EXTRA_BOLUS_OFFSET 0
@@ -25,3 +26,4 @@ GraphElement* graph_element_create(Layer *parent);
 void graph_element_destroy(GraphElement *el);
 void graph_element_update(GraphElement *el, DataMessage *data);
 void graph_element_tick(GraphElement *el);
+void graph_element_show_request_state(GraphElement *el, RequestState state, AppMessageResult reason);

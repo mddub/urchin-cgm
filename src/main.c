@@ -123,9 +123,18 @@ static void prefs_callback(DictionaryIterator *received) {
   s_window = create_main_window();
 }
 
+static void request_state_callback(RequestState state, AppMessageResult reason) {
+  // TODO: implement this method on the other elements.
+  // For now it's implicit that only the ConnectionStatusComponent shows the
+  // request state, and only the GraphElement contains that component.
+  if (s_graph_element != NULL) {
+    graph_element_show_request_state(s_graph_element, state, reason);
+  }
+}
+
 static void init(void) {
   init_prefs();
-  init_comm(data_callback, prefs_callback);
+  init_comm(data_callback, prefs_callback, request_state_callback);
   s_window = create_main_window();
 }
 
