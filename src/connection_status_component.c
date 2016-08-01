@@ -72,7 +72,9 @@ static char* staleness_text(int staleness_seconds) {
   static char buf[8];
   int minutes = ((float)staleness_seconds / 60.0f) + 0.5f;
   int hours = minutes / 60;
-  if (minutes < 60) {
+  if (minutes == 0) {
+    strcpy(buf, "");
+  } else if (minutes < 60) {
     snprintf(buf, sizeof(buf), "%d", minutes);
   } else if (hours < 10 && minutes % 60 > 0) {
     snprintf(buf, sizeof(buf), "%dh%d", hours, minutes - 60 * hours);

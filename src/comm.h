@@ -9,6 +9,7 @@
 // There are many failure modes...
 #define INITIAL_TIMEOUT 1000
 #define DEFAULT_TIMEOUT (20*1000)
+#define MISSING_INITIAL_DATA_ALERT (5*1000)
 #define TIMEOUT_RETRY_DELAY (20*1000)
 #define NO_BLUETOOTH_RETRY_DELAY (60*1000)
 #define OUT_RETRY_DELAY (20*1000)

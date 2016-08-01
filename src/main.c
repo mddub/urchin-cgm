@@ -7,6 +7,7 @@
 #include "layout.h"
 #include "graph_element.h"
 #include "preferences.h"
+#include "staleness.h"
 #include "status_bar_element.h"
 #include "sidebar_element.h"
 #include "time_element.h"
@@ -98,6 +99,8 @@ static Window *create_main_window() {
 }
 
 static void data_callback(DataMessage *data) {
+  staleness_on_data_received(data->recency);
+
   if (s_time_element != NULL) {
     time_element_update(s_time_element, data);
   }
@@ -124,6 +127,8 @@ static void prefs_callback(DictionaryIterator *received) {
 }
 
 static void request_state_callback(RequestState state, AppMessageResult reason) {
+  staleness_on_request_state_changed(state);
+
   // TODO: implement this method on the other elements.
   // For now it's implicit that only the ConnectionStatusComponent shows the
   // request state, and only the GraphElement contains that component.
@@ -134,13 +139,14 @@ static void request_state_callback(RequestState state, AppMessageResult reason) 
 
 static void init(void) {
   init_prefs();
-  init_comm(data_callback, prefs_callback, request_state_callback);
+  init_staleness();
   s_window = create_main_window();
+  init_comm(data_callback, prefs_callback, request_state_callback);
 }
 
 static void deinit(void) {
-  window_destroy(s_window);
   deinit_comm();
+  window_destroy(s_window);
   deinit_prefs();
 }
 

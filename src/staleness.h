@@ -1,6 +1,6 @@
 #pragma once
 
-#include <pebble.h>
+#include "comm.h"
 
 enum {
   CONNECTION_ISSUE_NONE,
@@ -11,16 +11,11 @@ enum {
 
 typedef struct ConnectionIssue {
   unsigned int reason:2;
-  int staleness;
+  uint32_t staleness;
 } ConnectionIssue;
 
-bool ever_had_phone_contact();
-bool ever_received_data();
-int phone_to_pebble_staleness();
-int web_to_phone_staleness();
-int rig_to_web_staleness();
-int total_data_staleness();
-int graph_staleness_padding();
+uint32_t graph_staleness_padding();
 ConnectionIssue connection_issue();
-void staleness_update_message_received(time_t received_at);
-void staleness_update_data_received(time_t received_at, int32_t recency);
+void init_staleness();
+void staleness_on_request_state_changed(RequestState state);
+void staleness_on_data_received(int32_t recency);
