@@ -62,7 +62,7 @@ def include_constants_for_config_page(ctx):
 class concat_and_invoke_js(Task):
     def run(self):
         constants_json_str = override_constants_str_for_env_maybe(self.inputs[0].read())
-        main_call = "main({});".format(constants_json_str)
+        main_call = "main(Pebble, {});".format(constants_json_str)
 
         all_js = "\n".join([node.read() for node in self.inputs[1:]])
         self.outputs[0].write(all_js + main_call)

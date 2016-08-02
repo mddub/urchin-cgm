@@ -1,8 +1,7 @@
 /* jshint browser: true */
-/* global console, Pebble, Data, Format */
-/* exported main */
+/* global console, Data, Format, module */
 
-function main(c) {
+function main(Pebble, c) {
 
   var data = Data(c);
   var format = Format(c);
@@ -192,4 +191,8 @@ function main(c) {
     requestAndSendData();
   });
 
+}
+
+if (typeof(module) !== 'undefined') {
+  module.exports = main;
 }
