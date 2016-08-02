@@ -1,9 +1,26 @@
 machine:
   node:
     version: 0.12.0
+  environment:
+    PEBBLE_TOOL: 4.3
+    PEBBLE_SDK: 3.7
+
 dependencies:
+  pre:
+    - . test/ensure-pebble-test-environment.sh
   override:
     - cd test/js; npm install
+  cache_directories:
+    - ~/.pebble-sdk
+    - ~/pebble-dev
+    - ~/imagemagick
+
 test:
+  pre:
+    - mkdir -p $CIRCLE_TEST_REPORTS/screenshots
   override:
     - cd test/js; npm test
+    - . ~/pebble-dev/path.sh; pebble build
+    - . ~/pebble-dev/path.sh; . test/do_screenshots.sh --junitxml=$CIRCLE_TEST_REPORTS/screenshots/junit.xml
+  post:
+    - cp -r test/output $CIRCLE_ARTIFACTS/output
