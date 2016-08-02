@@ -1,8 +1,7 @@
 /* jshint browser: true */
-/* global console, Pebble, Data, Format */
-/* exported main */
+/* global console, Data, Format, module */
 
-function main(c) {
+function main(Pebble, c) {
 
   var data = Data(c);
   var format = Format(c);
@@ -26,7 +25,9 @@ function main(c) {
 
   function sendMessage(data) {
     console.log('sending ' + JSON.stringify(data));
-    Pebble.sendAppMessage(data);
+    Pebble.sendAppMessage(data, function() {}, function(e) {
+      console.log('Message failed: ' + JSON.stringify(e));
+    });
   }
 
   function requestAndSendData() {
@@ -47,7 +48,7 @@ function main(c) {
           lastSgv: format.lastSgv(sgvs),
           trend: format.lastTrendNumber(sgvs),
           delta: format.lastDelta(ys),
-          statusText: statusText,
+          statusText: statusText.substr(0, 255),
           graphExtra: graphExtra,
         });
       } catch (e) {
@@ -181,7 +182,8 @@ function main(c) {
       }
     });
 
-    Pebble.addEventListener('appmessage', function() {
+    Pebble.addEventListener('appmessage', function(e) {
+      console.log('Received message from watch: ' + JSON.stringify(e.payload));
       requestAndSendData();
     });
 
@@ -189,4 +191,8 @@ function main(c) {
     requestAndSendData();
   });
 
+}
+
+if (typeof(module) !== 'undefined') {
+  module.exports = main;
 }

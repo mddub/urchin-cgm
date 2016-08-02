@@ -9,12 +9,30 @@
 // There are many failure modes...
 #define INITIAL_TIMEOUT 1000
 #define DEFAULT_TIMEOUT (20*1000)
-#define TIMEOUT_RETRY_DELAY (10*1000)
+#define MISSING_INITIAL_DATA_ALERT (5*1000)
+#define TIMEOUT_RETRY_DELAY (20*1000)
+#define NO_BLUETOOTH_RETRY_DELAY (60*1000)
 #define OUT_RETRY_DELAY (20*1000)
 #define IN_RETRY_DELAY 100
 #define LATE_DATA_UPDATE_FREQUENCY (60*1000)
 #define ERROR_RETRY_DELAY (60*1000)
 #define BAD_APP_MESSAGE_RETRY_DELAY (60*1000)
 
-void init_comm(void (*callback_for_data)(DataMessage *data), void (*callback_for_prefs)(DictionaryIterator *received));
+typedef enum {
+  REQUEST_STATE_WAITING,
+  REQUEST_STATE_SUCCESS,
+  REQUEST_STATE_FETCH_ERROR,
+  REQUEST_STATE_BAD_APP_MESSAGE,
+  REQUEST_STATE_TIMED_OUT,
+  REQUEST_STATE_NO_BLUETOOTH,
+  REQUEST_STATE_OUT_FAILED,
+  REQUEST_STATE_IN_DROPPED,
+} RequestState;
+
+void init_comm(
+  void (*callback_for_data)(DataMessage *data),
+  void (*callback_for_prefs)(DictionaryIterator *received),
+  void (*callback_for_request_state)(RequestState state, AppMessageResult reason)
+);
 void deinit_comm();
+bool comm_is_update_in_progress();

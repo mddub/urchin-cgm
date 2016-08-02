@@ -91,6 +91,11 @@
       },
       {
         "type": "pbi",
+        "name": "CONN_REFRESHING",
+        "file": "images/conn_refreshing.png"
+      },
+      {
+        "type": "pbi",
         "name": "BATTERY_10",
         "file": "images/battery_10.png"
       },

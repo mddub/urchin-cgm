@@ -566,13 +566,26 @@ var Data = function(c) {
     }
   };
 
-  function getUsingCache(baseUrl, cache, dateKey) {
+  function getUsingCache(baseUrl, cache, dateKey, keysToKeep) {
     var url = baseUrl;
     if (cache.entries.length) {
       url += '&find[' + dateKey + '][$gt]=' + encodeURIComponent(cache.entries[0][dateKey]);
     }
     return d.getJSON(url).then(function(newEntries) {
-      return cache.update(newEntries);
+      var toCache;
+      if (keysToKeep !== undefined) {
+        toCache = newEntries.map(function(entry) {
+          return keysToKeep.reduce(function(acc, key) {
+            if (entry[key] !== undefined) {
+              acc[key] = entry[key];
+            }
+            return acc;
+          }, {});
+        });
+      } else {
+        toCache = newEntries;
+      }
+      return cache.update(toCache);
     });
   }
 
@@ -580,7 +593,8 @@ var Data = function(c) {
     return getUsingCache(
       config.nightscout_url + '/api/v1/entries/sgv.json?count=' + MAX_SGVS,
       sgvCache,
-      'date'
+      'date',
+      ['date', 'sgv', 'trend', 'direction', 'filtered', 'unfiltered', 'noise']
     );
   });
 
@@ -588,7 +602,8 @@ var Data = function(c) {
     return getUsingCache(
       config.nightscout_url + '/api/v1/treatments.json?find[eventType]=Temp+Basal&count=' + MAX_TEMP_BASALS,
       tempBasalCache,
-      'created_at'
+      'created_at',
+      ['created_at', 'duration', 'absolute', 'percent']
     );
   });
 
@@ -612,7 +627,8 @@ var Data = function(c) {
     return getUsingCache(
       config.nightscout_url + '/api/v1/treatments.json?find[insulin][$exists]=true&count=' + MAX_BOLUSES,
       bolusCache,
-      'created_at'
+      'created_at',
+      ['created_at', 'insulin']
     );
   });
 

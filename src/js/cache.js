@@ -24,11 +24,12 @@ Cache.prototype.persist = function() {
 };
 
 Cache.prototype.update = function(newEntries) {
-  this.entries = newEntries.concat(this.entries).slice(0, this.maxEntries);
+  Array.prototype.unshift.apply(this.entries, newEntries);
+  while (this.entries.length > this.maxEntries) {
+    this.entries.pop();
+  }
   this.persist();
-
-  // Deep copy so the cache can't be mutated
-  return JSON.parse(JSON.stringify(this.entries));
+  return this.entries;
 };
 
 Cache.prototype.clear = function() {
