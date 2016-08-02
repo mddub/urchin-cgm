@@ -72,13 +72,13 @@ ConnectionIssue connection_issue() {
         .reason = CONNECTION_ISSUE_RIG,
         .staleness = rig_to_web_staleness(),
       };
-    } else {
-      return (ConnectionIssue) {
-        .reason = CONNECTION_ISSUE_NONE,
-        .staleness = 0,
-      };
     }
   }
+
+  return (ConnectionIssue) {
+    .reason = CONNECTION_ISSUE_NONE,
+    .staleness = 0,
+  };
 }
 
 void init_staleness() {
