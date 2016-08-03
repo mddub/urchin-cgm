@@ -124,7 +124,7 @@ class ScreenshotTest(object):
         ensure_empty_dir(cls.out_dir())
         os.mkdir(os.path.join(cls.out_dir(), 'img'))
         os.mkdir(os.path.join(cls.out_dir(), 'diff'))
-        ScreenshotTest.summary_file = SummaryFile(cls.summary_filename())
+        ScreenshotTest.summary_file = SummaryFile(cls.summary_filename(), BASE_CONFIG)
         ScreenshotTest._loaded_environment = True
 
     def test_screenshot(self):
@@ -156,8 +156,9 @@ class ScreenshotTest(object):
 
 class SummaryFile(object):
     """Generate summary file with screenshots, in a very janky way for now."""
-    def __init__(self, out_file):
+    def __init__(self, out_file, base_config):
         self.out_file = out_file
+        self.base_config = base_config
         self.fails = ''
         self.passes = ''
 
@@ -184,6 +185,12 @@ class SummaryFile(object):
                 {passes}
               </table>
             """.format(fails=self.fails, passes=self.passes))
+
+            f.write("""
+            <strong>Default config</strong> (each test's config is merged into this):
+            <br>
+            <code>{}</code>
+            """.format(json.dumps(self.base_config)))
 
     def add_test_result(self, test_instance, passed):
         result = """
