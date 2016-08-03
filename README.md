@@ -111,56 +111,62 @@ Contributions are welcome in the form of bugs and pull requests. To report a bug
 
 ## Testing
 
-Since this software displays real-time health data, it is important to be able to verify that it works as expected. This project includes two tools to aid testing: a mock Nightscout server and automated screenshot testing. There is also a suite of JavaScript unit tests.
+Since this software displays real-time health data, it is important to be able to verify that it works as expected.
 
-To install testing dependencies, use `pip`:
-```
-pip install -r requirements.txt
-```
+The most effective method of integration testing I've found is to [compare screenshots][screenshots-artifact]. This relies on [ImageMagick] to compute diffs, plus a bit of [magic][emu-app-config-magic] to send configuration to the Pebble emulator. Screenshot tests and JavaScript unit tests are run automatically by CircleCI.
 
-Screenshot testing has an additional dependency on [ImageMagick] to compute visual diffs.
+* **Running screenshot tests locally**
 
-* **Mock Nightscout server**
+  Install [ImageMagick], then use `pip` to install Python testing dependencies:
+  ```
+  pip install -r requirements.txt --user
+  ```
 
-  The `test/` directory includes a server which uses the [Flask] framework. To run it:
+  Run the tests:
+  ```
+  . test/do_screenshots.sh
+  ```
+
+* **Running an individual screenshot test**
+  ```
+  . test/do_screenshots.sh -k TestName
+  ```
+
+* **Using the mock Nightscout server**
+
+  Start the server:
   ```
   MOCK_SERVER_PORT=5555 python test/server.py
   ```
 
-  Then open the configuration page to set your Nightscout host to `http://localhost:5555`:
+  Build the watchface as usual:
   ```
-  pebble emu-app-config
-  # ...make configuration changes in web browser...
+  pebble clean && pebble build && pebble install --emulator aplite && pebble logs
   ```
 
-  To set the data that will be returned by the `sgv.json` endpoint:
+  Use an editor to save mock data, send it to the server, verify it:
   ```
   vi sgv-data.json
   # ...edit mock data...
+
+  # POST it for the server to store
   curl -d @sgv-data.json http://localhost:5555/set-sgv
-  ```
 
-  Verify:
-  ```
+  # Verify:
   curl http://localhost:5555/api/v1/entries/sgv.json
+
+  # ("sgv" can be sgv, entries, treatments, devicestatus, or profile)
   ```
 
-* **Automated screenshot testing**
-
-  Writing integration tests for Pebble is not simple. The best method I have found is to take screenshots. Each test case provides watchface configuration and SGV data to the mock server, triggers the emulator to open a configuration page hosted on the mock server, and [does magic][emu-app-config-magic] to pass the stored configuration back to the emulator. By design, receiving new configuration causes the watchface to request new data from the mock server. A screenshot can then be saved for that combination of configuration and data.
-
-  To run tests:
+  Use the browser to configure the watchface:
   ```
-  bash test/do_screenshots.sh
+  # Make sure you set the Nightscout host to "http://localhost:5555"
+  pebble emu-app-config --emulator aplite
   ```
 
-  This will build the watchface, run it in the emulator, take a screenshot for each test, and generate an HTML file with the results. It depends on [ImageMagick] to diff the expected and observed screenshots.
+* **Running JavaScript unit tests locally**
 
-  To add a new test case, follow the examples in `test/test_screenshots.py` and add a new "passing" screenshot to `test/gold/`.
-
-* **JavaScript unit tests**
-
-  There is a suite of [JavaScript unit tests][js-unit-tests] to verify the transformation of Nightscout data in PebbleKit JS. These are run with [Node] + [Mocha].
+  These require [Node]. See the [Mocha] and [Expect] docs.
 
   ```
   cd test/js
@@ -187,6 +193,7 @@ This project is intended for educational and informational purposes only. It is 
 [build-env-development]: https://github.com/mddub/urchin-cgm/blob/ede29c/wscript#L17
 [care-portal]: http://www.nightscout.info/wiki/welcome/website-features/cgm-remote-monitor-care-portal
 [emu-app-config-magic]: https://github.com/mddub/urchin-cgm/blob/c46e1f/test/util.py#L36-51
+[Expect]: https://github.com/Automattic/expect.js
 [file-issue]: https://github.com/mddub/urchin-cgm/issues
 [Flask]: http://flask.pocoo.org/
 [ImageMagick]: http://www.imagemagick.org/
@@ -200,4 +207,5 @@ This project is intended for educational and informational purposes only. It is 
 [Pebble SDK Tool]: https://developer.getpebble.com/sdk/
 [pebble-care-portal]: https://apps.getpebble.com/en_US/application/568fb97705f633b362000045
 [raw-dexcom-readings]: http://www.nightscout.info/wiki/labs/interpreting-raw-dexcom-data
+[screenshots-artifact]: https://circleci.com/api/v1/project/mddub/urchin-cgm/latest/artifacts/0/$CIRCLE_ARTIFACTS/output/screenshots.html
 [Syntastic]: https://github.com/scrooloose/syntastic
