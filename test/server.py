@@ -4,12 +4,16 @@ import urllib
 import requests
 from flask import Flask, request
 from werkzeug.contrib.cache import SimpleCache
+from werkzeug.exceptions import NotFound
 
 port = int(os.environ['MOCK_SERVER_PORT'])
 
-cache = SimpleCache()
+COLLECTIONS = ['entries', 'treatments', 'profile', 'devicestatus']
+
+cache = SimpleCache(default_timeout=999999)
 cache.set('config', '{}')
-cache.set('sgv', '[]')
+for collection in COLLECTIONS:
+    cache.set(collection, '[]')
 
 app = Flask(__name__)
 
@@ -35,29 +39,28 @@ def set_config():
     cache.set('config', _get_post_data(request))
     return ''
 
+@app.route('/api/v1/<collection>.json')
+def get_collection(collection):
+    if collection in COLLECTIONS:
+        return cache.get(collection)
+    else:
+        raise NotFound
+
+@app.route('/set-<collection>', methods=['post'])
+def set_collection(collection):
+    if collection in COLLECTIONS:
+        cache.set(collection, _get_post_data(request))
+        return ''
+    else:
+        raise NotFound
+
 @app.route('/api/v1/entries/sgv.json')
-def sgv():
-    return cache.get('sgv')
+def get_sgv():
+    return get_collection('entries')
 
 @app.route('/set-sgv', methods=['post'])
 def set_sgv():
-    cache.set('sgv', _get_post_data(request))
-    return ''
-
-@app.route('/api/v1/devicestatus.json')
-def devicestatus():
-    return '[]'
-
-@app.route('/api/v1/treatments.json')
-def treatments():
-    return '[]'
-
-@app.route('/api/v1/profile.json')
-def profile():
-    return '[]'
+    return set_collection('entries')
 
 if __name__ == "__main__":
-    app.run(
-        debug=True,
-        port=port,
-    )
+    app.run(port=port)

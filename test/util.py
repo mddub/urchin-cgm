@@ -15,6 +15,11 @@ CONSTANTS = json.loads(
 )
 BASE_CONFIG = CONSTANTS['DEFAULT_CONFIG']
 
+PEBBLE_SETUP_SLEEP = 8
+PER_TEST_SLEEP = 2
+if os.environ.get('CIRCLECI'):
+    PER_TEST_SLEEP = 6
+
 def set_config(config):
     _post_mock_server('/set-config', config)
 
@@ -31,7 +36,7 @@ def pebble_install_and_run():
     _call('pebble build')
     _call('pebble install --emulator {}'.format(PLATFORM))
     # Give the watchface time to show up
-    time.sleep(5)
+    time.sleep(PEBBLE_SETUP_SLEEP)
 
 def pebble_set_config():
     """Tell Pebble emulator to open the config page and immediately set config.
@@ -84,6 +89,22 @@ class ScreenshotTest(object):
         return os.path.join(os.path.dirname(__file__), 'output')
 
     @classmethod
+    def summary_filename(cls):
+        return os.path.join(cls.out_dir(), 'screenshots.html')
+
+    def circleci_url(self):
+        if os.environ.get('CIRCLECI'):
+            return 'https://circleci.com/api/v1/project/{}/{}/{}/artifacts/{}/$CIRCLE_ARTIFACTS/{}'.format(
+                os.environ['CIRCLE_PROJECT_USERNAME'],
+                os.environ['CIRCLE_PROJECT_REPONAME'],
+                os.environ['CIRCLE_BUILD_NUM'],
+                os.environ['CIRCLE_NODE_INDEX'],
+                os.path.relpath(self.summary_filename(), os.path.dirname(__file__)),
+            )
+        else:
+            return None
+
+    @classmethod
     def test_filename(cls):
         return os.path.join(cls.out_dir(), 'img', cls.__name__ + '.png')
 
@@ -103,7 +124,7 @@ class ScreenshotTest(object):
         ensure_empty_dir(cls.out_dir())
         os.mkdir(os.path.join(cls.out_dir(), 'img'))
         os.mkdir(os.path.join(cls.out_dir(), 'diff'))
-        ScreenshotTest.summary_file = SummaryFile(os.path.join(cls.out_dir(), 'screenshots.html'))
+        ScreenshotTest.summary_file = SummaryFile(cls.summary_filename(), BASE_CONFIG)
         ScreenshotTest._loaded_environment = True
 
     def test_screenshot(self):
@@ -118,24 +139,26 @@ class ScreenshotTest(object):
 
         # Setting new config causes the watchface to re-render and request data
         pebble_set_config()
-        time.sleep(2)
+        time.sleep(PER_TEST_SLEEP)
 
         pebble_screenshot(self.test_filename())
         try:
             os.stat(self.gold_filename())
             images_match = image_diff(self.test_filename(), self.gold_filename(), self.diff_filename())
-            reason = 'Screenshot does not match expected'
+            reason = 'Screenshot does not match expected: "{}"'.format(self.__class__.__doc__)
+            reason += '\n' + self.circleci_url() if self.circleci_url() else ''
         except OSError:
             images_match = False
-            reason = 'Missing gold image'
+            reason = 'Test is missing "gold" image: {}'.format(self.gold_filename())
         ScreenshotTest.summary_file.add_test_result(self, images_match)
         assert images_match, reason
 
 
 class SummaryFile(object):
     """Generate summary file with screenshots, in a very janky way for now."""
-    def __init__(self, out_file):
+    def __init__(self, out_file, base_config):
         self.out_file = out_file
+        self.base_config = base_config
         self.fails = ''
         self.passes = ''
 
@@ -162,6 +185,12 @@ class SummaryFile(object):
                 {passes}
               </table>
             """.format(fails=self.fails, passes=self.passes))
+
+            f.write("""
+            <strong>Default config</strong> (each test's config is merged into this):
+            <br>
+            <code>{}</code>
+            """.format(json.dumps(self.base_config)))
 
     def add_test_result(self, test_instance, passed):
         result = """
