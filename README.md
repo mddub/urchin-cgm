@@ -70,10 +70,10 @@ Contributions are welcome in the form of bugs and pull requests. To report a bug
 
 * Install the [Pebble SDK Tool].
 
-* Install and activate Pebble SDK 3.7. (For now, it is necessary to build the app with this older version of the SDK, since it is the latest version which can build pbw files for Pebble Time and Steel running firmware 2.9.1. In the near future, the app will be migrated to use the latest SDK, which will require users of those Pebbles to upgrade their firmware.)
+* Install and activate the Pebble SDK. As of this writing, the app is built with SDK 3.14, but later versions should work, too.
   ```
-  pebble sdk install 3.7
-  pebble sdk activate 3.7
+  pebble sdk install 3.14
+  pebble sdk activate 3.14
   ```
 
 * Build and run the watchface with a command like:
@@ -103,7 +103,7 @@ Contributions are welcome in the form of bugs and pull requests. To report a bug
 * **Syntax checking:** If you use Vim, I highly recommend using [Syntastic] to display syntax errors. On my OS X system running Pebble Tool v4.1.1, these lines make Syntastic aware of Pebble's header files and suppress warnings generated within those files:
 
   ```
-  let g:syntastic_c_include_dirs = ['/Users/<user>/Library/Application Support/Pebble SDK/SDKs/3.7/sdk-core/pebble/aplite/include', 'build/aplite']
+  let g:syntastic_c_include_dirs = ['/Users/<user>/Library/Application Support/Pebble SDK/SDKs/current/sdk-core/pebble/aplite/include', 'build/aplite']
   let g:syntastic_c_remove_include_errors = 1
   ```
 
