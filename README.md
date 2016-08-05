@@ -113,7 +113,7 @@ Contributions are welcome in the form of bugs and pull requests. To report a bug
 
 Since this software displays real-time health data, it is important to be able to verify that it works as expected.
 
-The most effective method of integration testing I've found is to [compare screenshots][screenshots-artifact]. This relies on [ImageMagick] to compute diffs, plus a bit of [magic][emu-app-config-magic] to send configuration to the Pebble emulator. Screenshot tests and JavaScript unit tests are run automatically by CircleCI.
+The most effective method of integration testing I've found is to [compare screenshots][screenshots-artifact]. This relies on [ImageMagick] to compute diffs. Screenshot tests and JavaScript unit tests are run automatically by CircleCI.
 
 * **Running screenshot tests locally**
 
@@ -192,7 +192,6 @@ This project is intended for educational and informational purposes only. It is 
 
 [build-env-development]: https://github.com/mddub/urchin-cgm/blob/ede29c/wscript#L17
 [care-portal]: http://www.nightscout.info/wiki/welcome/website-features/cgm-remote-monitor-care-portal
-[emu-app-config-magic]: https://github.com/mddub/urchin-cgm/blob/c46e1f/test/util.py#L36-51
 [Expect]: https://github.com/Automattic/expect.js
 [file-issue]: https://github.com/mddub/urchin-cgm/issues
 [Flask]: http://flask.pocoo.org/

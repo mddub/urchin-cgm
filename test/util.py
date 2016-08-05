@@ -2,9 +2,15 @@ import json
 import os
 import subprocess
 import time
+import urllib2
 from datetime import datetime
 
 import requests
+from libpebble2.communication.transports.websocket import MessageTargetPhone
+from libpebble2.communication.transports.websocket.protocol import AppConfigResponse
+from libpebble2.communication.transports.websocket.protocol import AppConfigSetup
+from libpebble2.communication.transports.websocket.protocol import WebSocketPhonesimAppConfig
+from pebble_tool.sdk.emulator import ManagedEmulatorTransport
 
 PLATFORMS = ('aplite', 'basalt')
 PORT = os.environ['MOCK_SERVER_PORT']
@@ -14,9 +20,6 @@ CONSTANTS = json.loads(
     open(os.path.join(os.path.dirname(__file__), '../src/js/constants.json')).read()
 )
 BASE_CONFIG = CONSTANTS['DEFAULT_CONFIG']
-
-def set_config(config):
-    _post_mock_server('/set-config', config)
 
 def set_sgvs(sgvs):
     _post_mock_server('/set-sgv', sgvs)
@@ -34,30 +37,22 @@ def pebble_install_and_run(platforms):
     # Give the watchface time to show up
     time.sleep(10)
 
-def pebble_set_config(platform):
-    """Tell Pebble emulator to open the config page and immediately set config.
-
-    `pebble emu-app-config` first waits for `webbrowser.open_new` to complete,
-    then starts the server which handles the URL passed in the return_to param.
-    https://github.com/pebble/pebble-tool/blob/e428a0/pebble_tool/util/browser.py#L24
-
-    But specifying a command-line browser for webbrowser via BROWSER makes it a
-    blocking (non-"background") subprocess, so the server it's attempting to hit
-    hasn't started yet.
-    https://hg.python.org/cpython/file/5661480f7763/Lib/webbrowser.py#l180
-
-    Solution: wrap `curl` in a script which briefly sleeps and runs it in the
-    background, and use that as the headless browser to request the config page.
-    Nothing crazy about that.
-    """
-    _call(
-      'pebble emu-app-config --emulator {}'.format(platform),
-      env=dict(
-        os.environ,
-        BROWSER=os.path.join(os.path.dirname(__file__), 'background_curl.sh'),
-        SLEEP_TIME='1.5',
-      )
-    )
+def set_config(config, platforms):
+    for platform in platforms:
+        emu = ManagedEmulatorTransport(platform)
+        emu.connect()
+        time.sleep(0.5)
+        emu.send_packet(WebSocketPhonesimAppConfig(
+            config=AppConfigSetup()),
+            target=MessageTargetPhone()
+        )
+        time.sleep(0.5)
+        emu.send_packet(WebSocketPhonesimAppConfig(
+            config=AppConfigResponse(data=urllib2.quote(json.dumps(config)))),
+            target=MessageTargetPhone()
+        )
+    # Wait for the watchface to re-render and request data
+    time.sleep(0.5)
 
 def pebble_screenshot(filename, platform):
     _call('pebble screenshot --emulator {} --no-open {}'.format(platform, filename))
@@ -135,14 +130,11 @@ class ScreenshotTest(object):
             self.sgvs = []
 
         self.ensure_environment()
-        set_config(dict(BASE_CONFIG, nightscout_url=MOCK_HOST, **self.config))
         set_sgvs(self.sgvs)
+        set_config(dict(BASE_CONFIG, nightscout_url=MOCK_HOST, **self.config), PLATFORMS)
 
         fails = []
         for platform in PLATFORMS:
-            # Setting new config causes the watchface to re-render and request data
-            pebble_set_config(platform)
-
             pebble_screenshot(self.test_filename(platform), platform)
 
             try:

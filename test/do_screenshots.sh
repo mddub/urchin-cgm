@@ -22,7 +22,7 @@ fi
 pebble kill
 
 # Kill Flask server
-pkill -P $PID
+kill -9 $PID
 
 unset BUILD_ENV
 unset MOCK_SERVER_PORT
