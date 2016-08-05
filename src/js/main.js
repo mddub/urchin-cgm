@@ -25,8 +25,15 @@ function main(Pebble, c) {
 
   function sendMessage(data) {
     console.log('sending ' + JSON.stringify(data));
-    Pebble.sendAppMessage(data, function() {}, function(e) {
-      console.log('Message failed: ' + JSON.stringify(e));
+    return new Promise(function(resolve, reject) {
+      Pebble.sendAppMessage(
+        data,
+        resolve,
+        function(e) {
+          console.log('Message failed: ' + JSON.stringify(e));
+          reject(e);
+        }
+      );
     });
   }
 
@@ -99,7 +106,7 @@ function main(Pebble, c) {
   }
 
   function sendPreferences() {
-    sendMessage({
+    return sendMessage({
       msgType: c.MSG_TYPE_PREFERENCES,
       mmol: config.mmol ? 1 : 0,
       topOfGraph: config.topOfGraph,
@@ -177,8 +184,7 @@ function main(Pebble, c) {
         config = mergeConfig(newConfig, c.DEFAULT_CONFIG);
         localStorage.setItem(c.LOCAL_STORAGE_KEY_CONFIG, JSON.stringify(config));
         console.log('Preferences updated: ' + JSON.stringify(config));
-        sendPreferences();
-        requestAndSendData();
+        sendPreferences().then(requestAndSendData);
       }
     });
 
