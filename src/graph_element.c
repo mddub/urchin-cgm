@@ -34,20 +34,9 @@ static int bg_to_y_for_point(int height, int bg) {
 }
 
 static void fill_rect_gray(GContext *ctx, GRect bounds, GColor previous_color) {
-#ifdef PBL_COLOR
   graphics_context_set_fill_color(ctx, GColorLightGray);
   graphics_fill_rect(ctx, bounds, 0, GCornerNone);
   graphics_context_set_fill_color(ctx, previous_color);
-#else
-  // XXX: remove this after migrating to SDK 3.8+
-  for(uint8_t x = bounds.origin.x; x < bounds.origin.x + bounds.size.w; x++) {
-    for(uint8_t y = bounds.origin.y; y < bounds.origin.y + bounds.size.h; y++) {
-      if ((x + y) % 2 == 0) {
-        graphics_draw_pixel(ctx, GPoint(x, y));
-      }
-    }
-  }
-#endif
 }
 
 static uint8_t decode_bits(uint8_t value, uint8_t offset, uint8_t bits) {
