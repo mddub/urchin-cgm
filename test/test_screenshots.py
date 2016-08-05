@@ -107,19 +107,25 @@ class TestSGVsAtBoundsAndGridlines(ScreenshotTest):
 
 class TestStaleServerData(ScreenshotTest):
     """Test that when server data is stale, an icon appears."""
-    sgvs = default_entries('SingleDown')[7:]
+    @property
+    def sgvs(self):
+        return default_entries('SingleDown')[7:]
 
 
 class TestNotRecentButNotYetStaleSidebar(ScreenshotTest):
     """Test that trend and delta are not shown in the sidebar when data is not recent."""
-    sgvs = default_entries('SingleDown')[2:]
     config = {'layout': 'a'}
+    @property
+    def sgvs(self):
+        return default_entries('SingleDown')[2:]
 
 
 class TestNotRecentButNotYetStaleBGRow(ScreenshotTest):
     """Test that trend and delta are not shown in the BG row when data is not recent."""
-    sgvs = default_entries('SingleDown')[2:]
     config = {'layout': 'c'}
+    @property
+    def sgvs(self):
+        return default_entries('SingleDown')[2:]
 
 
 class TestErrorCodes(ScreenshotTest):

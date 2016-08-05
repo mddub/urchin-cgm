@@ -10,7 +10,6 @@ CONSTANTS_FILE = 'src/js/constants.json'
 
 ENV_CONSTANTS_OVERRIDES = {
     'test': {
-        'CONFIG_URL': 'http://localhost:{}/auto-config'.format(os.environ.get('MOCK_SERVER_PORT')),
         # Don't clobber config in localStorage with test config
         'LOCAL_STORAGE_KEY_CONFIG': 'test_config',
     },
