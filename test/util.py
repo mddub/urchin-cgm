@@ -6,7 +6,7 @@ from datetime import datetime
 
 import requests
 
-PLATFORM = 'aplite'
+PLATFORMS = ('aplite', 'basalt')
 PORT = os.environ['MOCK_SERVER_PORT']
 MOCK_HOST = 'http://localhost:{}'.format(PORT)
 
@@ -14,9 +14,6 @@ CONSTANTS = json.loads(
     open(os.path.join(os.path.dirname(__file__), '../src/js/constants.json')).read()
 )
 BASE_CONFIG = CONSTANTS['DEFAULT_CONFIG']
-
-PEBBLE_SETUP_SLEEP = 8
-PER_TEST_SLEEP = 3
 
 def set_config(config):
     _post_mock_server('/set-config', config)
@@ -27,16 +24,17 @@ def set_sgvs(sgvs):
 def _post_mock_server(url, data):
     requests.post(MOCK_HOST + url, data=json.dumps(data))
 
-def pebble_install_and_run():
+def pebble_install_and_run(platforms):
     _call('pebble kill')
     _call('pebble clean')
     # TODO ensure this is called from the main project directory
     _call('pebble build')
-    _call('pebble install --emulator {}'.format(PLATFORM))
+    for platform in platforms:
+        _call('pebble install --emulator {}'.format(platform))
     # Give the watchface time to show up
-    time.sleep(PEBBLE_SETUP_SLEEP)
+    time.sleep(10)
 
-def pebble_set_config():
+def pebble_set_config(platform):
     """Tell Pebble emulator to open the config page and immediately set config.
 
     `pebble emu-app-config` first waits for `webbrowser.open_new` to complete,
@@ -53,17 +51,16 @@ def pebble_set_config():
     Nothing crazy about that.
     """
     _call(
-      'pebble emu-app-config --emulator {}'.format(PLATFORM),
+      'pebble emu-app-config --emulator {}'.format(platform),
       env=dict(
         os.environ,
         BROWSER=os.path.join(os.path.dirname(__file__), 'background_curl.sh'),
         SLEEP_TIME='1.5',
       )
     )
-    time.sleep(PER_TEST_SLEEP)
 
-def pebble_screenshot(filename):
-    _call('pebble screenshot --emulator {} --no-open {}'.format(PLATFORM, filename))
+def pebble_screenshot(filename, platform):
+    _call('pebble screenshot --emulator {} --no-open {}'.format(platform, filename))
 
 def _call(command_str, **kwargs):
     print command_str
@@ -108,22 +105,23 @@ class ScreenshotTest(object):
             return None
 
     @classmethod
-    def test_filename(cls):
-        return os.path.join(cls.out_dir(), 'img', cls.__name__ + '.png')
+    def test_filename(cls, platform):
+        return os.path.join(cls.out_dir(), 'img', '{}-{}.png'.format(cls.__name__, platform))
 
     @classmethod
-    def gold_filename(cls):
-        return os.path.join(os.path.dirname(__file__), 'gold', cls.__name__ + '.png')
+    def gold_filename(cls, platform):
+        return os.path.join(os.path.dirname(__file__), 'gold', '{}-{}.png'.format(cls.__name__, platform))
 
     @classmethod
-    def diff_filename(cls):
-        return os.path.join(cls.out_dir(), 'diff', cls.__name__ + '.png')
+    def diff_filename(cls, platform):
+        return os.path.join(cls.out_dir(), 'diff', '{}-{}.png'.format(cls.__name__, platform))
+
 
     @classmethod
     def ensure_environment(cls):
         if hasattr(ScreenshotTest, '_loaded_environment'):
             return
-        pebble_install_and_run()
+        pebble_install_and_run(PLATFORMS)
         ensure_empty_dir(cls.out_dir())
         os.mkdir(os.path.join(cls.out_dir(), 'img'))
         os.mkdir(os.path.join(cls.out_dir(), 'diff'))
@@ -140,20 +138,28 @@ class ScreenshotTest(object):
         set_config(dict(BASE_CONFIG, nightscout_url=MOCK_HOST, **self.config))
         set_sgvs(self.sgvs)
 
-        # Setting new config causes the watchface to re-render and request data
-        pebble_set_config()
+        fails = []
+        for platform in PLATFORMS:
+            # Setting new config causes the watchface to re-render and request data
+            pebble_set_config(platform)
 
-        pebble_screenshot(self.test_filename())
-        try:
-            os.stat(self.gold_filename())
-            images_match = image_diff(self.test_filename(), self.gold_filename(), self.diff_filename())
-            reason = 'Screenshot does not match expected: "{}"'.format(self.__class__.__doc__)
-            reason += '\n' + self.circleci_url() if self.circleci_url() else ''
-        except OSError:
-            images_match = False
-            reason = 'Test is missing "gold" image: {}'.format(self.gold_filename())
-        ScreenshotTest.summary_file.add_test_result(self, images_match)
-        assert images_match, reason
+            pebble_screenshot(self.test_filename(platform), platform)
+
+            try:
+                os.stat(self.gold_filename(platform))
+            except OSError:
+                images_match = False
+                reason = 'Test is missing "gold" image: {}'.format(self.gold_filename(platform))
+            else:
+                images_match = image_diff(self.test_filename(platform), self.gold_filename(platform), self.diff_filename(platform))
+                reason = 'Screenshot does not match expected: "{}"'.format(self.__class__.__doc__)
+                reason += '\n' + self.circleci_url() if self.circleci_url() else ''
+
+            ScreenshotTest.summary_file.add_test_result(self, platform, images_match)
+            if not images_match:
+                fails.append((platform, reason))
+
+        assert fails == [], '\n'.join(['{}: {}'.format(p, reason) for p, reason in fails])
 
 
 class SummaryFile(object):
@@ -194,22 +200,23 @@ class SummaryFile(object):
             <code>{}</code>
             """.format(json.dumps(self.base_config)))
 
-    def add_test_result(self, test_instance, passed):
+    def add_test_result(self, test_instance, platform, passed):
         result = """
         <tr>
           <td><img src="{test_filename}" class="{klass}"></td>
           <td><img src="{diff_filename}"></td>
           <td>
-            <strong>{classname}</strong> {doc}
+            <strong>{classname} [{platform}]</strong> {doc}
             <code>{config}</code>
             <code>{sgvs}</code>
           </td>
         </tr>
         """.format(
-            test_filename=self.relative_path(test_instance.test_filename()),
+            test_filename=self.relative_path(test_instance.test_filename(platform)),
             klass=('pass' if passed else 'fail'),
-            diff_filename=self.relative_path(test_instance.diff_filename()),
+            diff_filename=self.relative_path(test_instance.diff_filename(platform)),
             classname=test_instance.__class__.__name__,
+            platform=platform,
             doc=test_instance.__class__.__doc__ or '',
             config=json.dumps(test_instance.config),
             sgvs=json.dumps(self.printed_sgvs(test_instance.sgvs))

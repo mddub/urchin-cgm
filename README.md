@@ -78,12 +78,12 @@ Contributions are welcome in the form of bugs and pull requests. To report a bug
 
 * Build and run the watchface with a command like:
   ```
-  pebble clean && pebble build && pebble install --emulator aplite && pebble logs
+  pebble clean && pebble build && pebble install --emulator basalt && pebble logs
   ```
 
 * The watchface will ask for settings from the "phone." Open the configuration page with this command and hit "save" in your browser (you'll need to do this only once):
   ```
-  pebble emu-app-config --emulator aplite
+  pebble emu-app-config --emulator basalt
   ```
 
 * At some point you'll want to install your revisions on your watch. Flip the "Enable Developer Connections" switch in the Pebble app on your phone, then:
@@ -96,8 +96,8 @@ Contributions are welcome in the form of bugs and pull requests. To report a bug
 * **Testing the configuration page**: If you make changes to the configuration page, you must build the watchface to point to your local copy of the page (`file:///...`). To do this, set `BUILD_ENV` to `development`. (More info [here][build-env-development].)
   ```
   BUILD_ENV=development pebble build
-  pebble install --emulator aplite
-  pebble emu-app-config --emulator aplite
+  pebble install --emulator basalt
+  pebble emu-app-config --emulator basalt
   ```
 
 * **Syntax checking:** If you use Vim, I highly recommend using [Syntastic] to display syntax errors. On my OS X system running Pebble Tool v4.1.1, these lines make Syntastic aware of Pebble's header files and suppress warnings generated within those files:
@@ -141,7 +141,7 @@ The most effective method of integration testing I've found is to [compare scree
 
   Build the watchface as usual:
   ```
-  pebble clean && pebble build && pebble install --emulator aplite && pebble logs
+  pebble clean && pebble build && pebble install --emulator basalt && pebble logs
   ```
 
   Use an editor to save mock data, send it to the server, verify it:
@@ -161,7 +161,7 @@ The most effective method of integration testing I've found is to [compare scree
   Use the browser to configure the watchface:
   ```
   # Make sure you set the Nightscout host to "http://localhost:5555"
-  pebble emu-app-config --emulator aplite
+  pebble emu-app-config --emulator basalt
   ```
 
 * **Running JavaScript unit tests locally**

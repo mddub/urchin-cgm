@@ -15,7 +15,7 @@ TEST_RESULT=$?
 
 if [ $CIRCLECI ] && [ $TEST_RESULT -ne 0 ]; then
   # Run it again in case tests are just flaky
-  py.test test/ $@
+  py.test test/ -v $@
   TEST_RESULT=$?
 fi
 
