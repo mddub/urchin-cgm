@@ -10,7 +10,7 @@
     "uuid": "ea361603-0373-4865-9824-8f52c65c6e07",
     "projectType": "native",
     "sdkVersion": "3",
-    "enableMultiJS": false,
+    "enableMultiJS": true,
     "targetPlatforms": [
       "aplite",
       "basalt"

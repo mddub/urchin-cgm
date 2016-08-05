@@ -37,6 +37,4 @@ Cache.prototype.clear = function() {
   this.persist();
 };
 
-if (typeof(module) !== 'undefined') {
-  module.exports = Cache;
-}
+module.exports = Cache;

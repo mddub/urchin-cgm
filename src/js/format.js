@@ -1,7 +1,7 @@
 /* jshint browser: true */
 /* global module */
 
-var Format = function(c) {
+var format = function(c) {
   var f = {};
 
   f.sgvArray = function(endTime, sgvs) {
@@ -172,6 +172,4 @@ var Format = function(c) {
   return f;
 };
 
-if (typeof(module) !== 'undefined') {
-  module.exports = Format;
-}
+module.exports = format;

@@ -1,7 +1,12 @@
 /* jshint browser: true */
-/* global console, module, Promise, Cache, debounce */
+/* global console, module, require */
 
-var Data = function(c) {
+require('./vendor/lie.polyfill');
+
+var Cache = require('./cache');
+var debounce = require('./debounce');
+
+var data = function(c) {
   var MAX_SGVS = c.SGV_FETCH_SECONDS / c.INTERVAL_SIZE_SECONDS + c.FETCH_EXTRA;
   var MAX_TEMP_BASALS = MAX_SGVS;
   var MAX_UPLOADER_BATTERIES = 1;
@@ -801,6 +806,4 @@ var Data = function(c) {
   return d;
 };
 
-if (typeof(module) !== 'undefined') {
-  module.exports = Data;
-}
+module.exports = data;
