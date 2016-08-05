@@ -16,9 +16,7 @@ CONSTANTS = json.loads(
 BASE_CONFIG = CONSTANTS['DEFAULT_CONFIG']
 
 PEBBLE_SETUP_SLEEP = 8
-PER_TEST_SLEEP = 2
-if os.environ.get('CIRCLECI'):
-    PER_TEST_SLEEP = 6
+PER_TEST_SLEEP = 3
 
 def set_config(config):
     _post_mock_server('/set-config', config)
@@ -56,8 +54,13 @@ def pebble_set_config():
     """
     _call(
       'pebble emu-app-config --emulator {}'.format(PLATFORM),
-      env=dict(os.environ, BROWSER=os.path.join(os.path.dirname(__file__), 'background_curl.sh'))
+      env=dict(
+        os.environ,
+        BROWSER=os.path.join(os.path.dirname(__file__), 'background_curl.sh'),
+        SLEEP_TIME='1.5',
+      )
     )
+    time.sleep(PER_TEST_SLEEP)
 
 def pebble_screenshot(filename):
     _call('pebble screenshot --emulator {} --no-open {}'.format(PLATFORM, filename))
@@ -139,7 +142,6 @@ class ScreenshotTest(object):
 
         # Setting new config causes the watchface to re-render and request data
         pebble_set_config()
-        time.sleep(PER_TEST_SLEEP)
 
         pebble_screenshot(self.test_filename())
         try:

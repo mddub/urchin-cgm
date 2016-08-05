@@ -3,7 +3,7 @@ machine:
     version: 0.12.0
   environment:
     PEBBLE_TOOL: 4.3
-    PEBBLE_SDK: 3.7
+    PEBBLE_SDK: 3.14
 
 dependencies:
   pre:

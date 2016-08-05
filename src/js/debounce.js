@@ -25,6 +25,4 @@ function debounce(fn) {
 
 debounce.MEMOIZE_PERIOD_MS = 1000;
 
-if (typeof(module) !== 'undefined') {
-  module.exports = debounce;
-}
+module.exports = debounce;

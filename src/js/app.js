@@ -1,10 +1,12 @@
 /* jshint browser: true */
-/* global console, Data, Format, module */
+/* global console, module, Pebble, require */
 
-function main(Pebble, c) {
+require('./vendor/lie.polyfill');
 
-  var data = Data(c);
-  var format = Format(c);
+function app(Pebble, c) {
+
+  var data = require('./data')(c);
+  var format = require('./format')(c);
   var config;
 
   function mergeConfig(config, defaults) {
@@ -199,6 +201,8 @@ function main(Pebble, c) {
 
 }
 
-if (typeof(module) !== 'undefined') {
-  module.exports = main;
+module.exports = app;
+
+if (typeof(Pebble) !== 'undefined') {
+  app(Pebble, require('./generated/constants.json'));
 }

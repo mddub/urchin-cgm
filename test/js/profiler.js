@@ -28,13 +28,6 @@
 
 require('v8-profiler');
 
-// XXX lots of overlap with test fixtures
-// TODO: upgrade to a later Pebble SDK with real `require`s and do proper
-// dependency injection
-global.Data = require('../../src/js/data');
-global.Format = require('../../src/js/format');
-global.Cache = require('../../src/js/cache');
-global.debounce = require('../../src/js/debounce');
 global.localStorage = require('./make_mock_local_storage.js')();
 global.XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
 
@@ -67,9 +60,9 @@ Pebble.sendAppMessage = function() {
   console.log('[' + new Date().toISOString() + ' SENT]\n');
 };
 
-var c = JSON.parse(require('fs').readFileSync('../../src/js/constants.json', 'utf8'));
-var main = require('../../src/js/main');
-main(Pebble, c);
+var c = require('../../src/js/constants.json');
+var app = require('../../src/js/app');
+app(Pebble, c);
 
 (function loop() {
   _messageHandler({payload: {}});

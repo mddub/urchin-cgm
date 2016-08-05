@@ -3,12 +3,11 @@
 "use strict";
 
 var expect = require('expect.js'),
-  fs = require('fs'),
   timekeeper = require('timekeeper');
 
 var Data = require('../../src/js/data.js');
 
-var defaultConstants = JSON.parse(fs.readFileSync('../../src/js/constants.json', 'utf8'));
+var defaultConstants = require('../../src/js/constants.json');
 var config = {};
 
 function mockAPI(data, urlToData) {
@@ -24,10 +23,6 @@ function mockAPI(data, urlToData) {
 }
 
 beforeEach(function() {
-  // XXX need browserify and real `require`s
-  global.Cache = require('../../src/js/cache.js');
-  global.debounce = require('../../src/js/debounce.js');
-
   global.localStorage = require('./make_mock_local_storage.js')();
 });
 

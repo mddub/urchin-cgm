@@ -10,7 +10,7 @@ python "$TEST_DIR/server.py" & PID=$!
 sleep 0.5
 
 # Run tests
-py.test test/ $@
+py.test test/ -v $@
 TEST_RESULT=$?
 
 if [ $CIRCLECI ] && [ $TEST_RESULT -ne 0 ]; then

@@ -2,12 +2,11 @@
 /* globals describe, it */
 "use strict";
 
-var expect = require('expect.js'),
-  fs = require('fs');
+var expect = require('expect.js');
 
 var Format = require('../../src/js/format.js');
 
-var constants = JSON.parse(fs.readFileSync('../../src/js/constants.json', 'utf8'));
+var constants = require('../../src/js/constants.json');
 
 describe('format', function() {
   var format = Format(constants);
