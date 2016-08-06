@@ -7,7 +7,7 @@
 #define CONTENT_SIZE 512
 
 // There are many failure modes...
-#define INITIAL_TIMEOUT 2000
+#define INITIAL_TIMEOUT_HALVED 2500
 #define DEFAULT_TIMEOUT (10*1000)
 #define MISSING_INITIAL_DATA_ALERT (5*1000)
 #define TIMEOUT_RETRY_DELAY (20*1000)

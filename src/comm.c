@@ -28,7 +28,7 @@ static void clear_timer(AppTimer **timer) {
 
 static uint32_t timeout_length() {
   // Start with extra short timeouts on launch to get data showing as soon as possible.
-  static uint32_t exponential_timeout = INITIAL_TIMEOUT;
+  static uint32_t exponential_timeout = INITIAL_TIMEOUT_HALVED;
 
   if (phone_contact) {
     return DEFAULT_TIMEOUT;
@@ -51,11 +51,7 @@ static void timeout_handler() {
       request_state_callback(REQUEST_STATE_TIMED_OUT, 0);
       schedule_update(TIMEOUT_RETRY_DELAY);
     } else {
-      // Requests time out more quickly immediately after load (before any phone
-      // contact), so wait a bit before announcing a timeout
-      if (!phone_contact && time(NULL) - app_start_time > MISSING_INITIAL_DATA_ALERT) {
-        request_state_callback(REQUEST_STATE_TIMED_OUT, 0);
-      }
+      request_state_callback(REQUEST_STATE_TIMED_OUT, 0);
       // If we haven't heard from the phone yet, retry immediately after timing out.
       schedule_update(0);
     }
