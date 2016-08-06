@@ -176,6 +176,8 @@ void connection_status_component_show_request_state(ConnectionStatusComponent *c
       case REQUEST_STATE_NO_BLUETOOTH:      strcpy(state_text, "No BT");          break;
       case REQUEST_STATE_OUT_FAILED:        strcpy(state_text, "Msg failed");     break;
       case REQUEST_STATE_IN_DROPPED:        strcpy(state_text, "Msg dropped");    break;
+      case REQUEST_STATE_BEGIN_FAILED:      strcpy(state_text, "Begin failed");   break;
+      case REQUEST_STATE_SEND_FAILED:       strcpy(state_text, "Send failed");    break;
       default:                              strcpy(state_text, "Msg error");      break;
     }
 

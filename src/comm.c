@@ -16,6 +16,7 @@ static void (*request_state_callback)(RequestState state, AppMessageResult reaso
 static void schedule_update(uint32_t delay);
 static void request_update();
 static void timeout_handler();
+static void init_app_message();
 
 static DataMessage *last_data_message;
 
@@ -28,7 +29,7 @@ static void clear_timer(AppTimer **timer) {
 
 static uint32_t timeout_length() {
   // Start with extra short timeouts on launch to get data showing as soon as possible.
-  static uint32_t exponential_timeout = INITIAL_TIMEOUT;
+  static uint32_t exponential_timeout = INITIAL_TIMEOUT_HALVED;
 
   if (phone_contact) {
     return DEFAULT_TIMEOUT;
@@ -51,11 +52,7 @@ static void timeout_handler() {
       request_state_callback(REQUEST_STATE_TIMED_OUT, 0);
       schedule_update(TIMEOUT_RETRY_DELAY);
     } else {
-      // Requests time out more quickly immediately after load (before any phone
-      // contact), so wait a bit before announcing a timeout
-      if (!phone_contact && time(NULL) - app_start_time > MISSING_INITIAL_DATA_ALERT) {
-        request_state_callback(REQUEST_STATE_TIMED_OUT, 0);
-      }
+      request_state_callback(REQUEST_STATE_TIMED_OUT, 0);
       // If we haven't heard from the phone yet, retry immediately after timing out.
       schedule_update(0);
     }
@@ -78,16 +75,33 @@ static void request_update() {
   if (!connection_service_peek_pebble_app_connection()) {
     request_state_callback(REQUEST_STATE_NO_BLUETOOTH, 0);
     schedule_update(NO_BLUETOOTH_RETRY_DELAY);
-  } else {
-    request_state_callback(REQUEST_STATE_WAITING, 0);
-
-    DictionaryIterator *send_message;
-    app_message_outbox_begin(&send_message);
-    app_message_outbox_send();
-
-    update_in_progress = true;
-    timeout_timer = app_timer_register(timeout_length(), timeout_handler, NULL);
+    return;
   }
+
+  DictionaryIterator *send_message;
+
+  AppMessageResult begin_result = app_message_outbox_begin(&send_message);
+  if (begin_result != APP_MSG_OK) {
+    if (begin_result == APP_MSG_CLOSED) {
+      // Unclear whether this ever happens. Trying this for
+      // https://github.com/mddub/urchin-cgm/issues/22
+      init_app_message();
+    }
+    request_state_callback(REQUEST_STATE_BEGIN_FAILED, begin_result);
+    schedule_update(SEND_FAILED_DELAY);
+    return;
+  }
+
+  AppMessageResult send_result = app_message_outbox_send();
+  if (send_result != APP_MSG_OK) {
+    request_state_callback(REQUEST_STATE_SEND_FAILED, send_result);
+    schedule_update(SEND_FAILED_DELAY);
+    return;
+  }
+
+  update_in_progress = true;
+  timeout_timer = app_timer_register(timeout_length(), timeout_handler, NULL);
+  request_state_callback(REQUEST_STATE_WAITING, 0);
 }
 
 static void in_received_handler(DictionaryIterator *received, void *context) {
@@ -145,9 +159,19 @@ static void out_failed_handler(DictionaryIterator *failed, AppMessageResult reas
 }
 
 static void bluetooth_connection_handler(bool connected) {
+  // Request data as soon as Bluetooth reconnects
   if (connected) {
     schedule_update(0);
   }
+}
+
+static void init_app_message() {
+  const uint32_t inbound_size = CONTENT_SIZE;
+  const uint32_t outbound_size = 64;
+  app_message_register_inbox_received(in_received_handler);
+  app_message_register_inbox_dropped(in_dropped_handler);
+  app_message_register_outbox_failed(out_failed_handler);
+  app_message_open(inbound_size, outbound_size);
 }
 
 void init_comm(
@@ -161,12 +185,6 @@ void init_comm(
 
   app_start_time = time(NULL);
 
-  app_message_register_inbox_received(in_received_handler);
-  app_message_register_inbox_dropped(in_dropped_handler);
-  app_message_register_outbox_failed(out_failed_handler);
-  const uint32_t inbound_size = CONTENT_SIZE;
-  const uint32_t outbound_size = 64;
-
   if (connection_service_peek_pebble_app_connection()) {
     // We expect the JS to initiate sending data first.
     update_in_progress = true;
@@ -179,10 +197,8 @@ void init_comm(
   }
 
   last_data_message = malloc(sizeof(DataMessage));
+  init_app_message();
 
-  app_message_open(inbound_size, outbound_size);
-
-  // Request data as soon as Bluetooth reconnects
   connection_service_subscribe((ConnectionHandlers) {
     .pebble_app_connection_handler = bluetooth_connection_handler
   });
