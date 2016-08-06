@@ -78,16 +78,28 @@ static void request_update() {
   if (!connection_service_peek_pebble_app_connection()) {
     request_state_callback(REQUEST_STATE_NO_BLUETOOTH, 0);
     schedule_update(NO_BLUETOOTH_RETRY_DELAY);
-  } else {
-    request_state_callback(REQUEST_STATE_WAITING, 0);
-
-    DictionaryIterator *send_message;
-    app_message_outbox_begin(&send_message);
-    app_message_outbox_send();
-
-    update_in_progress = true;
-    timeout_timer = app_timer_register(timeout_length(), timeout_handler, NULL);
+    return;
   }
+
+  DictionaryIterator *send_message;
+
+  AppMessageResult begin_result = app_message_outbox_begin(&send_message);
+  if (begin_result != APP_MSG_OK) {
+    request_state_callback(REQUEST_STATE_BEGIN_FAILED, begin_result);
+    schedule_update(SEND_FAILED_DELAY);
+    return;
+  }
+
+  AppMessageResult send_result = app_message_outbox_send();
+  if (send_result != APP_MSG_OK) {
+    request_state_callback(REQUEST_STATE_SEND_FAILED, send_result);
+    schedule_update(SEND_FAILED_DELAY);
+    return;
+  }
+
+  update_in_progress = true;
+  timeout_timer = app_timer_register(timeout_length(), timeout_handler, NULL);
+  request_state_callback(REQUEST_STATE_WAITING, 0);
 }
 
 static void in_received_handler(DictionaryIterator *received, void *context) {
