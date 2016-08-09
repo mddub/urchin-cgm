@@ -847,13 +847,21 @@ describe('getMultiple', function() {
 describe('getShareSGVsDateDescending', function() {
   var config = {source: 'dexcom'};
 
-  function mockDexcomAPI(data, sgvs) {
+  function mockDexcomAPI(data, sgvs, token) {
+    mockDexcomAPIQueue(data, [sgvs], token);
+  }
+
+  function mockDexcomAPIQueue(data, responseQueue, token) {
+    var toRespond = responseQueue.slice();
+    if (token === undefined) {
+      token = 'fake-token';
+    }
     data.postJSON = function(url) {
       urls.push(url);
       if (url.indexOf('ReadPublisherLatestGlucoseValues') !== -1) {
-        return Promise.resolve(sgvs);
+        return Promise.resolve(toRespond.shift());
       } else {
-        return Promise.resolve('fake-token');
+        return Promise.resolve(token);
       }
     };
   }
@@ -867,6 +875,7 @@ describe('getShareSGVsDateDescending', function() {
   });
 
   it('should request a token only once', function() {
+    mockDexcomAPIQueue(d, [[], []]);
     function afterFirstFetch() {
       expect(urls).to.have.length(2);
       return d.getSGVsDateDescending(config);
@@ -885,7 +894,8 @@ describe('getShareSGVsDateDescending', function() {
   });
 
   function expectSecondFetchCount(delayFromFirstSGV, expectedCount) {
-    mockDexcomAPI(d, [{'Value': 108, 'Trend': 4, 'WT': '\/Date(1462420778000)\/'}]);
+    var sgv = {'Value': 108, 'Trend': 4, 'WT': '\/Date(1462420778000)\/'};
+    mockDexcomAPIQueue(d, [[sgv], [sgv]]);
     function afterFirstFetch() {
       timekeeper.freeze(new Date(1462420778000 + delayFromFirstSGV));
       return d.getSGVsDateDescending(config);
@@ -939,6 +949,39 @@ describe('getShareSGVsDateDescending', function() {
     function afterThirdFetch(sgvs) {
       expect(urls[urls.length - 1]).to.contain('maxCount=1');
       expect(sgvs).to.have.length(3);
+    }
+    return d.getSGVsDateDescending(config)
+      .then(afterFirstFetch)
+      .then(afterSecondFetch)
+      .then(afterThirdFetch);
+  });
+
+  it('should re-request a token if the fetch fails', function() {
+    mockDexcomAPI(d, [], 'token-a');
+    function afterFirstFetch() {
+      expect(urls).to.have.length(2);
+      expect(urls[1]).to.contain('token-a');
+
+      mockDexcomAPIQueue(d, [{'Code': 'SessionNotValid'}, []], 'token-b');
+      urls = [];
+      return d.getSGVsDateDescending(config);
+    }
+    function afterSecondFetch() {
+      expect(urls).to.have.length(3);
+      expect(urls[0]).to.contain('ReadPublisherLatestGlucoseValues');
+      expect(urls[0]).to.contain('token-a');
+      expect(urls[1]).to.contain('LoginPublisherAccountByName');
+      expect(urls[2]).to.contain('ReadPublisherLatestGlucoseValues');
+      expect(urls[2]).to.contain('token-b');
+
+      mockDexcomAPI(d, []);
+      urls = [];
+      return d.getSGVsDateDescending(config);
+    }
+    function afterThirdFetch() {
+      expect(urls).to.have.length(1);
+      expect(urls[0]).to.contain('ReadPublisherLatestGlucoseValues');
+      expect(urls[0]).to.contain('token-b');
     }
     return d.getSGVsDateDescending(config)
       .then(afterFirstFetch)
