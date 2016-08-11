@@ -292,6 +292,22 @@
     });
   }
 
+  function onTabClick(e) {
+    e.preventDefault();
+    var target = $(e.currentTarget).closest('li').data('target');
+    $('.tab').hide();
+    $('.tab#' + target).show();
+    // keep the top/bottom tab menus in sync
+    $('.tabs-menu li').removeClass('current');
+    $('.tabs-menu li[data-target=' + target + ']').addClass('current');
+    // keep the tab menu visible when content expands
+    if ($(e.currentTarget).closest('.tabs-menu').hasClass('bottom')) {
+      setTimeout(function() {
+        window.scrollTo(0, document.body.scrollHeight);
+      });
+    }
+  }
+
   function populateValues(current) {
     document.getElementById('ns-url').value = current['nightscout_url'] || '';
 
@@ -466,6 +482,8 @@
       '[name=timeAlign]',
       '[name=batteryLoc]',
     ].join(', ')).on('change', maybeUpdateSelectedLayout);
+
+    $('.tabs-menu a').on('click', onTabClick);
 
     document.getElementById('config-form').addEventListener('submit', onSubmit);
 
