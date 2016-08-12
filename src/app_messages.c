@@ -20,8 +20,8 @@ static bool fail_missing_required_value(uint8_t key) {
   return false;
 }
 
-static bool pass_default_value(uint8_t key) {
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Missing value for key %d, assigning default", (int)key);
+static bool pass_default_value(uint8_t key, const char * type) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Missing %s value for key %d, assigning default", type, (int)key);
   return true;
 }
 
@@ -50,7 +50,7 @@ bool get_int32(DictionaryIterator *data, int32_t *dest, uint8_t key, bool requir
       return fail_missing_required_value(key);
     } else {
       *dest = fallback;
-      return pass_default_value(key);
+      return pass_default_value(key, "int32");
     }
   }
 }
@@ -69,7 +69,7 @@ bool get_byte_array(DictionaryIterator *data, uint8_t *dest, uint8_t key, size_t
       return fail_missing_required_value(key);
     } else {
       memcpy(dest, fallback, ARRAY_LENGTH(fallback));
-      return pass_default_value(key);
+      return pass_default_value(key, "byte array");
     }
   }
 }
@@ -99,7 +99,7 @@ bool get_cstring(DictionaryIterator *data, char *dest, uint8_t key, size_t max_l
       return fail_missing_required_value(key);
     } else {
       strcpy(dest, fallback);
-      return pass_default_value(key);
+      return pass_default_value(key, "cstring");
     }
   }
 }
