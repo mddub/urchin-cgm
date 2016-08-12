@@ -1,8 +1,11 @@
-#include "config.h"
 #include "graph_element.h"
 #include "layout.h"
 #include "preferences.h"
 #include "staleness.h"
+
+#define GRAPH_POINT_SIZE 3
+#define BOLUS_TICK_WIDTH 2
+#define BOLUS_TICK_HEIGHT 7
 
 static void plot_point(int x, int y, GContext *ctx) {
   graphics_fill_rect(ctx, GRect(x, y, GRAPH_POINT_SIZE, GRAPH_POINT_SIZE), 0, GCornerNone);

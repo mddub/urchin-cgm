@@ -1,6 +1,7 @@
-#include "app_keys.h"
 #include "config.h"
 #include "staleness.h"
+
+#define GRAPH_INTERVAL_SIZE_SECONDS (5*60)
 
 static bool ever_seen_request_complete = false;
 static bool ever_had_phone_contact = false;

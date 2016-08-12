@@ -1,5 +1,4 @@
 #include "comm.h"
-#include "config.h"
 #include "connection_status_component.h"
 #include "fonts.h"
 #include "layout.h"
@@ -10,8 +9,8 @@
 #define REQUEST_STATE_MESSAGE_DURATION_MS 2000
 
 // This matches STALENESS_REASON_*
-const int CONN_ISSUE_ICONS[] = {
-  NO_ICON,
+const uint32_t CONN_ISSUE_ICONS[] = {
+  0,
   RESOURCE_ID_CONN_ISSUE_BLUETOOTH,
   RESOURCE_ID_CONN_ISSUE_NETWORK,
   RESOURCE_ID_CONN_ISSUE_RIG,

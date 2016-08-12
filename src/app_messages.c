@@ -1,4 +1,3 @@
-#include "app_keys.h"
 #include "app_messages.h"
 
 static const char* type_name(TupleType type) {
@@ -116,12 +115,12 @@ bool validate_data_message(DictionaryIterator *data, DataMessage *out) {
   memset(zeroes, 0, GRAPH_MAX_SGV_COUNT);
 
   return true
-    && get_int32(data, &out->recency, APP_KEY_RECENCY, false, 0)
-    && get_byte_array(data, out->sgvs, APP_KEY_SGVS, GRAPH_MAX_SGV_COUNT, true, NULL)
-    && get_byte_array_length(data, &out->sgv_count, GRAPH_MAX_SGV_COUNT, APP_KEY_SGVS)
-    && get_int32(data, &out->last_sgv, APP_KEY_LAST_SGV, true, 0)
-    && get_int32(data, &out->trend, APP_KEY_TREND, false, 0)
-    && get_int32(data, &out->delta, APP_KEY_DELTA, false, NO_DELTA_VALUE)
-    && get_cstring(data, out->status_text, APP_KEY_STATUS_TEXT, STATUS_BAR_MAX_LENGTH, false, "")
-    && get_byte_array(data, out->graph_extra, APP_KEY_GRAPH_EXTRA, GRAPH_MAX_SGV_COUNT, false, zeroes);
+    && get_int32(data, &out->recency, MESSAGE_KEY_recency, false, 0)
+    && get_byte_array(data, out->sgvs, MESSAGE_KEY_sgvs, GRAPH_MAX_SGV_COUNT, true, NULL)
+    && get_byte_array_length(data, &out->sgv_count, GRAPH_MAX_SGV_COUNT, MESSAGE_KEY_sgvs)
+    && get_int32(data, &out->last_sgv, MESSAGE_KEY_lastSgv, true, 0)
+    && get_int32(data, &out->trend, MESSAGE_KEY_trend, false, 0)
+    && get_int32(data, &out->delta, MESSAGE_KEY_delta, false, NO_DELTA_VALUE)
+    && get_cstring(data, out->status_text, MESSAGE_KEY_statusText, STATUS_BAR_MAX_LENGTH, false, "")
+    && get_byte_array(data, out->graph_extra, MESSAGE_KEY_graphExtra, GRAPH_MAX_SGV_COUNT, false, zeroes);
 }

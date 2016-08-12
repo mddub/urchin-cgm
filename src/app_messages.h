@@ -1,7 +1,10 @@
 #pragma once
 
 #include <pebble.h>
-#include "config.h"
+
+#define GRAPH_MAX_SGV_COUNT 48
+#define STATUS_BAR_MAX_LENGTH 256
+#define NO_DELTA_VALUE 65536
 
 typedef struct __attribute__((__packed__)) DataMessage {
   int32_t recency;
