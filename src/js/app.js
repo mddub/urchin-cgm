@@ -5,9 +5,11 @@ require('./vendor/lie.polyfill');
 
 function app(Pebble, c) {
 
-  var data = require('./data')(c);
   var format = require('./format')(c);
+  var points = require('./points')(c);
+  var data;
   var config;
+  var maxSGVs;
 
   function mergeConfig(config, defaults) {
     var out = {};
@@ -18,6 +20,10 @@ function app(Pebble, c) {
       out[key] = config[key];
     });
     return out;
+  }
+
+  function computeMaxSGVs(config) {
+    return points.computeVisiblePoints(points.computeGraphWidth(getLayout(config)), config);
   }
 
   function dataFetchError(e) {
@@ -43,10 +49,10 @@ function app(Pebble, c) {
     function onData(sgvs, bolusHistory, basalHistory, statusText) {
       try {
         var endTime = sgvs.length > 0 ? sgvs[0]['date'] : new Date();
-        var ys = format.sgvArray(endTime, sgvs);
+        var ys = format.sgvArray(endTime, sgvs, maxSGVs);
 
-        var boluses = format.bolusGraphArray(endTime, bolusHistory);
-        var basals = format.basalGraphArray(endTime, basalHistory, config);
+        var boluses = format.bolusGraphArray(endTime, bolusHistory, maxSGVs);
+        var basals = format.basalGraphArray(endTime, basalHistory, maxSGVs, config);
         var graphExtra = format.graphExtraArray(boluses, basals);
 
         sendMessage({
@@ -146,6 +152,10 @@ function app(Pebble, c) {
       }
     }
 
+    // can't initialize these until we know the graph config
+    maxSGVs = computeMaxSGVs(config);
+    data = require('./data')(c, maxSGVs);
+
     Pebble.addEventListener('showConfiguration', function() {
       var platform = 'unknown';
       var firmware = '0.0.0';
@@ -187,9 +197,21 @@ function app(Pebble, c) {
       }
 
       if (newConfig) {
-        if (newConfig.nightscout_url !== config.nightscout_url) {
+        var newMaxSGVs = computeMaxSGVs(newConfig);
+        data.setMaxSGVCount(newMaxSGVs);
+
+        if (newConfig.nightscout_url !== config.nightscout_url ||
+            newMaxSGVs > maxSGVs ||
+            newConfig.__CLEAR_CACHE__
+        ) {
           data.clearCache();
         }
+        if (newConfig.__CLEAR_CACHE__) {
+          // present only for tests
+          delete newConfig.__CLEAR_CACHE__;
+        }
+
+        maxSGVs = newMaxSGVs;
         config = mergeConfig(newConfig, c.DEFAULT_CONFIG);
         localStorage.setItem(c.LOCAL_STORAGE_KEY_CONFIG, JSON.stringify(config));
         console.log('Preferences updated: ' + JSON.stringify(config));

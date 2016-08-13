@@ -24,12 +24,15 @@ Cache.prototype.persist = function() {
 };
 
 Cache.prototype.update = function(newEntries) {
-  Array.prototype.unshift.apply(this.entries, newEntries);
-  while (this.entries.length > this.maxEntries) {
-    this.entries.pop();
-  }
+  this.entries = newEntries.concat(this.entries).slice(0, this.maxEntries);
   this.persist();
   return this.entries;
+};
+
+Cache.prototype.setMaxEntries = function(newMax) {
+  this.maxEntries = newMax;
+  this.entries = this.entries.slice(0, this.maxEntries);
+  this.persist();
 };
 
 Cache.prototype.clear = function() {

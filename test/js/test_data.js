@@ -26,6 +26,11 @@ beforeEach(function() {
   global.localStorage = require('./make_mock_local_storage.js')();
 });
 
+var DEFAULT_MAX_SGVS = 48;
+function defaultData() {
+  return Data(defaultConstants, DEFAULT_MAX_SGVS);
+}
+
 describe('basals', function() {
   before(function() {
     // TODO: _profileBasalRateAtTime and _profileBasalsInWindow assume that the
@@ -71,7 +76,7 @@ describe('basals', function() {
 
   describe('getActiveBasal', function() {
     it('should report a temp basal with the difference from current basal and recency', function() {
-      var d = Data(defaultConstants);
+      var d = defaultData();
       mockSingleTempBasal(d, "2015-12-03T14:12:25-08:00");
       timekeeper.freeze(new Date("2015-12-03T14:20:25-08:00"));
 
@@ -81,7 +86,7 @@ describe('basals', function() {
     });
 
     it('should compute recency correctly', function() {
-      var d = Data(defaultConstants);
+      var d = defaultData();
       mockSingleTempBasal(d, "2015-12-03T14:12:25-08:00");
       timekeeper.freeze(new Date("2015-12-03T14:28:25-08:00"));
 
@@ -91,7 +96,7 @@ describe('basals', function() {
     });
 
     it('should report the profile basal rate if it is past the duration of the most recent temp basal', function() {
-      var d = Data(defaultConstants);
+      var d = defaultData();
       mockSingleTempBasal(d, "2015-12-03T14:12:25-08:00");
       timekeeper.freeze(new Date("2015-12-03T14:50:25-08:00"));
 
@@ -101,7 +106,7 @@ describe('basals', function() {
     });
 
     it('should report the correct profile basal rate at any time', function() {
-      var d = Data(defaultConstants);
+      var d = defaultData();
       mockSingleTempBasal(d, "2015-12-03T14:12:25-08:00");
       timekeeper.freeze(new Date("2015-12-03T20:50:25-08:00"));
 
@@ -113,7 +118,7 @@ describe('basals', function() {
 
   describe('getBasalHistory', function() {
     it('should report 24 hours of profile basals if no temps have occurred', function() {
-      var d = Data(defaultConstants);
+      var d = defaultData();
       mockAPI(d, {
         'profile.json': PROFILE,
         'treatments.json': [],
@@ -137,7 +142,7 @@ describe('basals', function() {
     });
 
     it('should interpose profile basals if there is a gap between two temp basals', function() {
-      var d = Data(defaultConstants);
+      var d = defaultData();
       mockAPI(d, {
         'profile.json': PROFILE,
         'treatments.json': [
@@ -168,7 +173,7 @@ describe('basals', function() {
     });
 
     it('should not interpose profile basals if two temp basals overlap', function() {
-      var d = Data(defaultConstants);
+      var d = defaultData();
       mockAPI(d, {
         'profile.json': PROFILE,
         'treatments.json': [
@@ -197,7 +202,7 @@ describe('basals', function() {
     });
 
     it('should treat an empty "Temp Basal" treatment recorded by Nightscout Care Portal as having duration 0', function() {
-      var d = Data(defaultConstants);
+      var d = defaultData();
       mockAPI(d, {
         'profile.json': PROFILE,
         'treatments.json': [
@@ -293,7 +298,7 @@ describe('getRawData', function() {
   }];
 
   it('should report raw sgvs in ascending date order, plus sensor noise on most recent sgv', function() {
-    var d = Data(defaultConstants);
+    var d = defaultData();
     mockAPI(d, {
       'sgv.json': SGVS(1),
       'cal.json': CAL,
@@ -305,7 +310,7 @@ describe('getRawData', function() {
   });
 
   it('should show only the number of raw readings configured', function() {
-    var d = Data(defaultConstants);
+    var d = defaultData();
     mockAPI(d, {
       'sgv.json': SGVS(3),
       'cal.json': CAL,
@@ -318,7 +323,7 @@ describe('getRawData', function() {
   });
 
   it('should report raw sgvs in mmol when that preference is set, plus sensor noise on most recent sgv', function() {
-    var d = Data(defaultConstants);
+    var d = defaultData();
     mockAPI(d, {
       'sgv.json': SGVS(2),
       'cal.json': CAL,
@@ -336,7 +341,7 @@ describe('getCarePortalIOB', function() {
     var PEBBLE_DATA = {
       "bgs": [{"iob": 1.27}]
     };
-    var d = Data(defaultConstants);
+    var d = defaultData();
     mockAPI(d, {
       'pebble': PEBBLE_DATA
     });
@@ -406,7 +411,7 @@ describe('getOpenAPSStatus', function() {
   describe('last "enacted" is stale but "suggested" is fresh', function() {
     var d;
     beforeEach(function() {
-      d = Data(defaultConstants);
+      d = defaultData();
       mockAPI(d, {
         'treatments': tempBasal(),
         'devicestatus': lastTwoOpenAPS(),
@@ -457,7 +462,7 @@ describe('getOpenAPSStatus', function() {
         'recieved': true,
         'timestamp': '2016-03-01T16:45:00Z',
       };
-      d = Data(defaultConstants);
+      d = defaultData();
       mockAPI(d, {
         'treatments': tempBasal(),
         'devicestatus': statuses,
@@ -506,7 +511,7 @@ describe('getOpenAPSStatus', function() {
       'recieved': true,
       'timestamp': '2016-03-01T16:45:00Z',
     };
-    var d = Data(defaultConstants);
+    var d = defaultData();
     mockAPI(d, {
       'treatments': tempBasal(),
       'devicestatus': statuses,
@@ -522,7 +527,7 @@ describe('getOpenAPSStatus', function() {
   it('should not report IOB if it is stale', function() {
     var statuses = lastTwoOpenAPS();
     statuses[0]['openaps']['iob'] = statuses[1]['openaps']['iob'];
-    var d = Data(defaultConstants);
+    var d = defaultData();
     mockAPI(d, {
       'treatments': tempBasal(),
       'devicestatus': statuses,
@@ -536,7 +541,7 @@ describe('getOpenAPSStatus', function() {
   });
 
   it('should report eventualBG if configured', function() {
-    var d = Data(defaultConstants);
+    var d = defaultData();
     mockAPI(d, {
       'treatments': tempBasal(),
       'devicestatus': lastTwoOpenAPS(),
@@ -568,7 +573,7 @@ describe('getOpenAPSStatus', function() {
       'openaps': {},
       'device': statuses[0]['device'],
     });
-    var d = Data(defaultConstants);
+    var d = defaultData();
     mockAPI(d, {
       'treatments': tempBasal(),
       'devicestatus': statuses,
@@ -582,7 +587,7 @@ describe('getOpenAPSStatus', function() {
   });
 
   it('should not crash if no data', function() {
-    var d = Data(defaultConstants);
+    var d = defaultData();
     mockAPI(d, {
       'treatments': [],
       'devicestatus': [],
@@ -624,7 +629,7 @@ describe('getOpenAPSStatus', function() {
     });
 
     it('should report the last success even if a different device has failed since then', function() {
-      var d = Data(defaultConstants);
+      var d = defaultData();
       mockAPI(d, {
         'treatments': [],
         'profile': [],
@@ -640,7 +645,7 @@ describe('getOpenAPSStatus', function() {
     });
 
     it('should report failure from the most recently successful device', function() {
-      var d = Data(defaultConstants);
+      var d = defaultData();
       mockAPI(d, {
         'treatments': [],
         'profile': [],
@@ -657,7 +662,7 @@ describe('getOpenAPSStatus', function() {
     });
 
     it('should report the most recent failure if there are no successes', function() {
-      var d = Data(defaultConstants);
+      var d = defaultData();
       mockAPI(d, {
         'treatments': [],
         'profile': [],
@@ -679,7 +684,7 @@ describe('getOpenAPSStatus', function() {
 describe('getCustomJsonUrl', function() {
   function testWith(data) {
     timekeeper.freeze(new Date());
-    var d = Data(defaultConstants);
+    var d = defaultData();
     d.getURL = function() {
       return Promise.resolve(JSON.stringify(data));
     };
@@ -726,7 +731,7 @@ describe('getCustomJsonUrl', function() {
 describe('getMultiple', function() {
   var d;
   beforeEach(function() {
-    d = Data(defaultConstants);
+    d = defaultData();
     d.getRawData = function() { return Promise.resolve('raw data'); };
     d.getCarePortalIOB = function() { return Promise.resolve('care portal iob'); };
     d.getCustomUrl = function() { return Promise.resolve('custom url'); };
@@ -777,7 +782,6 @@ describe('getMultiple', function() {
 
 describe('getShareSGVsDateDescending', function() {
   var config = {source: 'dexcom'};
-  var MAX_COUNT = defaultConstants.SGV_FETCH_SECONDS / defaultConstants.INTERVAL_SIZE_SECONDS + defaultConstants.FETCH_EXTRA;
 
   function mockDexcomAPI(data, sgvs) {
     data.postJSON = function(url) {
@@ -794,7 +798,7 @@ describe('getShareSGVsDateDescending', function() {
   var d;
   beforeEach(function() {
     urls = [];
-    d = Data(defaultConstants);
+    d = defaultData();
     mockDexcomAPI(d, []);
   });
 
@@ -812,7 +816,7 @@ describe('getShareSGVsDateDescending', function() {
   it('should request a full history of SGVs when the cache is empty', function() {
     return d.getSGVsDateDescending(config).then(function() {
       expect(urls).to.have.length(2);
-      expect(urls[urls.length - 1]).to.contain('maxCount=' + MAX_COUNT);
+      expect(urls[urls.length - 1]).to.contain('maxCount=' + DEFAULT_MAX_SGVS);
     });
   });
 
@@ -841,7 +845,7 @@ describe('getShareSGVsDateDescending', function() {
   });
 
   it('should request a full history of SGVs when the last one is from 20 hours ago', function() {
-    return expectSecondFetchCount(20 * 60 * 60 * 1000, MAX_COUNT);
+    return expectSecondFetchCount(20 * 60 * 60 * 1000, DEFAULT_MAX_SGVS);
   });
 
   it('should properly transform and dedupe data', function() {

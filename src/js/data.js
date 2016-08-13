@@ -7,20 +7,17 @@ var Cache = require('./cache');
 var debounce = require('./debounce');
 var Debug = require('./debug');
 
-var data = function(c) {
-  var MAX_SGVS = c.SGV_FETCH_SECONDS / c.INTERVAL_SIZE_SECONDS + c.FETCH_EXTRA;
-  var MAX_TEMP_BASALS = MAX_SGVS;
+var data = function(c, maxSGVCount) {
   var MAX_UPLOADER_BATTERIES = 1;
   var MAX_CALIBRATIONS = 1;
   var MAX_OPENAPS_STATUSES = 24;
-  var MAX_BOLUSES_PER_HOUR_AVERAGE = 6;
-  var MAX_BOLUSES = c.SGV_FETCH_SECONDS / (60 * 60) * MAX_BOLUSES_PER_HOUR_AVERAGE;
+  var MAX_BOLUSES_PER_HOUR_TO_CACHE = 6;
 
-  var sgvCache = new Cache('sgv', MAX_SGVS);
-  var tempBasalCache = new Cache('tempBasal', MAX_TEMP_BASALS);
+  var sgvCache = new Cache('sgv', maxSGVCount);
+  var tempBasalCache = new Cache('tempBasal', maxSGVCount);
+  var bolusCache = new Cache('bolus', Math.ceil(maxSGVCount / 12 * MAX_BOLUSES_PER_HOUR_TO_CACHE));
   var uploaderBatteryCache = new Cache('uploaderBattery', MAX_UPLOADER_BATTERIES);
   var calibrationCache = new Cache('calibration', MAX_CALIBRATIONS);
-  var bolusCache = new Cache('bolus', MAX_BOLUSES);
   var openAPSStatusCache = new Cache('openAPSStatus', MAX_OPENAPS_STATUSES);
   var profileCache;
 
@@ -46,12 +43,19 @@ var data = function(c) {
   d.clearCache = function() {
     sgvCache.clear();
     tempBasalCache.clear();
+    bolusCache.clear();
     uploaderBatteryCache.clear();
     calibrationCache.clear();
-    bolusCache.clear();
     openAPSStatusCache.clear();
     profileCache = undefined;
     dexcomToken = undefined;
+  };
+
+  d.setMaxSGVCount = function(count) {
+    maxSGVCount = count;
+    sgvCache.setMaxEntries(count);
+    tempBasalCache.setMaxEntries(count);
+    bolusCache.setMaxEntries(Math.ceil(count / 12 * MAX_BOLUSES_PER_HOUR_TO_CACHE));
   };
 
   d.fetch = function(url, method, headers, body) {
@@ -600,7 +604,7 @@ var data = function(c) {
 
   d.getNightscoutSGVsDateDescending = debounce(function(config) {
     return getUsingCache(
-      config.nightscout_url + '/api/v1/entries/sgv.json?count=' + MAX_SGVS,
+      config.nightscout_url + '/api/v1/entries/sgv.json?count=' + sgvCache.maxEntries,
       sgvCache,
       'date',
       ['date', 'sgv', 'trend', 'direction', 'filtered', 'unfiltered', 'noise']
@@ -609,7 +613,7 @@ var data = function(c) {
 
   d.getTempBasals = debounce(function(config) {
     return getUsingCache(
-      config.nightscout_url + '/api/v1/treatments.json?find[eventType]=Temp+Basal&count=' + MAX_TEMP_BASALS,
+      config.nightscout_url + '/api/v1/treatments.json?find[eventType]=Temp+Basal&count=' + tempBasalCache.maxEntries,
       tempBasalCache,
       'created_at',
       ['created_at', 'duration', 'absolute', 'percent']
@@ -618,7 +622,7 @@ var data = function(c) {
 
   d.getLastUploaderBattery = debounce(function(config) {
     return getUsingCache(
-      config.nightscout_url + '/api/v1/devicestatus.json?find[$or][0][uploaderBattery][$exists]=true&find[$or][1][uploader][$exists]=true&count=' + MAX_UPLOADER_BATTERIES,
+      config.nightscout_url + '/api/v1/devicestatus.json?find[$or][0][uploaderBattery][$exists]=true&find[$or][1][uploader][$exists]=true&count=' + uploaderBatteryCache.maxEntries,
       uploaderBatteryCache,
       'created_at'
     );
@@ -626,7 +630,7 @@ var data = function(c) {
 
   d.getLastCalibration = debounce(function(config) {
     return getUsingCache(
-      config.nightscout_url + '/api/v1/entries/cal.json?count=' + MAX_CALIBRATIONS,
+      config.nightscout_url + '/api/v1/entries/cal.json?count=' + calibrationCache.maxEntries,
       calibrationCache,
       'date'
     );
@@ -634,7 +638,7 @@ var data = function(c) {
 
   d.getBolusHistory = debounce(function(config) {
     return getUsingCache(
-      config.nightscout_url + '/api/v1/treatments.json?find[insulin][$exists]=true&count=' + MAX_BOLUSES,
+      config.nightscout_url + '/api/v1/treatments.json?find[insulin][$exists]=true&count=' + bolusCache.maxEntries,
       bolusCache,
       'created_at',
       ['created_at', 'insulin']
@@ -643,7 +647,7 @@ var data = function(c) {
 
   d.getOpenAPSStatusHistory = debounce(function(config) {
     return getUsingCache(
-      config.nightscout_url + '/api/v1/devicestatus.json?find[openaps][$exists]=true&count=' + MAX_OPENAPS_STATUSES,
+      config.nightscout_url + '/api/v1/devicestatus.json?find[openaps][$exists]=true&count=' + openAPSStatusCache.maxEntries,
       openAPSStatusCache,
       'created_at'
     );
@@ -775,9 +779,9 @@ var data = function(c) {
     var count;
     if (sgvCache.entries.length) {
       var elapsed = Date.now() - sgvCache.entries[0]['date'];
-      count = Math.min(MAX_SGVS, Math.max(1, Math.floor(elapsed / (5 * 60 * 1000))));
+      count = Math.min(sgvCache.maxEntries, Math.max(1, Math.floor(elapsed / (5 * 60 * 1000))));
     } else {
-      count = MAX_SGVS;
+      count = sgvCache.maxEntries;
     }
     var url = [
       dexcomServer(config),

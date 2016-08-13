@@ -9,10 +9,11 @@ var Format = require('../../src/js/format.js');
 var constants = require('../../src/js/constants.json');
 
 describe('format', function() {
+  var MAX_SGVS = 48;
   var format = Format(constants);
 
   function expectZeroesForGraph(arr) {
-    expect(arr.length).to.be(constants.SGV_FETCH_SECONDS / constants.INTERVAL_SIZE_SECONDS);
+    expect(arr.length).to.be(MAX_SGVS);
     arr.forEach(function(y) {
       expect(y).to.be(0);
     });
@@ -21,7 +22,7 @@ describe('format', function() {
   describe('sgvArray', function() {
     it('should return an array of zeroes when there is no data', function() {
       expectZeroesForGraph(
-        format.sgvArray(Date.now(), [])
+        format.sgvArray(Date.now(), [], MAX_SGVS)
       );
     });
   });
@@ -44,7 +45,7 @@ describe('format', function() {
       // the interval around this endTime is 17:45:00 to 17:50:00
       var endTime = new Date("2016-02-18T17:47:30-08:00").getTime();
 
-      var arr = format.basalRateArray(endTime, basals);
+      var arr = format.basalRateArray(endTime, basals, MAX_SGVS);
       expect(arr.slice(0, 20)).to.eql(
         [0.8, 0.6, 0.6, 0.6, 0.4, 0.3, 0.3, 0.3, 0.3, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0, 0, 0]
       );
@@ -52,7 +53,7 @@ describe('format', function() {
 
     it('should return an array of zeroes when there is no data', function() {
       expectZeroesForGraph(
-        format.basalRateArray(Date.now(), [])
+        format.basalRateArray(Date.now(), [], MAX_SGVS)
       );
     });
   });
