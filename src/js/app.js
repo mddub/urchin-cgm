@@ -122,6 +122,13 @@ function app(Pebble, c) {
       updateEveryMinute: config.updateEveryMinute ? 1 : 0,
       timeAlign: c.ALIGN[getLayout(config).timeAlign],
       batteryLoc: c.BATTERY_LOC[getLayout(config).batteryLoc],
+      pointShape: c.POINT_SHAPE[config.pointShape],
+      pointHeight: config.pointHeight,
+      pointWidth: config.pointWidth,
+      pointMargin: config.pointMargin,
+      pointRightMargin: config.pointRightMargin,
+      plotLine: config.plotLine,
+      plotLineWidth: config.plotLineWidth,
       numElements: countElementsForPebble(getLayout(config)),
       elements: encodeElementsForPebble(getLayout(config)),
     });

@@ -840,8 +840,8 @@ describe('getShareSGVsDateDescending', function() {
     return expectSecondFetchCount((15 * 60 + 1) * 1000, 3);
   });
 
-  it('should request a full history of SGVs when the last one is from 5 hours ago', function() {
-    return expectSecondFetchCount(5 * 60 * 60 * 1000, MAX_COUNT);
+  it('should request a full history of SGVs when the last one is from 20 hours ago', function() {
+    return expectSecondFetchCount(20 * 60 * 60 * 1000, MAX_COUNT);
   });
 
   it('should properly transform and dedupe data', function() {

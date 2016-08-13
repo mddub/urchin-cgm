@@ -45,8 +45,15 @@
       "updateEveryMinute": 10,
       "timeAlign": 11,
       "batteryLoc": 12,
-      "numElements": 13,
-      "elements": 14
+      "pointShape": 13,
+      "pointHeight": 14,
+      "pointWidth": 15,
+      "pointMargin": 16,
+      "pointRightMargin": 17,
+      "plotLine": 18,
+      "plotLineWidth": 19,
+      "numElements": 20,
+      "elements": 21
     },
     "resources": {
       "media": [

@@ -3,12 +3,23 @@
 #include "preferences.h"
 #include "staleness.h"
 
-#define GRAPH_POINT_SIZE 3
 #define BOLUS_TICK_WIDTH 2
 #define BOLUS_TICK_HEIGHT 7
 
+static GPoint center_of_point(int x, int y) {
+  if (get_prefs()->point_shape == POINT_SHAPE_CIRCLE) {
+    return GPoint(x + get_prefs()->point_width / 2, y + get_prefs()->point_width / 2);
+  } else {
+    return GPoint(x + get_prefs()->point_width / 2, y + get_prefs()->point_height / 2);
+  }
+}
+
 static void plot_point(int x, int y, GContext *ctx) {
-  graphics_fill_rect(ctx, GRect(x, y, GRAPH_POINT_SIZE, GRAPH_POINT_SIZE), 0, GCornerNone);
+  if (get_prefs()->point_shape == POINT_SHAPE_RECTANGLE) {
+    graphics_fill_rect(ctx, GRect(x, y, get_prefs()->point_width, get_prefs()->point_height), 0, GCornerNone);
+  } else if (get_prefs()->point_shape == POINT_SHAPE_CIRCLE) {
+    graphics_fill_circle(ctx, center_of_point(x, y), get_prefs()->point_width / 2);
+  }
 }
 
 static void plot_tick(int x, int bottom_y, GContext *ctx) {
@@ -22,11 +33,16 @@ static int bg_to_y(int height, int bg) {
   return (float)height - (float)(bg - graph_min) / (float)(graph_max - graph_min) * (float)height + 0.5f;
 }
 
+static int index_to_x(uint8_t i, uint8_t graph_width, uint8_t padding) {
+  return graph_width - (get_prefs()->point_width + get_prefs()->point_margin) * (1 + i + padding) + get_prefs()->point_margin - get_prefs()->point_right_margin;
+}
+
 static int bg_to_y_for_point(int height, int bg) {
   int min = 0;
-  int max = height - GRAPH_POINT_SIZE;
+  int diameter = get_prefs()->point_height;
+  int max = height - diameter;
 
-  int y = (float)bg_to_y(height, bg) - GRAPH_POINT_SIZE / 2.0f + 0.5f;
+  int y = (float)bg_to_y(height, bg) - diameter / 2.0f + 0.5f;
   if (y < min) {
     return min;
   } else if (y > max) {
@@ -88,23 +104,46 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
     }
   }
 
+  if (get_prefs()->plot_line) {
+    graphics_context_set_stroke_width(ctx, get_prefs()->plot_line_width);
+  }
+
   // SGVs
+  GPoint last_center = GPointZero;
   for(i = 0; i < data->count; i++) {
     // XXX: JS divides by 2 to fit into 1 byte
     int bg = data->sgvs[i] * 2;
     if(bg == 0) {
       continue;
     }
-    x = graph_width - GRAPH_POINT_SIZE * (1 + i + padding);
+    x = index_to_x(i, graph_width, padding);
     y = bg_to_y_for_point(graph_height, bg);
+
+    // line
+    if (get_prefs()->plot_line) {
+      GPoint center = center_of_point(x, y);
+      if (!gpoint_equal(&last_center, &GPointZero)) {
+        graphics_draw_line(ctx, center, last_center);
+      }
+      last_center = center;
+    }
+
+    // point
     plot_point(x, y, ctx);
+
+    // stop after drawing the first off-screen SGV
+    if (x < 0) {
+      break;
+    }
   }
+
+  graphics_context_set_stroke_width(ctx, 1);
 
   // Boluses
   for(i = 0; i < data->count; i++) {
     bool bolus = decode_bits(data->extra[i], GRAPH_EXTRA_BOLUS_OFFSET, GRAPH_EXTRA_BOLUS_BITS);
     if (bolus) {
-      x = graph_width - GRAPH_POINT_SIZE * (1 + i + padding);
+      x = index_to_x(i, graph_width, padding);
       plot_tick(x, graph_height, ctx);
     }
   }
@@ -114,15 +153,15 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
     graphics_draw_line(ctx, GPoint(0, graph_height), GPoint(graph_width, graph_height));
     for(i = 0; i < data->count; i++) {
       uint8_t basal = decode_bits(data->extra[i], GRAPH_EXTRA_BASAL_OFFSET, GRAPH_EXTRA_BASAL_BITS);
-      x = graph_width - GRAPH_POINT_SIZE * (1 + i + padding);
+      x = index_to_x(i, graph_width, padding);
       y = layer_size.h - basal;
-      graphics_draw_line(ctx, GPoint(x, y), GPoint(x + GRAPH_POINT_SIZE - 1, y));
+      graphics_draw_line(ctx, GPoint(x, y), GPoint(x + get_prefs()->point_width + get_prefs()->point_margin - 1, y));
       if (basal > 1) {
-        fill_rect_gray(ctx, GRect(x, y + 1, GRAPH_POINT_SIZE, basal - 1), data->color);
+        fill_rect_gray(ctx, GRect(x, y + 1, get_prefs()->point_width + get_prefs()->point_margin, basal - 1), data->color);
       }
     }
     if (padding > 0) {
-      x = graph_width - GRAPH_POINT_SIZE * padding - 1;
+      x = index_to_x(padding - 1, graph_width, 0);
       graphics_fill_rect(ctx, GRect(x, graph_height, graph_width - x, get_prefs()->basal_height), 0, GCornerNone);
     }
   }
