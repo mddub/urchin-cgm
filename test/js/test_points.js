@@ -30,22 +30,22 @@ describe('points', function() {
 
   describe('computeVisiblePoints', function() {
 
-    it('should return the number of 9-px points visible', function() {
+    it('should return the number of 9-px points visible with a 4-px margin', function() {
       var config = {
         pointShape: 'circle',
         pointWidth: 9,
         pointHeight: 9, // unused for circle
         pointMargin: 4,
-        pointRightMargin: 13,
+        pointRightMargin: 4,
       };
       expect(points.computeVisiblePoints(144, config)).to.be(11);
-      config.pointRightMargin = 14;
-      expect(points.computeVisiblePoints(144, config)).to.be(10);
-      config.pointRightMargin = 15;
+      config.pointRightMargin = 5;
+      expect(points.computeVisiblePoints(144, config)).to.be(11);
+      config.pointRightMargin = 6;
       expect(points.computeVisiblePoints(144, config)).to.be(10);
     });
 
-    it('should return the number of 5-px points visible', function() {
+    it('should return the number of 5-px points visible with a 4-px margin', function() {
       var config = {
         pointShape: 'rectangle',
         pointWidth: 5,
@@ -54,15 +54,17 @@ describe('points', function() {
         pointRightMargin: 0,
       };
       expect(points.computeVisiblePoints(144, config)).to.be(16);
-      config.pointRightMargin = 1;
+      config.pointRightMargin = 4;
       expect(points.computeVisiblePoints(144, config)).to.be(16);
-      config.pointRightMargin = 8;
-      expect(points.computeVisiblePoints(144, config)).to.be(16);
-      config.pointRightMargin = 9;
+      config.pointRightMargin = 5;
       expect(points.computeVisiblePoints(144, config)).to.be(15);
+      config.pointRightMargin = 13;
+      expect(points.computeVisiblePoints(144, config)).to.be(15);
+      config.pointRightMargin = 14;
+      expect(points.computeVisiblePoints(144, config)).to.be(14);
     });
 
-    it('should return the number of 4-px points visible', function() {
+    it('should work with a 108-px screen width', function() {
       var config = {
         pointShape: 'rectangle',
         pointWidth: 4,
@@ -70,7 +72,7 @@ describe('points', function() {
         pointMargin: 1,
         pointRightMargin: 0,
       };
-      expect(points.computeVisiblePoints(108, config)).to.be(22);
+      expect(points.computeVisiblePoints(108, config)).to.be(21);
     });
 
     it('should handle negative point margins', function() {

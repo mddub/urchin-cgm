@@ -119,6 +119,11 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
     x = index_to_x(i, graph_width, padding);
     y = bg_to_y_for_point(graph_height, bg);
 
+    // stop plotting if the SGV is off-screen
+    if (x < 0) {
+      break;
+    }
+
     // line
     if (get_prefs()->plot_line) {
       GPoint center = center_of_point(x, y);
@@ -130,11 +135,6 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
 
     // point
     plot_point(x, y, ctx);
-
-    // stop after drawing the first off-screen SGV
-    if (x < 0) {
-      break;
-    }
   }
 
   graphics_context_set_stroke_width(ctx, 1);
@@ -155,9 +155,15 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
       uint8_t basal = decode_bits(data->extra[i], GRAPH_EXTRA_BASAL_OFFSET, GRAPH_EXTRA_BASAL_BITS);
       x = index_to_x(i, graph_width, padding);
       y = layer_size.h - basal;
-      graphics_draw_line(ctx, GPoint(x, y), GPoint(x + get_prefs()->point_width + get_prefs()->point_margin - 1, y));
+      uint8_t width = get_prefs()->point_width + get_prefs()->point_margin;
+      if (i == data->count - 1) {
+        // if this is the last point to draw, extend its basal data to the left edge
+        width += x;
+        x = 0;
+      }
+      graphics_draw_line(ctx, GPoint(x, y), GPoint(x + width - 1, y));
       if (basal > 1) {
-        fill_rect_gray(ctx, GRect(x, y + 1, get_prefs()->point_width + get_prefs()->point_margin, basal - 1), data->color);
+        fill_rect_gray(ctx, GRect(x, y + 1, width, basal - 1), data->color);
       }
     }
     if (padding > 0) {
