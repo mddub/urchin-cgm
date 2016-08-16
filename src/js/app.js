@@ -194,29 +194,27 @@ function app(Pebble, c) {
       } catch (e) {
         console.log(e);
         console.log('Bad config from webview: ' + event.response);
+        return;
       }
 
-      if (newConfig) {
-        var newMaxSGVs = computeMaxSGVs(newConfig);
-        data.setMaxSGVCount(newMaxSGVs);
+      var oldNightscoutURL = config.nightscout_url;
+      var oldMaxSGVs = computeMaxSGVs(config);
 
-        if (newConfig.nightscout_url !== config.nightscout_url ||
-            newMaxSGVs > maxSGVs ||
-            newConfig.__CLEAR_CACHE__
-        ) {
-          data.clearCache();
-        }
-        if (newConfig.__CLEAR_CACHE__) {
+      config = mergeConfig(newConfig, c.DEFAULT_CONFIG);
+      maxSGVs = computeMaxSGVs(config);
+      data.setMaxSGVCount(maxSGVs);
+
+      if (config.nightscout_url !== oldNightscoutURL || maxSGVs > oldMaxSGVs || config.__CLEAR_CACHE__) {
+        data.clearCache();
+        if (config.__CLEAR_CACHE__) {
           // present only for tests
           delete newConfig.__CLEAR_CACHE__;
         }
-
-        maxSGVs = newMaxSGVs;
-        config = mergeConfig(newConfig, c.DEFAULT_CONFIG);
-        localStorage.setItem(c.LOCAL_STORAGE_KEY_CONFIG, JSON.stringify(config));
-        console.log('Preferences updated: ' + JSON.stringify(config));
-        sendPreferences().then(requestAndSendData);
       }
+
+      localStorage.setItem(c.LOCAL_STORAGE_KEY_CONFIG, JSON.stringify(config));
+      console.log('Preferences updated: ' + JSON.stringify(config));
+      sendPreferences().then(requestAndSendData);
     });
 
     Pebble.addEventListener('appmessage', function(e) {
