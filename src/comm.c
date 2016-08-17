@@ -66,7 +66,6 @@ static void schedule_update(uint32_t delay) {
   clear_timer(&request_timer);
   clear_timer(&timeout_timer);
   request_timer = app_timer_register(delay, request_update, NULL);
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Scheduling update for delay %d", (int) delay);
 }
 
 static void request_update() {
