@@ -2,6 +2,7 @@ import copy
 import math
 from datetime import datetime
 from datetime import timedelta
+from functools import partial
 
 from util import BASE_CONFIG
 from util import CONSTANTS
@@ -44,7 +45,7 @@ def default_entries(direction, count=50):
         in zip(default_sgv_series(count), default_dates(count))
     ]
 
-def some_real_life_entries():
+def some_real_life_entries(*args):
     sgvs = [190, 188, 180, 184, 184, 177, 174, 163, 152, 141, 134, 127, 124, 121, 117, 109, 103, 97, 94, 88, 79, 79, 75, 79, 84, 87, 88, 91, 91, 91, 94, 99, 102, 107, 106, 108, 107, 108, 115, 111, 114, 113, 115, 118, 120, 119, 120, 122, 123, 126, 122, 125, 125, 126, 125, 122, 122, 122, 119, 118, 118, 118, 117, 116, 115, 114, 114, 115, 114, 113, 114, 115, 111, 114, 115, 114, 114, 116, 117, 117, 118, 119, 121, 124, 125, 128, 126, 128, 131, 133, 135, 136, 135, 134, 132, 130]
     return [
         {
@@ -66,7 +67,7 @@ def mutate_element(layout, el_name, props):
 
 class TestBasicIntegration(ScreenshotTest):
     """Test that the graph, delta, trend, etc. all work."""
-    sgvs = default_entries('FortyFiveDown')
+    sgvs = partial(default_entries, 'FortyFiveDown')
 
 
 class TestMmol(ScreenshotTest):
@@ -74,7 +75,7 @@ class TestMmol(ScreenshotTest):
     config = {
         'mmol': True,
     }
-    sgvs = default_entries('Flat')
+    sgvs = partial(default_entries, 'Flat')
 
 
 class TestGraphBoundsAndGridlines(ScreenshotTest):
@@ -86,12 +87,11 @@ class TestGraphBoundsAndGridlines(ScreenshotTest):
         'bottomOfGraph': 20,
         'hGridlines': 20,
     }
-    sgvs = default_entries('DoubleUp')
+    sgvs = partial(default_entries, 'DoubleUp')
 
 
 class TestSGVsAtBoundsAndGridlines(ScreenshotTest):
     """Test that the placement of target range bounds and gridlines is consistent with the placement of SGV points."""
-    @property
     def sgvs(self):
         sgvs = default_entries('Flat')
         for i, s in enumerate(sgvs):
@@ -107,7 +107,6 @@ class TestSGVsAtBoundsAndGridlines(ScreenshotTest):
 
 class TestStaleServerData(ScreenshotTest):
     """Test that when server data is stale, an icon appears."""
-    @property
     def sgvs(self):
         return default_entries('SingleDown')[7:]
 
@@ -115,7 +114,6 @@ class TestStaleServerData(ScreenshotTest):
 class TestNotRecentButNotYetStaleSidebar(ScreenshotTest):
     """Test that trend and delta are not shown in the sidebar when data is not recent."""
     config = {'layout': 'a'}
-    @property
     def sgvs(self):
         return default_entries('SingleDown')[2:]
 
@@ -123,14 +121,12 @@ class TestNotRecentButNotYetStaleSidebar(ScreenshotTest):
 class TestNotRecentButNotYetStaleBGRow(ScreenshotTest):
     """Test that trend and delta are not shown in the BG row when data is not recent."""
     config = {'layout': 'c'}
-    @property
     def sgvs(self):
         return default_entries('SingleDown')[2:]
 
 
 class TestErrorCodes(ScreenshotTest):
     """Test that error codes appear as ??? and are not graphed."""
-    @property
     def sgvs(self):
         s = default_entries('SingleDown')
         for i in range(0, 19, 3):
@@ -142,7 +138,6 @@ class TestErrorCodes(ScreenshotTest):
 
 class TestPositiveDelta(ScreenshotTest):
     """Test that positive deltas have "+" prepended and are not treated as error codes."""
-    @property
     def sgvs(self):
         s = default_entries('SingleUp')
         s[1]['sgv'] = s[0]['sgv'] - 10
@@ -158,7 +153,6 @@ class TestTrimmingValues(ScreenshotTest):
         'bottomOfGraph': 40,
         'hGridlines': 50,
     }
-    @property
     def sgvs(self):
         s = default_entries('DoubleDown')
         for i in range(12):
@@ -172,7 +166,6 @@ class TestTrimmingValues(ScreenshotTest):
 
 class TestDegenerateEntries(ScreenshotTest):
     """Test that "bad" SGV entries don't cause the watchface to crash."""
-    @property
     def sgvs(self):
         s = default_entries('DoubleDown')
         # A raw-only entry won't have sgv, shouldn't be graphed
@@ -204,7 +197,7 @@ class TestBlackBackground(ScreenshotTest):
             'statusText': 'black as coal',
         }
 
-    sgvs = default_entries('Flat')
+    sgvs = partial(default_entries, 'Flat')
 
 
 class TestStatusTextTooLong(ScreenshotTest):
@@ -213,12 +206,12 @@ class TestStatusTextTooLong(ScreenshotTest):
         'statusContent': 'customtext',
         'statusText': '^_^ ' * 100,
     }
-    sgvs = default_entries('Flat')
+    sgvs = partial(default_entries, 'Flat')
 
 
 class TestLayoutA(ScreenshotTest):
     """Test layout A."""
-    sgvs = some_real_life_entries()
+    sgvs = some_real_life_entries
     config = {
         'layout': 'a',
         'statusContent': 'customtext',
@@ -228,7 +221,7 @@ class TestLayoutA(ScreenshotTest):
 
 class TestLayoutB(ScreenshotTest):
     """Test layout B."""
-    sgvs = some_real_life_entries()
+    sgvs = some_real_life_entries
     config = {
         'layout': 'b',
         'statusContent': 'customtext',
@@ -238,7 +231,7 @@ class TestLayoutB(ScreenshotTest):
 
 class TestLayoutC(ScreenshotTest):
     """Test layout C."""
-    sgvs = some_real_life_entries()
+    sgvs = some_real_life_entries
     config = {
         'layout': 'c',
         'statusContent': 'customtext',
@@ -248,7 +241,7 @@ class TestLayoutC(ScreenshotTest):
 
 class TestLayoutD(ScreenshotTest):
     """Test layout D."""
-    sgvs = some_real_life_entries()
+    sgvs = some_real_life_entries
     config = {
         'layout': 'd',
     }
@@ -256,7 +249,7 @@ class TestLayoutD(ScreenshotTest):
 
 class TestLayoutE(ScreenshotTest):
     """Test layout E."""
-    sgvs = some_real_life_entries()
+    sgvs = some_real_life_entries
     config = {
         'layout': 'e',
         'statusContent': 'customtext',
@@ -266,7 +259,7 @@ class TestLayoutE(ScreenshotTest):
 
 class TestLayoutCustom(ScreenshotTest):
     """Test the default custom layout."""
-    sgvs = some_real_life_entries()
+    sgvs = some_real_life_entries
     config = {
         'layout': 'custom',
         'customLayout': BASE_CONFIG['customLayout'],
@@ -295,7 +288,7 @@ class BaseBatteryLocInStatusTest(ScreenshotTest):
             'statusText': self.status_text,
         }
 
-    sgvs = default_entries('FortyFiveDown')
+    sgvs = partial(default_entries, 'FortyFiveDown')
 
 
 class TestBatteryLocInStatusAlignedWithLastLineOfText(BaseBatteryLocInStatusTest):
@@ -311,7 +304,7 @@ class TestBatteryLocInStatusMinimumPadding(BaseBatteryLocInStatusTest):
 
 
 class TestBatteryAsNumber(ScreenshotTest):
-    sgvs = default_entries('FortyFiveUp')
+    sgvs = partial(default_entries, 'FortyFiveUp')
     config = {
         'layout': 'a',
         'statusContent': 'customtext',
@@ -320,7 +313,7 @@ class TestBatteryAsNumber(ScreenshotTest):
     }
 
 class BaseDynamicTimeFontTest(ScreenshotTest):
-    sgvs = default_entries('Flat')
+    sgvs = partial(default_entries, 'Flat')
     time_height = None
 
     @property

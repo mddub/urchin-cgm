@@ -123,15 +123,23 @@ class ScreenshotTest(object):
         ScreenshotTest.summary_file = SummaryFile(cls.summary_filename(), BASE_CONFIG)
         ScreenshotTest._loaded_environment = True
 
+    def sgvs(self):
+        raise NotImplementedError
+
     def test_screenshot(self):
         if not hasattr(self, 'config'):
             self.config = {}
-        if not hasattr(self, 'sgvs'):
-            self.sgvs = []
+
+        # Create the SGVs at test run time, not at test definition time.
+        # Otherwise, recency display in the screenshots can differ across runs.
+        if not hasattr(self.sgvs, '__call__'):
+            raise "sgvs attribute of test instance must be callable"
 
         self.ensure_environment()
-        set_sgvs(self.sgvs)
-        set_config(dict(BASE_CONFIG, nightscout_url=MOCK_HOST, **self.config), PLATFORMS)
+
+        self.test_sgvs = self.sgvs()
+        set_sgvs(self.test_sgvs)
+        set_config(dict(BASE_CONFIG, nightscout_url=MOCK_HOST, __CLEAR_CACHE__=True, **self.config), PLATFORMS)
 
         fails = []
         for platform in PLATFORMS:
@@ -211,7 +219,7 @@ class SummaryFile(object):
             platform=platform,
             doc=test_instance.__class__.__doc__ or '',
             config=json.dumps(test_instance.config),
-            sgvs=json.dumps(self.printed_sgvs(test_instance.sgvs))
+            sgvs=json.dumps(self.printed_sgvs(test_instance.test_sgvs))
         )
         if passed:
             self.passes += result
