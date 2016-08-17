@@ -121,14 +121,22 @@ static void in_received_handler(DictionaryIterator *received, void *context) {
     static DataMessage d;
     if (validate_data_message(received, &d)) {
       memcpy(last_data_message, &d, sizeof(DataMessage));
-      int32_t delay;
+
+      int32_t delay_seconds;
       if (get_prefs()->update_every_minute) {
-        delay = 60 * 1000;
+        delay_seconds = 60;
       } else {
-        int32_t next_update = (SGV_UPDATE_FREQUENCY_SECONDS - last_data_message->recency) * 1000;
-        delay = next_update < 0 ? LATE_DATA_UPDATE_FREQUENCY : next_update;
+        int32_t next_update;
+        if (last_data_message->recency < SGV_UPDATE_FREQUENCY_SECONDS) {
+          next_update = SGV_UPDATE_FREQUENCY_SECONDS - last_data_message->recency;
+          delay_seconds = next_update < 15 ? 15 : next_update;
+        } else if (last_data_message->recency < SGV_UPDATE_FREQUENCY_SECONDS + LATE_DATA_RETRY_PERIOD_SECONDS) {
+          delay_seconds = 15;
+        } else {
+          delay_seconds = LATE_DATA_UPDATE_FREQUENCY_SECONDS;
+        }
       }
-      schedule_update((uint32_t) delay);
+      schedule_update((uint32_t) delay_seconds * 1000);
 
       request_state_callback(REQUEST_STATE_SUCCESS, 0);
       data_callback(last_data_message);
