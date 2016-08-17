@@ -8,7 +8,6 @@ static bool phone_contact = false;
 static bool update_in_progress;
 static AppTimer *request_timer = NULL;
 static AppTimer *timeout_timer = NULL;
-static time_t app_start_time;
 
 static void (*data_callback)(DataMessage *data);
 static void (*prefs_callback)(DictionaryIterator *received);
@@ -81,11 +80,6 @@ static void request_update() {
 
   AppMessageResult begin_result = app_message_outbox_begin(&send_message);
   if (begin_result != APP_MSG_OK) {
-    if (begin_result == APP_MSG_CLOSED) {
-      // Unclear whether this ever happens. Trying this for
-      // https://github.com/mddub/urchin-cgm/issues/22
-      init_app_message();
-    }
     request_state_callback(REQUEST_STATE_BEGIN_FAILED, begin_result);
     schedule_update(SEND_FAILED_DELAY);
     return;
@@ -106,8 +100,6 @@ static void request_update() {
 static void in_received_handler(DictionaryIterator *received, void *context) {
   phone_contact = true;
   update_in_progress = false;
-
-  time_t now = time(NULL);
 
   int32_t msg_type;
   if (!get_int32(received, &msg_type, APP_KEY_MSG_TYPE, true, 0)) {
@@ -173,12 +165,10 @@ static void bluetooth_connection_handler(bool connected) {
 }
 
 static void init_app_message() {
-  const uint32_t inbound_size = CONTENT_SIZE;
-  const uint32_t outbound_size = 64;
   app_message_register_inbox_received(in_received_handler);
   app_message_register_inbox_dropped(in_dropped_handler);
   app_message_register_outbox_failed(out_failed_handler);
-  app_message_open(inbound_size, outbound_size);
+  app_message_open(CONTENT_SIZE, APP_MESSAGE_OUTBOX_SIZE_MINIMUM);
 }
 
 void init_comm(
@@ -189,8 +179,6 @@ void init_comm(
   data_callback = callback_for_data;
   prefs_callback = callback_for_prefs;
   request_state_callback = callback_for_request_state;
-
-  app_start_time = time(NULL);
 
   if (connection_service_peek_pebble_app_connection()) {
     // We expect the JS to initiate sending data first.
