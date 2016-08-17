@@ -1,6 +1,7 @@
 {
    "VERSION" : "0.0.9",
 
+   "DEBUG": false,
    "CONFIG_URL" : "https://mddub.github.io/urchin-cgm/config/",
    "LOCAL_STORAGE_KEY_CONFIG" : "config",
 

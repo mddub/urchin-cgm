@@ -5,6 +5,7 @@ require('./vendor/lie.polyfill');
 
 var Cache = require('./cache');
 var debounce = require('./debounce');
+var Debug = require('./debug');
 
 var data = function(c) {
   var MAX_SGVS = c.SGV_FETCH_SECONDS / c.INTERVAL_SIZE_SECONDS + c.FETCH_EXTRA;
@@ -37,6 +38,8 @@ var data = function(c) {
   // https://github.com/bewest/share2nightscout-bridge
   var DEXCOM_APPLICATION_ID = 'd89443d2-327c-4a6f-89e5-496bbb0317db';
   var dexcomToken;
+
+  var debug = Debug(c);
 
   var d = {};
 
@@ -89,6 +92,7 @@ var data = function(c) {
 
       // On iOS, PebbleKit JS will throw an error on send() for an invalid URL
       try {
+        debug.log(method + ' ' + url);
         xhr.send(body);
         setTimeout(onTimeout, c.REQUEST_TIMEOUT);
       } catch (e) {
