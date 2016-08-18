@@ -6,6 +6,8 @@ import urllib2
 from datetime import datetime
 
 import requests
+from dateutil import parser
+from dateutil.tz import tzlocal
 from libpebble2.communication.transports.websocket import MessageTargetPhone
 from libpebble2.communication.transports.websocket.protocol import AppConfigResponse
 from libpebble2.communication.transports.websocket.protocol import AppConfigSetup
@@ -21,10 +23,7 @@ CONSTANTS = json.loads(
 )
 BASE_CONFIG = CONSTANTS['DEFAULT_CONFIG']
 
-def set_sgvs(sgvs):
-    _post_mock_server('/set-sgv', sgvs)
-
-def _post_mock_server(url, data):
+def post_mock_server(url, data):
     requests.post(MOCK_HOST + url, data=json.dumps(data))
 
 def pebble_install_and_run(platforms):
@@ -126,6 +125,12 @@ class ScreenshotTest(object):
     def sgvs(self):
         raise NotImplementedError
 
+    def treatments(self):
+        return []
+
+    def profile(self):
+        return []
+
     def test_screenshot(self):
         if not hasattr(self, 'config'):
             self.config = {}
@@ -137,8 +142,16 @@ class ScreenshotTest(object):
 
         self.ensure_environment()
 
+        # XXX this should all be run in a single process, e.g. with Tornado
         self.test_sgvs = self.sgvs()
-        set_sgvs(self.test_sgvs)
+        post_mock_server('/set-sgv', self.test_sgvs)
+
+        self.test_treatments = self.treatments()
+        post_mock_server('/set-treatments', self.test_treatments)
+
+        self.test_profile = self.profile()
+        post_mock_server('/set-profile', self.test_profile)
+
         set_config(dict(BASE_CONFIG, nightscout_url=MOCK_HOST, __CLEAR_CACHE__=True, **self.config), PLATFORMS)
 
         fails = []
@@ -201,25 +214,32 @@ class SummaryFile(object):
             """.format(json.dumps(self.base_config)))
 
     def add_test_result(self, test_instance, platform, passed):
+        details = """
+            <strong>{classname} [{platform}]</strong> {doc}
+            <code>{config}</code>
+            <code>{sgvs}</code>
+        """.format(
+            classname=test_instance.__class__.__name__,
+            platform=platform,
+            doc=test_instance.__class__.__doc__ or '',
+            config=json.dumps(test_instance.config),
+            sgvs=json.dumps(self.formatted_sgvs(test_instance.test_sgvs))
+        )
+        if test_instance.test_treatments:
+            details += "<code>{treatments}</code>".format(treatments=self.formatted_treatments(test_instance.test_treatments))
+        if test_instance.test_profile:
+            details += "<code>{profile}</code>".format(profile=test_instance.test_profile)
         result = """
         <tr>
           <td><img src="{test_filename}" class="{klass}"></td>
           <td><img src="{diff_filename}"></td>
-          <td>
-            <strong>{classname} [{platform}]</strong> {doc}
-            <code>{config}</code>
-            <code>{sgvs}</code>
-          </td>
+          <td>{details}</td>
         </tr>
         """.format(
             test_filename=self.relative_path(test_instance.test_filename(platform)),
             klass=('pass' if passed else 'fail'),
             diff_filename=self.relative_path(test_instance.diff_filename(platform)),
-            classname=test_instance.__class__.__name__,
-            platform=platform,
-            doc=test_instance.__class__.__doc__ or '',
-            config=json.dumps(test_instance.config),
-            sgvs=json.dumps(self.printed_sgvs(test_instance.test_sgvs))
+            details=details,
         )
         if passed:
             self.passes += result
@@ -230,21 +250,28 @@ class SummaryFile(object):
     def relative_path(self, filename):
         return os.path.relpath(filename, os.path.dirname(self.out_file))
 
-    def printed_sgvs(self, sgvs):
+    def formatted_sgvs(self, sgvs):
         return [
             s
             if i == 0
             else {
                 'sgv': s.get('sgv'),
-                'ago': self.format_ago(s['date'])
+                'ago': self.format_ago(datetime.fromtimestamp(s['date'] / 1000).replace(tzinfo=tzlocal())),
             }
             for i, s in enumerate(sgvs)
         ]
 
+    def formatted_treatments(self, treatments):
+        out = []
+        for t in [_t.copy() for _t in treatments]:
+            t['ago'] = self.format_ago(parser.parse(t['created_at']))
+            del t['created_at']
+            out.append(t)
+        return out
+
     @staticmethod
     def format_ago(time):
-        now = int(datetime.now().strftime('%s'))
-        minutes = int(round((now - time / 1000) / 60))
+        minutes = int((datetime.now().replace(tzinfo=tzlocal()) - time).total_seconds() / 60)
         if minutes < 60:
             return '{}m'.format(minutes)
         else:

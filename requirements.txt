@@ -1,5 +1,6 @@
 flask==0.10.1
 pytest==2.6.1
+python-dateutil==2.5.3
 requests==2.3.0
 simplejson==3.8.0
 watchdog==0.8.3

@@ -35,14 +35,16 @@ for coll in COLLECTIONS:
 
 app = Flask(__name__)
 
-def _get_post_data(request):
-    return request.data or request.form.keys()[0]
+def _get_post_json(request):
+    return json.loads(request.data or request.form.keys()[0])
 
 @app.route('/api/v1/<coll>.json')
 def get_collection(coll):
-    coll = _collection_from_test(coll, args.test_class) if args.test_class else _collection_from_cache(coll)
-    if coll is not None:
-        return coll
+    elements = _collection_from_test(coll, args.test_class) if args.test_class else _collection_from_cache(coll)
+    if coll == 'treatments':
+        return json.dumps(_filter_treatments(elements, request.args))
+    elif elements is not None:
+        return json.dumps(elements)
     else:
         raise NotFound
 
@@ -53,16 +55,27 @@ def _collection_from_test(coll, test_class_name):
     # XXX this is very fragile, but for now makes iterating much faster
     reload(test_screenshots)
     if coll == 'entries':
-        return json.dumps(getattr(test_screenshots, test_class_name)().sgvs())
-    elif coll in COLLECTIONS:
-        return []
+        return getattr(test_screenshots, test_class_name)().sgvs()
+    elif coll == 'treatments':
+        return getattr(test_screenshots, test_class_name)().treatments()
+    elif coll == 'profile':
+        return getattr(test_screenshots, test_class_name)().profile()
     else:
         return None
+
+def _filter_treatments(treatments, query):
+    # XXX hard-coding the queries performed by the JS
+    if query.get('find[eventType]') == 'Temp Basal':
+        return [t for t in treatments if 'duration' in t]
+    elif query.get('find[insulin][$exists]'):
+        return [t for t in treatments if 'insulin' in t]
+    else:
+        return treatments
 
 @app.route('/set-<coll>', methods=['post'])
 def set_collection(coll):
     if coll in COLLECTIONS:
-        cache.set(coll, _get_post_data(request))
+        cache.set(coll, _get_post_json(request))
         return ''
     else:
         raise NotFound
