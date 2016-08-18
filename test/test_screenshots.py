@@ -4,6 +4,8 @@ from datetime import datetime
 from datetime import timedelta
 from functools import partial
 
+from dateutil.tz import tzlocal
+
 from util import BASE_CONFIG
 from util import CONSTANTS
 from util import MOCK_HOST
@@ -25,11 +27,17 @@ def default_sgv_series(count=50):
         for i in range(count)
     ]
 
-def default_dates(count=50):
+def default_dates(count=50, offset=0):
     now = datetime.now()
     return [
-        int((now - timedelta(minutes=5 * i)).strftime('%s')) * 1000
+        int((now + timedelta(seconds=offset) - timedelta(minutes=5 * i)).strftime('%s')) * 1000
         for i in range(count)
+    ]
+
+def default_dates_as_iso(*args, **kwargs):
+    return [
+        datetime.fromtimestamp(date / 1000).replace(tzinfo=tzlocal()).isoformat()
+        for date in default_dates(*args, **kwargs)
     ]
 
 def default_entries(direction, count=50):
@@ -58,6 +66,34 @@ def some_real_life_entries(*args):
         for sgv, date
         in zip(sgvs, default_dates(len(sgvs)))
     ]
+
+def sgvs_from_array(arr):
+    return [
+        {'date': date, 'sgv': sgv, 'direction': 'Flat'}
+        for date, sgv in zip(default_dates(len(arr)), arr)
+    ]
+
+def some_fake_temp_basals(*args):
+    rates = [2, 1, 0, 0.1, 0.4, 0, 0.5, 1.5, 0.8, 0]
+    return [
+        {'absolute': rate, 'created_at': date, 'duration': 30}
+        # offset by 2.5 minutes so the basals are centered around the SGVs
+        for rate, date in zip(rates, default_dates_as_iso(offset=-150))
+    ]
+
+def some_fake_boluses(*args):
+    dates = default_dates_as_iso()
+    return [
+        {'created_at': dates[0], 'insulin': 1},
+        {'created_at': dates[2], 'insulin': 1},
+        {'created_at': dates[5], 'insulin': 1},
+        {'created_at': dates[6], 'insulin': 1},
+        {'created_at': dates[11], 'insulin': 1},
+        {'created_at': dates[40], 'insulin': 1},
+    ]
+
+def profile_with_one_basal(rate):
+    return [{"basal": [{"time": "00:00", "value": rate}]}]
 
 def mutate_element(layout, el_name, props):
     for el in layout['elements']:
@@ -345,3 +381,137 @@ class TestDynamicTimeFont10(BaseDynamicTimeFontTest):
 
 class TestDynamicTimeFont6(BaseDynamicTimeFontTest):
     time_height = 6
+
+class TestBasalGraph(ScreenshotTest):
+    config = {
+        'layout': 'd',
+        'basalGraph': True,
+        'basalHeight': 20,
+    }
+    sgvs = some_real_life_entries
+    profile = partial(profile_with_one_basal, 0.5)
+    def treatments(self):
+        dates = default_dates_as_iso(offset=-150)
+        return [
+            {'created_at': dates[0], 'duration': 30, 'absolute': 1},
+            {'created_at': dates[9], 'duration': 30, 'absolute': 1},
+            {'created_at': dates[16], 'duration': 30, 'absolute': 1},
+            {'created_at': dates[18], 'duration': 30, 'absolute': 0.8},
+            {'created_at': dates[25], 'duration': 30, 'absolute': 0},
+            {'created_at': dates[35], 'duration': 30, 'absolute': 0.2},
+            {'created_at': dates[48], 'duration': 30, 'absolute': 0.05},
+        ]
+
+class TestPointsCircleAlignment(ScreenshotTest):
+    """Test the vertical alignment of circular points, including trimmed values."""
+    config = {
+        'layout': 'd',
+        'topOfGraph': 250,
+        'topOfRange': 180,
+        'bottomOfRange': 80,
+        'bottomOfGraph': 40,
+        'hGridlines': 50,
+        'pointShape': 'circle',
+        'pointWidth': 11,
+        'pointMargin': 4,
+        'pointRightMargin': 5,
+        'plotLine': True,
+        'plotLineWidth': 3,
+    }
+    sgvs = partial(sgvs_from_array, [300, 250, 200, 180, 150, 100, 80, 50, 30])
+
+class TestPointsMissingWithLine(ScreenshotTest):
+    """Test that the line is drawn as expected when SGV values are missing."""
+    config = {
+        'layout': 'd',
+        'pointShape': 'circle',
+        'pointWidth': 9,
+        'pointMargin': 3,
+        'pointRightMargin': 0,
+        'plotLine': True,
+        'plotLineWidth': 1,
+    }
+    sgvs = partial(sgvs_from_array, [100, 150, 0, 0, 85, 0, 85, 0, 30, 85, 0, 230])
+
+class TestPointsBarelyOnScreen(ScreenshotTest):
+    config = {
+        'layout': 'd',
+        'pointShape': 'rectangle',
+        'pointWidth': 9,
+        'pointRectHeight': 9,
+        'pointMargin': 6,
+        'pointRightMargin': 0,
+        'plotLine': True,
+        'plotLineWidth': 1,
+    }
+    sgvs = partial(sgvs_from_array, [200 - 12 * i + (i ** 2) for i in range(10)])
+
+class TestPointsBarelyOffScreen(TestPointsBarelyOnScreen):
+    @property
+    def config(self):
+        config = super(TestPointsBarelyOffScreen, self).config.copy()
+        config['pointRightMargin'] += 1
+        return config
+
+class TestPointsNegativeMargin(ScreenshotTest):
+    config = {
+        'layout': 'd',
+        'pointShape': 'rectangle',
+        'pointWidth': 19,
+        'pointRectHeight': 19,
+        'pointMargin': -9,
+        'pointRightMargin': 0,
+        'plotLine': False,
+    }
+    sgvs = partial(sgvs_from_array, range(230, 50, -15))
+
+class TestPointsMarginsWithTreatments(ScreenshotTest):
+    """Test that boluses and basals are left-shifted when there is a margin, and the leftmost point's basal extends to the left edge."""
+    config = {
+        'layout': 'd',
+        'pointShape': 'rectangle',
+        'pointWidth': 9,
+        'pointRectHeight': 13,
+        'pointMargin': 5,
+        'pointRightMargin': 15,
+        'plotLine': False,
+        'bolusTicks': True,
+        'basalGraph': True,
+        'basalHeight': 20,
+    }
+    sgvs = partial(sgvs_from_array, range(200, 110, -10))
+    profile = partial(profile_with_one_basal, 0.5)
+    def treatments(self):
+        return some_fake_temp_basals() + some_fake_boluses()
+
+class TestPointsBolusesDefault(ScreenshotTest):
+    """Test that bolus ticks are left-aligned with width 2 by default."""
+    config = {
+        'layout': 'd',
+        'bolusTicks': True,
+    }
+    sgvs = some_real_life_entries
+    treatments = some_fake_boluses
+
+class TestPointsBolusesCenteredEven(ScreenshotTest):
+    """Test that bolus ticks are center-aligned with width 2 for even-width points."""
+    config = {
+        'layout': 'd',
+        'bolusTicks': True,
+        'pointWidth': 6,
+    }
+    sgvs = some_real_life_entries
+    treatments = some_fake_boluses
+
+
+class TestPointsBolusesCenteredOdd(ScreenshotTest):
+    """Test that bolus ticks are center-aligned with width 3 for odd-width points."""
+    config = {
+        'layout': 'a',
+        'bolusTicks': True,
+        'pointShape': 'circle',
+        'pointWidth': 7,
+        'pointRightMargin': 1,
+    }
+    sgvs = some_real_life_entries
+    treatments = some_fake_boluses
