@@ -3,7 +3,6 @@
 #include "preferences.h"
 #include "staleness.h"
 
-#define BOLUS_TICK_WIDTH 2
 #define BOLUS_TICK_HEIGHT 7
 
 static GPoint center_of_point(int x, int y) {
@@ -23,7 +22,13 @@ static void plot_point(int x, int y, GContext *ctx) {
 }
 
 static void plot_tick(int x, int bottom_y, GContext *ctx) {
-  graphics_fill_rect(ctx, GRect(x, bottom_y - BOLUS_TICK_HEIGHT, BOLUS_TICK_WIDTH, BOLUS_TICK_HEIGHT), 0, GCornerNone);
+  uint8_t width;
+  if (get_prefs()->point_width >= 5 && get_prefs()->point_width % 2 == 1) {
+    width = 3;
+  } else {
+    width = 2;
+  }
+  graphics_fill_rect(ctx, GRect(x + get_prefs()->point_width / 2 - width / 2, bottom_y - BOLUS_TICK_HEIGHT, width, BOLUS_TICK_HEIGHT), 0, GCornerNone);
 }
 
 static int bg_to_y(int height, int bg) {
