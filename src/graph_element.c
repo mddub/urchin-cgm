@@ -10,13 +10,13 @@ static GPoint center_of_point(int x, int y) {
   if (get_prefs()->point_shape == POINT_SHAPE_CIRCLE) {
     return GPoint(x + get_prefs()->point_width / 2, y + get_prefs()->point_width / 2);
   } else {
-    return GPoint(x + get_prefs()->point_width / 2, y + get_prefs()->point_height / 2);
+    return GPoint(x + get_prefs()->point_width / 2, y + get_prefs()->point_rect_height / 2);
   }
 }
 
 static void plot_point(int x, int y, GContext *ctx) {
   if (get_prefs()->point_shape == POINT_SHAPE_RECTANGLE) {
-    graphics_fill_rect(ctx, GRect(x, y, get_prefs()->point_width, get_prefs()->point_height), 0, GCornerNone);
+    graphics_fill_rect(ctx, GRect(x, y, get_prefs()->point_width, get_prefs()->point_rect_height), 0, GCornerNone);
   } else if (get_prefs()->point_shape == POINT_SHAPE_CIRCLE) {
     graphics_fill_circle(ctx, center_of_point(x, y), get_prefs()->point_width / 2);
   }
@@ -39,7 +39,7 @@ static int index_to_x(uint8_t i, uint8_t graph_width, uint8_t padding) {
 
 static int bg_to_y_for_point(int height, int bg) {
   int min = 0;
-  int diameter = get_prefs()->point_height;
+  int diameter = get_prefs()->point_shape == POINT_SHAPE_CIRCLE ? get_prefs()->point_width : get_prefs()->point_rect_height;
   int max = height - diameter;
 
   int y = (float)bg_to_y(height, bg) - diameter / 2.0f + 0.5f;

@@ -10,7 +10,7 @@
     'topOfRange',
     'bottomOfRange',
     'bottomOfGraph',
-    'pointHeight',
+    'pointRectHeight',
     'pointWidth',
     'pointMargin',
     'pointRightMargin',
@@ -76,7 +76,7 @@
     $('.plot-line-width-container').toggle($('#plotLine').is(':checked'));
 
     var width = tryParseInt($('#pointWidth-val').val(), 1);
-    var height = tryParseInt($('#pointHeight-val').val(), 1);
+    var height = tryParseInt($('#pointRectHeight-val').val(), 1);
 
     // point width must be odd for circle
     if ($('[name=pointShape].active').attr('value') === 'circle' && width % 2 === 0) {
@@ -85,7 +85,7 @@
 
     // point height must be odd
     if (height % 2 === 0) {
-      $('#pointHeight, #pointHeight-val').val(height + 1);
+      $('#pointRectHeight, #pointRectHeight-val').val(height + 1);
     }
 
     // the lowest available negative point margin must make sense
@@ -516,7 +516,7 @@
     $('#basalGraph').trigger('change');
 
     $('[name=pointShape]').on('click', onPointSettingsChange);
-    $('#pointHeight, #pointHeight-val').on('change', onPointSettingsChange);
+    $('#pointRectHeight, #pointRectHeight-val').on('change', onPointSettingsChange);
     $('#pointWidth, #pointWidth-val').on('change', onPointSettingsChange);
     $('#pointMargin, #pointMargin-val').on('change', onPointSettingsChange);
     $('#pointRightMargin, #pointRightMargin-val').on('change', onPointSettingsChange);

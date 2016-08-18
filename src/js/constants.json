@@ -14,7 +14,7 @@
       "bottomOfGraph" : 40,
       "hGridlines" : 50,
       "pointShape": "rectangle",
-      "pointHeight": 3,
+      "pointRectHeight": 3,
       "pointWidth": 3,
       "pointMargin": 0,
       "pointRightMargin": 0,

@@ -34,7 +34,7 @@ describe('points', function() {
       var config = {
         pointShape: 'circle',
         pointWidth: 9,
-        pointHeight: 9, // unused for circle
+        pointRectHeight: 9,
         pointMargin: 4,
         pointRightMargin: 4,
       };
@@ -49,7 +49,7 @@ describe('points', function() {
       var config = {
         pointShape: 'rectangle',
         pointWidth: 5,
-        pointHeight: 5,
+        pointRectHeight: 5,
         pointMargin: 4,
         pointRightMargin: 0,
       };
@@ -68,7 +68,7 @@ describe('points', function() {
       var config = {
         pointShape: 'rectangle',
         pointWidth: 4,
-        pointHeight: 5,
+        pointRectHeight: 5,
         pointMargin: 1,
         pointRightMargin: 0,
       };
@@ -79,7 +79,7 @@ describe('points', function() {
       var config = {
         pointShape: 'rectangle',
         pointWidth: 3,
-        pointHeight: 3,
+        pointRectHeight: 3,
         pointMargin: -1,
         pointRightMargin: 0,
       };

@@ -71,7 +71,7 @@ typedef struct __attribute__((__packed__)) Preferences {
   unsigned int time_align:2;
   unsigned int battery_loc:3;
   unsigned int point_shape:2;
-  unsigned int point_height:5;
+  unsigned int point_rect_height:5;
   unsigned int point_width:5;
   int8_t point_margin;
   unsigned int point_right_margin:5;

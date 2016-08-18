@@ -46,7 +46,7 @@
       "timeAlign": 11,
       "batteryLoc": 12,
       "pointShape": 13,
-      "pointHeight": 14,
+      "pointRectHeight": 14,
       "pointWidth": 15,
       "pointMargin": 16,
       "pointRightMargin": 17,

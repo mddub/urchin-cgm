@@ -129,7 +129,7 @@ function app(Pebble, c) {
       timeAlign: c.ALIGN[getLayout(config).timeAlign],
       batteryLoc: c.BATTERY_LOC[getLayout(config).batteryLoc],
       pointShape: c.POINT_SHAPE[config.pointShape],
-      pointHeight: config.pointHeight,
+      pointRectHeight: config.pointRectHeight,
       pointWidth: config.pointWidth,
       pointMargin: config.pointMargin,
       pointRightMargin: config.pointRightMargin,
