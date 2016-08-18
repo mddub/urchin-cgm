@@ -13,7 +13,7 @@ from libpebble2.communication.transports.websocket.protocol import WebSocketPhon
 from pebble_tool.sdk.emulator import ManagedEmulatorTransport
 
 PLATFORMS = ('aplite', 'basalt')
-PORT = os.environ['MOCK_SERVER_PORT']
+PORT = os.environ.get('MOCK_SERVER_PORT', 5555)
 MOCK_HOST = 'http://localhost:{}'.format(PORT)
 
 CONSTANTS = json.loads(

@@ -2,4 +2,5 @@ flask==0.10.1
 pytest==2.6.1
 requests==2.3.0
 simplejson==3.8.0
+watchdog==0.8.3
 -e git+https://github.com/pebble/pebble-tool.git@v4.2.1#egg=pebble-tool
