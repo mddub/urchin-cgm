@@ -65,8 +65,8 @@
     return order.indexOf(a) - order.indexOf(b);
   }
 
-  function onPointStyleClick() {
-    var key = $('[name=pointStyle].active').attr('value');
+  function onPointStyleClick(e) {
+    var key = $(e.currentTarget).attr('value');
     var style = c.POINT_STYLES[key];
     if (key === 'd' && points.computeGraphWidth(encodeLayout()) !== 144) {
       // XXX adapt this style to narrow graph, but only when first selected
@@ -74,7 +74,7 @@
     }
     if (style !== undefined) {
       populatePointConfig(style);
-      setTimeout(onPointSettingsChange, 0);
+      setTimeout(onPointSettingsChange.bind(this, false), 0);
     }
   }
 
@@ -102,7 +102,7 @@
     $('[name=pointStyle][value=' + match + ']').addClass('active');
   }
 
-  function onPointSettingsChange() {
+  function onPointSettingsChange(e) {
     if ($('[name=pointShape].active').attr('value') === 'circle') {
       $('.point-width-container .item-container-header').text('Point diameter');
       $('#pointWidth').attr('step', 2);
@@ -142,7 +142,10 @@
     }
 
     updateVisibleHistoryLength();
-    updateSelectedPointStyle();
+
+    if (e) {
+      updateSelectedPointStyle();
+    }
   }
 
   function updateVisibleHistoryLength() {
@@ -314,12 +317,12 @@
     $('#layout-preview').addClass('layout-preview-' + layout);
   }
 
-  function onLayoutChoiceChange() {
+  function onLayoutChoiceChange(e) {
     if (currentLayoutChoice === 'custom') {
       // if switching from custom to a preset, save the custom layout
       customLayout = encodeLayout();
     }
-    currentLayoutChoice = $('[name=layout].active').attr('value');
+    currentLayoutChoice = (e ? $(e.currentTarget) : $('[name=layout].active')).attr('value');
     showLayoutPreview(currentLayoutChoice);
     decodeLayout(currentLayoutChoice);
     updateLayoutUpDownEnabledState();
@@ -584,7 +587,7 @@
     $('#pointRightMargin, #pointRightMargin-val').on('change', onPointSettingsChange);
     $('#plotLine').on('change', onPointSettingsChange);
     $('#plotLineWidth, #plotLineWidth-val').on('change', onPointSettingsChange);
-    onPointSettingsChange();
+    onPointSettingsChange(true);
 
     $('.layout-order').children('label').append([
       '<div class="up-down-buttons">',
