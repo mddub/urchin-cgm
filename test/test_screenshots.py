@@ -515,3 +515,27 @@ class TestPointsBolusesCenteredOdd(ScreenshotTest):
     }
     sgvs = some_real_life_entries
     treatments = some_fake_boluses
+
+def with_no_lines(config):
+    return dict(config, **{
+        'layout': 'd',
+        'bottomOfRange': 20,
+        'topOfRange': 400,
+        'hGridlines': 0,
+    })
+
+class TestPointsPresetA(ScreenshotTest):
+    config = with_no_lines(CONSTANTS['POINT_STYLES']['a'])
+    sgvs = some_real_life_entries
+
+class TestPointsPresetB(ScreenshotTest):
+    config = with_no_lines(CONSTANTS['POINT_STYLES']['b'])
+    sgvs = some_real_life_entries
+
+class TestPointsPresetC(ScreenshotTest):
+    config = with_no_lines(CONSTANTS['POINT_STYLES']['c'])
+    sgvs = some_real_life_entries
+
+class TestPointsPresetD(ScreenshotTest):
+    config = with_no_lines(CONSTANTS['POINT_STYLES']['d'])
+    sgvs = some_real_life_entries
