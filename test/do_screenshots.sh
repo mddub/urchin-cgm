@@ -7,7 +7,8 @@ TEST_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Start & background Flask server
 python "$TEST_DIR/server.py" & PID=$!
-sleep 0.5
+sleep 1
+bg
 
 # Run tests
 py.test test/ -v $@

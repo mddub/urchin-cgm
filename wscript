@@ -6,6 +6,7 @@ from waflib.Task import Task
 
 DEFAULT_BUILD_ENV = 'production'
 BUILD_ENV = os.environ.get('BUILD_ENV', DEFAULT_BUILD_ENV)
+DEBUG = os.environ.get('DEBUG')
 CONSTANTS_FILE = 'src/js/constants.json'
 
 ENV_CONSTANTS_OVERRIDES = {
@@ -33,11 +34,10 @@ def ensure_dir(filename):
             raise
 
 def constants_for_environment():
-    base_constants = json.loads(open(CONSTANTS_FILE).read())
-    if BUILD_ENV in ENV_CONSTANTS_OVERRIDES.keys():
-        return dict(base_constants, **ENV_CONSTANTS_OVERRIDES[BUILD_ENV])
-    else:
-        return base_constants
+    constants = json.loads(open(CONSTANTS_FILE).read())
+    constants.update(ENV_CONSTANTS_OVERRIDES.get(BUILD_ENV, {}))
+    constants.update(DEBUG=DEBUG)
+    return constants
 
 def generate_constants_file(ctx):
     target = 'src/js/generated/constants.json'
