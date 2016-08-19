@@ -108,6 +108,40 @@
       }
    },
 
+   "POINT_STYLES": {
+      "a": {
+         "pointShape": "rectangle",
+         "pointWidth": 3,
+         "pointRectHeight": 3,
+         "pointMargin": 0,
+         "pointRightMargin": 0,
+         "plotLine": false
+      },
+      "b": {
+         "pointShape": "rectangle",
+         "pointWidth": 3,
+         "pointRectHeight": 3,
+         "pointMargin": -1,
+         "pointRightMargin": 0,
+         "plotLine": false
+      },
+      "c": {
+         "pointShape": "circle",
+         "pointWidth": 7,
+         "pointMargin": 0,
+         "pointRightMargin": 1,
+         "plotLine": false
+      },
+      "d": {
+         "pointShape": "circle",
+         "pointWidth": 13,
+         "pointMargin": 2,
+         "pointRightMargin": 5,
+         "plotLine": true,
+         "plotLineWidth": 3
+      }
+   },
+
    "ELEMENTS": [
       "GRAPH_ELEMENT",
       "SIDEBAR_ELEMENT",

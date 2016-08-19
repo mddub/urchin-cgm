@@ -5,18 +5,21 @@
 
   var points = window.points(c);
 
-  var SLIDER_KEYS = [
+  var MAIN_SLIDER_KEYS = [
     'topOfGraph',
     'topOfRange',
     'bottomOfRange',
     'bottomOfGraph',
+    'statusRawCount',
+    'basalHeight',
+  ];
+
+  var POINT_SLIDER_KEYS = [
     'pointRectHeight',
     'pointWidth',
     'pointMargin',
     'pointRightMargin',
     'plotLineWidth',
-    'statusRawCount',
-    'basalHeight',
   ];
 
   var customLayout;
@@ -62,6 +65,43 @@
     return order.indexOf(a) - order.indexOf(b);
   }
 
+  function onPointStyleClick() {
+    var key = $('[name=pointStyle].active').attr('value');
+    var style = c.POINT_STYLES[key];
+    if (key === 'd' && points.computeGraphWidth(encodeLayout()) !== 144) {
+      // XXX adapt this style to narrow graph, but only when first selected
+      style.pointRightMargin = 2;
+    }
+    if (style !== undefined) {
+      populatePointConfig(style);
+      setTimeout(onPointSettingsChange, 0);
+    }
+  }
+
+  function updateSelectedPointStyle() {
+    var selected = {};
+    encodePointConfig(selected);
+    var match = Object.keys(c.POINT_STYLES).filter(function(styleKey) {
+      var style = c.POINT_STYLES[styleKey];
+      var keys = Object.keys(style).slice();
+      if (!style.plotLine) {
+        keys = keys.filter(function(k) { return k !== 'plotLineWidth'; });
+      }
+      if (style.pointShape === 'circle') {
+        keys = keys.filter(function(k) { return k !== 'pointRectHeight'; });
+      }
+      if (styleKey === 'd') {
+        // XXX see onPointStyleClick
+        keys = keys.filter(function(k) { return k !== 'pointRightMargin'; });
+      }
+      return keys.reduce(function(equal, key) {
+        return equal && style[key] === selected[key];
+      }, true);
+    })[0] || 'custom';
+    $('[name=pointStyle]').removeClass('active');
+    $('[name=pointStyle][value=' + match + ']').addClass('active');
+  }
+
   function onPointSettingsChange() {
     if ($('[name=pointShape].active').attr('value') === 'circle') {
       $('.point-width-container .item-container-header').text('Point diameter');
@@ -102,6 +142,7 @@
     }
 
     updateVisibleHistoryLength();
+    updateSelectedPointStyle();
   }
 
   function updateVisibleHistoryLength() {
@@ -283,6 +324,7 @@
     decodeLayout(currentLayoutChoice);
     updateLayoutUpDownEnabledState();
     reorderLayoutInputs();
+    updateVisibleHistoryLength();
   }
 
   function elementsEqual(a, b) {
@@ -312,7 +354,7 @@
     return match !== undefined ? match : 'custom';
   }
 
-  function maybeUpdateSelectedLayout() {
+  function updateSelectedLayout() {
     var layout = deriveLayoutChoiceFromInputs();
     if (layout !== $('[name=layout].active').attr('value')) {
       $('[name=layout]').removeClass('active');
@@ -374,6 +416,40 @@
     }
   }
 
+  function populateSliders(current, sliderKeys) {
+    sliderKeys.forEach(function(key) {
+      document.getElementById(key).value = current[key] !== undefined ? current[key] : '';
+      document.getElementById(key + '-val').value = current[key] !== undefined ? current[key] : '';
+    });
+  }
+
+  function encodeSliders(out, sliderKeys) {
+    sliderKeys.forEach(function(key) {
+      var val = tryParseInt($('#' + key + '-val').val(), 0);
+      var $slider = $('#' + key);
+      if ($slider.attr('max')) {
+        val = Math.min(val, parseInt($slider.attr('max'), 10));
+      }
+      if ($slider.attr('min')) {
+        val = Math.max(val, parseInt($slider.attr('min'), 10));
+      }
+      out[key] = val;
+    });
+  }
+
+  function populatePointConfig(current) {
+    populateSliders(current, POINT_SLIDER_KEYS.filter(function(k) { return k in current; }));
+    $('[name=pointShape]').removeClass('active');
+    $('[name=pointShape][value=' + current['pointShape'] + ']').addClass('active');
+    $('#plotLine').prop('checked', !!current['plotLine']);
+  }
+
+  function encodePointConfig(out) {
+    out.pointShape = $('[name=pointShape].active').attr('value');
+    out.plotLine = $('#plotLine').is(':checked');
+    encodeSliders(out, POINT_SLIDER_KEYS);
+  }
+
   function populateValues(current) {
     document.getElementById('ns-url').value = current['nightscout_url'] || '';
 
@@ -383,15 +459,10 @@
       document.getElementById('units-mgdl').className += ' active';
     }
 
-    SLIDER_KEYS.forEach(function(key) {
-      document.getElementById(key).value = current[key] !== undefined ? current[key] : '';
-      document.getElementById(key + '-val').value = current[key] !== undefined ? current[key] : '';
-    });
+    populateSliders(current, MAIN_SLIDER_KEYS);
+    populatePointConfig(current);
 
     document.getElementById('hGridlines').value = current['hGridlines'];
-
-    $('[name=pointShape][value=' + current['pointShape'] + ']').addClass('active');
-    $('#plotLine').prop('checked', !!current['plotLine']);
 
     document.getElementById('statusContent').value = current['statusContent'];
     document.getElementById('statusText').value = current['statusText'] || '';
@@ -429,8 +500,6 @@
       mmol: mmol,
       nightscout_url: document.getElementById('ns-url').value.replace(/\/$/, ''),
       hGridlines: tryParseInt(document.getElementById('hGridlines').value),
-      pointShape: $('[name=pointShape].active').attr('value'),
-      plotLine: $('#plotLine').is(':checked'),
       statusContent: document.getElementById('statusContent').value,
       statusText: document.getElementById('statusText').value,
       statusUrl: document.getElementById('statusUrl').value,
@@ -448,17 +517,8 @@
       advancedLayout: $('[name=advancedLayout]').is(':checked'),
       customLayout: customLayout,
     };
-    SLIDER_KEYS.forEach(function(key) {
-      var val = tryParseInt($('#' + key + '-val').val(), 0);
-      var $slider = $('#' + key);
-      if ($slider.attr('max')) {
-        val = Math.min(val, parseInt($slider.attr('max'), 10));
-      }
-      if ($slider.attr('min')) {
-        val = Math.max(val, parseInt($slider.attr('min'), 10));
-      }
-      out[key] = val;
-    });
+    encodeSliders(out, MAIN_SLIDER_KEYS);
+    encodePointConfig(out);
     return out;
   }
 
@@ -515,6 +575,8 @@
     });
     $('#basalGraph').trigger('change');
 
+    $('[name=pointStyle]').on('click', onPointStyleClick);
+
     $('[name=pointShape]').on('click', onPointSettingsChange);
     $('#pointRectHeight, #pointRectHeight-val').on('change', onPointSettingsChange);
     $('#pointWidth, #pointWidth-val').on('change', onPointSettingsChange);
@@ -534,13 +596,13 @@
       onLayoutUpDownButtonClick(evt);
       updateLayoutUpDownEnabledState();
       reorderLayoutInputs();
-      maybeUpdateSelectedLayout();
+      updateSelectedLayout();
     });
 
     $('.layout-order input').on('change', function() {
       updateLayoutUpDownEnabledState();
       reorderLayoutInputs();
-      maybeUpdateSelectedLayout();
+      updateSelectedLayout();
       updateVisibleHistoryLength();
     });
 
@@ -562,7 +624,7 @@
       '.layout-element-config input',
       '[name=timeAlign]',
       '[name=batteryLoc]',
-    ].join(', ')).on('change', maybeUpdateSelectedLayout);
+    ].join(', ')).on('change', updateSelectedLayout);
 
     $('.tabs-menu a').on('click', onTabClick);
 
