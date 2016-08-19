@@ -1,5 +1,5 @@
 {
-   "VERSION" : "0.0.9",
+   "VERSION" : "0.0.10",
 
    "DEBUG": false,
    "CONFIG_URL" : "https://mddub.github.io/urchin-cgm/config/",
