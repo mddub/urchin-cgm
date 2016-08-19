@@ -3,13 +3,23 @@
 
 (function($, c) {
 
-  var SLIDER_KEYS = [
+  var points = window.points(c);
+
+  var MAIN_SLIDER_KEYS = [
     'topOfGraph',
     'topOfRange',
     'bottomOfRange',
     'bottomOfGraph',
     'statusRawCount',
     'basalHeight',
+  ];
+
+  var POINT_SLIDER_KEYS = [
+    'pointRectHeight',
+    'pointWidth',
+    'pointMargin',
+    'pointRightMargin',
+    'plotLineWidth',
   ];
 
   var customLayout;
@@ -37,7 +47,7 @@
   }
 
   function tryParseInt(s, defaultValue) {
-    return parseInt(s, 10) >= 0 ? parseInt(s, 10) : defaultValue;
+    return isNaN(parseInt(s, 10)) ? defaultValue : parseInt(s, 10);
   }
 
   function enabledLayoutElements() {
@@ -53,6 +63,103 @@
       return $(e).data('element');
     });
     return order.indexOf(a) - order.indexOf(b);
+  }
+
+  function onPointStyleClick() {
+    var key = $('[name=pointStyle].active').attr('value');
+    var style = c.POINT_STYLES[key];
+    if (key === 'd' && points.computeGraphWidth(encodeLayout()) !== 144) {
+      // XXX adapt this style to narrow graph, but only when first selected
+      style.pointRightMargin = 2;
+    }
+    if (style !== undefined) {
+      populatePointConfig(style);
+      setTimeout(onPointSettingsChange, 0);
+    }
+  }
+
+  function updateSelectedPointStyle() {
+    var selected = {};
+    encodePointConfig(selected);
+    var match = Object.keys(c.POINT_STYLES).filter(function(styleKey) {
+      var style = c.POINT_STYLES[styleKey];
+      var keys = Object.keys(style).slice();
+      if (!style.plotLine) {
+        keys = keys.filter(function(k) { return k !== 'plotLineWidth'; });
+      }
+      if (style.pointShape === 'circle') {
+        keys = keys.filter(function(k) { return k !== 'pointRectHeight'; });
+      }
+      if (styleKey === 'd') {
+        // XXX see onPointStyleClick
+        keys = keys.filter(function(k) { return k !== 'pointRightMargin'; });
+      }
+      return keys.reduce(function(equal, key) {
+        return equal && style[key] === selected[key];
+      }, true);
+    })[0] || 'custom';
+    $('[name=pointStyle]').removeClass('active');
+    $('[name=pointStyle][value=' + match + ']').addClass('active');
+  }
+
+  function onPointSettingsChange() {
+    if ($('[name=pointShape].active').attr('value') === 'circle') {
+      $('.point-width-container .item-container-header').text('Point diameter');
+      $('#pointWidth').attr('step', 2);
+      $('.point-height-container').hide();
+    } else {
+      $('.point-width-container .item-container-header').text('Point width');
+      $('#pointWidth').attr('step', 1);
+      $('.point-height-container').show();
+    }
+
+    $('.plot-line-width-container').toggle($('#plotLine').is(':checked'));
+
+    var width = tryParseInt($('#pointWidth-val').val(), 1);
+    var height = tryParseInt($('#pointRectHeight-val').val(), 1);
+
+    // point width must be odd for circle
+    if ($('[name=pointShape].active').attr('value') === 'circle' && width % 2 === 0) {
+      $('#pointWidth, #pointWidth-val').val(width + 1);
+    }
+
+    // point height must be odd
+    if (height % 2 === 0) {
+      $('#pointRectHeight, #pointRectHeight-val').val(height + 1);
+    }
+
+    // the lowest available negative point margin must make sense
+    var minMargin = 1 - width;
+    if (tryParseInt($('#pointMargin').val(), 0) < minMargin) {
+      $('#pointMargin, #pointMargin-val').val(minMargin);
+    }
+    $('#pointMargin').attr('min', minMargin);
+
+    // line width must be odd
+    var lineWidth = tryParseInt($('#plotLineWidth-val').val(), 1);
+    if (lineWidth % 2 === 0) {
+      $('#plotLineWidth, #plotLineWidth-val').val(lineWidth - 1);
+    }
+
+    updateVisibleHistoryLength();
+    updateSelectedPointStyle();
+  }
+
+  function updateVisibleHistoryLength() {
+    var graphWidth = points.computeGraphWidth(encodeLayout());
+    var pointCount = points.computeVisiblePoints(graphWidth, buildConfig());
+    var hours = Math.floor(pointCount / 12);
+    var minutes = (pointCount - (12 * hours)) * 5;
+    var text;
+    if (hours > 0 && minutes > 0) {
+      text = hours + ' hr ' + minutes + ' min';
+    } else if (hours > 0 && minutes === 0) {
+      text = hours + ' hour' + (hours > 1 ? 's' : '');
+    } else {
+      text = minutes + ' minutes';
+    }
+    $('.history-length-shown').text(text);
+    $('.current-layout-graph-width').text(graphWidth);
   }
 
   function toggleAdvancedLayout() {
@@ -217,6 +324,7 @@
     decodeLayout(currentLayoutChoice);
     updateLayoutUpDownEnabledState();
     reorderLayoutInputs();
+    updateVisibleHistoryLength();
   }
 
   function elementsEqual(a, b) {
@@ -246,7 +354,7 @@
     return match !== undefined ? match : 'custom';
   }
 
-  function maybeUpdateSelectedLayout() {
+  function updateSelectedLayout() {
     var layout = deriveLayoutChoiceFromInputs();
     if (layout !== $('[name=layout].active').attr('value')) {
       $('[name=layout]').removeClass('active');
@@ -308,6 +416,40 @@
     }
   }
 
+  function populateSliders(current, sliderKeys) {
+    sliderKeys.forEach(function(key) {
+      document.getElementById(key).value = current[key] !== undefined ? current[key] : '';
+      document.getElementById(key + '-val').value = current[key] !== undefined ? current[key] : '';
+    });
+  }
+
+  function encodeSliders(out, sliderKeys) {
+    sliderKeys.forEach(function(key) {
+      var val = tryParseInt($('#' + key + '-val').val(), 0);
+      var $slider = $('#' + key);
+      if ($slider.attr('max')) {
+        val = Math.min(val, parseInt($slider.attr('max'), 10));
+      }
+      if ($slider.attr('min')) {
+        val = Math.max(val, parseInt($slider.attr('min'), 10));
+      }
+      out[key] = val;
+    });
+  }
+
+  function populatePointConfig(current) {
+    populateSliders(current, POINT_SLIDER_KEYS.filter(function(k) { return k in current; }));
+    $('[name=pointShape]').removeClass('active');
+    $('[name=pointShape][value=' + current['pointShape'] + ']').addClass('active');
+    $('#plotLine').prop('checked', !!current['plotLine']);
+  }
+
+  function encodePointConfig(out) {
+    out.pointShape = $('[name=pointShape].active').attr('value');
+    out.plotLine = $('#plotLine').is(':checked');
+    encodeSliders(out, POINT_SLIDER_KEYS);
+  }
+
   function populateValues(current) {
     document.getElementById('ns-url').value = current['nightscout_url'] || '';
 
@@ -317,10 +459,8 @@
       document.getElementById('units-mgdl').className += ' active';
     }
 
-    SLIDER_KEYS.forEach(function(key) {
-      document.getElementById(key).value = current[key] || '';
-      document.getElementById(key + '-val').value = current[key] || '';
-    });
+    populateSliders(current, MAIN_SLIDER_KEYS);
+    populatePointConfig(current);
 
     document.getElementById('hGridlines').value = current['hGridlines'];
 
@@ -377,17 +517,8 @@
       advancedLayout: $('[name=advancedLayout]').is(':checked'),
       customLayout: customLayout,
     };
-    SLIDER_KEYS.forEach(function(key) {
-      var val = tryParseInt($('#' + key + '-val').val(), 0);
-      var $slider = $('#' + key);
-      if ($slider.attr('max')) {
-        val = Math.min(val, parseInt($slider.attr('max'), 10));
-      }
-      if ($slider.attr('min')) {
-        val = Math.max(val, parseInt($slider.attr('min'), 10));
-      }
-      out[key] = val;
-    });
+    encodeSliders(out, MAIN_SLIDER_KEYS);
+    encodePointConfig(out);
     return out;
   }
 
@@ -444,6 +575,17 @@
     });
     $('#basalGraph').trigger('change');
 
+    $('[name=pointStyle]').on('click', onPointStyleClick);
+
+    $('[name=pointShape]').on('click', onPointSettingsChange);
+    $('#pointRectHeight, #pointRectHeight-val').on('change', onPointSettingsChange);
+    $('#pointWidth, #pointWidth-val').on('change', onPointSettingsChange);
+    $('#pointMargin, #pointMargin-val').on('change', onPointSettingsChange);
+    $('#pointRightMargin, #pointRightMargin-val').on('change', onPointSettingsChange);
+    $('#plotLine').on('change', onPointSettingsChange);
+    $('#plotLineWidth, #plotLineWidth-val').on('change', onPointSettingsChange);
+    onPointSettingsChange();
+
     $('.layout-order').children('label').append([
       '<div class="up-down-buttons">',
         '<a class="button up">&#9650;</a>',
@@ -454,13 +596,14 @@
       onLayoutUpDownButtonClick(evt);
       updateLayoutUpDownEnabledState();
       reorderLayoutInputs();
-      maybeUpdateSelectedLayout();
+      updateSelectedLayout();
     });
 
     $('.layout-order input').on('change', function() {
       updateLayoutUpDownEnabledState();
       reorderLayoutInputs();
-      maybeUpdateSelectedLayout();
+      updateSelectedLayout();
+      updateVisibleHistoryLength();
     });
 
     $('[name=advancedLayout]').on('change', toggleAdvancedLayout);
@@ -481,7 +624,7 @@
       '.layout-element-config input',
       '[name=timeAlign]',
       '[name=batteryLoc]',
-    ].join(', ')).on('change', maybeUpdateSelectedLayout);
+    ].join(', ')).on('change', updateSelectedLayout);
 
     $('.tabs-menu a').on('click', onTabClick);
 

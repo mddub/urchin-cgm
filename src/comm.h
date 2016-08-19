@@ -3,8 +3,8 @@
 #include <pebble.h>
 #include "app_messages.h"
 
-// Size can be up to ~390 when status bar text is 255 bytes long (as of fa6984)
-#define CONTENT_SIZE 512
+// Can be up to ~620 when status bar text is 255 characters and point width is 1px
+#define CONTENT_SIZE 768
 
 // There are many failure modes...
 #define INITIAL_TIMEOUT_HALVED 2500

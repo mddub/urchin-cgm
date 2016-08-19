@@ -8,6 +8,7 @@ DEFAULT_BUILD_ENV = 'production'
 BUILD_ENV = os.environ.get('BUILD_ENV', DEFAULT_BUILD_ENV)
 DEBUG = os.environ.get('DEBUG')
 CONSTANTS_FILE = 'src/js/constants.json'
+INCLUDES_FOR_CONFIG_PAGE = ['src/js/points.js']
 
 ENV_CONSTANTS_OVERRIDES = {
     'test': {
@@ -54,12 +55,14 @@ def generate_testing_headers_maybe(ctx):
     else:
         open(target, 'w').close()
 
-def include_constants_for_config_page(ctx):
-    target = 'config/js/generated/constants.js'
+def include_js_for_config_page(ctx):
+    target = 'config/js/generated/includes.js'
     ensure_dir(target)
-    constants_definition = "window.CONSTANTS = {};".format(json.dumps(constants_for_environment()))
+    includes = "window.CONSTANTS = {};".format(json.dumps(constants_for_environment()))
+    for js_file in INCLUDES_FOR_CONFIG_PAGE:
+        includes += '\n(function() { /* %s */\n%s\n})();' % (js_file, open(js_file).read())
     with open(target, 'w') as f:
-        f.write(constants_definition)
+        f.write(includes)
 
 top = '.'
 out = 'build'
@@ -76,7 +79,7 @@ def build(ctx):
     # TODO: specify these the right way so that they can be rebuilt without `pebble clean`
     ctx.add_pre_fun(generate_testing_headers_maybe)
     ctx.add_pre_fun(generate_constants_file)
-    ctx.add_pre_fun(include_constants_for_config_page)
+    ctx.add_pre_fun(include_js_for_config_page)
 
     binaries = []
 

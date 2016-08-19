@@ -2,7 +2,7 @@
 
 #include <pebble.h>
 
-#define GRAPH_MAX_SGV_COUNT 48
+#define GRAPH_MAX_SGV_COUNT 144
 #define STATUS_BAR_MAX_LENGTH 256
 #define NO_DELTA_VALUE 65536
 

@@ -71,6 +71,13 @@ void set_prefs(DictionaryIterator *data) {
   s_prefs->update_every_minute = dict_find(data, MESSAGE_KEY_updateEveryMinute)->value->int32;
   s_prefs->time_align = dict_find(data, MESSAGE_KEY_timeAlign)->value->int32;
   s_prefs->battery_loc = dict_find(data, MESSAGE_KEY_batteryLoc)->value->int32;
+  s_prefs->point_shape = dict_find(data, MESSAGE_KEY_pointShape)->value->int32;
+  s_prefs->point_rect_height = dict_find(data, MESSAGE_KEY_pointRectHeight)->value->int32;
+  s_prefs->point_width = dict_find(data, MESSAGE_KEY_pointWidth)->value->int32;
+  s_prefs->point_margin = dict_find(data, MESSAGE_KEY_pointMargin)->value->int32;
+  s_prefs->point_right_margin = dict_find(data, MESSAGE_KEY_pointRightMargin)->value->int32;
+  s_prefs->plot_line = dict_find(data, MESSAGE_KEY_plotLine)->value->int32;
+  s_prefs->plot_line_width = dict_find(data, MESSAGE_KEY_plotLineWidth)->value->int32;
   s_prefs->num_elements = dict_find(data, MESSAGE_KEY_numElements)->value->int32;
 
   decode_layout_elements(s_prefs, s_prefs->num_elements, dict_find(data, MESSAGE_KEY_elements)->value->data);

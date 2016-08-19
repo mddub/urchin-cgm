@@ -5,7 +5,7 @@
 #define PERSIST_KEY_VERSION 0
 #define PERSIST_KEY_PREFERENCES_OBJECT 1
 
-#define PREFERENCES_SCHEMA_VERSION 9
+#define PREFERENCES_SCHEMA_VERSION 10
 
 enum {
   ALIGN_LEFT,
@@ -20,6 +20,11 @@ enum {
   BATTERY_LOC_TIME_TOP_RIGHT,
   BATTERY_LOC_TIME_BOTTOM_LEFT,
   BATTERY_LOC_TIME_BOTTOM_RIGHT,
+};
+
+enum {
+  POINT_SHAPE_RECTANGLE,
+  POINT_SHAPE_CIRCLE,
 };
 
 // The order here should match constants.PROPERTIES.
@@ -65,6 +70,13 @@ typedef struct __attribute__((__packed__)) Preferences {
   bool update_every_minute;
   unsigned int time_align:2;
   unsigned int battery_loc:3;
+  unsigned int point_shape:2;
+  unsigned int point_rect_height:5;
+  unsigned int point_width:5;
+  int8_t point_margin;
+  unsigned int point_right_margin:5;
+  bool plot_line;
+  unsigned int plot_line_width:4;
   unsigned int num_elements:3;
   ElementConfig elements[MAX_LAYOUT_ELEMENTS];
 } Preferences;

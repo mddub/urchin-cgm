@@ -5,9 +5,11 @@ require('./vendor/lie.polyfill');
 
 function app(Pebble, c) {
 
-  var data = require('./data')(c);
   var format = require('./format')(c);
+  var points = require('./points')(c);
+  var data;
   var config;
+  var maxSGVs;
 
   function mergeConfig(config, defaults) {
     var out = {};
@@ -18,6 +20,10 @@ function app(Pebble, c) {
       out[key] = config[key];
     });
     return out;
+  }
+
+  function computeMaxSGVs(config) {
+    return points.computeVisiblePoints(points.computeGraphWidth(getLayout(config)), config);
   }
 
   function dataFetchError(e) {
@@ -43,10 +49,10 @@ function app(Pebble, c) {
     function onData(sgvs, bolusHistory, basalHistory, statusText) {
       try {
         var endTime = sgvs.length > 0 ? sgvs[0]['date'] : new Date();
-        var ys = format.sgvArray(endTime, sgvs);
+        var ys = format.sgvArray(endTime, sgvs, maxSGVs);
 
-        var boluses = format.bolusGraphArray(endTime, bolusHistory);
-        var basals = format.basalGraphArray(endTime, basalHistory, config);
+        var boluses = format.bolusGraphArray(endTime, bolusHistory, maxSGVs);
+        var basals = format.basalGraphArray(endTime, basalHistory, maxSGVs, config);
         var graphExtra = format.graphExtraArray(boluses, basals);
 
         sendMessage({
@@ -122,6 +128,13 @@ function app(Pebble, c) {
       updateEveryMinute: config.updateEveryMinute ? 1 : 0,
       timeAlign: c.ALIGN[getLayout(config).timeAlign],
       batteryLoc: c.BATTERY_LOC[getLayout(config).batteryLoc],
+      pointShape: c.POINT_SHAPE[config.pointShape],
+      pointRectHeight: config.pointRectHeight,
+      pointWidth: config.pointWidth,
+      pointMargin: config.pointMargin,
+      pointRightMargin: config.pointRightMargin,
+      plotLine: config.plotLine,
+      plotLineWidth: config.plotLineWidth,
       numElements: countElementsForPebble(getLayout(config)),
       elements: encodeElementsForPebble(getLayout(config)),
     });
@@ -138,6 +151,10 @@ function app(Pebble, c) {
         console.log('Bad config from localStorage: ' + configStr);
       }
     }
+
+    // can't initialize these until we know the graph config
+    maxSGVs = computeMaxSGVs(config);
+    data = require('./data')(c, maxSGVs);
 
     Pebble.addEventListener('showConfiguration', function() {
       var platform = 'unknown';
@@ -177,17 +194,27 @@ function app(Pebble, c) {
       } catch (e) {
         console.log(e);
         console.log('Bad config from webview: ' + event.response);
+        return;
       }
 
-      if (newConfig) {
-        if (newConfig.nightscout_url !== config.nightscout_url) {
-          data.clearCache();
+      var oldNightscoutURL = config.nightscout_url;
+      var oldMaxSGVs = computeMaxSGVs(config);
+
+      config = mergeConfig(newConfig, c.DEFAULT_CONFIG);
+      maxSGVs = computeMaxSGVs(config);
+      data.setMaxSGVCount(maxSGVs);
+
+      if (config.nightscout_url !== oldNightscoutURL || maxSGVs > oldMaxSGVs || config.__CLEAR_CACHE__) {
+        data.clearCache();
+        if (config.__CLEAR_CACHE__) {
+          // present only for tests
+          delete newConfig.__CLEAR_CACHE__;
         }
-        config = mergeConfig(newConfig, c.DEFAULT_CONFIG);
-        localStorage.setItem(c.LOCAL_STORAGE_KEY_CONFIG, JSON.stringify(config));
-        console.log('Preferences updated: ' + JSON.stringify(config));
-        sendPreferences().then(requestAndSendData);
       }
+
+      localStorage.setItem(c.LOCAL_STORAGE_KEY_CONFIG, JSON.stringify(config));
+      console.log('Preferences updated: ' + JSON.stringify(config));
+      sendPreferences().then(requestAndSendData);
     });
 
     Pebble.addEventListener('appmessage', function(e) {

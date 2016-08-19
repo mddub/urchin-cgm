@@ -63,6 +63,35 @@
   background: url(../images/layouts.png) -720px 0;
 }
 
+.point-style-option {
+  display: inline-block;
+  vertical-align: middle;
+  width: 43px;
+  height: 22px;
+}
+
+.active .point-style-option {
+  filter: invert(100%);
+  -webkit-filter: invert(100%);
+  -moz-filter: invert(100%);
+}
+
+.point-style-a {
+  background: url(../images/point-styles.png) 0 0;
+}
+
+.point-style-b {
+  background: url(../images/point-styles.png) -43px 0;
+}
+
+.point-style-c {
+  background: url(../images/point-styles.png) -86px 0;
+}
+
+.point-style-d {
+  background: url(../images/point-styles.png) -129px 0;
+}
+
 .tabs-menu {
   height: 28px;
   float: left;

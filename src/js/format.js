@@ -4,7 +4,7 @@
 var format = function(c) {
   var f = {};
 
-  f.sgvArray = function(endTime, sgvs) {
+  f.sgvArray = function(endTime, sgvs, maxSGVs) {
     var noEntry = {
       'date': Infinity,
       'sgv': 0
@@ -13,7 +13,7 @@ var format = function(c) {
 
     var graphed = [];
     var xs = [];
-    for(i = 0; i < c.SGV_FETCH_SECONDS; i += c.INTERVAL_SIZE_SECONDS) {
+    for(i = 0; i < maxSGVs * c.INTERVAL_SIZE_SECONDS; i += c.INTERVAL_SIZE_SECONDS) {
       graphed.push(noEntry);
       xs.push(endTime - i * 1000);
     }
@@ -43,9 +43,9 @@ var format = function(c) {
     return ys;
   };
 
-  function _graphIntervals(endTime) {
+  function _graphIntervals(endTime, maxSGVs) {
     var out = [];
-    for(var i = 0; i < c.SGV_FETCH_SECONDS; i += c.INTERVAL_SIZE_SECONDS) {
+    for(var i = 0; i < maxSGVs * c.INTERVAL_SIZE_SECONDS; i += c.INTERVAL_SIZE_SECONDS) {
       out.push({
         start: endTime - 1000 * i - 1000 * c.INTERVAL_SIZE_SECONDS / 2,
         end: endTime - 1000 * i + 1000 * c.INTERVAL_SIZE_SECONDS / 2,
@@ -54,8 +54,8 @@ var format = function(c) {
     return out;
   }
 
-  f.bolusGraphArray = function(endTime, bolusHistory) {
-    return _graphIntervals(endTime).map(function(interval) {
+  f.bolusGraphArray = function(endTime, bolusHistory, maxSGVs) {
+    return _graphIntervals(endTime, maxSGVs).map(function(interval) {
       var bolusInInterval = false;
       for(var j = 0; j < bolusHistory.length; j++) {
         var bolusTime = new Date(bolusHistory[j]['created_at']).getTime();
@@ -67,8 +67,8 @@ var format = function(c) {
     });
   };
 
-  f.basalRateArray = function(endTime, basalHistory) {
-    return _graphIntervals(endTime).map(function(interval) {
+  f.basalRateArray = function(endTime, basalHistory, maxSGVs) {
+    return _graphIntervals(endTime, maxSGVs).map(function(interval) {
       var rateTotals = {};
       basalHistory.forEach(function(basal, i) {
         if (i === basalHistory.length - 1) {
@@ -112,8 +112,8 @@ var format = function(c) {
     });
   }
 
-  f.basalGraphArray = function(endTime, basalHistory, config) {
-    return _rescale(f.basalRateArray(endTime, basalHistory), config.basalHeight);
+  f.basalGraphArray = function(endTime, basalHistory, maxSGVs, config) {
+    return _rescale(f.basalRateArray(endTime, basalHistory, maxSGVs), config.basalHeight);
   };
 
   function _encodeBits(value, offset, bits) {

@@ -13,6 +13,13 @@
       "bottomOfRange" : 70,
       "bottomOfGraph" : 40,
       "hGridlines" : 50,
+      "pointShape": "rectangle",
+      "pointRectHeight": 3,
+      "pointWidth": 3,
+      "pointMargin": 0,
+      "pointRightMargin": 0,
+      "plotLine": false,
+      "plotLineWidth": 1,
       "statusContent" : "none",
       "statusLine1" : "none",
       "statusLine2" : "none",
@@ -101,6 +108,40 @@
       }
    },
 
+   "POINT_STYLES": {
+      "a": {
+         "pointShape": "rectangle",
+         "pointWidth": 3,
+         "pointRectHeight": 3,
+         "pointMargin": 0,
+         "pointRightMargin": 0,
+         "plotLine": false
+      },
+      "b": {
+         "pointShape": "rectangle",
+         "pointWidth": 3,
+         "pointRectHeight": 3,
+         "pointMargin": -1,
+         "pointRightMargin": 0,
+         "plotLine": false
+      },
+      "c": {
+         "pointShape": "circle",
+         "pointWidth": 7,
+         "pointMargin": 0,
+         "pointRightMargin": 1,
+         "plotLine": false
+      },
+      "d": {
+         "pointShape": "circle",
+         "pointWidth": 13,
+         "pointMargin": 2,
+         "pointRightMargin": 5,
+         "plotLine": true,
+         "plotLineWidth": 3
+      }
+   },
+
    "ELEMENTS": [
       "GRAPH_ELEMENT",
       "SIDEBAR_ELEMENT",
@@ -134,6 +175,11 @@
       "statusRight" : 1
    },
 
+   "POINT_SHAPE" : {
+     "rectangle": 0,
+     "circle": 1
+   },
+
    "MSG_TYPE_ERROR" : 0,
    "MSG_TYPE_DATA" : 1,
    "MSG_TYPE_PREFERENCES" : 2,
@@ -143,9 +189,8 @@
    "GRAPH_EXTRA_BASAL_OFFSET": 1,
    "GRAPH_EXTRA_BASAL_BITS": 5,
 
-   "SGV_FETCH_SECONDS" : 14400,
+   "SCREEN_WIDTH": 144,
    "INTERVAL_SIZE_SECONDS" : 300,
-   "FETCH_EXTRA" : 5,
    "DEVICE_STATUS_RECENCY_THRESHOLD_SECONDS": 1800,
    "IOB_RECENCY_THRESHOLD_SECONDS" : 600,
    "REQUEST_TIMEOUT" : 5000,
