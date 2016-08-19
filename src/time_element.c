@@ -1,4 +1,3 @@
-#include "app_keys.h"
 #include "fonts.h"
 #include "layout.h"
 #include "preferences.h"

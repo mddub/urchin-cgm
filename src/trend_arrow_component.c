@@ -1,8 +1,8 @@
-#include "config.h"
 #include "layout.h"
 #include "staleness.h"
 #include "trend_arrow_component.h"
 
+#define NO_ICON -1
 #define TREND_ARROW_WIDTH 25
 
 // TODO define a "big" and "small" set of icons

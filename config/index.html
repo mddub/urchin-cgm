@@ -3,6 +3,7 @@
   <head>
     <title></title>
     <link rel="stylesheet" type="text/css" href="css/slate.min.css">
+    <meta name="robots" content="noindex">
   </head>
   <body>
     <form id="config-form">
@@ -17,528 +18,552 @@
         </div>
       </div>
 
-      <div class="item-container">
-        <div class="item-container-header">Nightscout URL</div>
-        <div class="item-container-content">
-          <label class="item">
-            <div class="item-input-wrapper">
-              <input id="ns-url" type="url" class="item-input">
-            </div>
-          </label>
-        </div>
-        <div class="item-container-footer">
-          This probably looks like: <strong>https://YOURSITENAME.azurewebsites.net</strong>
-        </div>
-      </div>
+      <ul class="tabs-menu top">
+        <li class="current" data-target="tab-cgm"><a href="#">CGM</a></li>
+        <li data-target="tab-layout"><a href="#">Layout</a></li>
+        <li data-target="tab-graph"><a href="#">Graph</a></li>
+        <li data-target="tab-data"><a href="#">Data</a></li>
+      </ul>
 
-      <div class="item-container">
-        <div class="item-container-header">Units</div>
-        <div class="item-container-content">
-          <div class="item tab-buttons">
-            <a id="units-mgdl" name="units" class="tab-button">mg/dL</a>
-            <a id="units-mmol" name="units" class="tab-button">mmol/L</a>
+      <div class="tab active" id="tab-cgm">
+
+        <div class="item-container">
+          <div class="item-container-header">Nightscout URL</div>
+          <div class="item-container-content">
+            <label class="item">
+              <div class="item-input-wrapper">
+                <input id="ns-url" type="url" class="item-input">
+              </div>
+            </label>
+          </div>
+          <div class="item-container-footer">
+            This probably looks like: <strong>https://YOURSITENAME.azurewebsites.net</strong>
           </div>
         </div>
-      </div>
 
-      <div class="item-container">
-        <div class="button-container">
-          <input id="submit-button" type="submit" class="item-button" value="SAVE">
-        </div>
-      </div>
-
-      <div class="item-container">
-        <h3>GRAPH SETTINGS:</h3>
-        <div class="item-container-footer">
-          All numbers must be in mg/dL.
-        </div>
-      </div>
-
-      <div class="item-container">
-        <div class="item-container-header">Top of graph</div>
-        <div class="item-container-content">
-          <label class="item">
-            <input id="topOfGraph" name="topOfGraph" type="range" class="item-slider" min="30" max="500" step="10">
-            <div class="item-input-wrapper item-slider-text">
-              <input id="topOfGraph-val" name="topOfGraph" type="tel" class="item-input">
+        <div class="item-container">
+          <div class="item-container-header">Units</div>
+          <div class="item-container-content">
+            <div class="item tab-buttons">
+              <a id="units-mgdl" name="units" class="tab-button">mg/dL</a>
+              <a id="units-mmol" name="units" class="tab-button">mmol/L</a>
             </div>
-          </label>
-        </div>
-      </div>
-
-      <div class="item-container">
-        <div class="item-container-header">Top of target range</div>
-        <div class="item-container-content">
-          <label class="item">
-            <input id="topOfRange" name="topOfRange" type="range" class="item-slider" min="30" max="500" step="10">
-            <div class="item-input-wrapper item-slider-text">
-              <input id="topOfRange-val" name="topOfRange" type="tel" class="item-input">
-            </div>
-          </label>
-        </div>
-      </div>
-
-      <div class="item-container">
-        <div class="item-container-header">Bottom of target range</div>
-        <div class="item-container-content">
-          <label class="item">
-            <input id="bottomOfRange" name="bottomOfRange" type="range" class="item-slider" min="30" max="500" step="10">
-            <div class="item-input-wrapper item-slider-text">
-              <input id="bottomOfRange-val" name="bottomOfRange" type="tel" class="item-input">
-            </div>
-          </label>
-        </div>
-      </div>
-
-      <div class="item-container">
-        <div class="item-container-header">Bottom of graph</div>
-        <div class="item-container-content">
-          <label class="item">
-            <input id="bottomOfGraph" name="bottomOfGraph" type="range" class="item-slider" min="30" max="500" step="10">
-            <div class="item-input-wrapper item-slider-text">
-              <input id="bottomOfGraph-val" name="bottomOfGraph" type="tel" class="item-input">
-            </div>
-          </label>
-        </div>
-      </div>
-
-      <div class="item-container">
-        <div class="item-container-header">Gridlines</div>
-        <div class="item-container-content">
-          <label class="item">
-            &nbsp;
-            <select id="hGridlines" name="hGridlines" dir="rtl" class="item-select">
-              <option value="0" class="item-select-option">None</option>
-              <option value="20" class="item-select-option">Every 20 mg/dL</option>
-              <option value="25" class="item-select-option">Every 25 mg/dL</option>
-              <option value="40" class="item-select-option">Every 40 mg/dL</option>
-              <option value="50" class="item-select-option">Every 50 mg/dL</option>
-              <option value="75" class="item-select-option">Every 75 mg/dL</option>
-              <option value="100" class="item-select-option">Every 100 mg/dL</option>
-              <option value="18" class="item-select-option">Every 18 mg/dL = 1 mmol/L</option>
-              <option value="36" class="item-select-option">Every 36 mg/dL = 2 mmol/L</option>
-              <option value="54" class="item-select-option">Every 54 mg/dL = 3 mmol/L</option>
-              <option value="72" class="item-select-option">Every 72 mg/dL = 4 mmol/L</option>
-              <option value="90" class="item-select-option">Every 90 mg/dL = 5 mmol/L</option>
-            </select>
-          </label>
-        </div>
-      </div>
-
-      <div class="item-container">
-        <h3>CONTENT SETTINGS:</h3>
-      </div>
-
-      <div class="item-container" id="main-status-option">
-        <div class="item-container-header">Status bar</div>
-        <div class="item-container-content">
-          <label class="item">
-            &nbsp;
-            <select id="statusContent" dir="rtl" class="item-select">
-              <option value="none" class="item-select-option">None</option>
-              <option value="rigbattery" class="item-select-option">Uploader battery level</option>
-              <option value="rawdata" class="item-select-option">Raw Dexcom reading</option>
-              <option value="rig-raw" class="item-select-option">Uploader battery, Dexcom raw</option>
-              <option value="basal" class="item-select-option">Active basal - NS Care Portal</option>
-              <option value="careportaliob" class="item-select-option">IOB - NS Care Portal</option>
-              <option value="pumpiob" class="item-select-option">Pump IOB - MM Connect</option>
-              <option value="openaps" class="item-select-option">IOB and temp - OpenAPS</option>
-              <option value="customurl" class="item-select-option">Custom URL - text</option>
-              <option value="customjson" class="item-select-option">Custom URL - JSON</option>
-              <option value="customtext" class="item-select-option">Custom text</option>
-              <option value="multiple" class="item-select-option">Multiple</option>
-            </select>
-          </label>
-        </div>
-      </div>
-
-      <div class="item-container status-extra status-line-option" data-keys="multiple" data-field="statusLine1">
-        <div class="item-container-header">Status line 1</div>
-      </div>
-
-      <div class="item-container status-extra status-line-option" data-keys="multiple" data-field="statusLine2">
-        <div class="item-container-header">Status line 2</div>
-      </div>
-
-      <div class="item-container status-extra status-line-option" data-keys="multiple" data-field="statusLine3">
-        <div class="item-container-header">Status line 3</div>
-      </div>
-
-      <div class="item-container status-extra" data-keys="rawdata rig-raw">
-        <div class="item-container-header">Number of raw readings</div>
-        <div class="item-container-content">
-          <label class="item">
-            <input id="statusRawCount" name="statusRawCount" type="range" class="item-slider" min="1" max="20" step="1">
-            <div class="item-input-wrapper item-slider-text">
-              <input id="statusRawCount-val" name="statusRawCount" type="tel" class="item-input">
-            </div>
-          </label>
-        </div>
-      </div>
-
-      <div class="item-container status-extra" data-keys="openaps">
-        <div class="item-container-header">OpenAPS</div>
-        <div class="item-container-content">
-          <label class="item">
-            Basal rate
-            <select name="statusOpenAPSNetBasal" dir="rtl" class="item-select">
-              <option value="false" class="item-select-option">Absolute</option>
-              <option value="true" class="item-select-option">Net</option>
-            </select>
-          </label>
-        </div>
-        <div class="item-container-content">
-          <label class="item">
-            <input name="statusOpenAPSEvBG" type="checkbox" class="item-checkbox">
-            Show "eventual BG"
-          </label>
-        </div>
-      </div>
-
-      <div class="item-container status-extra" data-keys="customurl">
-        <div class="item-container-header">Custom URL - text</div>
-        <div class="item-container-content">
-          <label class="item">
-            <div class="item-input-wrapper">
-              <input id="statusUrl" type="url" class="item-input">
-            </div>
-          </label>
-        </div>
-      </div>
-
-      <div class="item-container status-extra" data-keys="customjson">
-        <div class="item-container-header">Custom URL - JSON</div>
-        <div class="item-container-content">
-          <label class="item">
-            <div class="item-input-wrapper">
-              <input id="statusJsonUrl" type="url" class="item-input">
-            </div>
-          </label>
-        </div>
-        <div class="item-container-footer">
-          This URL should return a single object or an array containing a single object like <code>{"content": "your text"}</code>. If it has a <code>timestamp</code> field with epoch time in seconds or milliseconds, the watch will also display the recency of the data.
-        </div>
-      </div>
-
-      <div class="item-container status-extra" data-keys="customtext">
-        <div class="item-container-header">Custom text</div>
-        <div class="item-container-content">
-          <label class="item">
-            <div class="item-input-wrapper">
-              <input id="statusText" type="text" size="255" class="item-input">
-            </div>
-          </label>
-        </div>
-      </div>
-
-      <div class="item-container">
-        <div class="item-container-header">Battery status</div>
-        <div class="item-container-content">
-          <div class="item tab-buttons">
-            <a name="batteryAsNumber" value="icon" class="tab-button">Icon</a>
-            <a name="batteryAsNumber" value="number" class="tab-button">Percentage</a>
           </div>
         </div>
-      </div>
 
-      <div class="item-container">
-        <h3>PUMP GRAPH SETTINGS:</h3>
-        <div class="item-container-footer">
-          You can enter pump data in Nightscout Care Portal, with the "CarePortal" Pebble app, or automatically with an OpenAPS uploader.
-        </div>
       </div>
+      <!-- end #tab-cgm -->
 
-      <div class="item-container">
-        <div class="item-container-header">Bolus history</div>
-        <div class="item-container-content">
-          <label class="item">
-            <input name="bolusTicks" type="checkbox" class="item-checkbox">
-            Show bolus history
-          </label>
-          <label class="item">
-            <input name="basalGraph" id="basalGraph" type="checkbox" class="item-checkbox">
-            Show basal rate history
-          </label>
+      <div class="tab" id="tab-graph">
+        <div class="item-container">
+          <h3>GRAPH SETTINGS:</h3>
+          <div class="item-container-footer">
+            All numbers must be in mg/dL.
+          </div>
         </div>
-        <div class="item-container-footer">
-          Bolus treatments from Nightscout Care Portal appear as ticks along the bottom of the graph. Basal rate history appears as a bar graph below the graph of glucose readings.
+
+        <div class="item-container">
+          <div class="item-container-header">Top of graph</div>
+          <div class="item-container-content">
+            <label class="item">
+              <input id="topOfGraph" name="topOfGraph" type="range" class="item-slider" min="30" max="500" step="10">
+              <div class="item-input-wrapper item-slider-text">
+                <input id="topOfGraph-val" name="topOfGraph" type="tel" class="item-input">
+              </div>
+            </label>
+          </div>
         </div>
+
+        <div class="item-container">
+          <div class="item-container-header">Top of target range</div>
+          <div class="item-container-content">
+            <label class="item">
+              <input id="topOfRange" name="topOfRange" type="range" class="item-slider" min="30" max="500" step="10">
+              <div class="item-input-wrapper item-slider-text">
+                <input id="topOfRange-val" name="topOfRange" type="tel" class="item-input">
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="item-container">
+          <div class="item-container-header">Bottom of target range</div>
+          <div class="item-container-content">
+            <label class="item">
+              <input id="bottomOfRange" name="bottomOfRange" type="range" class="item-slider" min="30" max="500" step="10">
+              <div class="item-input-wrapper item-slider-text">
+                <input id="bottomOfRange-val" name="bottomOfRange" type="tel" class="item-input">
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="item-container">
+          <div class="item-container-header">Bottom of graph</div>
+          <div class="item-container-content">
+            <label class="item">
+              <input id="bottomOfGraph" name="bottomOfGraph" type="range" class="item-slider" min="30" max="500" step="10">
+              <div class="item-input-wrapper item-slider-text">
+                <input id="bottomOfGraph-val" name="bottomOfGraph" type="tel" class="item-input">
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="item-container">
+          <div class="item-container-header">Gridlines</div>
+          <div class="item-container-content">
+            <label class="item">
+              &nbsp;
+              <select id="hGridlines" name="hGridlines" dir="rtl" class="item-select">
+                <option value="0" class="item-select-option">None</option>
+                <option value="20" class="item-select-option">Every 20 mg/dL</option>
+                <option value="25" class="item-select-option">Every 25 mg/dL</option>
+                <option value="40" class="item-select-option">Every 40 mg/dL</option>
+                <option value="50" class="item-select-option">Every 50 mg/dL</option>
+                <option value="75" class="item-select-option">Every 75 mg/dL</option>
+                <option value="100" class="item-select-option">Every 100 mg/dL</option>
+                <option value="18" class="item-select-option">Every 18 mg/dL = 1 mmol/L</option>
+                <option value="36" class="item-select-option">Every 36 mg/dL = 2 mmol/L</option>
+                <option value="54" class="item-select-option">Every 54 mg/dL = 3 mmol/L</option>
+                <option value="72" class="item-select-option">Every 72 mg/dL = 4 mmol/L</option>
+                <option value="90" class="item-select-option">Every 90 mg/dL = 5 mmol/L</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
       </div>
+      <!-- end #tab-graph -->
 
-      <div class="item-container" id="basal-height-container">
-        <div class="item-container-header">Basal rate graph height</div>
-        <div class="item-container-content">
-          <label class="item">
-            <input id="basalHeight" name="basalHeight" type="range" class="item-slider" min="2" max="30" step="1">
-            <div class="item-input-wrapper item-slider-text">
-              <input id="basalHeight-val" name="basalHeight" type="tel" class="item-input">
+      <div class="tab" id="tab-data">
+        <div class="item-container">
+          <div class="item-container-header">Battery</div>
+          <div class="item-container-content">
+            <div class="item tab-buttons">
+              <a name="batteryAsNumber" value="icon" class="tab-button">Battery icon</a>
+              <a name="batteryAsNumber" value="number" class="tab-button">Battery %</a>
             </div>
-          </label>
-        </div>
-        <div class="item-container-footer">
-          NOTE: This height is in pixels, but the heights for layout elements (below) are percentages.
-        </div>
-      </div>
-
-      <div class="item-container">
-        <h3>UPDATE SETTINGS:</h3>
-      </div>
-
-      <div class="item-container">
-        <div class="item-container-header">Update frequency</div>
-        <div class="item-container-content">
-          <div class="item">
-            &nbsp;
-            <select name="updateEveryMinute" dir="rtl" class="item-select">
-              <option value="false" class="item-select-option">When CGM reading expected</option>
-              <option value="true" class="item-select-option">Every minute</option>
-            </select>
           </div>
         </div>
-        <div class="item-container-footer">
-          By default, the watch calculates when it expects the next CGM reading to become available, and waits until then to request new data from the web. This means all the data you see is updated about every 5 minutes. If you need your status bar or pump data to be fresher, you can choose to update every minute instead.
+
+        <div class="item-container">
+          <h3>STATUS BAR DATA:</h3>
         </div>
-      </div>
 
-      <div class="item-container">
-        <h3>LAYOUT SETTINGS:</h3>
-      </div>
-
-      <div class="item-container">
-        <div class="item-container-header">Layout</div>
-        <div class="item-container-content">
-          <div class="item tab-buttons">
-            <a name="layout" value="a" class="tab-button">A</a>
-            <a name="layout" value="b" class="tab-button">B</a>
-            <a name="layout" value="c" class="tab-button">C</a>
-            <a name="layout" value="d" class="tab-button">D</a>
-            <a name="layout" value="e" class="tab-button">E</a>
-            <a name="layout" value="custom" class="tab-button">Custom</a>
+        <div class="item-container" id="main-status-option">
+          <div class="item-container-header">Status bar</div>
+          <div class="item-container-content">
+            <label class="item">
+              &nbsp;
+              <select id="statusContent" dir="rtl" class="item-select">
+                <option value="none" class="item-select-option">None</option>
+                <option value="rigbattery" class="item-select-option">Uploader battery level</option>
+                <option value="rawdata" class="item-select-option">Raw Dexcom reading</option>
+                <option value="rig-raw" class="item-select-option">Uploader battery, Dexcom raw</option>
+                <option value="basal" class="item-select-option">Active basal - NS Care Portal</option>
+                <option value="careportaliob" class="item-select-option">IOB - NS Care Portal</option>
+                <option value="pumpiob" class="item-select-option">Pump IOB - MM Connect</option>
+                <option value="openaps" class="item-select-option">IOB and temp - OpenAPS</option>
+                <option value="customurl" class="item-select-option">Custom URL - text</option>
+                <option value="customjson" class="item-select-option">Custom URL - JSON</option>
+                <option value="customtext" class="item-select-option">Custom text</option>
+                <option value="multiple" class="item-select-option">Multiple</option>
+              </select>
+            </label>
           </div>
-          <div id="layout-preview"></div>
         </div>
-      </div>
 
-      <div class="item-container">
-        <div class="item-container-content">
-          <label class="item">
-            Show advanced layout settings
-            <input type="checkbox" class="item-toggle" name="advancedLayout">
-          </label>
+        <div class="item-container status-extra status-line-option" data-keys="multiple" data-field="statusLine1">
+          <div class="item-container-header">Status line 1</div>
         </div>
-      </div>
 
-      <div class="item-container advanced-layout">
-        <div class="item-container-header">Layout order</div>
-        <div class="item-container-content">
-          <div class="layout-order">
+        <div class="item-container status-extra status-line-option" data-keys="multiple" data-field="statusLine2">
+          <div class="item-container-header">Status line 2</div>
+        </div>
+
+        <div class="item-container status-extra status-line-option" data-keys="multiple" data-field="statusLine3">
+          <div class="item-container-header">Status line 3</div>
+        </div>
+
+        <div class="item-container status-extra" data-keys="rawdata rig-raw">
+          <div class="item-container-header">Number of raw readings</div>
+          <div class="item-container-content">
+            <label class="item">
+              <input id="statusRawCount" name="statusRawCount" type="range" class="item-slider" min="1" max="20" step="1">
+              <div class="item-input-wrapper item-slider-text">
+                <input id="statusRawCount-val" name="statusRawCount" type="tel" class="item-input">
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="item-container status-extra" data-keys="openaps">
+          <div class="item-container-header">OpenAPS</div>
+          <div class="item-container-content">
+            <label class="item">
+              Basal rate
+              <select name="statusOpenAPSNetBasal" dir="rtl" class="item-select">
+                <option value="false" class="item-select-option">Absolute</option>
+                <option value="true" class="item-select-option">Net</option>
+              </select>
+            </label>
+          </div>
+          <div class="item-container-content">
+            <label class="item">
+              <input name="statusOpenAPSEvBG" type="checkbox" class="item-checkbox">
+              Show "eventual BG"
+            </label>
+          </div>
+        </div>
+
+        <div class="item-container status-extra" data-keys="customurl">
+          <div class="item-container-header">Custom URL - text</div>
+          <div class="item-container-content">
+            <label class="item">
+              <div class="item-input-wrapper">
+                <input id="statusUrl" type="url" class="item-input">
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="item-container status-extra" data-keys="customjson">
+          <div class="item-container-header">Custom URL - JSON</div>
+          <div class="item-container-content">
+            <label class="item">
+              <div class="item-input-wrapper">
+                <input id="statusJsonUrl" type="url" class="item-input">
+              </div>
+            </label>
+          </div>
+          <div class="item-container-footer">
+            This URL should return a single object or an array containing a single object like <code>{"content": "your text"}</code>. If it has a <code>timestamp</code> field with epoch time in seconds or milliseconds, the watch will also display the recency of the data.
+          </div>
+        </div>
+
+        <div class="item-container status-extra" data-keys="customtext">
+          <div class="item-container-header">Custom text</div>
+          <div class="item-container-content">
+            <label class="item">
+              <div class="item-input-wrapper">
+                <input id="statusText" type="text" size="255" class="item-input">
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="item-container">
+          <h3>PUMP DATA:</h3>
+          <div class="item-container-footer">
+            You can enter pump data with the Care Portal plugin on your Nightscout site, via the "CarePortal" Pebble app, or automatically with an OpenAPS uploader.
+          </div>
+        </div>
+
+        <div class="item-container">
+          <div class="item-container-header">Bolus history</div>
+          <div class="item-container-content">
+            <label class="item">
+              <input name="bolusTicks" type="checkbox" class="item-checkbox">
+              Show bolus history
+            </label>
+            <label class="item">
+              <input name="basalGraph" id="basalGraph" type="checkbox" class="item-checkbox">
+              Show basal rate history
+            </label>
+          </div>
+          <div class="item-container-footer">
+            Bolus treatments from Nightscout Care Portal appear as ticks along the bottom of the graph. Basal rate history appears as a bar graph below the graph of glucose readings.
+          </div>
+        </div>
+
+        <div class="item-container" id="basal-height-container">
+          <div class="item-container-header">Basal rate graph height</div>
+          <div class="item-container-content">
+            <label class="item">
+              <input id="basalHeight" name="basalHeight" type="range" class="item-slider" min="2" max="30" step="1">
+              <div class="item-input-wrapper item-slider-text">
+                <input id="basalHeight-val" name="basalHeight" type="tel" class="item-input">
+              </div>
+            </label>
+          </div>
+          <div class="item-container-footer">
+            NOTE: This height is in pixels, but the heights for layout elements (below) are percentages.
+          </div>
+        </div>
+
+        <div class="item-container">
+          <h3>UPDATE SETTINGS:</h3>
+        </div>
+
+        <div class="item-container">
+          <div class="item-container-header">Update frequency</div>
+          <div class="item-container-content">
+            <div class="item">
+              &nbsp;
+              <select name="updateEveryMinute" dir="rtl" class="item-select">
+                <option value="false" class="item-select-option">When CGM reading expected</option>
+                <option value="true" class="item-select-option">Every minute</option>
+              </select>
+            </div>
+          </div>
+          <div class="item-container-footer">
+            By default, the watch calculates when it expects the next CGM reading to become available, and waits until then to request new data from the web. This means all the data you see is updated about every 5 minutes. If you need your status bar or pump data to be fresher, you can choose to update every minute instead.
+          </div>
+        </div>
+
+      </div>
+      <!-- end #tab-data -->
+
+      <div class="tab" id="tab-layout">
+
+        <div class="item-container">
+          <div class="item-container-header">Layout</div>
+          <div class="item-container-content">
+            <div class="item tab-buttons">
+              <a name="layout" value="a" class="tab-button">A</a>
+              <a name="layout" value="b" class="tab-button">B</a>
+              <a name="layout" value="c" class="tab-button">C</a>
+              <a name="layout" value="d" class="tab-button">D</a>
+              <a name="layout" value="e" class="tab-button">E</a>
+              <a name="layout" value="custom" class="tab-button">Custom</a>
+            </div>
+            <div id="layout-preview"></div>
+          </div>
+        </div>
+
+        <div class="item-container">
+          <div class="item-container-content">
+            <label class="item">
+              Show advanced layout settings
+              <input type="checkbox" class="item-toggle" name="advancedLayout">
+            </label>
+          </div>
+        </div>
+
+        <div class="item-container advanced-layout">
+          <div class="item-container-header">Layout order</div>
+          <div class="item-container-content">
+            <div class="layout-order">
+              <label class="item" data-element="GRAPH_ELEMENT">
+                <input type="checkbox" class="item-checkbox">
+                Graph
+              </label>
+              <label class="item" data-element="SIDEBAR_ELEMENT">
+                <input type="checkbox" class="item-checkbox">
+                Sidebar
+              </label>
+              <label class="item" data-element="STATUS_BAR_ELEMENT">
+                <input type="checkbox" class="item-checkbox">
+                Status bar
+              </label>
+              <label class="item" data-element="TIME_AREA_ELEMENT">
+                <input type="checkbox" class="item-checkbox">
+                Time area
+              </label>
+              <label class="item" data-element="BG_ROW_ELEMENT">
+                <input type="checkbox" class="item-checkbox">
+                BG row
+              </label>
+            </div>
+          </div>
+          <div class="item-container-footer">
+            Sidebar must come before or after graph.
+          </div>
+        </div>
+
+        <div class="item-container advanced-layout">
+          <div class="item-container-header">Height (0% - 100%)</div>
+          <div class="item-container-content layout-height">
             <label class="item" data-element="GRAPH_ELEMENT">
-              <input type="checkbox" class="item-checkbox">
               Graph
+              <div class="item-input-wrapper item-slider-text">
+                <input type="tel" min="0" max="100" class="item-input">
+              </div>
             </label>
             <label class="item" data-element="SIDEBAR_ELEMENT">
-              <input type="checkbox" class="item-checkbox">
               Sidebar
+              <div class="item-input-wrapper item-slider-text">
+                <input type="tel" min="0" max="100" class="item-input" disabled="disabled">
+              </div>
             </label>
             <label class="item" data-element="STATUS_BAR_ELEMENT">
-              <input type="checkbox" class="item-checkbox">
               Status bar
+              <div class="item-input-wrapper item-slider-text">
+                <input type="tel" min="0" max="100" class="item-input">
+              </div>
             </label>
             <label class="item" data-element="TIME_AREA_ELEMENT">
-              <input type="checkbox" class="item-checkbox">
               Time area
+              <div class="item-input-wrapper item-slider-text">
+                <input type="tel" min="0" max="100" class="item-input">
+              </div>
             </label>
             <label class="item" data-element="BG_ROW_ELEMENT">
-              <input type="checkbox" class="item-checkbox">
               BG row
+              <div class="item-input-wrapper item-slider-text">
+                <input type="tel" min="0" max="100" class="item-input">
+              </div>
             </label>
           </div>
-        </div>
-        <div class="item-container-footer">
-          Sidebar must come before or after graph.
-        </div>
-      </div>
-
-      <div class="item-container advanced-layout">
-        <div class="item-container-header">Height (0% - 100%)</div>
-        <div class="item-container-content layout-height">
-          <label class="item" data-element="GRAPH_ELEMENT">
-            Graph
-            <div class="item-input-wrapper item-slider-text">
-              <input type="tel" min="0" max="100" class="item-input">
-            </div>
-          </label>
-          <label class="item" data-element="SIDEBAR_ELEMENT">
-            Sidebar
-            <div class="item-input-wrapper item-slider-text">
-              <input type="tel" min="0" max="100" class="item-input" disabled="disabled">
-            </div>
-          </label>
-          <label class="item" data-element="STATUS_BAR_ELEMENT">
-            Status bar
-            <div class="item-input-wrapper item-slider-text">
-              <input type="tel" min="0" max="100" class="item-input">
-            </div>
-          </label>
-          <label class="item" data-element="TIME_AREA_ELEMENT">
-            Time area
-            <div class="item-input-wrapper item-slider-text">
-              <input type="tel" min="0" max="100" class="item-input">
-            </div>
-          </label>
-          <label class="item" data-element="BG_ROW_ELEMENT">
-            BG row
-            <div class="item-input-wrapper item-slider-text">
-              <input type="tel" min="0" max="100" class="item-input">
-            </div>
-          </label>
-        </div>
-        <div class="item-container-footer">
-          All elements with a height of 0% will share the space remaining from elements with non-zero height. The sidebar always has the same height as the graph.
-        </div>
-      </div>
-
-      <div class="layout-element-config advanced-layout">
-        <div class="item-container" data-element="GRAPH_ELEMENT">
-          <div class="item-container-header">
-            Graph
+          <div class="item-container-footer">
+            All elements with a height of 0% will share the space remaining from elements with non-zero height. The sidebar always has the same height as the graph.
           </div>
+        </div>
+
+        <div class="layout-element-config advanced-layout">
+          <div class="item-container" data-element="GRAPH_ELEMENT">
+            <div class="item-container-header">
+              Graph
+            </div>
+            <div class="item-container-content">
+              <label class="item">
+                <input type="checkbox" class="item-checkbox" name="black">
+                Black background
+              </label>
+              <label class="item">
+                <input type="checkbox" class="item-checkbox" name="bottom">
+                Bottom border
+              </label>
+              <label class="item">
+                <input type="checkbox" class="item-checkbox" name="right">
+                Right border
+              </label>
+            </div>
+          </div>
+
+          <div class="item-container" data-element="SIDEBAR_ELEMENT">
+            <div class="item-container-header">
+              Sidebar
+            </div>
+            <div class="item-container-content">
+              <label class="item">
+                <input type="checkbox" class="item-checkbox" name="black">
+                Black background
+              </label>
+              <label class="item">
+                <input type="checkbox" class="item-checkbox" name="bottom">
+                Bottom border
+              </label>
+              <label class="item">
+                <input type="checkbox" class="item-checkbox" name="right">
+                Right border
+              </label>
+            </div>
+          </div>
+
+          <div class="item-container" data-element="STATUS_BAR_ELEMENT">
+            <div class="item-container-header">
+              Status bar
+            </div>
+            <div class="item-container-content">
+              <label class="item">
+                <input type="checkbox" class="item-checkbox" name="black">
+                Black background
+              </label>
+              <label class="item">
+                <input type="checkbox" class="item-checkbox" name="bottom">
+                Bottom border
+              </label>
+              <label class="item">
+                <input type="checkbox" class="item-checkbox" name="right">
+                Right border
+              </label>
+            </div>
+          </div>
+
+          <div class="item-container" data-element="TIME_AREA_ELEMENT">
+            <div class="item-container-header">
+              Time area
+            </div>
+            <div class="item-container-content">
+              <label class="item">
+                <input type="checkbox" class="item-checkbox" name="black">
+                Black background
+              </label>
+              <label class="item">
+                <input type="checkbox" class="item-checkbox" name="bottom">
+                Bottom border
+              </label>
+              <label class="item">
+                <input type="checkbox" class="item-checkbox" name="right">
+                Right border
+              </label>
+            </div>
+          </div>
+
+          <div class="item-container" data-element="BG_ROW_ELEMENT">
+            <div class="item-container-header">
+              BG row
+            </div>
+            <div class="item-container-content">
+              <label class="item">
+                <input type="checkbox" class="item-checkbox" name="black">
+                Black background
+              </label>
+              <label class="item">
+                <input type="checkbox" class="item-checkbox" name="bottom">
+                Bottom border
+              </label>
+              <label class="item">
+                <input type="checkbox" class="item-checkbox" name="right">
+                Right border
+              </label>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="item-container advanced-layout">
+          <div class="item-container-header">Time alignment</div>
           <div class="item-container-content">
             <label class="item">
-              <input type="checkbox" class="item-checkbox" name="black">
-              Black background
-            </label>
-            <label class="item">
-              <input type="checkbox" class="item-checkbox" name="bottom">
-              Bottom border
-            </label>
-            <label class="item">
-              <input type="checkbox" class="item-checkbox" name="right">
-              Right border
+              &nbsp;
+              <select id="timeAlign" name="timeAlign" dir="rtl" class="item-select">
+                <option value="left" class="item-select-option">Left</option>
+                <option value="center" class="item-select-option">Center</option>
+                <option value="right" class="item-select-option">Right</option>
+              </select>
             </label>
           </div>
         </div>
 
-        <div class="item-container" data-element="SIDEBAR_ELEMENT">
-          <div class="item-container-header">
-            Sidebar
-          </div>
+        <div class="item-container advanced-layout">
+          <div class="item-container-header">Battery location</div>
           <div class="item-container-content">
             <label class="item">
-              <input type="checkbox" class="item-checkbox" name="black">
-              Black background
-            </label>
-            <label class="item">
-              <input type="checkbox" class="item-checkbox" name="bottom">
-              Bottom border
-            </label>
-            <label class="item">
-              <input type="checkbox" class="item-checkbox" name="right">
-              Right border
+              &nbsp;
+              <select id="batteryLoc" name="batteryLoc" dir="rtl" class="item-select">
+                <option value="none" class="item-select-option">Don't show</option>
+                <option value="statusRight" class="item-select-option">Status bar</option>
+                <option value="timeTopLeft" class="item-select-option">Time - top left</option>
+                <option value="timeTopRight" class="item-select-option">Time - top right</option>
+                <option value="timeBottomLeft" class="item-select-option">Time - bottom left</option>
+                <option value="timeBottomRight" class="item-select-option">Time - bottom right</option>
+              </select>
             </label>
           </div>
         </div>
 
-        <div class="item-container" data-element="STATUS_BAR_ELEMENT">
-          <div class="item-container-header">
-            Status bar
-          </div>
-          <div class="item-container-content">
-            <label class="item">
-              <input type="checkbox" class="item-checkbox" name="black">
-              Black background
-            </label>
-            <label class="item">
-              <input type="checkbox" class="item-checkbox" name="bottom">
-              Bottom border
-            </label>
-            <label class="item">
-              <input type="checkbox" class="item-checkbox" name="right">
-              Right border
-            </label>
+        <div class="item-container advanced-layout">
+          <div class="item-container-footer">
+            Crafted a beautiful custom layout? Improved a preset layout? Found a bug? Please share: post an issue on the Urchin CGM GitHub page!
           </div>
         </div>
 
-        <div class="item-container" data-element="TIME_AREA_ELEMENT">
-          <div class="item-container-header">
-            Time area
-          </div>
-          <div class="item-container-content">
-            <label class="item">
-              <input type="checkbox" class="item-checkbox" name="black">
-              Black background
-            </label>
-            <label class="item">
-              <input type="checkbox" class="item-checkbox" name="bottom">
-              Bottom border
-            </label>
-            <label class="item">
-              <input type="checkbox" class="item-checkbox" name="right">
-              Right border
-            </label>
-          </div>
-        </div>
-
-        <div class="item-container" data-element="BG_ROW_ELEMENT">
-          <div class="item-container-header">
-            BG row
-          </div>
-          <div class="item-container-content">
-            <label class="item">
-              <input type="checkbox" class="item-checkbox" name="black">
-              Black background
-            </label>
-            <label class="item">
-              <input type="checkbox" class="item-checkbox" name="bottom">
-              Bottom border
-            </label>
-            <label class="item">
-              <input type="checkbox" class="item-checkbox" name="right">
-              Right border
-            </label>
-          </div>
         </div>
 
       </div>
+      <!-- end #tab-layout -->
 
-      <div class="item-container advanced-layout">
-        <div class="item-container-header">Time alignment</div>
-        <div class="item-container-content">
-          <label class="item">
-            &nbsp;
-            <select id="timeAlign" name="timeAlign" dir="rtl" class="item-select">
-              <option value="left" class="item-select-option">Left</option>
-              <option value="center" class="item-select-option">Center</option>
-              <option value="right" class="item-select-option">Right</option>
-            </select>
-          </label>
-        </div>
-      </div>
+      <ul class="tabs-menu bottom">
+        <li class="current" data-target="tab-cgm"><a href="#">CGM</a></li>
+        <li data-target="tab-layout"><a href="#">Layout</a></li>
+        <li data-target="tab-graph"><a href="#">Graph</a></li>
+        <li data-target="tab-data"><a href="#">Data</a></li>
+      </ul>
 
-      <div class="item-container advanced-layout">
-        <div class="item-container-header">Battery location</div>
-        <div class="item-container-content">
-          <label class="item">
-            &nbsp;
-            <select id="batteryLoc" name="batteryLoc" dir="rtl" class="item-select">
-              <option value="none" class="item-select-option">Don't show</option>
-              <option value="statusRight" class="item-select-option">Status bar</option>
-              <option value="timeTopLeft" class="item-select-option">Time - top left</option>
-              <option value="timeTopRight" class="item-select-option">Time - top right</option>
-              <option value="timeBottomLeft" class="item-select-option">Time - bottom left</option>
-              <option value="timeBottomRight" class="item-select-option">Time - bottom right</option>
-            </select>
-          </label>
-        </div>
-      </div>
-
-      <div class="item-container advanced-layout">
-        <div class="item-container-footer">
-          Crafted a beautiful custom layout? Improved a preset layout? Found a bug? Please share: post an issue on the Urchin CGM GitHub page!
-        </div>
-      </div>
-
-      <div class="item-container">
+      <div class="item-container save-button">
         <div class="button-container">
           <input id="submit-button" type="submit" class="item-button" value="SAVE">
         </div>

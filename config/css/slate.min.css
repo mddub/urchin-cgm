@@ -62,3 +62,75 @@
 .layout-preview-custom {
   background: url(../images/layouts.png) -720px 0;
 }
+
+.tabs-menu {
+  height: 28px;
+  float: left;
+  clear: both;
+  list-style: none;
+}
+
+.tabs-menu.top {
+  margin-top: 1em;
+}
+
+.tabs-menu.bottom {
+  margin-bottom: 1em;
+}
+
+.tabs-menu li {
+  height: 28px;
+  float: left;
+  margin-left: 3px;
+  background-color: #a8a8a8;
+  border-right: 1px solid #a8a8a8;
+  border-left: 1px solid #a8a8a8;
+}
+
+.tabs-menu.top li {
+  border-top: 1px solid #a8a8a8;
+}
+
+.tabs-menu.bottom li {
+  border-bottom: 1px solid #a8a8a8;
+}
+
+.tabs-menu .current {
+  position: relative;
+  background-color: #eaeaea;
+  z-index: 5;
+}
+
+.tabs-menu.bottom .current {
+  top: -1px;
+  padding-top: 1px;
+}
+
+.tabs-menu li a {
+  font-size: 0.7em;
+  padding: 10px;
+  text-transform: uppercase;
+  color: #fff;
+  font-weight: normal;
+}
+
+.tabs-menu .current a {
+  color: #ff4700;
+}
+
+.tab {
+  clear: both;
+  padding-top: 0.25em;
+  padding-bottom: 1em;
+  border-top: 1px solid #a8a8a8;
+  border-bottom: 1px solid #a8a8a8;
+  display: none;
+}
+
+.tab.active {
+  display: inherit;
+}
+
+.save-button {
+  clear: both;
+}

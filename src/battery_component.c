@@ -1,5 +1,4 @@
 #include "battery_component.h"
-#include "config.h"
 #include "fonts.h"
 #include "layout.h"
 #include "preferences.h"

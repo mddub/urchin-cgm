@@ -1,7 +1,6 @@
 #pragma once
 
 #include <pebble.h>
-#include "config.h"
 #include "preferences.h"
 
 typedef struct LayoutLayers {

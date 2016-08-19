@@ -1,5 +1,4 @@
 #include <pebble.h>
-#include "app_keys.h"
 #include "config.h"
 #include "comm.h"
 #include "preferences.h"
@@ -102,7 +101,7 @@ static void in_received_handler(DictionaryIterator *received, void *context) {
   update_in_progress = false;
 
   int32_t msg_type;
-  if (!get_int32(received, &msg_type, APP_KEY_MSG_TYPE, true, 0)) {
+  if (!get_int32(received, &msg_type, MESSAGE_KEY_msgType, true, 0)) {
     request_state_callback(REQUEST_STATE_BAD_APP_MESSAGE, 0);
     schedule_update(BAD_APP_MESSAGE_RETRY_DELAY);
     return;

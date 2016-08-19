@@ -1,4 +1,3 @@
-#include "app_keys.h"
 #include "preferences.h"
 
 static Preferences *s_prefs = NULL;
@@ -60,21 +59,21 @@ static void decode_layout_elements(Preferences *prefs, int num_elements, uint8_t
 }
 
 void set_prefs(DictionaryIterator *data) {
-  s_prefs->mmol = dict_find(data, APP_KEY_MMOL)->value->int32;
-  s_prefs->top_of_graph = dict_find(data, APP_KEY_TOP_OF_GRAPH)->value->int32;
-  s_prefs->top_of_range = dict_find(data, APP_KEY_TOP_OF_RANGE)->value->int32;
-  s_prefs->bottom_of_range = dict_find(data, APP_KEY_BOTTOM_OF_RANGE)->value->int32;
-  s_prefs->bottom_of_graph = dict_find(data, APP_KEY_BOTTOM_OF_GRAPH)->value->int32;
-  s_prefs->h_gridlines = dict_find(data, APP_KEY_H_GRIDLINES)->value->int32;
-  s_prefs->battery_as_number = dict_find(data, APP_KEY_BATTERY_AS_NUMBER)->value->int32;
-  s_prefs->basal_graph = dict_find(data, APP_KEY_BASAL_GRAPH)->value->int32;
-  s_prefs->basal_height = dict_find(data, APP_KEY_BASAL_HEIGHT)->value->int32;
-  s_prefs->update_every_minute = dict_find(data, APP_KEY_UPDATE_EVERY_MINUTE)->value->int32;
-  s_prefs->time_align = dict_find(data, APP_KEY_TIME_ALIGN)->value->int32;
-  s_prefs->battery_loc = dict_find(data, APP_KEY_BATTERY_LOC)->value->int32;
-  s_prefs->num_elements = dict_find(data, APP_KEY_NUM_ELEMENTS)->value->int32;
+  s_prefs->mmol = dict_find(data, MESSAGE_KEY_mmol)->value->int32;
+  s_prefs->top_of_graph = dict_find(data, MESSAGE_KEY_topOfGraph)->value->int32;
+  s_prefs->top_of_range = dict_find(data, MESSAGE_KEY_topOfRange)->value->int32;
+  s_prefs->bottom_of_range = dict_find(data, MESSAGE_KEY_bottomOfRange)->value->int32;
+  s_prefs->bottom_of_graph = dict_find(data, MESSAGE_KEY_bottomOfGraph)->value->int32;
+  s_prefs->h_gridlines = dict_find(data, MESSAGE_KEY_hGridlines)->value->int32;
+  s_prefs->battery_as_number = dict_find(data, MESSAGE_KEY_batteryAsNumber)->value->int32;
+  s_prefs->basal_graph = dict_find(data, MESSAGE_KEY_basalGraph)->value->int32;
+  s_prefs->basal_height = dict_find(data, MESSAGE_KEY_basalHeight)->value->int32;
+  s_prefs->update_every_minute = dict_find(data, MESSAGE_KEY_updateEveryMinute)->value->int32;
+  s_prefs->time_align = dict_find(data, MESSAGE_KEY_timeAlign)->value->int32;
+  s_prefs->battery_loc = dict_find(data, MESSAGE_KEY_batteryLoc)->value->int32;
+  s_prefs->num_elements = dict_find(data, MESSAGE_KEY_numElements)->value->int32;
 
-  decode_layout_elements(s_prefs, s_prefs->num_elements, dict_find(data, APP_KEY_ELEMENTS)->value->data);
+  decode_layout_elements(s_prefs, s_prefs->num_elements, dict_find(data, MESSAGE_KEY_elements)->value->data);
 
   save_prefs();
 }

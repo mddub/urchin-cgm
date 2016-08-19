@@ -1,8 +1,8 @@
-#include "app_keys.h"
+#include "app_messages.h"
+#include "format.h"
 #include "preferences.h"
 #include "staleness.h"
 #include "text_updates.h"
-#include "format.h"
 
 void last_bg_text_layer_update(TextLayer *text_layer, DataMessage *data) {
   static char last_bg_buffer[8];

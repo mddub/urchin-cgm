@@ -1,9 +1,47 @@
 #pragma once
 
 #include <pebble.h>
-#include "config.h"
+
+#define PERSIST_KEY_VERSION 0
+#define PERSIST_KEY_PREFERENCES_OBJECT 1
 
 #define PREFERENCES_SCHEMA_VERSION 9
+
+enum {
+  ALIGN_LEFT,
+  ALIGN_CENTER,
+  ALIGN_RIGHT,
+};
+
+enum {
+  BATTERY_LOC_NONE,
+  BATTERY_LOC_STATUS_RIGHT,
+  BATTERY_LOC_TIME_TOP_LEFT,
+  BATTERY_LOC_TIME_TOP_RIGHT,
+  BATTERY_LOC_TIME_BOTTOM_LEFT,
+  BATTERY_LOC_TIME_BOTTOM_RIGHT,
+};
+
+// The order here should match constants.PROPERTIES.
+enum {
+  ELEMENT_TYPE,
+  ELEMENT_ENABLED,
+  ELEMENT_WIDTH,
+  ELEMENT_HEIGHT,
+  ELEMENT_BLACK,
+  ELEMENT_BOTTOM,
+  ELEMENT_RIGHT,
+  NUM_ELEMENT_PROPERTIES,
+};
+
+enum {
+  GRAPH_ELEMENT,
+  SIDEBAR_ELEMENT,
+  STATUS_BAR_ELEMENT,
+  TIME_AREA_ELEMENT,
+  BG_ROW_ELEMENT,
+  MAX_LAYOUT_ELEMENTS,
+};
 
 typedef struct __attribute__((__packed__)) ElementConfig {
   int el;

@@ -3,7 +3,6 @@
 #include "app_messages.h"
 #include "bg_row_element.h"
 #include "comm.h"
-#include "config.h"
 #include "layout.h"
 #include "graph_element.h"
 #include "preferences.h"
