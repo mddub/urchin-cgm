@@ -691,8 +691,9 @@
 
     </form>
     <!-- TODO this page really needs templating and proper inclusion in the build process //-->
-    <script src="js/slate.min.js"></script>
     <script src="js/generated/includes.js"></script>
     <script src="js/config.js"></script>
+    <!-- XXX this must be included last so that the color inputs are populated first //-->
+    <script src="js/slate.js"></script>
   </body>
 </html>
