@@ -566,6 +566,9 @@ class TestPointsColor(ScreenshotTest):
     }
     sgvs = partial(sgvs_from_array, [163, 162, 160, 155, 150, 145, 125, 110, 102, 100, 95, 90, 88])
 
+class TestPointsColorLineWithMissingPoints(TestPointsColor):
+    sgvs = partial(sgvs_from_array, [130, 160, 0, 140, 0, 0, 120, 0, 180, 0, 90, 0, 120])
+
 class TestPointsColorCustomLine(TestPointsColor):
     config = dict(TestPointsColor.config, **{
         'plotLineIsCustomColor': True,
