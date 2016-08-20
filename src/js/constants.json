@@ -20,6 +20,11 @@
       "pointRightMargin": 0,
       "plotLine": false,
       "plotLineWidth": 1,
+      "pointColorDefault": "0x000000",
+      "pointColorHigh": "0x000000",
+      "pointColorLow": "0x000000",
+      "plotLineIsCustomColor": false,
+      "plotLineColor": "0x000000",
       "statusContent" : "none",
       "statusLine1" : "none",
       "statusLine2" : "none",
@@ -141,6 +146,13 @@
          "plotLineWidth": 3
       }
    },
+
+   "COLOR_KEYS": [
+      "pointColorDefault",
+      "pointColorHigh",
+      "pointColorLow",
+      "plotLineColor"
+   ],
 
    "ELEMENTS": [
       "GRAPH_ELEMENT",

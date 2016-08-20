@@ -539,3 +539,30 @@ class TestPointsPresetC(ScreenshotTest):
 class TestPointsPresetD(ScreenshotTest):
     config = with_no_lines(CONSTANTS['POINT_STYLES']['d'])
     sgvs = some_real_life_entries
+
+class TestPointsColor(ScreenshotTest):
+    config = {
+        'topOfGraph': 200,
+        'topOfRange': 150,
+        'bottomOfRange': 100,
+        'bottomOfGraph': 80,
+        'layout': 'd',
+        'pointShape': 'circle',
+        'pointWidth': 7,
+        'pointMargin': 4,
+        'pointRightMargin': 0,
+        'plotLine': True,
+        'plotLineWidth': 3,
+        'pointColorDefault': '0x00AA00',
+        'pointColorHigh': '0xFFAA00',
+        'pointColorLow': '0xFF0000',
+        'plotLineIsCustomColor': False,
+        'plotLineColor': '0x000000',
+    }
+    sgvs = partial(sgvs_from_array, [163, 162, 160, 155, 150, 145, 125, 110, 102, 100, 95, 90, 88])
+
+class TestPointsColorCustomLine(TestPointsColor):
+    config = dict(TestPointsColor.config, **{
+        'plotLineIsCustomColor': True,
+        'plotLineColor': '0x5555FF',
+    })

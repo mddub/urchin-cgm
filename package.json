@@ -52,8 +52,10 @@
       "pointRightMargin": 17,
       "plotLine": 18,
       "plotLineWidth": 19,
-      "numElements": 20,
-      "elements": 21
+      "plotLineIsCustomColor": 20,
+      "numElements": 21,
+      "elements": 22,
+      "colors": 23
     },
     "resources": {
       "media": [
