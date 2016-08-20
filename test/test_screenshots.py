@@ -231,6 +231,11 @@ class TestBlackBackground(ScreenshotTest):
             'customLayout': layout,
             'statusContent': 'customtext',
             'statusText': 'black as coal',
+            'bottomOfRange': 120,
+            'topOfRange': 180,
+            'pointColorDefault': '0x5555FF',
+            'pointColorHigh': '0xFFAAAA',
+            'pointColorLow': '0xAAFFFF',
         }
 
     sgvs = partial(default_entries, 'Flat')

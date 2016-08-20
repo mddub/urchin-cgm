@@ -153,9 +153,9 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
       GPoint center = center_of_point(to_plot[i].x, to_plot[i].y);
       if (last_bg != NO_BG) {
         if (get_prefs()->plot_line_is_custom_color) {
-          graphics_context_set_stroke_color(ctx, get_prefs()->colors[COLOR_KEY_PLOT_LINE]);
+          graphics_context_set_stroke_color(ctx, COLOR_FALLBACK(get_prefs()->colors[COLOR_KEY_PLOT_LINE], data->color));
         } else {
-          graphics_context_set_stroke_color(ctx, color_for_bg(last_bg));
+          graphics_context_set_stroke_color(ctx, COLOR_FALLBACK(color_for_bg(last_bg), data->color));
         }
         graphics_draw_line(ctx, center, last_center);
       }
@@ -169,7 +169,7 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
   for(i = 0; i < plot_count; i++) {
     bg = data->sgvs[i] * 2;
     if (bg != 0) {
-      plot_point(to_plot[i].x, to_plot[i].y, color_for_bg(bg), ctx);
+      plot_point(to_plot[i].x, to_plot[i].y, COLOR_FALLBACK(color_for_bg(bg), data->color), ctx);
     }
   }
 
