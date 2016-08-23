@@ -126,16 +126,6 @@ var data = function(c, maxSGVCount) {
     });
   };
 
-  d.getIOB = function(config) {
-    return d.getJSON(config.nightscout_url + '/api/v1/entries.json?find[activeInsulin][$exists]=true&count=1').then(function(iobs) {
-      if(iobs.length && Date.now() - iobs[0]['date'] <= c.IOB_RECENCY_THRESHOLD_SECONDS * 1000) {
-        return iobs[0]['activeInsulin'].toFixed(1).toString() + ' u';
-      } else {
-        return '-';
-      }
-    });
-  };
-
   d.getPebbleEndpoint = debounce(function(config) {
     return d.getJSON(config.nightscout_url + '/pebble').then(function(pebbleData) {
       if (pebbleData['bgs'] !== undefined && pebbleData['bgs'].length) {
@@ -146,7 +136,10 @@ var data = function(c, maxSGVCount) {
     });
   });
 
-  d.getCarePortalIOB = function(config) {
+  d.getPebbleIOB = function(config) {
+    // As of Nightscout 0.9.0-beta1, the /pebble endpoint will return either
+    // Care Portal or devicestatus IOB depending on what's available.
+    // https://github.com/nightscout/cgm-remote-monitor/pull/1560
     return d.getPebbleEndpoint(config).then(function(data) {
       if (data && !isNaN(parseFloat(data['iob']))) {
         return parseFloat(data['iob']).toFixed(1).toString() + ' u';
@@ -156,7 +149,7 @@ var data = function(c, maxSGVCount) {
     });
   };
 
-  d.getCarePortalIOBAndCOB = function(config) {
+  d.getPebbleIOBAndCOB = function(config) {
     return d.getPebbleEndpoint(config).then(function(data) {
       var out = [];
       if (data && !isNaN(parseFloat(data['iob']))) {
@@ -580,9 +573,8 @@ var data = function(c, maxSGVCount) {
       'rawdata': d.getRawData,
       'rig-raw': d.getRigBatteryAndRawData,
       'basal': d.getActiveBasal,
-      'pumpiob': d.getIOB,
-      'careportaliob': d.getCarePortalIOB,
-      'careportaliobandcob': d.getCarePortalIOBAndCOB,
+      'pebbleiob': d.getPebbleIOB,
+      'pebbleiobandcob': d.getPebbleIOBAndCOB,
       'openaps': d.getOpenAPSStatus,
       'customurl': d.getCustomUrl,
       'customjson': d.getCustomJsonUrl,
