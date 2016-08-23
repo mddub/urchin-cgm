@@ -178,7 +178,7 @@ The most effective method of integration testing I've found is to [compare scree
 * High/low BG alerts
 * Stale data alerts
 * Show date when space allows
-* Color support for Pebble Time
+* More color configurability
 * A fixed layout which supports Pebble Time Round
 * Use data directly from Dexcom Share (no Nightscout site required)
 * Recency indicator (like Dexcom's warm-up pie chart)
