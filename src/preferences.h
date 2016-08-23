@@ -5,7 +5,7 @@
 #define PERSIST_KEY_VERSION 0
 #define PERSIST_KEY_PREFERENCES_OBJECT 1
 
-#define PREFERENCES_SCHEMA_VERSION 10
+#define PREFERENCES_SCHEMA_VERSION 11
 
 enum {
   ALIGN_LEFT,
@@ -48,6 +48,14 @@ enum {
   MAX_LAYOUT_ELEMENTS,
 };
 
+enum {
+  COLOR_KEY_POINT_DEFAULT,
+  COLOR_KEY_POINT_HIGH,
+  COLOR_KEY_POINT_LOW,
+  COLOR_KEY_PLOT_LINE,
+  NUM_COLOR_KEYS,
+};
+
 typedef struct __attribute__((__packed__)) ElementConfig {
   int el;
   int w;
@@ -77,8 +85,10 @@ typedef struct __attribute__((__packed__)) Preferences {
   unsigned int point_right_margin:5;
   bool plot_line;
   unsigned int plot_line_width:4;
+  bool plot_line_is_custom_color;
   unsigned int num_elements:3;
   ElementConfig elements[MAX_LAYOUT_ELEMENTS];
+  GColor colors[NUM_COLOR_KEYS];
 } Preferences;
 
 void init_prefs();

@@ -92,6 +92,11 @@
   background: url(../images/point-styles.png) -129px 0;
 }
 
+.sub-item {
+  border-top: none !important;
+  margin-top: -10px;
+}
+
 .tabs-menu {
   height: 28px;
   float: left;

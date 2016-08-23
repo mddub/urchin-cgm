@@ -4,6 +4,7 @@
 #include "staleness.h"
 
 #define BOLUS_TICK_HEIGHT 7
+#define NO_BG 32767
 
 static GPoint center_of_point(int x, int y) {
   if (get_prefs()->point_shape == POINT_SHAPE_CIRCLE) {
@@ -13,7 +14,8 @@ static GPoint center_of_point(int x, int y) {
   }
 }
 
-static void plot_point(int x, int y, GContext *ctx) {
+static void plot_point(int x, int y, GColor c, GContext *ctx) {
+  graphics_context_set_fill_color(ctx, c);
   if (get_prefs()->point_shape == POINT_SHAPE_RECTANGLE) {
     graphics_fill_rect(ctx, GRect(x, y, get_prefs()->point_width, get_prefs()->point_rect_height), 0, GCornerNone);
   } else if (get_prefs()->point_shape == POINT_SHAPE_CIRCLE) {
@@ -54,6 +56,16 @@ static int bg_to_y_for_point(int height, int bg) {
     return max;
   } else {
     return y;
+  }
+}
+
+static GColor color_for_bg(int bg) {
+  if (bg > get_prefs()->top_of_range) {
+    return get_prefs()->colors[COLOR_KEY_POINT_HIGH];
+  } else if (bg < get_prefs()->bottom_of_range) {
+    return get_prefs()->colors[COLOR_KEY_POINT_LOW];
+  } else {
+    return get_prefs()->colors[COLOR_KEY_POINT_DEFAULT];
   }
 }
 
@@ -109,40 +121,60 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
     }
   }
 
-  if (get_prefs()->plot_line) {
-    graphics_context_set_stroke_width(ctx, get_prefs()->plot_line_width);
-  }
-
-  // SGVs
-  GPoint last_center = GPointZero;
+  // Line and point preprocessing
+  static GPoint to_plot[GRAPH_MAX_SGV_COUNT];
+  int16_t bg;
   for(i = 0; i < data->count; i++) {
     // XXX: JS divides by 2 to fit into 1 byte
-    int bg = data->sgvs[i] * 2;
+    bg = data->sgvs[i] * 2;
     if(bg == 0) {
       continue;
     }
     x = index_to_x(i, graph_width, padding);
     y = bg_to_y_for_point(graph_height, bg);
-
+    to_plot[i] = GPoint(x, y);
     // stop plotting if the SGV is off-screen
     if (x < 0) {
       break;
     }
+  }
+  uint8_t plot_count = i;
 
-    // line
-    if (get_prefs()->plot_line) {
-      GPoint center = center_of_point(x, y);
-      if (!gpoint_equal(&last_center, &GPointZero)) {
+  // Line
+  if (get_prefs()->plot_line) {
+    graphics_context_set_stroke_width(ctx, get_prefs()->plot_line_width);
+    int16_t last_bg = NO_BG;
+    GPoint last_center;
+    for(i = 0; i < plot_count; i++) {
+      bg = data->sgvs[i] * 2;
+      if (bg == 0) {
+        continue;
+      }
+      GPoint center = center_of_point(to_plot[i].x, to_plot[i].y);
+      if (last_bg != NO_BG) {
+        if (get_prefs()->plot_line_is_custom_color) {
+          graphics_context_set_stroke_color(ctx, COLOR_FALLBACK(get_prefs()->colors[COLOR_KEY_PLOT_LINE], data->color));
+        } else {
+          graphics_context_set_stroke_color(ctx, COLOR_FALLBACK(color_for_bg(last_bg), data->color));
+        }
         graphics_draw_line(ctx, center, last_center);
       }
+      last_bg = bg;
       last_center = center;
     }
-
-    // point
-    plot_point(x, y, ctx);
+    graphics_context_set_stroke_width(ctx, 1);
   }
 
-  graphics_context_set_stroke_width(ctx, 1);
+  // Points
+  for(i = 0; i < plot_count; i++) {
+    bg = data->sgvs[i] * 2;
+    if (bg != 0) {
+      plot_point(to_plot[i].x, to_plot[i].y, COLOR_FALLBACK(color_for_bg(bg), data->color), ctx);
+    }
+  }
+
+  graphics_context_set_fill_color(ctx, data->color);
+  graphics_context_set_stroke_color(ctx, data->color);
 
   // Boluses
   for(i = 0; i < data->count; i++) {

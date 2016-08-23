@@ -58,6 +58,12 @@ static void decode_layout_elements(Preferences *prefs, int num_elements, uint8_t
   }
 }
 
+static void decode_colors(Preferences *prefs, uint8_t *values) {
+  for (uint8_t i = 0; i < NUM_COLOR_KEYS; i++) {
+    s_prefs->colors[i] = (GColor){.argb=(values[i])};
+  }
+}
+
 void set_prefs(DictionaryIterator *data) {
   s_prefs->mmol = dict_find(data, MESSAGE_KEY_mmol)->value->int32;
   s_prefs->top_of_graph = dict_find(data, MESSAGE_KEY_topOfGraph)->value->int32;
@@ -78,9 +84,12 @@ void set_prefs(DictionaryIterator *data) {
   s_prefs->point_right_margin = dict_find(data, MESSAGE_KEY_pointRightMargin)->value->int32;
   s_prefs->plot_line = dict_find(data, MESSAGE_KEY_plotLine)->value->int32;
   s_prefs->plot_line_width = dict_find(data, MESSAGE_KEY_plotLineWidth)->value->int32;
-  s_prefs->num_elements = dict_find(data, MESSAGE_KEY_numElements)->value->int32;
+  s_prefs->plot_line_is_custom_color = dict_find(data, MESSAGE_KEY_plotLineIsCustomColor)->value->int32;
 
+  s_prefs->num_elements = dict_find(data, MESSAGE_KEY_numElements)->value->int32;
   decode_layout_elements(s_prefs, s_prefs->num_elements, dict_find(data, MESSAGE_KEY_elements)->value->data);
+
+  decode_colors(s_prefs, dict_find(data, MESSAGE_KEY_colors)->value->data);
 
   save_prefs();
 }

@@ -8,7 +8,10 @@ DEFAULT_BUILD_ENV = 'production'
 BUILD_ENV = os.environ.get('BUILD_ENV', DEFAULT_BUILD_ENV)
 DEBUG = os.environ.get('DEBUG')
 CONSTANTS_FILE = 'src/js/constants.json'
-INCLUDES_FOR_CONFIG_PAGE = ['src/js/points.js']
+INCLUDES_FOR_CONFIG_PAGE = [
+    'config/js/vendor.min.js',
+    'src/js/points.js'
+]
 
 ENV_CONSTANTS_OVERRIDES = {
     'test': {

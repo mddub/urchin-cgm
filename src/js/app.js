@@ -113,6 +113,21 @@ function app(Pebble, c) {
     return out;
   }
 
+  function colorHexTo8Bit(hexString) {
+    // hexString should look like 0x55FFAA
+    var r = (parseInt(hexString.substr(-6).substr(0, 2), 16) / 85);
+    var g = (parseInt(hexString.substr(-6).substr(2, 2), 16) / 85);
+    var b = (parseInt(hexString.substr(-6).substr(4, 2), 16) / 85);
+    var a = 3;
+    return (a << 6) + (r << 4) + (g << 2) + (b << 0);
+  }
+
+  function encodeColorsForPebble(config) {
+    return c.COLOR_KEYS.map(function(key) {
+      return colorHexTo8Bit(config[key]);
+    });
+  }
+
   function sendPreferences() {
     return sendMessage({
       msgType: c.MSG_TYPE_PREFERENCES,
@@ -135,8 +150,10 @@ function app(Pebble, c) {
       pointRightMargin: config.pointRightMargin,
       plotLine: config.plotLine,
       plotLineWidth: config.plotLineWidth,
+      plotLineIsCustomColor: config.plotLineIsCustomColor,
       numElements: countElementsForPebble(getLayout(config)),
       elements: encodeElementsForPebble(getLayout(config)),
+      colors: encodeColorsForPebble(config),
     });
   }
 

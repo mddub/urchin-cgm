@@ -141,6 +141,11 @@
       $('#plotLineWidth, #plotLineWidth-val').val(lineWidth - 1);
     }
 
+    $('.plot-line-is-custom-color-container').toggle($('#plotLine').is(':checked'));
+    $('.plot-line-color-container').toggle(
+      $('#plotLine').is(':checked') && $('[name=plotLineIsCustomColor]').val() === 'true'
+    );
+
     updateVisibleHistoryLength();
 
     if (e) {
@@ -453,6 +458,18 @@
     encodeSliders(out, POINT_SLIDER_KEYS);
   }
 
+  function populateColors(current) {
+    c.COLOR_KEYS.forEach(function(key) {
+      $('[name=' + key + ']').val(current[key]);
+    });
+  }
+
+  function encodeColors(out) {
+    c.COLOR_KEYS.forEach(function(key) {
+      out[key] = $('[name=' + key + ']').val();
+    });
+  }
+
   function populateValues(current) {
     document.getElementById('ns-url').value = current['nightscout_url'] || '';
 
@@ -464,6 +481,9 @@
 
     populateSliders(current, MAIN_SLIDER_KEYS);
     populatePointConfig(current);
+    populateColors(current);
+
+    $('[name=plotLineIsCustomColor]').val(current['plotLineIsCustomColor'] ? 'true' : 'false');
 
     document.getElementById('hGridlines').value = current['hGridlines'];
 
@@ -503,6 +523,7 @@
       mmol: mmol,
       nightscout_url: document.getElementById('ns-url').value.replace(/\/$/, ''),
       hGridlines: tryParseInt(document.getElementById('hGridlines').value),
+      plotLineIsCustomColor: $('[name=plotLineIsCustomColor]').val() === 'true',
       statusContent: document.getElementById('statusContent').value,
       statusText: document.getElementById('statusText').value,
       statusUrl: document.getElementById('statusUrl').value,
@@ -522,6 +543,7 @@
     };
     encodeSliders(out, MAIN_SLIDER_KEYS);
     encodePointConfig(out);
+    encodeColors(out);
     return out;
   }
 
@@ -571,6 +593,8 @@
     $('#update-available #available-version').text(c.VERSION);
     $('#update-available').toggle(c.VERSION !== getQueryParam('version'));
 
+    $('.color-platforms-only').toggle(['aplite', 'diorite'].indexOf(getQueryParam('pf')) === -1);
+
     initializeStatusOptions(current);
 
     $('#basalGraph').on('change', function(evt) {
@@ -587,6 +611,7 @@
     $('#pointRightMargin, #pointRightMargin-val').on('change', onPointSettingsChange);
     $('#plotLine').on('change', onPointSettingsChange);
     $('#plotLineWidth, #plotLineWidth-val').on('change', onPointSettingsChange);
+    $('[name=plotLineIsCustomColor]').on('change', onPointSettingsChange);
     onPointSettingsChange(true);
 
     $('.layout-order').children('label').append([

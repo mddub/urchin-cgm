@@ -135,7 +135,7 @@
         </div>
 
         <div class="item-container">
-          <h3>POINT SETTINGS:</h3>
+          <h3>POINT STYLE:</h3>
         </div>
 
         <div class="item-container">
@@ -247,6 +247,41 @@
                 <input id="plotLineWidth-val" name="plotLineWidth" type="tel" class="item-input">
               </div>
             </label>
+          </div>
+        </div>
+
+        <div class="color-platforms-only">
+          <div class="item-container">
+            <h3>POINT COLOR:</h3>
+          </div>
+
+          <div class="item-container">
+            <div class="item-container-header">Point color</div>
+            <div class="item-container-content">
+              <label class="item">
+                Point color
+                <input type="text" class="item-color item-color-normal" name="pointColorDefault" value="#000000">
+              </label>
+              <label class="item">
+                When above range
+                <input type="text" class="item-color item-color-normal" name="pointColorHigh" value="#000000">
+              </label>
+              <label class="item">
+                When below range
+                <input type="text" class="item-color item-color-normal" name="pointColorLow" value="#000000">
+              </label>
+              <label class="item plot-line-is-custom-color-container">
+                Line color
+                <select name="plotLineIsCustomColor" dir="rtl" class="item-select">
+                  <option value="false" class="item-select-option">Same as next point</option>
+                  <option value="true" class="item-select-option">Custom</option>
+                </select>
+              </label>
+              <label class="item sub-item plot-line-color-container">
+                &nbsp;
+                <input type="text" class="item-color item-color-normal" name="plotLineColor" value="#000000">
+              </label>
+            </div>
           </div>
         </div>
 
@@ -691,8 +726,9 @@
 
     </form>
     <!-- TODO this page really needs templating and proper inclusion in the build process //-->
-    <script src="js/slate.min.js"></script>
     <script src="js/generated/includes.js"></script>
     <script src="js/config.js"></script>
+    <!-- XXX this must be included last so that the color inputs are populated first //-->
+    <script src="js/slate.js"></script>
   </body>
 </html>
