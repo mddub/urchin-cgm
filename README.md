@@ -23,6 +23,7 @@ The status bar can display content from a variety of sources:
 * **Uploader battery, Dexcom raw** - combination of the above two. (e.g. `36% Cln 97 104 106`)
 * **Active basal - NS Care Portal** - the currently-active basal rate based on treatments in [Nightscout Care Portal][care-portal]. If a temp basal is currently active, shows the difference from normal basal and how many minutes ago the temp basal began. (e.g. `1.5u/h +0.6 (19)`)
 * **IOB - NS Care Portal** - IOB calculated based on treatments in [Nightscout Care Portal][care-portal]. (e.g. `2.3 u`)
+* **IOB+COB - NS Care Portal** - Same IOB as above plus carbs-on-board. (e.g. `2.3 u  31 g`)
 * **Pump IOB - MiniMed Connect** - the bolus IOB reported by a [MiniMed Connect][minimed-connect]. (e.g. `2.3 u`)
 * **IOB and temp - OpenAPS** - IOB and currently-active temp basal rate from the most recent [OpenAPS status upload][openaps-status-uploads], or if the most recent status indicates failure, the time since that failure plus the time and IOB from the last successful status. (e.g. `(2) 1.1u 1.9x13` or `(4) -- | (23) 2.2u`)
 * **Custom URL - text** - if you want to summarize your data in a custom way.

@@ -338,16 +338,46 @@ describe('getRawData', function() {
 
 describe('getCarePortalIOB', function() {
   it('should report IOB from the Nightscout /pebble endpoint', function() {
-    var PEBBLE_DATA = {
-      "bgs": [{"iob": 1.27}]
-    };
     var d = defaultData();
     mockAPI(d, {
-      'pebble': PEBBLE_DATA
+      'pebble': {"bgs": [{"iob": 1.27}]}
     });
 
     return d.getCarePortalIOB({}).then(function(iob) {
       expect(iob).to.be('1.3 u');
+    });
+  });
+});
+
+describe('getCarePortalIOBAndCOB', function() {
+  it('should report IOB and COB from the Nightscout /pebble endpoint', function() {
+    var d = defaultData();
+    mockAPI(d, {
+      // Pebble endpoint does weird stuff
+      'pebble': {"bgs": [{"iob": "2.67", "cob": "28.63"}]}
+    });
+    return d.getCarePortalIOBAndCOB({}).then(function(s) {
+      expect(s).to.be('2.7 u  29 g');
+    });
+  });
+
+  it('should report only IOB when COB is absent', function() {
+    var d = defaultData();
+    mockAPI(d, {
+      'pebble': {"bgs": [{"iob": 1.83, "cob": "foo"}]}
+    });
+    return d.getCarePortalIOBAndCOB({}).then(function(s) {
+      expect(s).to.be('1.8 u');
+    });
+  });
+
+  it('should report nothing when IOB and COB are both absent', function() {
+    var d = defaultData();
+    mockAPI(d, {
+      'pebble': {"bgs": [{"iob": "", "cob": ""}]}
+    });
+    return d.getCarePortalIOBAndCOB({}).then(function(s) {
+      expect(s).to.be('-');
     });
   });
 });
