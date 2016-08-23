@@ -29,11 +29,10 @@
     itemCheckbox: function() {
       this.each(function() {
         var $checkbox = $(this);
-        var item = $checkbox.parent();
 
         var $injectedCheckbox = $('<div class="item-styled-checkbox"></div>');
 
-        item.append($injectedCheckbox);
+        $checkbox.after($injectedCheckbox);
       });
     },
 
