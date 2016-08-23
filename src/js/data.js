@@ -136,13 +136,36 @@ var data = function(c, maxSGVCount) {
     });
   };
 
-  d.getCarePortalIOB = function(config) {
+  d.getPebbleEndpoint = debounce(function(config) {
     return d.getJSON(config.nightscout_url + '/pebble').then(function(pebbleData) {
-      if(pebbleData['bgs'] !== undefined && pebbleData['bgs'].length && !isNaN(parseFloat(pebbleData['bgs'][0]['iob']))) {
-        return parseFloat(pebbleData['bgs'][0]['iob']).toFixed(1).toString() + ' u';
+      if (pebbleData['bgs'] !== undefined && pebbleData['bgs'].length) {
+        return pebbleData['bgs'][0];
+      } else {
+        return undefined;
+      }
+    });
+  });
+
+  d.getCarePortalIOB = function(config) {
+    return d.getPebbleEndpoint(config).then(function(data) {
+      if (data && !isNaN(parseFloat(data['iob']))) {
+        return parseFloat(data['iob']).toFixed(1).toString() + ' u';
       } else {
         return '-';
       }
+    });
+  };
+
+  d.getCarePortalIOBAndCOB = function(config) {
+    return d.getPebbleEndpoint(config).then(function(data) {
+      var out = [];
+      if (data && !isNaN(parseFloat(data['iob']))) {
+        out.push(parseFloat(data['iob']).toFixed(1).toString() + ' u');
+      }
+      if (data && !isNaN(parseFloat(data['cob']))) {
+        out.push(Math.round(parseFloat(data['cob'])) + ' g');
+      }
+      return out.length > 0 ? out.join('  ') : '-';
     });
   };
 
@@ -559,6 +582,7 @@ var data = function(c, maxSGVCount) {
       'basal': d.getActiveBasal,
       'pumpiob': d.getIOB,
       'careportaliob': d.getCarePortalIOB,
+      'careportaliobandcob': d.getCarePortalIOBAndCOB,
       'openaps': d.getOpenAPSStatus,
       'customurl': d.getCustomUrl,
       'customjson': d.getCustomJsonUrl,
