@@ -27,8 +27,12 @@
 
   function upgradeConfig(config) {
     if (config.layout === undefined) {
-      // config is un-versioned and older than v0.0.4
+      // v0.0.4
       config.layout = 'a';
+    }
+    if (config.statusContent === 'careportaliob' || config.statusContent === 'pumpiob') {
+      // v0.0.11: IOB from /pebble now handles both Care Portal and devicestatus IOB
+      config.statusContent = 'pebbleiob';
     }
     return config;
   }

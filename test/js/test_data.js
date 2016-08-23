@@ -336,27 +336,27 @@ describe('getRawData', function() {
   });
 });
 
-describe('getCarePortalIOB', function() {
+describe('getPebbleIOB', function() {
   it('should report IOB from the Nightscout /pebble endpoint', function() {
     var d = defaultData();
     mockAPI(d, {
       'pebble': {"bgs": [{"iob": 1.27}]}
     });
 
-    return d.getCarePortalIOB({}).then(function(iob) {
+    return d.getPebbleIOB({}).then(function(iob) {
       expect(iob).to.be('1.3 u');
     });
   });
 });
 
-describe('getCarePortalIOBAndCOB', function() {
+describe('getPebbleIOBAndCOB', function() {
   it('should report IOB and COB from the Nightscout /pebble endpoint', function() {
     var d = defaultData();
     mockAPI(d, {
       // Pebble endpoint does weird stuff
       'pebble': {"bgs": [{"iob": "2.67", "cob": "28.63"}]}
     });
-    return d.getCarePortalIOBAndCOB({}).then(function(s) {
+    return d.getPebbleIOBAndCOB({}).then(function(s) {
       expect(s).to.be('2.7 u  29 g');
     });
   });
@@ -366,7 +366,7 @@ describe('getCarePortalIOBAndCOB', function() {
     mockAPI(d, {
       'pebble': {"bgs": [{"iob": 1.83, "cob": "foo"}]}
     });
-    return d.getCarePortalIOBAndCOB({}).then(function(s) {
+    return d.getPebbleIOBAndCOB({}).then(function(s) {
       expect(s).to.be('1.8 u');
     });
   });
@@ -376,7 +376,7 @@ describe('getCarePortalIOBAndCOB', function() {
     mockAPI(d, {
       'pebble': {"bgs": [{"iob": "", "cob": ""}]}
     });
-    return d.getCarePortalIOBAndCOB({}).then(function(s) {
+    return d.getPebbleIOBAndCOB({}).then(function(s) {
       expect(s).to.be('-');
     });
   });
@@ -763,19 +763,19 @@ describe('getMultiple', function() {
   beforeEach(function() {
     d = defaultData();
     d.getRawData = function() { return Promise.resolve('raw data'); };
-    d.getCarePortalIOB = function() { return Promise.resolve('care portal iob'); };
+    d.getPebbleIOB = function() { return Promise.resolve('pebble iob'); };
     d.getCustomUrl = function() { return Promise.resolve('custom url'); };
     d.getCustomText = function() { return Promise.reject(new Error()); };
   });
 
   it('should get multiple status lines and join them with newlines', function() {
     return d.getStatusText({ statusContent: 'multiple',
-      statusLine1: 'careportaliob',
+      statusLine1: 'pebbleiob',
       statusLine2: 'rawdata',
       statusLine3: 'customurl',
     }).then(function(result) {
       expect(result).to.be([
-        'care portal iob',
+        'pebble iob',
         'raw data',
         'custom url',
       ].join('\n'));
@@ -800,11 +800,11 @@ describe('getMultiple', function() {
     return d.getStatusText({ statusContent: 'multiple',
       statusLine1: 'rawdata',
       statusLine2: 'none',
-      statusLine3: 'careportaliob',
+      statusLine3: 'pebbleiob',
     }).then(function(result) {
       expect(result).to.be([
         'raw data',
-        'care portal iob',
+        'pebble iob',
       ].join('\n'));
     });
   });
