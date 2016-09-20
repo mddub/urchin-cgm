@@ -7,7 +7,11 @@ set -x
 set -e
 
 PEBBLE_TOOL_PATH=pebble-sdk-$PEBBLE_TOOL-linux64
-IMAGEMAGICK_PATH=ImageMagick-7.0.2-6
+IMAGEMAGICK_PATH=ImageMagick-7.0.3-0
+
+######## Python testing dependencies
+
+pip install -r ~/urchin-cgm/requirements.txt
 
 ######## Pebble CLI tool
 
@@ -56,7 +60,3 @@ cd ~/imagemagick/$IMAGEMAGICK_PATH
 sudo make install
 sudo ldconfig /usr/local/lib
 (convert logo: logo.gif && rm logo.gif) || { echo "ImageMagick install failed"; exit 1; }
-
-######## Python testing dependencies
-
-pip install -r ~/urchin-cgm/requirements.txt
