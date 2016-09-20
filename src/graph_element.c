@@ -193,7 +193,7 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
       x = index_to_x(i, graph_width, padding);
       y = layer_size.h - basal;
       uint8_t width = get_prefs()->point_width + get_prefs()->point_margin;
-      if (i == data->count - 1) {
+      if (i == data->count - 1 && x >= 0) {
         // if this is the last point to draw, extend its basal data to the left edge
         width += x;
         x = 0;
