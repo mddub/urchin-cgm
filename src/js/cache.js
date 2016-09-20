@@ -1,9 +1,10 @@
 /* jshint browser: true */
 /* global module, console */
 
-var Cache = function(key, maxEntries) {
+var Cache = function() {};
+
+Cache.prototype.init = function(key) {
   this.storageKey = 'cache_' + key;
-  this.maxEntries = maxEntries;
   this.entries = [];
   this.revive();
 };
@@ -24,15 +25,10 @@ Cache.prototype.persist = function() {
 };
 
 Cache.prototype.update = function(newEntries) {
-  this.entries = newEntries.concat(this.entries).slice(0, this.maxEntries);
+  this.entries = newEntries.concat(this.entries);
+  this.purge();
   this.persist();
   return this.entries;
-};
-
-Cache.prototype.setMaxEntries = function(newMax) {
-  this.maxEntries = newMax;
-  this.entries = this.entries.slice(0, this.maxEntries);
-  this.persist();
 };
 
 Cache.prototype.clear = function() {
@@ -40,4 +36,47 @@ Cache.prototype.clear = function() {
   this.persist();
 };
 
-module.exports = Cache;
+////////////////
+
+var CacheWithMaxAge = function(key, maxSecondsOld) {
+  this.init(key);
+  this.maxSecondsOld = maxSecondsOld;
+};
+
+CacheWithMaxAge.prototype = Object.create(Cache.prototype);
+
+CacheWithMaxAge.prototype.purge = function() {
+  this.entries = this.entries.filter(function(e) {
+    // For now, assume "date" holds the timestamp, formatted as epoch milliseconds
+    // (This generally holds only for the "entries" collection)
+    return e['date'] >= Date.now() - this.maxSecondsOld * 1000;
+  }.bind(this));
+};
+
+CacheWithMaxAge.prototype.setMaxSecondsOld = function(newMax) {
+  this.maxSecondsOld = newMax;
+};
+
+////////////////
+
+var CacheWithMaxSize = function(key, maxSize) {
+  this.init(key);
+  this.maxSize = maxSize;
+};
+
+CacheWithMaxSize.prototype = Object.create(Cache.prototype);
+
+CacheWithMaxSize.prototype.purge = function() {
+  this.entries = this.entries.slice(0, this.maxSize);
+};
+
+CacheWithMaxSize.prototype.setMaxSize = function(newMax) {
+  this.maxSize = newMax;
+};
+
+////////////////
+
+module.exports = {
+  WithMaxAge: CacheWithMaxAge,
+  WithMaxSize: CacheWithMaxSize,
+};
