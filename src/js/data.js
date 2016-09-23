@@ -317,9 +317,9 @@ var data = function(c, maxSGVCount) {
     });
   }
 
-  function _getActiveTempBasal(config) {
+  function _getLastTempBasal(config) {
     return d.getTempBasals(config).then(function(treatments) {
-      if (treatments.length && treatments[0]['duration'] && Date.now() < new Date(treatments[0]['created_at']).getTime() + parseFloat(treatments[0]['duration']) * 60 * 1000) {
+      if (treatments.length && treatments[0]['duration']) {
         var start = new Date(treatments[0]['created_at']);
         var rate;
         if (treatments[0]['percent'] && parseFloat(treatments[0]['percent']) === 0) {
@@ -327,7 +327,7 @@ var data = function(c, maxSGVCount) {
         } else {
           rate = parseFloat(treatments[0]['absolute']);
         }
-        return {start: start, rate: rate, duration: treatments[0]['duration']};
+        return {start: start, rate: rate, duration: parseFloat(treatments[0]['duration'])};
       } else {
         return undefined;
       }
@@ -348,14 +348,14 @@ var data = function(c, maxSGVCount) {
     // adapted from @audiefile: https://github.com/mddub/urchin-cgm/pull/1
     return Promise.all([
       _getCurrentProfileBasal(config),
-      _getActiveTempBasal(config),
+      _getLastTempBasal(config),
     ]).then(function(results) {
       var profileBasal = results[0],
         tempBasal = results[1];
 
       if (profileBasal === undefined && tempBasal === undefined) {
         return {text: '-'};
-      } else if (tempBasal !== undefined) {
+      } else if (tempBasal !== undefined && Date.now() - tempBasal.start < tempBasal.duration * 60 * 1000) {
         var diff = tempBasal.rate - profileBasal;
         return {
           text: _roundBasal(tempBasal.rate) + 'u/h ' + (diff >= 0 ? '+' : '') + _roundBasal(diff),
@@ -446,7 +446,7 @@ var data = function(c, maxSGVCount) {
     }
   }
 
-  function openAPSTempBasal(entries, activeTemp, relativeTo) {
+  function openAPSTempBasal(entries, lastTemp, relativeTo, atTime) {
     var last = entries[0];
     var enacted = last['openaps']['enacted'];
 
@@ -460,11 +460,11 @@ var data = function(c, maxSGVCount) {
       // if last enacted is a "cancel", don't show an active rate and don't consider last temp basal
       if (enacted['duration'] > 0) {
         rate = enacted['rate'];
-        remaining = Math.ceil(enacted['duration'] - (Date.now() - new Date(enacted['timestamp']).getTime()) / (60 * 1000));
+        remaining = Math.ceil(enacted['duration']);
       }
-    } else if (activeTemp && activeTemp.duration > 0) {
-      rate = activeTemp.rate;
-      remaining = Math.ceil(activeTemp.duration - (Date.now() - activeTemp.start) / (60 * 1000));
+    } else if (lastTemp && lastTemp.duration > 0) {
+      rate = lastTemp.rate;
+      remaining = Math.ceil(lastTemp.duration - (new Date(atTime).getTime() - lastTemp.start) / (60 * 1000));
     }
 
     if (rate !== undefined && remaining > 0) {
@@ -539,11 +539,11 @@ var data = function(c, maxSGVCount) {
   d.getOpenAPSStatus = function(config) {
     return Promise.all([
       d.getOpenAPSStatusHistory(config),
-      _getActiveTempBasal(config),
+      _getLastTempBasal(config),
       _getCurrentProfileBasal(config),
     ]).then(function(results) {
       var allEntries = results[0],
-        activeTemp = results[1],
+        lastTemp = results[1],
         profileBasal = results[2];
 
       var entries = openAPSEntriesFromLastSuccessfulDevice(allEntries);
@@ -556,7 +556,7 @@ var data = function(c, maxSGVCount) {
       var summary;
       if (openAPSIsSuccess(entries)) {
         var relativeTo = config.statusOpenAPSNetBasal ? profileBasal : undefined;
-        var temp = openAPSTempBasal(entries, activeTemp, relativeTo);
+        var temp = openAPSTempBasal(entries, lastTemp, relativeTo, lastLoopTime);
         var iob = openAPSIOB(entries);
         // If showing temp, eventual BG, and net +/-, we need all the space we can get
         var abbreviate = temp !== '' && config.statusOpenAPSNetBasal;

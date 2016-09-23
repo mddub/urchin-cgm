@@ -453,16 +453,17 @@ describe('getOpenAPSStatus', function() {
       });
     });
 
-    it('should report the time remaining in the last temp basal relative to now', function() {
+    it('should report the time remaining in the last temp basal as of the time of the OpenAPS status', function() {
       return d.getOpenAPSStatus({}).then(function(result) {
-        expect(result.text).to.contain('1.4x6');
+        expect(result.text).to.contain('1.4x10');
       });
     });
 
-    it('should not report a temp if the last temp basal is over', function() {
+    it('should report time remaining in the last temp as of the status time, even if the last temp basal has ended', function() {
       timekeeper.freeze(new Date('2016-03-01T16:56:00Z'));
       return d.getOpenAPSStatus({}).then(function(result) {
-        expect(result.text).not.to.contain('1.4x');
+        expect(result.text).to.contain('1.4x10');
+        expect(result.recency).to.be(722);
       });
     });
 
@@ -504,16 +505,17 @@ describe('getOpenAPSStatus', function() {
       });
     });
 
-    it('should report the time remaining in the enacted temp basal relative to now', function() {
+    it('should report the time remaining in the enacted temp basal as of the time of the OpenAPS status', function() {
       return d.getOpenAPSStatus({}).then(function(result) {
-        expect(result.text).to.contain('0.2x27');
+        expect(result.text).to.contain('0.2x30');
       });
     });
 
-    it('should not report a temp if the last enacted temp is over', function() {
+    it('should report time remaining in the last temp as of the status time, even if the last temp basal has ended', function() {
       timekeeper.freeze(new Date('2016-03-01T17:20:00Z'));
       return d.getOpenAPSStatus({}).then(function(result) {
-        expect(result.text).not.to.contain('0.2x');
+        expect(result.text).to.contain('0.2x30');
+        expect(result.recency).to.be(2100);
       });
     });
 
