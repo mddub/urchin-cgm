@@ -60,6 +60,8 @@ def _collection_from_test(coll, test_class_name):
         return getattr(test_screenshots, test_class_name)().treatments()
     elif coll == 'profile':
         return getattr(test_screenshots, test_class_name)().profile()
+    elif coll == 'devicestatus':
+        return getattr(test_screenshots, test_class_name)().devicestatus()
     else:
         return None
 

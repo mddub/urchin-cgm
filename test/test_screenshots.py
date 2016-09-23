@@ -574,3 +574,57 @@ class TestPointsColorCustomLine(TestPointsColor):
         'plotLineIsCustomColor': True,
         'plotLineColor': '0x5555FF',
     })
+
+STATUS_RECENCY_TEST_CONFIG = {
+    'statusMinRecencyToShowMinutes': 10,
+    'statusMaxAgeMinutes': 30,
+    'statusContent': 'rigbattery',
+}
+
+def uploader_battery_devicestatus(min_ago):
+    def devicestatus(self):
+        return [{
+            'uploaderBattery': 85,
+            'created_at': (datetime.now() - timedelta(minutes=min_ago)).replace(tzinfo=tzlocal()).isoformat()
+        }]
+    return devicestatus
+
+class TestStatusRecencyHiddenBeforeMinAge(ScreenshotTest):
+    """Test that if the min status recency is set to 10 minutes, it's not reported until it says 11 minutes."""
+    config = STATUS_RECENCY_TEST_CONFIG
+    sgvs = some_real_life_entries
+    devicestatus = uploader_battery_devicestatus(min_ago=10.2)
+
+class TestStatusRecencyShownAfterMinAge(ScreenshotTest):
+    config = STATUS_RECENCY_TEST_CONFIG
+    sgvs = some_real_life_entries
+    devicestatus = uploader_battery_devicestatus(min_ago=11)
+
+class TestStatusHiddenAfterMaxAge(ScreenshotTest):
+    config = STATUS_RECENCY_TEST_CONFIG
+    sgvs = some_real_life_entries
+    devicestatus = uploader_battery_devicestatus(min_ago=31)
+
+class TestStatusRecencyOverOneHour(ScreenshotTest):
+    config = dict(
+        STATUS_RECENCY_TEST_CONFIG,
+        statusMaxAgeMinutes=9999,
+    )
+    sgvs = some_real_life_entries
+    devicestatus = uploader_battery_devicestatus(min_ago=129)
+
+class TestStatusRecencyFormatColonLeft(ScreenshotTest):
+    config = dict(
+        STATUS_RECENCY_TEST_CONFIG,
+        statusRecencyFormat='colonLeft',
+    )
+    sgvs = some_real_life_entries
+    devicestatus = uploader_battery_devicestatus(min_ago=12)
+
+class TestStatusRecencyFormatBracketRight(ScreenshotTest):
+    config = dict(
+        STATUS_RECENCY_TEST_CONFIG,
+        statusRecencyFormat='bracketRight',
+    )
+    sgvs = some_real_life_entries
+    devicestatus = uploader_battery_devicestatus(min_ago=12)
