@@ -3,7 +3,7 @@
 
 require('./vendor/lie.polyfill');
 
-var Cache = require('./cache');
+var cache = require('./cache');
 var debounce = require('./debounce');
 var Debug = require('./debug');
 
@@ -13,12 +13,12 @@ var data = function(c, maxSGVCount) {
   var MAX_OPENAPS_STATUSES = 24;
   var MAX_BOLUSES_PER_HOUR_TO_CACHE = 6;
 
-  var sgvCache = new Cache('sgv', maxSGVCount);
-  var tempBasalCache = new Cache('tempBasal', maxSGVCount);
-  var bolusCache = new Cache('bolus', Math.ceil(maxSGVCount / 12 * MAX_BOLUSES_PER_HOUR_TO_CACHE));
-  var uploaderBatteryCache = new Cache('uploaderBattery', MAX_UPLOADER_BATTERIES);
-  var calibrationCache = new Cache('calibration', MAX_CALIBRATIONS);
-  var openAPSStatusCache = new Cache('openAPSStatus', MAX_OPENAPS_STATUSES);
+  var sgvCache = new cache.WithMaxAge('sgv', (maxSGVCount + 1) * 5 * 60);
+  var tempBasalCache = new cache.WithMaxSize('tempBasal', maxSGVCount);
+  var bolusCache = new cache.WithMaxSize('bolus', Math.ceil(maxSGVCount / 12 * MAX_BOLUSES_PER_HOUR_TO_CACHE));
+  var uploaderBatteryCache = new cache.WithMaxSize('uploaderBattery', MAX_UPLOADER_BATTERIES);
+  var calibrationCache = new cache.WithMaxSize('calibration', MAX_CALIBRATIONS);
+  var openAPSStatusCache = new cache.WithMaxSize('openAPSStatus', MAX_OPENAPS_STATUSES);
   var profileCache;
 
   // TODO this file should be split into several smaller modules
@@ -53,9 +53,9 @@ var data = function(c, maxSGVCount) {
 
   d.setMaxSGVCount = function(count) {
     maxSGVCount = count;
-    sgvCache.setMaxEntries(count);
-    tempBasalCache.setMaxEntries(count);
-    bolusCache.setMaxEntries(Math.ceil(count / 12 * MAX_BOLUSES_PER_HOUR_TO_CACHE));
+    sgvCache.setMaxSecondsOld((count + 1) * 5 * 60);
+    tempBasalCache.setMaxSize(count);
+    bolusCache.setMaxSize(Math.ceil(count / 12 * MAX_BOLUSES_PER_HOUR_TO_CACHE));
   };
 
   d.fetch = function(url, method, headers, body) {
@@ -595,41 +595,49 @@ var data = function(c, maxSGVCount) {
     }
   };
 
+  function filterKeys(objs, keys) {
+    if (keys !== undefined) {
+      return objs.map(function(obj) {
+        return keys.reduce(function(acc, key) {
+          if (obj[key] !== undefined) {
+            acc[key] = obj[key];
+          }
+          return acc;
+        }, {});
+      });
+    } else {
+      return objs;
+    }
+  }
+
   function getUsingCache(baseUrl, cache, dateKey, keysToKeep) {
     var url = baseUrl;
     if (cache.entries.length) {
       url += '&find[' + dateKey + '][$gt]=' + encodeURIComponent(cache.entries[0][dateKey]);
     }
     return d.getJSON(url).then(function(newEntries) {
-      var toCache;
-      if (keysToKeep !== undefined) {
-        toCache = newEntries.map(function(entry) {
-          return keysToKeep.reduce(function(acc, key) {
-            if (entry[key] !== undefined) {
-              acc[key] = entry[key];
-            }
-            return acc;
-          }, {});
-        });
-      } else {
-        toCache = newEntries;
-      }
-      return cache.update(toCache);
+      return cache.update(filterKeys(newEntries, keysToKeep));
     });
   }
 
   d.getNightscoutSGVsDateDescending = debounce(function(config) {
-    return getUsingCache(
-      config.nightscout_url + '/api/v1/entries/sgv.json?count=' + sgvCache.maxEntries,
-      sgvCache,
-      'date',
-      ['date', 'sgv', 'trend', 'direction', 'filtered', 'unfiltered', 'noise']
-    );
+    var start;
+    if (sgvCache.entries.length) {
+      start = sgvCache.entries[0]['date'];
+    } else {
+      start = new Date() - sgvCache.maxSecondsOld * 1000;
+    }
+    var url = config.nightscout_url + '/api/v1/entries/sgv.json?count=1000&find[date][$gt]=' + start;
+    return d.getJSON(url).then(function(newEntries) {
+      return sgvCache.update(
+        filterKeys(newEntries, ['date', 'sgv', 'trend', 'direction', 'filtered', 'unfiltered', 'noise'])
+      );
+    });
   });
 
   d.getTempBasals = debounce(function(config) {
     return getUsingCache(
-      config.nightscout_url + '/api/v1/treatments.json?find[eventType]=Temp+Basal&count=' + tempBasalCache.maxEntries,
+      config.nightscout_url + '/api/v1/treatments.json?find[eventType]=Temp+Basal&count=' + tempBasalCache.maxSize,
       tempBasalCache,
       'created_at',
       ['created_at', 'duration', 'absolute', 'percent']
@@ -638,7 +646,7 @@ var data = function(c, maxSGVCount) {
 
   d.getLastUploaderBattery = debounce(function(config) {
     return getUsingCache(
-      config.nightscout_url + '/api/v1/devicestatus.json?find[$or][0][uploaderBattery][$exists]=true&find[$or][1][uploader][$exists]=true&count=' + uploaderBatteryCache.maxEntries,
+      config.nightscout_url + '/api/v1/devicestatus.json?find[$or][0][uploaderBattery][$exists]=true&find[$or][1][uploader][$exists]=true&count=' + uploaderBatteryCache.maxSize,
       uploaderBatteryCache,
       'created_at'
     );
@@ -646,7 +654,7 @@ var data = function(c, maxSGVCount) {
 
   d.getLastCalibration = debounce(function(config) {
     return getUsingCache(
-      config.nightscout_url + '/api/v1/entries/cal.json?count=' + calibrationCache.maxEntries,
+      config.nightscout_url + '/api/v1/entries/cal.json?count=' + calibrationCache.maxSize,
       calibrationCache,
       'date'
     );
@@ -654,7 +662,7 @@ var data = function(c, maxSGVCount) {
 
   d.getBolusHistory = debounce(function(config) {
     return getUsingCache(
-      config.nightscout_url + '/api/v1/treatments.json?find[insulin][$exists]=true&count=' + bolusCache.maxEntries,
+      config.nightscout_url + '/api/v1/treatments.json?find[insulin][$exists]=true&count=' + bolusCache.maxSize,
       bolusCache,
       'created_at',
       ['created_at', 'insulin']
@@ -663,7 +671,7 @@ var data = function(c, maxSGVCount) {
 
   d.getOpenAPSStatusHistory = debounce(function(config) {
     return getUsingCache(
-      config.nightscout_url + '/api/v1/devicestatus.json?find[openaps][$exists]=true&count=' + openAPSStatusCache.maxEntries,
+      config.nightscout_url + '/api/v1/devicestatus.json?find[openaps][$exists]=true&count=' + openAPSStatusCache.maxSize,
       openAPSStatusCache,
       'created_at'
     );
@@ -795,9 +803,9 @@ var data = function(c, maxSGVCount) {
     var count;
     if (sgvCache.entries.length) {
       var elapsed = Date.now() - sgvCache.entries[0]['date'];
-      count = Math.min(sgvCache.maxEntries, Math.max(1, Math.floor(elapsed / (5 * 60 * 1000))));
+      count = Math.min(maxSGVCount, Math.max(1, Math.floor(elapsed / (5 * 60 * 1000))));
     } else {
-      count = sgvCache.maxEntries;
+      count = maxSGVCount;
     }
     var url = [
       dexcomServer(config),
