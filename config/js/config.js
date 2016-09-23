@@ -410,6 +410,9 @@
         }, false)
       );
     });
+
+    var showStatusRecencyOptions = ['none', 'rawdata', 'customurl', 'customtext'].indexOf(mainKey) === -1;
+    $('.status-recency-options').toggle(showStatusRecencyOptions);
   }
 
   function onTabClick(e) {
@@ -497,6 +500,9 @@
     document.getElementById('statusJsonUrl').value = current['statusJsonUrl'] || '';
     $('[name=statusOpenAPSNetBasal]').val(current['statusOpenAPSNetBasal'] ? 'true' : 'false');
     $('[name=statusOpenAPSEvBG]').prop('checked', !!current['statusOpenAPSEvBG']);
+    $('[name=statusMinRecencyToShowMinutes]').val(current['statusMinRecencyToShowMinutes']);
+    $('[name=statusMaxAgeMinutes]').val(current['statusMaxAgeMinutes']);
+    $('[name=statusRecencyFormat]').val(current['statusRecencyFormat']);
 
     if (current.batteryAsNumber === true) {
       $('[name=batteryAsNumber][value=number]').addClass('active');
@@ -537,6 +543,9 @@
       statusLine1: $('#statusLine1').val(),
       statusLine2: $('#statusLine2').val(),
       statusLine3: $('#statusLine3').val(),
+      statusMinRecencyToShowMinutes: tryParseInt($('[name=statusMinRecencyToShowMinutes]').val()),
+      statusMaxAgeMinutes: tryParseInt($('[name=statusMaxAgeMinutes]').val()),
+      statusRecencyFormat: $('[name=statusRecencyFormat]').val(),
       batteryAsNumber: $('[name=batteryAsNumber][value=number]').hasClass('active'),
       bolusTicks: $('[name=bolusTicks]').is(':checked'),
       basalGraph: $('[name=basalGraph]').is(':checked'),

@@ -35,6 +35,9 @@
       "statusText" : "",
       "statusOpenAPSNetBasal": false,
       "statusOpenAPSEvBG": false,
+      "statusMinRecencyToShowMinutes": 10,
+      "statusMaxAgeMinutes": 30,
+      "statusRecencyFormat": "parenLeft",
       "batteryAsNumber": false,
       "bolusTicks": false,
       "basalGraph": false,
@@ -188,8 +191,18 @@
    },
 
    "POINT_SHAPE" : {
-     "rectangle": 0,
-     "circle": 1
+      "rectangle": 0,
+      "circle": 1
+   },
+
+   "STATUS_RECENCY_FORMAT": {
+      "parenLeft": 0,
+      "bracketLeft": 1,
+      "colonLeft": 2,
+      "closeParenLeft": 3,
+      "plainLeft": 4,
+      "parenRight": 5,
+      "bracketRight": 6
    },
 
    "MSG_TYPE_ERROR" : 0,
@@ -203,8 +216,6 @@
 
    "SCREEN_WIDTH": 144,
    "INTERVAL_SIZE_SECONDS" : 300,
-   "DEVICE_STATUS_RECENCY_THRESHOLD_SECONDS": 1800,
-   "IOB_RECENCY_THRESHOLD_SECONDS" : 600,
    "REQUEST_TIMEOUT" : 5000,
 
    "NO_DELTA_VALUE" : 65536,

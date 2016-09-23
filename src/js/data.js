@@ -142,7 +142,10 @@ var data = function(c, maxSGVCount) {
     // https://github.com/nightscout/cgm-remote-monitor/pull/1560
     return d.getPebbleEndpoint(config).then(function(data) {
       if (data && !isNaN(parseFloat(data['iob']))) {
-        return parseFloat(data['iob']).toFixed(1).toString() + ' u';
+        return {
+          text: parseFloat(data['iob']).toFixed(1).toString() + ' u',
+          recency: 0,
+        };
       } else {
         return '-';
       }
@@ -158,12 +161,18 @@ var data = function(c, maxSGVCount) {
       if (data && !isNaN(parseFloat(data['cob']))) {
         out.push(Math.round(parseFloat(data['cob'])) + ' g');
       }
-      return out.length > 0 ? out.join('  ') : '-';
+      if (out.length > 0) {
+        return {text: out.join('  '), recency: 0};
+      } else {
+        return {text: '-'};
+      }
     });
   };
 
   d.getCustomText = function(config) {
-    return Promise.resolve((config.statusText || '').substr(0, 255));
+    return Promise.resolve(
+      {text: (config.statusText || '').substr(0, 255)}
+    );
   };
 
   function uncacheableUrl(url) {
@@ -173,8 +182,9 @@ var data = function(c, maxSGVCount) {
 
   d.getCustomUrl = function(config) {
     return d.getURL(uncacheableUrl(config.statusUrl)).then(function(data) {
-      var newlinesTrimmed = data.replace(/(^\n+|\n+$)/g, '');
-      return (newlinesTrimmed || '-').substr(0, 255);
+      return {
+        text: data.replace(/(^\n+|\n+$)/g, '').substr(0, 255) || '-'
+      };
     });
   };
 
@@ -185,28 +195,36 @@ var data = function(c, maxSGVCount) {
         data = data[0];
       }
       if (data['content'] === undefined) {
-        return '-';
+        return {text: '-'};
       }
 
-      var out = data['content'];
+      var recency;
       if (data['timestamp'] !== undefined) {
         var ms = (Math.log(data['timestamp']) / Math.log(10) < 12 ? 1000 : 1) * data['timestamp'];
-        out = '(' + ago(ms) + ') ' + out;
+        recency = Math.round((Date.now() - ms) / 1000);
       }
-      return out.substr(0, 255);
+      return {
+        text: data['content'].substr(0, 255),
+        recency: recency,
+      };
     });
   };
 
   d.getRigBatteryLevel = function(config) {
     return d.getLastUploaderBattery(config).then(function(latest) {
-      if (latest && latest.length && new Date(latest[0]['created_at']) >= new Date() - c.DEVICE_STATUS_RECENCY_THRESHOLD_SECONDS * 1000) {
+      if (latest && latest.length) {
+        var battery;
         if (latest[0].uploader) {
-          return latest[0].uploader.battery + '%';
+          battery = latest[0].uploader.battery + '%';
         } else {
-          return latest[0]['uploaderBattery'] + '%';
+          battery = latest[0]['uploaderBattery'] + '%';
         }
+        return {
+          text: battery,
+          recency: Math.round((Date.now() - new Date(latest[0]['created_at'])) / 1000),
+        };
       } else {
-        return '-';
+        return {text: '-'};
       }
     });
   };
@@ -235,9 +253,9 @@ var data = function(c, maxSGVCount) {
           return (config.mmol && !isNaN(mgdl)) ? (mgdl / 18.0).toFixed(1) : mgdl;
         }).join(' ');
 
-        return (noiseStr ? noiseStr + ' ' : '') + sgvString;
+        return {text: (noiseStr ? noiseStr + ' ' : '') + sgvString};
       } else {
-        return '-';
+        return {text: '-'};
       }
     });
   };
@@ -260,9 +278,11 @@ var data = function(c, maxSGVCount) {
       d.getRigBatteryLevel(config),
       d.getRawData(config),
     ]).then(function(results) {
-      return results.filter(
+      var rigBattery = results[0];
+      var text = results.filter(
         function(v) { return v !== '-'; }
       ).join(' ') || '-';
+      return {text: text, recency: rigBattery.recency};
     });
   };
 
@@ -334,13 +354,18 @@ var data = function(c, maxSGVCount) {
         tempBasal = results[1];
 
       if (profileBasal === undefined && tempBasal === undefined) {
-        return '-';
+        return {text: '-'};
       } else if (tempBasal !== undefined) {
         var diff = tempBasal.rate - profileBasal;
-        var minutesAgo = Math.round((new Date() - tempBasal.start) / (60 * 1000));
-        return _roundBasal(tempBasal.rate) + 'u/h ' + (diff >= 0 ? '+' : '') + _roundBasal(diff) + ' (' + minutesAgo + ')';
+        return {
+          text: _roundBasal(tempBasal.rate) + 'u/h ' + (diff >= 0 ? '+' : '') + _roundBasal(diff),
+          recency: Math.round((new Date() - tempBasal.start) / 1000),
+        };
       } else {
-        return _roundBasal(profileBasal) + 'u/h';
+        return {
+          text: _roundBasal(profileBasal) + 'u/h',
+          recency: 0
+        };
       }
     });
   };
@@ -357,10 +382,10 @@ var data = function(c, maxSGVCount) {
     return (parseFloat(str) >= 0 ? '+' : '') + str;
   }
 
-  function ago(timestamp, addM) {
-    var minutes = Math.round((Date.now() - timestamp) / (60 * 1000));
+  function ago(ms) {
+    var minutes = Math.round(ms / (60 * 1000));
     if (minutes < 60) {
-      return minutes + (addM ? 'm' : '');
+      return minutes + 'm';
     } else {
       return Math.floor(minutes / 60) + 'h' + (minutes % 60);
     }
@@ -483,20 +508,21 @@ var data = function(c, maxSGVCount) {
     return '';
   }
 
-  function openAPSLastSuccess(config, entries) {
+  function openAPSLastSuccess(config, entries, lastLoopTime) {
     for (var i = 0; i < entries.length; i++) {
       if (openAPSIsSuccess(entries.slice(i))) {
         var success = entries.slice(i);
         var iob = openAPSIOB(success);
         var evBG = openAPSEventualBGDisplay(config, success, false);
-        var recency = openAPSLoopRecency(success);
-        var recencyDisplay = config.statusOpenAPSEvBG ? recency + ':' : '(' + recency + ')';
+        var lastSuccessTime = openAPSLoopTime(success);
+        var recency = ago(lastLoopTime - lastSuccessTime);
+        var recencyDisplay = config.statusOpenAPSEvBG ? '+' + recency + ':' : '(+' + recency + ')';
         return recencyDisplay + ' ' + iob + evBG;
       }
     }
   }
 
-  function openAPSLoopRecency(entries) {
+  function openAPSLoopTime(entries) {
     var last = entries[0];
 
     var latest;
@@ -507,7 +533,7 @@ var data = function(c, maxSGVCount) {
     } else {
       latest = last['created_at'];
     }
-    return ago(new Date(latest).getTime());
+    return new Date(latest).getTime();
   }
 
   d.getOpenAPSStatus = function(config) {
@@ -522,8 +548,10 @@ var data = function(c, maxSGVCount) {
 
       var entries = openAPSEntriesFromLastSuccessfulDevice(allEntries);
       if (entries.length < 2) {
-        return '-';
+        return {text: '-'};
       }
+
+      var lastLoopTime = openAPSLoopTime(entries);
 
       var summary;
       if (openAPSIsSuccess(entries)) {
@@ -535,15 +563,14 @@ var data = function(c, maxSGVCount) {
         var evBG = openAPSEventualBGDisplay(config, entries, abbreviate);
         summary = iob + evBG + (temp !== '' ? ' ' + temp : '');
       } else {
-        var lastSuccess = openAPSLastSuccess(config, entries);
+        var lastSuccess = openAPSLastSuccess(config, entries, lastLoopTime);
         summary = '--' + (lastSuccess ? ' | ' + lastSuccess : '');
       }
 
-      // Eventual BG takes up too much space to show recency as "(4)"
-      var recency = openAPSLoopRecency(entries);
-      var recencyDisplay = config.statusOpenAPSEvBG ? (recency + ': ') : ('(' + recency + ') ');
-
-      return recencyDisplay + summary;
+      return {
+        text: summary,
+        recency: Math.round((Date.now() - lastLoopTime) / 1000),
+      };
     });
   };
 
@@ -553,16 +580,19 @@ var data = function(c, maxSGVCount) {
     }).map(function(key) {
       return statusFn(key)(config).catch(function(e) {
         console.log(e.stack);
-        return '-';
+        return {text: '-'};
       });
     });
     return Promise.all(fetches).then(function(lines) {
-      return lines.join('\n').substr(0, 255);
+      return {
+        text: lines.map(function(l) { return l.text; }).join('\n').substr(0, 255),
+        recency: lines[0].recency,
+      };
     });
   };
 
   d.getNone = function() {
-    return Promise.resolve('');
+    return Promise.resolve({text: ''});
   };
 
   function statusFn(key) {

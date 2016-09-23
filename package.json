@@ -32,6 +32,7 @@
       "delta": 6,
       "statusText": 7,
       "graphExtra": 8,
+      "statusRecency": 9,
 
       "mmol": 1,
       "topOfGraph": 2,
@@ -55,7 +56,10 @@
       "plotLineIsCustomColor": 20,
       "numElements": 21,
       "elements": 22,
-      "colors": 23
+      "colors": 23,
+      "statusMinRecencyToShowMinutes": 24,
+      "statusMaxAgeMinutes": 25,
+      "statusRecencyFormat": 26
     },
     "resources": {
       "media": [

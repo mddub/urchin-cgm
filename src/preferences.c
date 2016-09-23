@@ -85,6 +85,9 @@ void set_prefs(DictionaryIterator *data) {
   s_prefs->plot_line = dict_find(data, MESSAGE_KEY_plotLine)->value->int32;
   s_prefs->plot_line_width = dict_find(data, MESSAGE_KEY_plotLineWidth)->value->int32;
   s_prefs->plot_line_is_custom_color = dict_find(data, MESSAGE_KEY_plotLineIsCustomColor)->value->int32;
+  s_prefs->status_min_recency_to_show_minutes = dict_find(data, MESSAGE_KEY_statusMinRecencyToShowMinutes)->value->int32;
+  s_prefs->status_max_age_minutes = dict_find(data, MESSAGE_KEY_statusMaxAgeMinutes)->value->int32;
+  s_prefs->status_recency_format = dict_find(data, MESSAGE_KEY_statusRecencyFormat)->value->int32;
 
   s_prefs->num_elements = dict_find(data, MESSAGE_KEY_numElements)->value->int32;
   decode_layout_elements(s_prefs, s_prefs->num_elements, dict_find(data, MESSAGE_KEY_elements)->value->data);

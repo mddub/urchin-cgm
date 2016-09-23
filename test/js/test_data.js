@@ -8,7 +8,6 @@ var expect = require('expect.js'),
 var Data = require('../../src/js/data.js');
 
 var defaultConstants = require('../../src/js/constants.json');
-var config = {};
 
 function mockAPI(data, urlToData) {
   data.getJSON = function(url) {
@@ -80,8 +79,9 @@ describe('basals', function() {
       mockSingleTempBasal(d, "2015-12-03T14:12:25-08:00");
       timekeeper.freeze(new Date("2015-12-03T14:20:25-08:00"));
 
-      return d.getActiveBasal(config).then(function(basal) {
-        expect(basal).to.be('0u/h -0.65 (8)');
+      return d.getActiveBasal({}).then(function(basal) {
+        expect(basal.text).to.be('0u/h -0.65');
+        expect(basal.recency).to.be(480);
       });
     });
 
@@ -90,8 +90,9 @@ describe('basals', function() {
       mockSingleTempBasal(d, "2015-12-03T14:12:25-08:00");
       timekeeper.freeze(new Date("2015-12-03T14:28:25-08:00"));
 
-      return d.getActiveBasal(config).then(function(basal) {
-        expect(basal).to.be('0u/h -0.65 (16)');
+      return d.getActiveBasal({}).then(function(basal) {
+        expect(basal.text).to.be('0u/h -0.65');
+        expect(basal.recency).to.be(960);
       });
     });
 
@@ -100,8 +101,9 @@ describe('basals', function() {
       mockSingleTempBasal(d, "2015-12-03T14:12:25-08:00");
       timekeeper.freeze(new Date("2015-12-03T14:50:25-08:00"));
 
-      return d.getActiveBasal(config).then(function(basal) {
-        expect(basal).to.be('0.65u/h');
+      return d.getActiveBasal({}).then(function(basal) {
+        expect(basal.text).to.be('0.65u/h');
+        expect(basal.recency).to.be(0);
       });
     });
 
@@ -110,8 +112,9 @@ describe('basals', function() {
       mockSingleTempBasal(d, "2015-12-03T14:12:25-08:00");
       timekeeper.freeze(new Date("2015-12-03T20:50:25-08:00"));
 
-      return d.getActiveBasal(config).then(function(basal) {
-        expect(basal).to.be('0.55u/h');
+      return d.getActiveBasal({}).then(function(basal) {
+        expect(basal.text).to.be('0.55u/h');
+        expect(basal.recency).to.be(0);
       });
     });
   });
@@ -126,7 +129,7 @@ describe('basals', function() {
 
       timekeeper.freeze(new Date("2016-02-18T17:31:25-08:00"));
 
-      return d.getBasalHistory(config).then(function(basals) {
+      return d.getBasalHistory({}).then(function(basals) {
         expect(basals.length).to.be(6);
         [
           {start: Date.now() - 24 * 60 * 60 * 1000, duration: 0},
@@ -153,7 +156,7 @@ describe('basals', function() {
 
       timekeeper.freeze(new Date("2016-02-18T17:31:25-08:00"));
 
-      return d.getBasalHistory(config).then(function(basals) {
+      return d.getBasalHistory({}).then(function(basals) {
         expect(basals.length).to.be(10);
         [
           {start: Date.now() - 24 * 60 * 60 * 1000, duration: 0},
@@ -184,7 +187,7 @@ describe('basals', function() {
 
       timekeeper.freeze(new Date("2016-02-18T17:31:25-08:00"));
 
-      return d.getBasalHistory(config).then(function(basals) {
+      return d.getBasalHistory({}).then(function(basals) {
         expect(basals.length).to.be(8);
         [
           {start: Date.now() - 24 * 60 * 60 * 1000, duration: 0},
@@ -213,7 +216,7 @@ describe('basals', function() {
 
       timekeeper.freeze(new Date("2016-02-18T17:31:25-08:00"));
 
-      return d.getBasalHistory(config).then(function(basals) {
+      return d.getBasalHistory({}).then(function(basals) {
         expect(basals.length).to.be(9);
         [
           {start: Date.now() - 24 * 60 * 60 * 1000, duration: 0},
@@ -239,25 +242,15 @@ describe('getRigBatteryLevel', function() {
     "created_at": "2015-12-04T01:05:18.994Z"
   }];
 
-  it('should report the rig battery level if it is recent enough', function() {
+  it('should report the rig battery level with recency', function() {
     var constants = {DEVICE_STATUS_RECENCY_THRESHOLD_SECONDS: 1800};
     var d = Data(constants);
     mockAPI(d, {'devicestatus.json': DEVICE_STATUS});
     timekeeper.freeze(new Date("2015-12-04T01:25:18.994Z"));
 
-    return d.getRigBatteryLevel(config).then(function(battery) {
-      expect(battery).to.be('37%');
-    });
-  });
-
-  it('should not report the rig battery level if it is stale', function() {
-    var constants = {DEVICE_STATUS_RECENCY_THRESHOLD_SECONDS: 60};
-    var d = Data(constants);
-    mockAPI(d, {'devicestatus.json': DEVICE_STATUS});
-    timekeeper.freeze(new Date("2015-12-04T01:25:18.994Z"));
-
-    return d.getRigBatteryLevel(config).then(function(battery) {
-      expect(battery).to.be('-');
+    return d.getRigBatteryLevel({}).then(function(battery) {
+      expect(battery.text).to.eql('37%');
+      expect(battery.recency).to.eql(1200);
     });
   });
 });
@@ -304,8 +297,8 @@ describe('getRawData', function() {
       'cal.json': CAL,
     });
 
-    return d.getRawData(config).then(function(raw) {
-      expect(raw).to.be('Cln 146 139');
+    return d.getRawData({}).then(function(raw) {
+      expect(raw.text).to.be('Cln 146 139');
     });
   });
 
@@ -318,7 +311,7 @@ describe('getRawData', function() {
 
     var config = {statusRawCount: 1};
     return d.getRawData(config).then(function(raw) {
-      expect(raw).to.be('Med 139');
+      expect(raw.text).to.be('Med 139');
     });
   });
 
@@ -331,7 +324,7 @@ describe('getRawData', function() {
 
     var config = {mmol: true};
     return d.getRawData(config).then(function(raw) {
-      expect(raw).to.be('Lgt 8.1 7.7');
+      expect(raw.text).to.be('Lgt 8.1 7.7');
     });
   });
 });
@@ -344,7 +337,8 @@ describe('getPebbleIOB', function() {
     });
 
     return d.getPebbleIOB({}).then(function(iob) {
-      expect(iob).to.be('1.3 u');
+      expect(iob.text).to.be('1.3 u');
+      expect(iob.recency).to.be(0);
     });
   });
 });
@@ -357,7 +351,8 @@ describe('getPebbleIOBAndCOB', function() {
       'pebble': {"bgs": [{"iob": "2.67", "cob": "28.63"}]}
     });
     return d.getPebbleIOBAndCOB({}).then(function(s) {
-      expect(s).to.be('2.7 u  29 g');
+      expect(s.text).to.be('2.7 u  29 g');
+      expect(s.recency).to.be(0);
     });
   });
 
@@ -367,7 +362,8 @@ describe('getPebbleIOBAndCOB', function() {
       'pebble': {"bgs": [{"iob": 1.83, "cob": "foo"}]}
     });
     return d.getPebbleIOBAndCOB({}).then(function(s) {
-      expect(s).to.be('1.8 u');
+      expect(s.text).to.be('1.8 u');
+      expect(s.recency).to.be(0);
     });
   });
 
@@ -377,7 +373,8 @@ describe('getPebbleIOBAndCOB', function() {
       'pebble': {"bgs": [{"iob": "", "cob": ""}]}
     });
     return d.getPebbleIOBAndCOB({}).then(function(s) {
-      expect(s).to.be('-');
+      expect(s.text).to.be('-');
+      expect(s.recency).to.be(undefined);
     });
   });
 });
@@ -452,32 +449,32 @@ describe('getOpenAPSStatus', function() {
 
     it('should report the time since the last "suggested" if enacted is stale', function() {
       return d.getOpenAPSStatus({}).then(function(result) {
-        expect(result).to.contain('(4)');
+        expect(result.recency).to.be(242);
       });
     });
 
     it('should report the time remaining in the last temp basal relative to now', function() {
       return d.getOpenAPSStatus({}).then(function(result) {
-        expect(result).to.contain('1.4x6');
+        expect(result.text).to.contain('1.4x6');
       });
     });
 
     it('should not report a temp if the last temp basal is over', function() {
       timekeeper.freeze(new Date('2016-03-01T16:56:00Z'));
       return d.getOpenAPSStatus({}).then(function(result) {
-        expect(result).not.to.contain('1.4x');
+        expect(result.text).not.to.contain('1.4x');
       });
     });
 
     it('should report IOB', function() {
       return d.getOpenAPSStatus({}).then(function(result) {
-        expect(result).to.contain('1.1u');
+        expect(result.text).to.contain('1.1u');
       });
     });
 
     it('should not report eventual BG', function() {
       return d.getOpenAPSStatus({}).then(function(result) {
-        expect(result).not.to.contain('->129');
+        expect(result.text).not.to.contain('->129');
       });
     });
   });
@@ -503,32 +500,32 @@ describe('getOpenAPSStatus', function() {
 
     it('should report the time since the last "enacted"', function() {
       return d.getOpenAPSStatus({}).then(function(result) {
-        expect(result).to.contain('(3)');
+        expect(result.recency).to.be(180);
       });
     });
 
     it('should report the time remaining in the enacted temp basal relative to now', function() {
       return d.getOpenAPSStatus({}).then(function(result) {
-        expect(result).to.contain('0.2x27');
+        expect(result.text).to.contain('0.2x27');
       });
     });
 
     it('should not report a temp if the last enacted temp is over', function() {
       timekeeper.freeze(new Date('2016-03-01T17:20:00Z'));
       return d.getOpenAPSStatus({}).then(function(result) {
-        expect(result).not.to.contain('0.2x');
+        expect(result.text).not.to.contain('0.2x');
       });
     });
 
     it('should report IOB', function() {
       return d.getOpenAPSStatus({}).then(function(result) {
-        expect(result).to.contain('1.1u');
+        expect(result.text).to.contain('1.1u');
       });
     });
 
     it('should not report eventual BG', function() {
       return d.getOpenAPSStatus({}).then(function(result) {
-        expect(result).not.to.contain('->129');
+        expect(result.text).not.to.contain('->129');
       });
     });
   });
@@ -550,7 +547,8 @@ describe('getOpenAPSStatus', function() {
     timekeeper.freeze(new Date('2016-03-01T16:48:00Z'));
 
     return d.getOpenAPSStatus({}).then(function(result) {
-      expect(result).to.be('(3) 1.1u');
+      expect(result.text).to.be('1.1u');
+      expect(result.recency).to.be(180);
     });
   });
 
@@ -566,7 +564,7 @@ describe('getOpenAPSStatus', function() {
     timekeeper.freeze(new Date('2016-03-01T16:48:00Z'));
 
     return d.getOpenAPSStatus({}).then(function(result) {
-      expect(result).not.to.contain('1.1u');
+      expect(result.text).not.to.contain('1.1u');
     });
   });
 
@@ -580,7 +578,7 @@ describe('getOpenAPSStatus', function() {
     timekeeper.freeze(new Date('2016-03-01T16:48:00Z'));
 
     return d.getOpenAPSStatus({statusOpenAPSEvBG: true}).then(function(result) {
-      expect(result).to.contain('->129');
+      expect(result.text).to.contain('->129');
     });
   });
 
@@ -612,7 +610,8 @@ describe('getOpenAPSStatus', function() {
     timekeeper.freeze(new Date('2016-03-01T16:58:00Z'));
 
     return d.getOpenAPSStatus({}).then(function(result) {
-      expect(result).to.be('(14) -- | (29) 3.1u');
+      expect(result.text).to.be('-- | (+15m) 3.1u');
+      expect(result.recency).to.be(818);
     });
   });
 
@@ -624,7 +623,7 @@ describe('getOpenAPSStatus', function() {
       'profile': [],
     });
     return d.getOpenAPSStatus({}).then(function(result) {
-      expect(result).to.be('-');
+      expect(result.text).to.be('-');
     });
   });
 
@@ -670,7 +669,8 @@ describe('getOpenAPSStatus', function() {
         ],
       });
       return d.getOpenAPSStatus({}).then(function(result) {
-        expect(result).to.contain('(7) 1.1u');
+        expect(result.text).to.contain('1.1u');
+        expect(result.recency).to.be(420);
       });
     });
 
@@ -687,7 +687,8 @@ describe('getOpenAPSStatus', function() {
         ],
       });
       return d.getOpenAPSStatus({}).then(function(result) {
-        expect(result).to.be('(7) -- | (15) 1.1u');
+        expect(result.text).to.be('-- | (+8m) 1.1u');
+        expect(result.recency).to.be(420);
       });
     });
 
@@ -704,7 +705,8 @@ describe('getOpenAPSStatus', function() {
         ],
       });
       return d.getOpenAPSStatus({}).then(function(result) {
-        expect(result).to.be('(1) --');
+        expect(result.text).to.be('--');
+        expect(result.recency).to.be(60);
       });
     });
   });
@@ -723,13 +725,13 @@ describe('getCustomJsonUrl', function() {
 
   it('should show the content', function() {
     return testWith({content: 'hello'}).then(function(result) {
-      expect(result).to.be('hello');
+      expect(result.text).to.be('hello');
     });
   });
 
   it('should handle missing content', function() {
     return testWith({}).then(function(result) {
-      expect(result).to.be('-');
+      expect(result.text).to.eql('-');
     });
   });
 
@@ -738,7 +740,8 @@ describe('getCustomJsonUrl', function() {
       content: 'all clear',
       timestamp: Date.now() - 8 * 60 * 1000,
     }).then(function(result) {
-      expect(result).to.be('(8) all clear');
+      expect(result.text).to.be('all clear');
+      expect(result.recency).to.be(480);
     });
   });
 
@@ -747,13 +750,14 @@ describe('getCustomJsonUrl', function() {
       content: 'all clear',
       timestamp: Math.floor(Date.now() / 1000 - 16 * 60),
     }).then(function(result) {
-      expect(result).to.be('(16) all clear');
+      expect(result.text).to.be('all clear');
+      expect(result.recency).to.be(960);
     });
   });
 
   it('should handle an array', function() {
     return testWith([{content: 'in array'}]).then(function(result) {
-      expect(result).to.be('in array');
+      expect(result.text).to.be('in array');
     });
   });
 });
@@ -762,34 +766,42 @@ describe('getMultiple', function() {
   var d;
   beforeEach(function() {
     d = defaultData();
-    d.getRawData = function() { return Promise.resolve('raw data'); };
-    d.getPebbleIOB = function() { return Promise.resolve('pebble iob'); };
-    d.getCustomUrl = function() { return Promise.resolve('custom url'); };
-    d.getCustomText = function() { return Promise.reject(new Error()); };
+    d.getRawData = function() {
+      return Promise.resolve({text: 'raw data'});
+    };
+    d.getPebbleIOB = function() {
+      return Promise.resolve({text: 'pebble iob', recency: 0});
+    };
+    d.getCustomJsonUrl = function() {
+      return Promise.resolve({text: 'custom json', recency: 123});
+    };
+    d.getCustomText = function() {
+      return Promise.reject(new Error());
+    };
   });
 
   it('should get multiple status lines and join them with newlines', function() {
     return d.getStatusText({ statusContent: 'multiple',
       statusLine1: 'pebbleiob',
       statusLine2: 'rawdata',
-      statusLine3: 'customurl',
+      statusLine3: 'customjson',
     }).then(function(result) {
-      expect(result).to.be([
+      expect(result.text).to.be([
         'pebble iob',
         'raw data',
-        'custom url',
+        'custom json',
       ].join('\n'));
     });
   });
 
   it('should handle an error in one of the lines', function() {
     return d.getStatusText({ statusContent: 'multiple',
-      statusLine1: 'customurl',
+      statusLine1: 'customjson',
       statusLine2: 'customtext',
       statusLine3: 'rawdata',
     }).then(function(result) {
-      expect(result).to.be([
-        'custom url',
+      expect(result.text).to.be([
+        'custom json',
         '-',
         'raw data',
       ].join('\n'));
@@ -802,10 +814,30 @@ describe('getMultiple', function() {
       statusLine2: 'none',
       statusLine3: 'pebbleiob',
     }).then(function(result) {
-      expect(result).to.be([
+      expect(result.text).to.be([
         'raw data',
         'pebble iob',
       ].join('\n'));
+    });
+  });
+
+  it('should use the recency from the first status line', function() {
+    return d.getStatusText({ statusContent: 'multiple',
+      statusLine1: 'customjson',
+      statusLine2: 'pebbleiob',
+      statusLine3: 'rawdata',
+    }).then(function(result) {
+      expect(result.recency).to.be(123);
+    });
+  });
+
+  it('should use report missing recency if the first status line has no recency', function() {
+    return d.getStatusText({ statusContent: 'multiple',
+      statusLine1: 'rawdata',
+      statusLine2: 'none',
+      statusLine3: 'pebbleiob',
+    }).then(function(result) {
+      expect(result.recency).to.be(undefined);
     });
   });
 });

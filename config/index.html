@@ -300,7 +300,7 @@
         </div>
 
         <div class="item-container">
-          <h3>STATUS BAR DATA:</h3>
+          <h3>STATUS BAR CONTENT:</h3>
         </div>
 
         <div class="item-container" id="main-status-option">
@@ -403,6 +403,76 @@
               </div>
             </label>
           </div>
+        </div>
+
+        <div class="status-recency-options">
+
+          <div class="item-container">
+            <h3>STATUS BAR "MINUTES AGO":</h3>
+          </div>
+
+          <div class="item-container">
+            <div class="item-container-header">Show "minutes ago" only after</div>
+            <div class="item-container-content">
+              <label class="item">
+                &nbsp;
+                <select name="statusMinRecencyToShowMinutes" class="item-select">
+                  <option value="0" class="item-select-option">Always show recency</option>
+                  <option value="5" class="item-select-option">5 minutes</option>
+                  <option value="6" class="item-select-option">6 minutes</option>
+                  <option value="7" class="item-select-option">7 minutes</option>
+                  <option value="8" class="item-select-option">8 minutes</option>
+                  <option value="9" class="item-select-option">9 minutes</option>
+                  <option value="10" class="item-select-option">10 minutes</option>
+                  <option value="15" class="item-select-option">15 minutes</option>
+                  <option value="20" class="item-select-option">20 minutes</option>
+                  <option value="30" class="item-select-option">30 minutes</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <div class="item-container">
+            <div class="item-container-header">Don't show status if older than</div>
+            <div class="item-container-content">
+              <label class="item">
+                &nbsp;
+                <select name="statusMaxAgeMinutes" class="item-select">
+                  <option value="10" class="item-select-option">10 minutes</option>
+                  <option value="15" class="item-select-option">15 minutes</option>
+                  <option value="20" class="item-select-option">20 minutes</option>
+                  <option value="30" class="item-select-option">30 minutes</option>
+                  <option value="40" class="item-select-option">40 minutes</option>
+                  <option value="60" class="item-select-option">1 hour</option>
+                  <option value="90" class="item-select-option">1.5 hours</option>
+                  <option value="120" class="item-select-option">2 hours</option>
+                  <option value="9999" class="item-select-option">Always show status</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <div class="item-container">
+            <div class="item-container-header">Status bar recency format</div>
+            <div class="item-container-content">
+              <label class="item">
+                &nbsp;
+                <select name="statusRecencyFormat" class="item-select">
+                  <option value="parenLeft" class="item-select-option">(9) text</option>
+                  <option value="bracketLeft" class="item-select-option">[9] text</option>
+                  <option value="colonLeft" class="item-select-option">9: text</option>
+                  <option value="closeParenLeft" class="item-select-option">9) text</option>
+                  <option value="plainLeft" class="item-select-option">9 text</option>
+                  <option value="parenRight" class="item-select-option">text (9)</option>
+                  <option value="bracketRight" class="item-select-option">text [9]</option>
+                </select>
+              </label>
+            </div>
+            <div class="item-container-footer status-extra" data-keys="multiple">
+              For the "Multiple" status option, the recency shown is for the first line only.
+            </div>
+          </div>
+
         </div>
 
         <div class="item-container">

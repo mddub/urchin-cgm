@@ -46,7 +46,7 @@ function app(Pebble, c) {
   }
 
   function requestAndSendData() {
-    function onData(sgvs, bolusHistory, basalHistory, statusText) {
+    function onData(sgvs, bolusHistory, basalHistory, status) {
       try {
         var endTime = sgvs.length > 0 ? sgvs[0]['date'] : new Date();
         var ys = format.sgvArray(endTime, sgvs, maxSGVs);
@@ -63,8 +63,9 @@ function app(Pebble, c) {
           lastSgv: format.lastSgv(sgvs),
           trend: format.lastTrendNumber(sgvs),
           delta: format.lastDelta(ys),
-          statusText: statusText.substr(0, 255),
+          statusText: status.text.substr(0, 255),
           graphExtra: graphExtra,
+          statusRecency: status.recency === undefined ? -1 : status.recency,
         });
       } catch (e) {
         dataFetchError(e);
@@ -75,12 +76,12 @@ function app(Pebble, c) {
     var bolusHistory = config.bolusTicks ? data.getBolusHistory(config) : Promise.resolve([]);
     var basalHistory = config.basalGraph ? data.getBasalHistory(config) : Promise.resolve([]);
     // recover from status text errors
-    var statusText = data.getStatusText(config).catch(function(e) {
+    var status = data.getStatusText(config).catch(function(e) {
       console.log(e.stack);
-      return '-';
+      return {text: '-'};
     });
 
-    Promise.all([sgvs, bolusHistory, basalHistory, statusText])
+    Promise.all([sgvs, bolusHistory, basalHistory, status])
       .then(function(results) {
         onData.apply(this, results);
       })
@@ -154,6 +155,9 @@ function app(Pebble, c) {
       numElements: countElementsForPebble(getLayout(config)),
       elements: encodeElementsForPebble(getLayout(config)),
       colors: encodeColorsForPebble(config),
+      statusMinRecencyToShowMinutes: config.statusMinRecencyToShowMinutes,
+      statusMaxAgeMinutes: config.statusMaxAgeMinutes,
+      statusRecencyFormat: c.STATUS_RECENCY_FORMAT[config.statusRecencyFormat],
     });
   }
 
