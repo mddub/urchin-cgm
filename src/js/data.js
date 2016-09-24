@@ -12,6 +12,7 @@ var data = function(c, maxSGVCount) {
   var MAX_UPLOADER_BATTERIES = 1;
   var MAX_CALIBRATIONS = 1;
   var MAX_OPENAPS_STATUSES = 24;
+  var MAX_LOOP_STATUSES = 1;
   var MAX_BOLUSES_PER_HOUR_TO_CACHE = 6;
 
   var sgvCache = new cache.WithMaxAge('sgv', (maxSGVCount + 1) * 5 * 60);
@@ -19,6 +20,7 @@ var data = function(c, maxSGVCount) {
   var bolusCache = new cache.WithMaxSize('bolus', Math.ceil(maxSGVCount / 12 * MAX_BOLUSES_PER_HOUR_TO_CACHE));
   var uploaderBatteryCache = new cache.WithMaxSize('uploaderBattery', MAX_UPLOADER_BATTERIES);
   var calibrationCache = new cache.WithMaxSize('calibration', MAX_CALIBRATIONS);
+  var loopStatusCache = new cache.WithMaxSize('loop', MAX_LOOP_STATUSES);
   var openAPSStatusCache = new cache.WithMaxSize('openAPSStatus', MAX_OPENAPS_STATUSES);
   var profileCache;
 
@@ -47,6 +49,7 @@ var data = function(c, maxSGVCount) {
     bolusCache.clear();
     uploaderBatteryCache.clear();
     calibrationCache.clear();
+    loopStatusCache.clear();
     openAPSStatusCache.clear();
     profileCache = undefined;
     dexcomToken = undefined;
@@ -373,6 +376,41 @@ var data = function(c, maxSGVCount) {
     });
   };
 
+  d.getLoopStatus = function(config) {
+    var fetches = [d.getLastLoopStatus(config)];
+    if (config.statusLoopShowBattery) {
+      fetches.push(d.getLastUploaderBattery(config));
+    }
+    return Promise.all(fetches).then(function(results) {
+      var loop = results[0][0],
+        battery = results[1];
+
+      var out = [];
+      if (loop['prediction'] && loop['prediction'].length) {
+        out.push(Math.round(loop['prediction'][loop['prediction'].length - 1]['value']));
+      }
+
+      if (loop['iob'] && loop['iob']['iob'] !== undefined) {
+        out.push(roundOrZero(loop['iob']['iob']) + 'U');
+      }
+
+      if (loop['cob'] && loop['cob']['cob'] !== undefined) {
+        out.push(Math.round(loop['cob']['cob']) + 'g');
+      }
+
+      if (battery !== undefined && battery.length && battery[0]['uploader'] && battery[0]['uploader']['battery']) {
+        if (Math.abs(new Date(battery[0]['created_at']) - new Date(loop['created_at'])) < 10 * 60 * 1000) {
+          out.push(battery[0]['uploader']['battery'] + '%');
+        }
+      }
+
+      return {
+        text: out.join(' '),
+        recency: Math.round((Date.now() - new Date(loop['created_at'])) / 1000),
+      };
+    });
+  };
+
   function roundOrZero(x) {
     if (x === 0 || x.toFixed(1) === '-0.0') {
       return '0';
@@ -614,6 +652,7 @@ var data = function(c, maxSGVCount) {
       'basal': d.getActiveBasal,
       'pebbleiob': d.getPebbleIOB,
       'pebbleiobandcob': d.getPebbleIOBAndCOB,
+      'loop': d.getLoopStatus,
       'openaps': d.getOpenAPSStatus,
       'customurl': d.getCustomUrl,
       'customjson': d.getCustomJsonUrl,
@@ -712,6 +751,14 @@ var data = function(c, maxSGVCount) {
     return getUsingCache(
       config.nightscout_url + '/api/v1/devicestatus.json?find[openaps][$exists]=true&count=' + openAPSStatusCache.maxSize,
       openAPSStatusCache,
+      'created_at'
+    );
+  });
+
+  d.getLastLoopStatus = debounce(function(config) {
+    return getUsingCache(
+      config.nightscout_url + '/api/v1/devicestatus.json?find[startDate][$exists]=true&find[prediction][$exists]=true&count=' + MAX_LOOP_STATUSES,
+      loopStatusCache,
       'created_at'
     );
   });
