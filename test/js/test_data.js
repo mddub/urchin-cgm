@@ -80,7 +80,7 @@ describe('basals', function() {
       timekeeper.freeze(new Date("2015-12-03T14:20:25-08:00"));
 
       return d.getActiveBasal({}).then(function(basal) {
-        expect(basal.text).to.be('0u/h -0.65');
+        expect(basal.text).to.be('0U/h -0.65');
         expect(basal.recency).to.be(480);
       });
     });
@@ -91,7 +91,7 @@ describe('basals', function() {
       timekeeper.freeze(new Date("2015-12-03T14:28:25-08:00"));
 
       return d.getActiveBasal({}).then(function(basal) {
-        expect(basal.text).to.be('0u/h -0.65');
+        expect(basal.text).to.be('0U/h -0.65');
         expect(basal.recency).to.be(960);
       });
     });
@@ -102,7 +102,7 @@ describe('basals', function() {
       timekeeper.freeze(new Date("2015-12-03T14:50:25-08:00"));
 
       return d.getActiveBasal({}).then(function(basal) {
-        expect(basal.text).to.be('0.65u/h');
+        expect(basal.text).to.be('0.65U/h');
         expect(basal.recency).to.be(0);
       });
     });
@@ -113,7 +113,7 @@ describe('basals', function() {
       timekeeper.freeze(new Date("2015-12-03T20:50:25-08:00"));
 
       return d.getActiveBasal({}).then(function(basal) {
-        expect(basal.text).to.be('0.55u/h');
+        expect(basal.text).to.be('0.55U/h');
         expect(basal.recency).to.be(0);
       });
     });
@@ -337,7 +337,7 @@ describe('getPebbleIOB', function() {
     });
 
     return d.getPebbleIOB({}).then(function(iob) {
-      expect(iob.text).to.be('1.3 u');
+      expect(iob.text).to.be('1.3 U');
       expect(iob.recency).to.be(0);
     });
   });
@@ -351,7 +351,7 @@ describe('getPebbleIOBAndCOB', function() {
       'pebble': {"bgs": [{"iob": "2.67", "cob": "28.63"}]}
     });
     return d.getPebbleIOBAndCOB({}).then(function(s) {
-      expect(s.text).to.be('2.7 u  29 g');
+      expect(s.text).to.be('2.7 U  29 g');
       expect(s.recency).to.be(0);
     });
   });
@@ -362,7 +362,7 @@ describe('getPebbleIOBAndCOB', function() {
       'pebble': {"bgs": [{"iob": 1.83, "cob": "foo"}]}
     });
     return d.getPebbleIOBAndCOB({}).then(function(s) {
-      expect(s.text).to.be('1.8 u');
+      expect(s.text).to.be('1.8 U');
       expect(s.recency).to.be(0);
     });
   });
@@ -469,7 +469,7 @@ describe('getOpenAPSStatus', function() {
 
     it('should report IOB', function() {
       return d.getOpenAPSStatus({}).then(function(result) {
-        expect(result.text).to.contain('1.1u');
+        expect(result.text).to.contain('1.1U');
       });
     });
 
@@ -521,7 +521,7 @@ describe('getOpenAPSStatus', function() {
 
     it('should report IOB', function() {
       return d.getOpenAPSStatus({}).then(function(result) {
-        expect(result.text).to.contain('1.1u');
+        expect(result.text).to.contain('1.1U');
       });
     });
 
@@ -549,7 +549,7 @@ describe('getOpenAPSStatus', function() {
     timekeeper.freeze(new Date('2016-03-01T16:48:00Z'));
 
     return d.getOpenAPSStatus({}).then(function(result) {
-      expect(result.text).to.be('1.1u');
+      expect(result.text).to.be('1.1U');
       expect(result.recency).to.be(180);
     });
   });
@@ -566,7 +566,7 @@ describe('getOpenAPSStatus', function() {
     timekeeper.freeze(new Date('2016-03-01T16:48:00Z'));
 
     return d.getOpenAPSStatus({}).then(function(result) {
-      expect(result.text).not.to.contain('1.1u');
+      expect(result.text).not.to.contain('1.1U');
     });
   });
 
@@ -612,7 +612,7 @@ describe('getOpenAPSStatus', function() {
     timekeeper.freeze(new Date('2016-03-01T16:58:00Z'));
 
     return d.getOpenAPSStatus({}).then(function(result) {
-      expect(result.text).to.be('-- | (+15m) 3.1u');
+      expect(result.text).to.be('-- | (+15m) 3.1U');
       expect(result.recency).to.be(818);
     });
   });
@@ -671,7 +671,7 @@ describe('getOpenAPSStatus', function() {
         ],
       });
       return d.getOpenAPSStatus({}).then(function(result) {
-        expect(result.text).to.contain('1.1u');
+        expect(result.text).to.contain('1.1U');
         expect(result.recency).to.be(420);
       });
     });
@@ -689,7 +689,7 @@ describe('getOpenAPSStatus', function() {
         ],
       });
       return d.getOpenAPSStatus({}).then(function(result) {
-        expect(result.text).to.be('-- | (+8m) 1.1u');
+        expect(result.text).to.be('-- | (+8m) 1.1U');
         expect(result.recency).to.be(420);
       });
     });

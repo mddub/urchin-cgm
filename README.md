@@ -36,10 +36,10 @@ The status bar can display content from a variety of sources:
 * **Uploader battery level** - if your Nightscout data comes from a wired rig/xDrip. (e.g. `36%`)
 * **Raw Dexcom readings** - [raw sensor readings][raw-dexcom-readings] plus noise level. (e.g. `Cln 97 104 106`)
 * **Uploader battery, Dexcom raw** - combination of the above two. (e.g. `36% Cln 97 104 106`)
-* **Active basal - NS Care Portal** - the currently-active basal rate based on treatments in [Nightscout Care Portal][care-portal]. If a temp basal is currently active, shows the difference from normal basal and how many minutes ago the temp basal began. (e.g. `(19) 1.5u/h +0.6`)
-* **Insulin on board** - this can be calculated from treatments entered manually in [Nightscout Care Portal][care-portal], or reported automatically by a [MiniMed Connect][minimed-connect] or [OpenAPS][openaps-status-uploads] device. (e.g. `2.3 u`)
-* **Insulin + carbs on board** - same IOB as above plus carbs-on-board entered in Care Portal. (e.g. `2.3 u  31 g`)
-* **IOB and temp - OpenAPS** - IOB and currently-active temp basal rate from the most recent [OpenAPS status upload][openaps-status-uploads], or if the most recent status indicates failure, the time since that failure plus the time and IOB from the last successful status. (e.g. `(2) 1.1u 1.9x13` or `(4) -- | (+23) 2.2u`)
+* **Active basal - NS Care Portal** - the currently-active basal rate based on treatments in [Nightscout Care Portal][care-portal]. If a temp basal is currently active, shows the difference from normal basal and how many minutes ago the temp basal began. (e.g. `(19) 1.5U/h +0.6`)
+* **Insulin on board** - this can be calculated from treatments entered manually in [Nightscout Care Portal][care-portal], or reported automatically by a [MiniMed Connect][minimed-connect] or [OpenAPS][openaps-status-uploads] device. (e.g. `2.3 U`)
+* **Insulin + carbs on board** - same IOB as above plus carbs-on-board entered in Care Portal. (e.g. `2.3 U  31 g`)
+* **IOB and temp - OpenAPS** - IOB and currently-active temp basal rate from the most recent [OpenAPS status upload][openaps-status-uploads], or if the most recent status indicates failure, the time since that failure plus the time and IOB from the last successful status. (e.g. `(2) 1.1U 1.9x13` or `(4) -- | (+23) 2.2U`)
 * **Custom URL - text** - if you want to summarize your data in a custom way.
 * **Custom URL - JSON** - show custom text, with support for a `timestamp` field to display recency (e.g. `(3) your text`).
 * **Custom text** - remind yourself whose glucose readings you're looking at, or leave a terse inspirational message.

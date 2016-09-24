@@ -147,7 +147,7 @@ var data = function(c, maxSGVCount) {
     return d.getPebbleEndpoint(config).then(function(data) {
       if (data && !isNaN(parseFloat(data['iob']))) {
         return {
-          text: parseFloat(data['iob']).toFixed(1).toString() + ' u',
+          text: parseFloat(data['iob']).toFixed(1).toString() + ' U',
           recency: 0,
         };
       } else {
@@ -160,7 +160,7 @@ var data = function(c, maxSGVCount) {
     return d.getPebbleEndpoint(config).then(function(data) {
       var out = [];
       if (data && !isNaN(parseFloat(data['iob']))) {
-        out.push(parseFloat(data['iob']).toFixed(1).toString() + ' u');
+        out.push(parseFloat(data['iob']).toFixed(1).toString() + ' U');
       }
       if (data && !isNaN(parseFloat(data['cob']))) {
         out.push(Math.round(parseFloat(data['cob'])) + ' g');
@@ -364,12 +364,12 @@ var data = function(c, maxSGVCount) {
       } else if (tempBasal !== undefined && Date.now() - tempBasal.start < tempBasal.duration * 60 * 1000) {
         var diff = tempBasal.rate - profileBasal;
         return {
-          text: _roundBasal(tempBasal.rate) + 'u/h ' + (diff >= 0 ? '+' : '') + _roundBasal(diff),
+          text: _roundBasal(tempBasal.rate) + 'U/h ' + (diff >= 0 ? '+' : '') + _roundBasal(diff),
           recency: Math.round((new Date() - tempBasal.start) / 1000),
         };
       } else {
         return {
-          text: _roundBasal(profileBasal) + 'u/h',
+          text: _roundBasal(profileBasal) + 'U/h',
           recency: 0
         };
       }
@@ -524,7 +524,7 @@ var data = function(c, maxSGVCount) {
       iob = iob[0];
     }
     if (openAPSIsFresh(entries, 'iob') && iob['iob'] !== undefined) {
-      return roundOrZero(iob['iob']) + 'u';
+      return roundOrZero(iob['iob']) + 'U';
     } else {
       return '';
     }
