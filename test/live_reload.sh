@@ -16,10 +16,10 @@ run () {
   sleep 1
   bg
 
-  python "$TEST_DIR/set_config.py" "$@"
+  python "$TEST_DIR/set_config.py" --test-class $@
 
   # Requires watchdog
-  watchmedo shell-command --patterns="**/test_screenshots.py" --recursive --command="python $TEST_DIR/set_config.py $@" $TEST_DIR
+  watchmedo shell-command --patterns="**/test_screenshots.py" --recursive --command="python $TEST_DIR/set_config.py --test-class $@" $TEST_DIR
 
   kill -9 $PID
 
