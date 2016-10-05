@@ -7,6 +7,7 @@
 #define NO_DELTA_VALUE 65536
 
 typedef struct __attribute__((__packed__)) DataMessage {
+  time_t received_at;
   int32_t recency;
   uint16_t sgv_count;
   uint8_t sgvs[GRAPH_MAX_SGV_COUNT];
@@ -14,6 +15,7 @@ typedef struct __attribute__((__packed__)) DataMessage {
   int32_t trend;
   int32_t delta;
   char status_text[STATUS_BAR_MAX_LENGTH];
+  int32_t status_recency;
   uint8_t graph_extra[GRAPH_MAX_SGV_COUNT];
 } DataMessage;
 
@@ -22,3 +24,6 @@ bool get_byte_array(DictionaryIterator *data, uint8_t *dest, uint8_t key, size_t
 bool get_byte_array_length(DictionaryIterator *data, uint16_t *dest, uint16_t max_length, uint8_t key);
 bool get_cstring(DictionaryIterator *data, char *dest, uint8_t key, size_t max_length, bool required, const char* fallback);
 bool validate_data_message(DictionaryIterator *data, DataMessage *out);
+
+void save_last_data_message(DataMessage *d);
+DataMessage *last_data_message();

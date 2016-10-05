@@ -1,4 +1,5 @@
 #include "format.h"
+#include "preferences.h"
 
 const char* get_error_string(int mgdl) {
   switch(mgdl) {
@@ -46,5 +47,56 @@ void format_bg(char* buffer, char buf_size, int mgdl, bool is_delta, bool use_mm
     snprintf(buffer, buf_size, "%s%d.%d", plus_minus, a, b);
   } else {
     snprintf(buffer, buf_size, "%s%d", plus_minus, mgdl);
+  }
+}
+
+void format_status_bar_text(char* buffer, uint16_t buf_size, DataMessage *d) {
+  int32_t recency = time(NULL) - d->received_at + d->status_recency;
+  int32_t minutes = (float)recency / 60.0f + 0.5f;
+
+  if (d->status_recency == -1 || (get_prefs()->status_min_recency_to_show_minutes > 0 && minutes <= get_prefs()->status_min_recency_to_show_minutes)) {
+
+    strcpy(buffer, d->status_text);
+
+  } else if (minutes > get_prefs()->status_max_age_minutes) {
+
+    strcpy(buffer, "-");
+
+  } else {
+
+    static char recency_str[16];
+    if (minutes < 60) {
+      snprintf(recency_str, 16, "%d", (int)minutes);
+    } else {
+      int32_t hours = minutes / 60;
+      snprintf(recency_str, 16, "%dh%d", (int)hours, (int)(minutes - 60 * hours));
+    }
+
+    switch(get_prefs()->status_recency_format) {
+      case STATUS_RECENCY_FORMAT_PAREN_LEFT:
+        snprintf(buffer, buf_size, "(%s) %s", recency_str, d->status_text);
+        break;
+      case STATUS_RECENCY_FORMAT_BRACKET_LEFT:
+        snprintf(buffer, buf_size, "[%s] %s", recency_str, d->status_text);
+        break;
+      case STATUS_RECENCY_FORMAT_COLON_LEFT:
+        snprintf(buffer, buf_size, "%s: %s", recency_str, d->status_text);
+        break;
+      case STATUS_RECENCY_FORMAT_CLOSE_PAREN_LEFT:
+        snprintf(buffer, buf_size, "%s) %s", recency_str, d->status_text);
+        break;
+      case STATUS_RECENCY_FORMAT_PLAIN_LEFT:
+        snprintf(buffer, buf_size, "%s %s", recency_str, d->status_text);
+        break;
+      case STATUS_RECENCY_FORMAT_PAREN_RIGHT:
+        snprintf(buffer, buf_size, "%s (%s)", d->status_text, recency_str);
+        break;
+      case STATUS_RECENCY_FORMAT_BRACKET_RIGHT:
+        snprintf(buffer, buf_size, "%s [%s]", d->status_text, recency_str);
+        break;
+      default:
+        break;
+    }
+
   }
 }

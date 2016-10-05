@@ -1,4 +1,5 @@
 #include "fonts.h"
+#include "format.h"
 #include "layout.h"
 #include "preferences.h"
 #include "staleness.h"
@@ -63,9 +64,14 @@ void status_bar_element_destroy(StatusBarElement *el) {
 }
 
 void status_bar_element_update(StatusBarElement *el, DataMessage *data) {
-  static char buffer[STATUS_BAR_MAX_LENGTH];
-  strcpy(buffer, data->status_text);
-  text_layer_set_text(el->text, buffer);
+  status_bar_element_tick(el);
 }
 
-void status_bar_element_tick(StatusBarElement *el) {}
+void status_bar_element_tick(StatusBarElement *el) {
+  if (last_data_message() == NULL) {
+    return;
+  }
+  static char buffer[STATUS_BAR_MAX_LENGTH + 16];
+  format_status_bar_text(buffer, sizeof(buffer), last_data_message());
+  text_layer_set_text(el->text, buffer);
+}

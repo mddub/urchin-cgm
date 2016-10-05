@@ -114,6 +114,8 @@ bool validate_data_message(DictionaryIterator *data, DataMessage *out) {
   static uint8_t zeroes[GRAPH_MAX_SGV_COUNT];
   memset(zeroes, 0, GRAPH_MAX_SGV_COUNT);
 
+  out->received_at = time(NULL);
+
   return true
     && get_int32(data, &out->recency, MESSAGE_KEY_recency, false, 0)
     && get_byte_array(data, out->sgvs, MESSAGE_KEY_sgvs, GRAPH_MAX_SGV_COUNT, true, NULL)
@@ -122,5 +124,16 @@ bool validate_data_message(DictionaryIterator *data, DataMessage *out) {
     && get_int32(data, &out->trend, MESSAGE_KEY_trend, false, 0)
     && get_int32(data, &out->delta, MESSAGE_KEY_delta, false, NO_DELTA_VALUE)
     && get_cstring(data, out->status_text, MESSAGE_KEY_statusText, STATUS_BAR_MAX_LENGTH, false, "")
+    && get_int32(data, &out->status_recency, MESSAGE_KEY_statusRecency, false, -1)
     && get_byte_array(data, out->graph_extra, MESSAGE_KEY_graphExtra, GRAPH_MAX_SGV_COUNT, false, zeroes);
+}
+
+static DataMessage *_last_data_message = NULL;
+
+void save_last_data_message(DataMessage *d) {
+  _last_data_message = d;
+}
+
+DataMessage *last_data_message() {
+  return _last_data_message;
 }

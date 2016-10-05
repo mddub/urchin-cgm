@@ -131,6 +131,9 @@ class ScreenshotTest(object):
     def profile(self):
         return []
 
+    def devicestatus(self):
+        return []
+
     def test_screenshot(self):
         if not hasattr(self, 'config'):
             self.config = {}
@@ -151,6 +154,9 @@ class ScreenshotTest(object):
 
         self.test_profile = self.profile()
         post_mock_server('/set-profile', self.test_profile)
+
+        self.test_devicestatus = self.devicestatus()
+        post_mock_server('/set-devicestatus', self.test_devicestatus)
 
         set_config(dict(BASE_CONFIG, nightscout_url=MOCK_HOST, __CLEAR_CACHE__=True, **self.config), PLATFORMS)
 
@@ -226,9 +232,11 @@ class SummaryFile(object):
             sgvs=json.dumps(self.formatted_sgvs(test_instance.test_sgvs))
         )
         if test_instance.test_treatments:
-            details += "<code>{treatments}</code>".format(treatments=self.formatted_treatments(test_instance.test_treatments))
+            details += "<code>{treatments}</code>".format(treatments=self.format_created_at(test_instance.test_treatments))
         if test_instance.test_profile:
             details += "<code>{profile}</code>".format(profile=test_instance.test_profile)
+        if test_instance.test_devicestatus:
+            details += "<code>{devicestatus}</code>".format(devicestatus=self.format_created_at(test_instance.test_devicestatus))
         result = """
         <tr>
           <td><img src="{test_filename}" class="{klass}"></td>
@@ -261,12 +269,12 @@ class SummaryFile(object):
             for i, s in enumerate(sgvs)
         ]
 
-    def formatted_treatments(self, treatments):
+    def format_created_at(self, entries):
         out = []
-        for t in [_t.copy() for _t in treatments]:
-            t['ago'] = self.format_ago(parser.parse(t['created_at']))
-            del t['created_at']
-            out.append(t)
+        for e in [_e.copy() for _e in entries]:
+            e['ago'] = self.format_ago(parser.parse(e['created_at']))
+            del e['created_at']
+            out.append(e)
         return out
 
     @staticmethod

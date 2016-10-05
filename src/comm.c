@@ -16,7 +16,7 @@ static void request_update();
 static void timeout_handler();
 static void init_app_message();
 
-static DataMessage *last_data_message;
+static DataMessage *_last_data_message;
 
 static void clear_timer(AppTimer **timer) {
   if (*timer != NULL) {
@@ -110,17 +110,18 @@ static void in_received_handler(DictionaryIterator *received, void *context) {
   if (msg_type == MSG_TYPE_DATA) {
     static DataMessage d;
     if (validate_data_message(received, &d)) {
-      memcpy(last_data_message, &d, sizeof(DataMessage));
+      memcpy(_last_data_message, &d, sizeof(DataMessage));
+      save_last_data_message(_last_data_message);
 
       int32_t delay_seconds;
       if (get_prefs()->update_every_minute) {
         delay_seconds = 60;
       } else {
         int32_t next_update;
-        if (last_data_message->recency < SGV_UPDATE_FREQUENCY_SECONDS) {
-          next_update = SGV_UPDATE_FREQUENCY_SECONDS - last_data_message->recency;
+        if (_last_data_message->recency < SGV_UPDATE_FREQUENCY_SECONDS) {
+          next_update = SGV_UPDATE_FREQUENCY_SECONDS - _last_data_message->recency;
           delay_seconds = next_update < 15 ? 15 : next_update;
-        } else if (last_data_message->recency < SGV_UPDATE_FREQUENCY_SECONDS + LATE_DATA_RETRY_PERIOD_SECONDS) {
+        } else if (_last_data_message->recency < SGV_UPDATE_FREQUENCY_SECONDS + LATE_DATA_RETRY_PERIOD_SECONDS) {
           delay_seconds = 15;
         } else {
           delay_seconds = LATE_DATA_UPDATE_FREQUENCY_SECONDS;
@@ -129,7 +130,7 @@ static void in_received_handler(DictionaryIterator *received, void *context) {
       schedule_update((uint32_t) delay_seconds * 1000);
 
       request_state_callback(REQUEST_STATE_SUCCESS, 0);
-      data_callback(last_data_message);
+      data_callback(_last_data_message);
     } else {
       request_state_callback(REQUEST_STATE_BAD_APP_MESSAGE, 0);
       schedule_update(BAD_APP_MESSAGE_RETRY_DELAY);
@@ -190,7 +191,7 @@ void init_comm(
     schedule_update(NO_BLUETOOTH_RETRY_DELAY);
   }
 
-  last_data_message = malloc(sizeof(DataMessage));
+  _last_data_message = malloc(sizeof(DataMessage));
   init_app_message();
 
   connection_service_subscribe((ConnectionHandlers) {
@@ -200,7 +201,7 @@ void init_comm(
 
 void deinit_comm() {
   app_message_deregister_callbacks();
-  free(last_data_message);
+  free(_last_data_message);
 }
 
 bool comm_is_update_in_progress() {

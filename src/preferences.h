@@ -5,7 +5,7 @@
 #define PERSIST_KEY_VERSION 0
 #define PERSIST_KEY_PREFERENCES_OBJECT 1
 
-#define PREFERENCES_SCHEMA_VERSION 11
+#define PREFERENCES_SCHEMA_VERSION 12
 
 enum {
   ALIGN_LEFT,
@@ -56,6 +56,16 @@ enum {
   NUM_COLOR_KEYS,
 };
 
+enum {
+  STATUS_RECENCY_FORMAT_PAREN_LEFT,
+  STATUS_RECENCY_FORMAT_BRACKET_LEFT,
+  STATUS_RECENCY_FORMAT_COLON_LEFT,
+  STATUS_RECENCY_FORMAT_CLOSE_PAREN_LEFT,
+  STATUS_RECENCY_FORMAT_PLAIN_LEFT,
+  STATUS_RECENCY_FORMAT_PAREN_RIGHT,
+  STATUS_RECENCY_FORMAT_BRACKET_RIGHT,
+};
+
 typedef struct __attribute__((__packed__)) ElementConfig {
   int el;
   int w;
@@ -89,6 +99,9 @@ typedef struct __attribute__((__packed__)) Preferences {
   unsigned int num_elements:3;
   ElementConfig elements[MAX_LAYOUT_ELEMENTS];
   GColor colors[NUM_COLOR_KEYS];
+  uint8_t status_min_recency_to_show_minutes;
+  uint16_t status_max_age_minutes;
+  unsigned int status_recency_format:3;
 } Preferences;
 
 void init_prefs();
