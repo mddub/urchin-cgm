@@ -233,23 +233,39 @@ GraphElement* graph_element_create(Layer *parent) {
   layer_set_update_proc(el->graph_layer, graph_update_proc);
   layer_add_child(parent, el->graph_layer);
 
-  // XXX There is an implicit dependency in the positioning of these elements.
-  // If recency is shown in graph bottom-right, then so is connection status.
-  bool conn_status_align_bottom = get_prefs()->recency_loc == RECENCY_LOC_GRAPH_BOTTOM_LEFT;
-  int16_t conn_status_y = conn_status_align_bottom ? bounds.size.h - connection_status_component_size() : 1;
-  el->conn_status = connection_status_component_create(parent, 0, conn_status_y, conn_status_align_bottom);
+  el->conn_status = NULL;
+  int16_t conn_status_y = -1;
+  bool conn_status_align_bottom;
+  if (get_prefs()->conn_status_loc == CONN_STATUS_LOC_GRAPH_TOP_LEFT) {
+    conn_status_align_bottom = false;
+    conn_status_y = 1;
+  } else if (get_prefs()->conn_status_loc == CONN_STATUS_LOC_GRAPH_BOTTOM_LEFT) {
+    conn_status_align_bottom = true;
+    conn_status_y = bounds.size.h - connection_status_component_size();
+  }
+  if (conn_status_y != -1) {
+    el->conn_status = connection_status_component_create(parent, 0, conn_status_y, conn_status_align_bottom);
+  }
 
+  el->recency = NULL;
   int16_t recency_y = -1;
   if (get_prefs()->recency_loc == RECENCY_LOC_GRAPH_TOP_LEFT) {
     recency_y = 1;
   } else if (get_prefs()->recency_loc == RECENCY_LOC_GRAPH_BOTTOM_LEFT) {
     recency_y = bounds.size.h - recency_component_size();
   }
-
   if (recency_y != -1) {
-    el->recency = recency_component_create(parent, recency_y, false, recency_size_changed, el->conn_status);
-  } else {
-    el->recency = NULL;
+    if (
+        (get_prefs()->recency_loc == RECENCY_LOC_GRAPH_TOP_LEFT && get_prefs()->conn_status_loc == CONN_STATUS_LOC_GRAPH_TOP_LEFT) ||
+        (get_prefs()->recency_loc == RECENCY_LOC_GRAPH_BOTTOM_LEFT && get_prefs()->conn_status_loc == CONN_STATUS_LOC_GRAPH_BOTTOM_LEFT)
+    ) {
+      // XXX: If the recency component and connection status component share the
+      // same corner, the connection status must subscribe to changes in the
+      // width of the recency to decide the x position of the icon.
+      el->recency = recency_component_create(parent, recency_y, false, recency_size_changed, el->conn_status);
+    } else {
+      el->recency = recency_component_create(parent, recency_y, false, NULL, NULL);
+    }
   }
 
   return el;
@@ -259,7 +275,9 @@ void graph_element_destroy(GraphElement *el) {
   free(((GraphData*)layer_get_data(el->graph_layer))->sgvs);
   free(((GraphData*)layer_get_data(el->graph_layer))->extra);
   layer_destroy(el->graph_layer);
-  connection_status_component_destroy(el->conn_status);
+  if (el->conn_status != NULL) {
+    connection_status_component_destroy(el->conn_status);
+  }
   if (el->recency != NULL) {
     recency_component_destroy(el->recency);
   }
@@ -276,12 +294,16 @@ void graph_element_update(GraphElement *el, DataMessage *data) {
 
 void graph_element_tick(GraphElement *el) {
   layer_mark_dirty(el->graph_layer);
-  connection_status_component_tick(el->conn_status);
+  if (el->conn_status != NULL) {
+    connection_status_component_tick(el->conn_status);
+  }
   if (el->recency != NULL) {
     recency_component_tick(el->recency);
   }
 }
 
 void graph_element_show_request_state(GraphElement *el, RequestState state, AppMessageResult reason) {
-  connection_status_component_show_request_state(el->conn_status, state, reason);
+  if (el->conn_status != NULL) {
+    connection_status_component_show_request_state(el->conn_status, state, reason);
+  }
 }

@@ -55,7 +55,8 @@
          ],
          "batteryLoc" : "timeBottomLeft",
          "timeAlign" : "right",
-         "recencyLoc" : "none"
+         "recencyLoc" : "none",
+         "connStatusLoc" : "graphTopLeft"
       }
    },
 
@@ -70,7 +71,8 @@
          ],
          "batteryLoc" : "statusRight",
          "timeAlign" : "center",
-         "recencyLoc" : "none"
+         "recencyLoc" : "none",
+         "connStatusLoc" : "graphTopLeft"
       },
       "b": {
          "elements": [
@@ -82,7 +84,8 @@
          ],
          "batteryLoc" : "statusRight",
          "timeAlign" : "center",
-         "recencyLoc" : "none"
+         "recencyLoc" : "none",
+         "connStatusLoc" : "graphTopLeft"
       },
       "c": {
          "elements": [
@@ -94,7 +97,8 @@
          ],
          "batteryLoc" : "statusRight",
          "timeAlign" : "center",
-         "recencyLoc" : "none"
+         "recencyLoc" : "none",
+         "connStatusLoc" : "graphTopLeft"
       },
       "d": {
          "elements": [
@@ -106,7 +110,8 @@
          ],
          "batteryLoc" : "timeTopRight",
          "timeAlign" : "left",
-         "recencyLoc" : "none"
+         "recencyLoc" : "none",
+         "connStatusLoc" : "graphTopLeft"
       },
       "e": {
          "elements": [
@@ -118,7 +123,8 @@
          ],
          "batteryLoc" : "timeBottomLeft",
          "timeAlign" : "right",
-         "recencyLoc" : "none"
+         "recencyLoc" : "none",
+         "connStatusLoc" : "graphTopLeft"
       }
    },
 
@@ -194,6 +200,12 @@
       "timeTopLeft" : 2,
       "none" : 0,
       "statusRight" : 1
+   },
+
+   "CONN_STATUS_LOC": {
+      "none" : 0,
+      "graphTopLeft" : 1,
+      "graphBottomLeft" : 2
    },
 
    "RECENCY_LOC" : {

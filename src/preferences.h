@@ -23,6 +23,12 @@ enum {
 };
 
 enum {
+  CONN_STATUS_LOC_NONE,
+  CONN_STATUS_LOC_GRAPH_TOP_LEFT,
+  CONN_STATUS_LOC_GRAPH_BOTTOM_LEFT,
+};
+
+enum {
   RECENCY_LOC_NONE,
   RECENCY_LOC_GRAPH_TOP_LEFT,
   RECENCY_LOC_GRAPH_BOTTOM_LEFT,
@@ -101,6 +107,7 @@ typedef struct __attribute__((__packed__)) Preferences {
   unsigned int time_align:2;
   unsigned int battery_loc:3;
   unsigned int recency_loc:4;
+  unsigned int conn_status_loc:2;
   unsigned int point_shape:2;
   unsigned int point_rect_height:5;
   unsigned int point_width:5;

@@ -81,9 +81,9 @@ void position_icon_and_text(ConnectionStatusComponent *c, GPoint icon_offset, GP
 }
 
 void connection_status_component_update_offset(ConnectionStatusComponent* c, GSize size) {
-  if (size.w == 0) {
-    // XXX: If no recency component affecting the offset, assume this component
-    // is in default position, which means align_bottom == false.
+  if (size.w == 0 && c->align_bottom) {
+    position_icon_and_text(c, GPoint(0, 0), GPoint(REASON_ICON_WIDTH + TEXT_MARGIN_L, 0));
+  } else if (size.w == 0 && !c->align_bottom) {
     position_icon_and_text(c, GPoint(0, 0), GPoint(REASON_ICON_WIDTH + TEXT_MARGIN_L, 0));
   } else if (c->align_bottom) {
     FontChoice font = get_font(CONN_STATUS_FONT);

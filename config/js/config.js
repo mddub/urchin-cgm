@@ -38,6 +38,10 @@
       // v0.0.12: new layout property
       config.customLayout.recencyLoc = 'none';
     }
+    if (!config.customLayout.connStatusLoc) {
+      // v0.0.12: new layout property
+      config.customLayout.connStatusLoc = 'graphTopLeft';
+    }
     return config;
   }
 
@@ -289,6 +293,7 @@
       batteryLoc: $('#batteryLoc').val(),
       timeAlign: $('#timeAlign').val(),
       recencyLoc: $('#recencyLoc').val(),
+      connStatusLoc: $('#connStatusLoc').val(),
     };
   }
 
@@ -322,6 +327,7 @@
       'batteryLoc',
       'timeAlign',
       'recencyLoc',
+      'connStatusLoc',
     ].forEach(function(prefKey) {
       $('[name=' + prefKey + ']').val(layout[prefKey]);
     });
@@ -672,6 +678,7 @@
       '[name=timeAlign]',
       '[name=batteryLoc]',
       '[name=recencyLoc]',
+      '[name=connStatusLoc]',
     ].join(', ')).on('change', updateSelectedLayout);
 
     $('.tabs-menu a').on('click', onTabClick);
