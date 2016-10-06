@@ -54,7 +54,8 @@
             {"el": 2, "enabled": true, "width": 100, "height": 32, "black": false, "bottom": false, "right": false}
          ],
          "batteryLoc" : "timeBottomLeft",
-         "timeAlign" : "right"
+         "timeAlign" : "right",
+         "recencyLoc" : "none"
       }
    },
 
@@ -68,7 +69,8 @@
             {"el": 4, "enabled": false, "width": 100, "height": 0, "black": false, "bottom": false, "right": false}
          ],
          "batteryLoc" : "statusRight",
-         "timeAlign" : "center"
+         "timeAlign" : "center",
+         "recencyLoc" : "none"
       },
       "b": {
          "elements": [
@@ -79,7 +81,8 @@
             {"el": 4, "enabled": false, "width": 100, "height": 0, "black": false, "bottom": false, "right": false}
          ],
          "batteryLoc" : "statusRight",
-         "timeAlign" : "center"
+         "timeAlign" : "center",
+         "recencyLoc" : "none"
       },
       "c": {
          "elements": [
@@ -90,7 +93,8 @@
             {"el": 3, "enabled": true, "width": 100, "height": 0, "black": false, "bottom": false, "right": false}
          ],
          "batteryLoc" : "statusRight",
-         "timeAlign" : "center"
+         "timeAlign" : "center",
+         "recencyLoc" : "none"
       },
       "d": {
          "elements": [
@@ -101,7 +105,8 @@
             {"el": 2, "enabled": false, "width": 100, "height": 0, "black": false, "bottom": false, "right": false}
          ],
          "batteryLoc" : "timeTopRight",
-         "timeAlign" : "left"
+         "timeAlign" : "left",
+         "recencyLoc" : "none"
       },
       "e": {
          "elements": [
@@ -112,7 +117,8 @@
             {"el": 4, "enabled": false, "width": 100, "height": 0, "black": false, "bottom": false, "right": false}
          ],
          "batteryLoc" : "timeBottomLeft",
-         "timeAlign" : "right"
+         "timeAlign" : "right",
+         "recencyLoc" : "none"
       }
    },
 
@@ -188,6 +194,18 @@
       "timeTopLeft" : 2,
       "none" : 0,
       "statusRight" : 1
+   },
+
+   "RECENCY_LOC" : {
+      "none" : 0,
+      "graphTopLeft" : 1,
+      "graphBottomLeft" : 2,
+      "statusTopRight" : 3,
+      "statusBottomRight" : 4,
+      "timeTopLeft" : 5,
+      "timeTopRight" : 6,
+      "timeBottomLeft" : 7,
+      "timeBottomRight" : 8
    },
 
    "POINT_SHAPE" : {

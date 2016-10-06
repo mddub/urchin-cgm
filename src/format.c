@@ -50,6 +50,20 @@ void format_bg(char* buffer, char buf_size, int mgdl, bool is_delta, bool use_mm
   }
 }
 
+void format_recency(char* buf, uint16_t buf_size, int32_t seconds) {
+  int32_t minutes = (float)seconds / 60.0f + 0.5f;
+  int32_t hours = minutes / 60;
+  if (minutes < 60) {
+    snprintf(buf, buf_size, "%d", (int)minutes);
+  } else if (hours < 10 && minutes % 60 > 0) {
+    snprintf(buf, buf_size, "%dh%d", (int)hours, (int)(minutes - 60 * hours));
+  } else if (hours < 100) {
+    snprintf(buf, buf_size, "%dh", (int)hours);
+  } else {
+    strcpy(buf, "!");
+  }
+}
+
 void format_status_bar_text(char* buffer, uint16_t buf_size, DataMessage *d) {
   int32_t recency = time(NULL) - d->received_at + d->status_recency;
   int32_t minutes = (float)recency / 60.0f + 0.5f;
@@ -65,12 +79,7 @@ void format_status_bar_text(char* buffer, uint16_t buf_size, DataMessage *d) {
   } else {
 
     static char recency_str[16];
-    if (minutes < 60) {
-      snprintf(recency_str, 16, "%d", (int)minutes);
-    } else {
-      int32_t hours = minutes / 60;
-      snprintf(recency_str, 16, "%dh%d", (int)hours, (int)(minutes - 60 * hours));
-    }
+    format_recency(recency_str, 16, recency);
 
     switch(get_prefs()->status_recency_format) {
       case STATUS_RECENCY_FORMAT_PAREN_LEFT:

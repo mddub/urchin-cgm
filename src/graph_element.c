@@ -79,11 +79,15 @@ static uint8_t decode_bits(uint8_t value, uint8_t offset, uint8_t bits) {
   return (value >> offset) & (0xff >> (8 - bits));
 }
 
+static uint8_t sgv_graph_height(int16_t available_height) {
+  return get_prefs()->basal_graph ? available_height - get_prefs()->basal_height : available_height;
+}
+
 static void graph_update_proc(Layer *layer, GContext *ctx) {
   int i, x, y;
   GSize layer_size = layer_get_bounds(layer).size;
   uint8_t graph_width = layer_size.w;
-  uint8_t graph_height = get_prefs()->basal_graph ? layer_size.h - get_prefs()->basal_height : layer_size.h;
+  uint8_t graph_height = sgv_graph_height(layer_size.h);
 
   GraphData *data = layer_get_data(layer);
   graphics_context_set_stroke_color(ctx, data->color);
@@ -210,24 +214,44 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
   }
 }
 
+static void recency_size_changed(GSize size, void *context) {
+  connection_status_component_update_offset((ConnectionStatusComponent*)context, size);
+}
+
 GraphElement* graph_element_create(Layer *parent) {
+  GraphElement *el = malloc(sizeof(GraphElement));
+
   GRect bounds = element_get_bounds(parent);
 
-  Layer* graph_layer = layer_create_with_data(
+  el->graph_layer = layer_create_with_data(
     GRect(0, 0, bounds.size.w, bounds.size.h),
     sizeof(GraphData)
   );
-  ((GraphData*)layer_get_data(graph_layer))->color = element_fg(parent);
-  ((GraphData*)layer_get_data(graph_layer))->sgvs = malloc(GRAPH_MAX_SGV_COUNT * sizeof(uint8_t));
-  ((GraphData*)layer_get_data(graph_layer))->extra = malloc(GRAPH_MAX_SGV_COUNT * sizeof(uint8_t));
-  layer_set_update_proc(graph_layer, graph_update_proc);
-  layer_add_child(parent, graph_layer);
+  ((GraphData*)layer_get_data(el->graph_layer))->color = element_fg(parent);
+  ((GraphData*)layer_get_data(el->graph_layer))->sgvs = malloc(GRAPH_MAX_SGV_COUNT * sizeof(uint8_t));
+  ((GraphData*)layer_get_data(el->graph_layer))->extra = malloc(GRAPH_MAX_SGV_COUNT * sizeof(uint8_t));
+  layer_set_update_proc(el->graph_layer, graph_update_proc);
+  layer_add_child(parent, el->graph_layer);
 
-  ConnectionStatusComponent *conn_status = connection_status_component_create(parent, 1, 1);
+  // XXX There is an implicit dependency in the positioning of these elements.
+  // If recency is shown in graph bottom-right, then so is connection status.
+  bool conn_status_align_bottom = get_prefs()->recency_loc == RECENCY_LOC_GRAPH_BOTTOM_LEFT;
+  int16_t conn_status_y = conn_status_align_bottom ? bounds.size.h - connection_status_component_size() : 1;
+  el->conn_status = connection_status_component_create(parent, 0, conn_status_y, conn_status_align_bottom);
 
-  GraphElement *el = malloc(sizeof(GraphElement));
-  el->graph_layer = graph_layer;
-  el->conn_status = conn_status;
+  int16_t recency_y = -1;
+  if (get_prefs()->recency_loc == RECENCY_LOC_GRAPH_TOP_LEFT) {
+    recency_y = 1;
+  } else if (get_prefs()->recency_loc == RECENCY_LOC_GRAPH_BOTTOM_LEFT) {
+    recency_y = bounds.size.h - recency_component_size();
+  }
+
+  if (recency_y != -1) {
+    el->recency = recency_component_create(parent, recency_y, false, recency_size_changed, el->conn_status);
+  } else {
+    el->recency = NULL;
+  }
+
   return el;
 }
 
@@ -236,6 +260,9 @@ void graph_element_destroy(GraphElement *el) {
   free(((GraphData*)layer_get_data(el->graph_layer))->extra);
   layer_destroy(el->graph_layer);
   connection_status_component_destroy(el->conn_status);
+  if (el->recency != NULL) {
+    recency_component_destroy(el->recency);
+  }
   free(el);
 }
 
@@ -244,12 +271,15 @@ void graph_element_update(GraphElement *el, DataMessage *data) {
   graph_data->count = data->sgv_count;
   memcpy(graph_data->sgvs, data->sgvs, data->sgv_count * sizeof(uint8_t));
   memcpy(graph_data->extra, data->graph_extra, data->sgv_count * sizeof(uint8_t));
-  layer_mark_dirty(el->graph_layer);
-  connection_status_component_tick(el->conn_status);
+  graph_element_tick(el);
 }
 
 void graph_element_tick(GraphElement *el) {
+  layer_mark_dirty(el->graph_layer);
   connection_status_component_tick(el->conn_status);
+  if (el->recency != NULL) {
+    recency_component_tick(el->recency);
+  }
 }
 
 void graph_element_show_request_state(GraphElement *el, RequestState state, AppMessageResult reason) {

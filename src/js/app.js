@@ -144,6 +144,7 @@ function app(Pebble, c) {
       updateEveryMinute: config.updateEveryMinute ? 1 : 0,
       timeAlign: c.ALIGN[getLayout(config).timeAlign],
       batteryLoc: c.BATTERY_LOC[getLayout(config).batteryLoc],
+      recencyLoc: c.RECENCY_LOC[getLayout(config).recencyLoc],
       pointShape: c.POINT_SHAPE[config.pointShape],
       pointRectHeight: config.pointRectHeight,
       pointWidth: config.pointWidth,

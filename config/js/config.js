@@ -34,6 +34,10 @@
       // v0.0.11: IOB from /pebble now handles both Care Portal and devicestatus IOB
       config.statusContent = 'pebbleiob';
     }
+    if (!config.customLayout.recencyLoc) {
+      // v0.0.12: new layout property
+      config.customLayout.recencyLoc = 'none';
+    }
     return config;
   }
 
@@ -282,8 +286,9 @@
 
     return {
       elements: elements,
-      batteryLoc: document.getElementById('batteryLoc').value,
-      timeAlign: document.getElementById('timeAlign').value,
+      batteryLoc: $('#batteryLoc').val(),
+      timeAlign: $('#timeAlign').val(),
+      recencyLoc: $('#recencyLoc').val(),
     };
   }
 
@@ -316,6 +321,7 @@
     [
       'batteryLoc',
       'timeAlign',
+      'recencyLoc',
     ].forEach(function(prefKey) {
       $('[name=' + prefKey + ']').val(layout[prefKey]);
     });
@@ -349,8 +355,8 @@
     // TODO use deep-equal + browserify instead of this brittle homebrew comparison
     return Object.keys(a).reduce(function(equal, key) {
       if (key === 'elements') {
-        return a['elements'].reduce(function(equal, el, i) {
-          return equal && elementsEqual(el, b['elements'][i]);
+        return equal && a['elements'].reduce(function(elEql, el, i) {
+          return elEql && elementsEqual(el, b['elements'][i]);
         }, true);
       } else {
         return equal && JSON.stringify(a[key]) === JSON.stringify(b[key]);
@@ -665,6 +671,7 @@
       '.layout-element-config input',
       '[name=timeAlign]',
       '[name=batteryLoc]',
+      '[name=recencyLoc]',
     ].join(', ')).on('change', updateSelectedLayout);
 
     $('.tabs-menu a').on('click', onTabClick);
