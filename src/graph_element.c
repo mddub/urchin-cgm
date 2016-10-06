@@ -215,7 +215,7 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
 }
 
 static void recency_size_changed(GSize size, void *context) {
-  connection_status_component_update_offset((ConnectionStatusComponent*)context, size);
+  connection_status_component_update_offset((ConnectionStatusComponent*)context, GSize(size.w, 0));
 }
 
 GraphElement* graph_element_create(Layer *parent) {

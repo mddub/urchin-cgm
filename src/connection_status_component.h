@@ -8,11 +8,9 @@ typedef struct ConnectionStatusComponent {
   TextLayer *reason_text;
   GColor background;
   bool align_bottom;
-  GSize parent_size;
+  GRect parent_bounds;
   int16_t initial_x;
   int16_t initial_y;
-  int16_t initial_text_width;
-  int16_t initial_text_height;
   bool is_showing_request_state;
 } ConnectionStatusComponent;
 

@@ -5,8 +5,7 @@
 #include "staleness.h"
 
 #define REASON_ICON_WIDTH 25
-#define TEXT_MARGIN_L 1
-#define TEXT_MARGIN_ON_OWN_LINE 3
+#define TEXT_V_MARGIN 1
 #define REQUEST_STATE_MESSAGE_DURATION_MS 5000
 #define CONN_STATUS_FONT FONT_18_BOLD
 
@@ -18,8 +17,6 @@ const uint32_t CONN_ISSUE_ICONS[] = {
   RESOURCE_ID_CONN_ISSUE_RIG,
 };
 
-static FontChoice font;
-
 ConnectionStatusComponent* connection_status_component_create(Layer *parent, int x, int y, bool align_bottom) {
   BitmapLayer *icon_layer = bitmap_layer_create(GRect(x, y, REASON_ICON_WIDTH, REASON_ICON_WIDTH));
   // draw the icon background over the graph
@@ -27,20 +24,14 @@ ConnectionStatusComponent* connection_status_component_create(Layer *parent, int
   layer_set_hidden(bitmap_layer_get_layer(icon_layer), true);
   layer_add_child(parent, bitmap_layer_get_layer(icon_layer));
 
-  int16_t initial_text_width = element_get_bounds(parent).size.w - x - REASON_ICON_WIDTH - TEXT_MARGIN_L;
-  font = get_font(CONN_STATUS_FONT);
-  int16_t initial_text_height = 2 * (font.height + font.padding_top + font.padding_bottom);
+  GRect parent_bounds = element_get_bounds(parent);
 
-  TextLayer *reason_text = text_layer_create(GRect(
-    x + REASON_ICON_WIDTH + TEXT_MARGIN_L,
-    y + (REASON_ICON_WIDTH - font.height) / 2 - font.padding_top,
-    initial_text_width,
-    initial_text_height
-  ));
-  text_layer_set_font(reason_text, fonts_get_system_font(font.key));
+  // The text appears only when there's an issue, and expands to fit content
+  TextLayer *reason_text = text_layer_create(parent_bounds);
+  text_layer_set_font(reason_text, fonts_get_system_font(get_font(CONN_STATUS_FONT).key));
   text_layer_set_background_color(reason_text, element_bg(parent));
   text_layer_set_text_color(reason_text, element_fg(parent));
-  text_layer_set_text_alignment(reason_text, GTextAlignmentLeft);
+  text_layer_set_text_alignment(reason_text, GTextAlignmentRight);
   layer_set_hidden(text_layer_get_layer(reason_text), true);
   layer_add_child(parent, text_layer_get_layer(reason_text));
 
@@ -50,11 +41,9 @@ ConnectionStatusComponent* connection_status_component_create(Layer *parent, int
   c->reason_text = reason_text;
   c->background = element_bg(parent);
   c->align_bottom = align_bottom;
-  c->parent_size = element_get_bounds(parent).size;
+  c->parent_bounds = parent_bounds;
   c->initial_x = x;
   c->initial_y = y;
-  c->initial_text_width = initial_text_width;
-  c->initial_text_height = initial_text_height;
   if (comm_is_update_in_progress()) {
     c->is_showing_request_state = true;
     connection_status_component_show_request_state(c, REQUEST_STATE_WAITING, 0);
@@ -64,33 +53,12 @@ ConnectionStatusComponent* connection_status_component_create(Layer *parent, int
   return c;
 }
 
-void position_icon_and_text(ConnectionStatusComponent *c, GPoint icon_offset, GPoint text_offset) {
+void connection_status_component_update_offset(ConnectionStatusComponent* c, GSize size) {
   GRect icon_frame = layer_get_frame(bitmap_layer_get_layer(c->icon_layer));
   layer_set_frame(
     bitmap_layer_get_layer(c->icon_layer),
-    GRect(c->initial_x + icon_offset.x, c->initial_y + icon_offset.y, icon_frame.size.w, icon_frame.size.h)
+    GRect(c->initial_x + size.w, c->initial_y + size.h, icon_frame.size.w, icon_frame.size.h)
   );
-
-  GRect text_frame = layer_get_frame(text_layer_get_layer(c->reason_text));
-  layer_set_frame(
-    text_layer_get_layer(c->reason_text),
-    GRect(c->initial_x + text_offset.x, c->initial_y + text_offset.y, text_frame.size.w, text_frame.size.h)
-  );
-
-  c->initial_text_width = c->parent_size.w - text_offset.x;
-}
-
-void connection_status_component_update_offset(ConnectionStatusComponent* c, GSize size) {
-  if (size.w == 0 && c->align_bottom) {
-    position_icon_and_text(c, GPoint(0, 0), GPoint(REASON_ICON_WIDTH + TEXT_MARGIN_L, 0));
-  } else if (size.w == 0 && !c->align_bottom) {
-    position_icon_and_text(c, GPoint(0, 0), GPoint(REASON_ICON_WIDTH + TEXT_MARGIN_L, 0));
-  } else if (c->align_bottom) {
-    FontChoice font = get_font(CONN_STATUS_FONT);
-    position_icon_and_text(c, GPoint(size.w, 0), GPoint(TEXT_MARGIN_ON_OWN_LINE, -font.height - font.padding_top));
-  } else {
-    position_icon_and_text(c, GPoint(size.w, 0), GPoint(TEXT_MARGIN_ON_OWN_LINE, size.h));
-  }
 }
 
 void connection_status_component_destroy(ConnectionStatusComponent *c) {
@@ -106,11 +74,14 @@ static void _resize_text_frame(ConnectionStatusComponent *c, int16_t width, int1
   // Make the background transparent during the resizing to avoid a flash
   text_layer_set_background_color(c->reason_text, fill_background ? c->background : GColorClear);
 
-  TextLayer *t = c->reason_text;
-  GRect frame = layer_get_frame(text_layer_get_layer(t));
   layer_set_frame(
-    text_layer_get_layer(t),
-    GRect(frame.origin.x, frame.origin.y, width, height)
+    text_layer_get_layer(c->reason_text),
+    GRect(
+      c->parent_bounds.size.w - width,
+      c->align_bottom ? c->parent_bounds.size.h - height - TEXT_V_MARGIN : -get_font(CONN_STATUS_FONT).padding_top + TEXT_V_MARGIN,
+      width,
+      height
+    )
   );
 }
 
@@ -126,7 +97,7 @@ static void _trim_text_frame(void *callback_data) {
 
 static void fix_text_frame(ConnectionStatusComponent *c) {
   // XXX: need this on Basalt, but not on Aplite or emulator
-  _resize_text_frame(c, c->initial_text_width, c->initial_text_height, false);
+  _resize_text_frame(c, c->parent_bounds.size.w, c->parent_bounds.size.h, false);
   layer_mark_dirty(text_layer_get_layer(c->reason_text));
   app_timer_register(100, _trim_text_frame, c);
 }
