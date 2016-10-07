@@ -326,9 +326,6 @@
         $('.layout-element-config [data-element=' + elName + '] [name=' + propName + ']')
           .prop('checked', elementConfig[propName]);
       });
-
-      toggleRecencySettings();
-      populateColors(layout);
     });
 
     [
@@ -342,6 +339,9 @@
 
     $('[name=recencyStyle]').removeClass('active');
     $('[name=recencyStyle][value=' + layout.recencyStyle + ']').addClass('active');
+
+    toggleRecencySettings();
+    populateColors(layout);
   }
 
   function showLayoutPreview(layout) {
@@ -501,8 +501,9 @@
   function populateColors(current) {
     c.COLOR_KEYS.forEach(function(key) {
       if (current[key]) {
+        // the first one is needed for page load, before Slate JS has bound to the event
         $('[name=' + key + ']').val(current[key]);
-        $('[name=' + key + ']').parent().find('.color-box.selectable[data-value="' + current[key] + '"]').click();
+        $('[name=' + key + ']').trigger('changeValue', [current[key]]);
       }
     });
   }
@@ -720,7 +721,7 @@
       }, 0);
     });
     c.LAYOUT_COLOR_KEYS.forEach(function(key) {
-      $('[name=' + key + ']').on('colorChanged', updateSelectedLayout);
+      $('[name=' + key + ']').on('colorChangedByClick', updateSelectedLayout);
     });
 
     $('[name=recencyLoc]').on('change', toggleRecencySettings);
