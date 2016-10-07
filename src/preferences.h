@@ -41,6 +41,16 @@ enum {
 };
 
 enum {
+  RECENCY_STYLE_SMALL_NO_CIRCLE,
+  RECENCY_STYLE_MEDIUM_PIE,
+  RECENCY_STYLE_MEDIUM_RING,
+  RECENCY_STYLE_MEDIUM_NO_CIRCLE,
+  RECENCY_STYLE_LARGE_PIE,
+  RECENCY_STYLE_LARGE_RING,
+  RECENCY_STYLE_LARGE_NO_CIRCLE,
+};
+
+enum {
   POINT_SHAPE_RECTANGLE,
   POINT_SHAPE_CIRCLE,
 };
@@ -71,6 +81,8 @@ enum {
   COLOR_KEY_POINT_HIGH,
   COLOR_KEY_POINT_LOW,
   COLOR_KEY_PLOT_LINE,
+  COLOR_KEY_RECENCY_CIRCLE,
+  COLOR_KEY_RECENCY_TEXT,
   NUM_COLOR_KEYS,
 };
 
@@ -106,8 +118,9 @@ typedef struct __attribute__((__packed__)) Preferences {
   bool update_every_minute;
   unsigned int time_align:2;
   unsigned int battery_loc:3;
-  unsigned int recency_loc:4;
   unsigned int conn_status_loc:2;
+  unsigned int recency_loc:4;
+  unsigned int recency_style:3;
   unsigned int point_shape:2;
   unsigned int point_rect_height:5;
   unsigned int point_width:5;

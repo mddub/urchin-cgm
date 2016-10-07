@@ -241,7 +241,7 @@ GraphElement* graph_element_create(Layer *parent) {
     conn_status_y = 1;
   } else if (get_prefs()->conn_status_loc == CONN_STATUS_LOC_GRAPH_BOTTOM_LEFT) {
     conn_status_align_bottom = true;
-    conn_status_y = bounds.size.h - connection_status_component_size();
+    conn_status_y = sgv_graph_height(bounds.size.h) - connection_status_component_size();
   }
   if (conn_status_y != -1) {
     el->conn_status = connection_status_component_create(parent, 0, conn_status_y, conn_status_align_bottom);
@@ -252,7 +252,7 @@ GraphElement* graph_element_create(Layer *parent) {
   if (get_prefs()->recency_loc == RECENCY_LOC_GRAPH_TOP_LEFT) {
     recency_y = 1;
   } else if (get_prefs()->recency_loc == RECENCY_LOC_GRAPH_BOTTOM_LEFT) {
-    recency_y = bounds.size.h - recency_component_size();
+    recency_y = sgv_graph_height(bounds.size.h) - recency_component_height();
   }
   if (recency_y != -1) {
     if (

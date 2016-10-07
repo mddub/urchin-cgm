@@ -2,14 +2,33 @@
 #include "fonts.h"
 #include "format.h"
 #include "layout.h"
+#include "preferences.h"
 #include "recency_component.h"
 
-// Circles can have odd diameters only
-#define CIRCLE_DIAMETER (21)
-#define RECENCY_FONT FONT_24_BOLD
 
-uint16_t recency_component_size() {
-  return CIRCLE_DIAMETER + 2 * recency_component_padding();
+RecencyStyle get_style() {
+  // NOTE: circles can have odd diameters only
+  switch(get_prefs()->recency_style) {
+    case RECENCY_STYLE_SMALL_NO_CIRCLE:
+      return (RecencyStyle) {.font = FONT_18_BOLD, .diameter = 11, .inset = 0};
+    case RECENCY_STYLE_MEDIUM_PIE:
+      return (RecencyStyle) {.font = FONT_24_BOLD, .diameter = 21, .inset = 21};
+    case RECENCY_STYLE_MEDIUM_RING:
+      return (RecencyStyle) {.font = FONT_24_BOLD, .diameter = 21, .inset = 3};
+    case RECENCY_STYLE_MEDIUM_NO_CIRCLE:
+      return (RecencyStyle) {.font = FONT_24_BOLD, .diameter = 15, .inset = 0};
+    case RECENCY_STYLE_LARGE_PIE:
+      return (RecencyStyle) {.font = FONT_28_BOLD, .diameter = 29, .inset = 29};
+    case RECENCY_STYLE_LARGE_RING:
+      return (RecencyStyle) {.font = FONT_28_BOLD, .diameter = 29, .inset = 7};
+    case RECENCY_STYLE_LARGE_NO_CIRCLE:
+    default:
+      return (RecencyStyle) {.font = FONT_28_BOLD, .diameter = 19, .inset = 0};
+  }
+}
+
+uint16_t recency_component_height() {
+  return get_style().diameter + 2 * recency_component_padding();
 }
 
 uint16_t recency_component_padding() {
@@ -21,13 +40,14 @@ static void draw_text(Layer *layer, GContext *ctx, int32_t seconds, bool has_cir
   format_recency(string, 16, seconds);
 
   GRect bounds = layer_get_bounds(layer);
-  FontChoice font = get_font(RECENCY_FONT);
+  RecencyStyle style = get_style();
+  FontChoice font = get_font(style.font);
 
   int16_t text_width;
   GTextAlignment alignment;
   int16_t content_width = graphics_text_layout_get_content_size(string, fonts_get_system_font(font.key), bounds, GTextOverflowModeWordWrap, GTextAlignmentLeft).w;
-  if (content_width <= CIRCLE_DIAMETER) {
-    text_width = CIRCLE_DIAMETER;
+  if (content_width <= style.diameter) {
+    text_width = style.diameter;
     alignment = GTextAlignmentCenter;
   } else {
     text_width = content_width;
@@ -50,10 +70,10 @@ static void draw_text(Layer *layer, GContext *ctx, int32_t seconds, bool has_cir
     graphics_fill_rect(ctx, grect_inset(text_bounds, GEdgeInsets(-1)), 0, GCornerNone);
     new_size = GSize(text_bounds.size.w + 1, text_bounds.size.h + 1);
   } else {
-    new_size = GSize(CIRCLE_DIAMETER, CIRCLE_DIAMETER);
+    new_size = GSize(style.diameter, style.diameter);
   }
 
-  graphics_context_set_text_color(ctx, props->parent_fg);
+  graphics_context_set_text_color(ctx, get_prefs()->colors[COLOR_KEY_RECENCY_TEXT]);
   graphics_draw_text(ctx, string, fonts_get_system_font(font.key), text_bounds, GTextOverflowModeWordWrap, alignment, NULL);
 
   if (props->size_changed_callback != NULL) {
@@ -66,16 +86,14 @@ static void draw_circle_and_text(Layer *layer, GContext *ctx) {
     return;
   }
 
+  RecencyStyle style = get_style();
   RecencyProps *props = layer_get_data(layer);
 
   bool align_right = props->align_right;
   GRect circle_bounds = (GRect) {
-    .origin = GPoint(align_right ? layer_get_bounds(layer).size.w - CIRCLE_DIAMETER : 0, 0),
-    .size = GSize(CIRCLE_DIAMETER, CIRCLE_DIAMETER),
+    .origin = GPoint(align_right ? layer_get_bounds(layer).size.w - style.diameter : 0, 0),
+    .size = GSize(style.diameter, style.diameter),
   };
-
-  // TODO make this configurable: pie, ring (2), disabled (0)
-  uint16_t arc_thickness = CIRCLE_DIAMETER;
 
   int32_t seconds = time(NULL) - last_data_message()->received_at + last_data_message()->recency;
   int32_t minutes = (float)seconds / 60.0f + 0.5f;
@@ -86,10 +104,10 @@ static void draw_circle_and_text(Layer *layer, GContext *ctx) {
 
   if (draw_circle) {
     graphics_context_set_fill_color(ctx, props->parent_bg);
-    graphics_fill_radial(ctx, circle_bounds, GOvalScaleModeFitCircle, CIRCLE_DIAMETER, DEG_TO_TRIGANGLE(0), DEG_TO_TRIGANGLE(360));
+    graphics_fill_radial(ctx, circle_bounds, GOvalScaleModeFitCircle, style.diameter, DEG_TO_TRIGANGLE(0), DEG_TO_TRIGANGLE(360));
 
-    graphics_context_set_fill_color(ctx, GColorLavenderIndigo);
-    graphics_fill_radial(ctx, circle_bounds, GOvalScaleModeFitCircle, arc_thickness, DEG_TO_TRIGANGLE(start), DEG_TO_TRIGANGLE(end));
+    graphics_context_set_fill_color(ctx, get_prefs()->colors[COLOR_KEY_RECENCY_CIRCLE]);
+    graphics_fill_radial(ctx, circle_bounds, GOvalScaleModeFitCircle, style.inset, DEG_TO_TRIGANGLE(start), DEG_TO_TRIGANGLE(end));
   }
 
   draw_text(layer, ctx, seconds, draw_circle, props);
@@ -103,7 +121,7 @@ RecencyComponent* recency_component_create(Layer *parent, uint16_t y, bool align
       recency_component_padding(),
       y + recency_component_padding(),
       element_get_bounds(parent).size.w - recency_component_padding() * 2,
-      CIRCLE_DIAMETER
+      get_style().diameter
     ),
     sizeof(RecencyProps)
   );

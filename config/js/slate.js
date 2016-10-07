@@ -210,6 +210,8 @@
           $color.val(value);
           $valueDisplay.css('background-color', value.replace(/^0x/, '#'));
           $item.find('.color-box-wrap').removeClass('show');
+
+          $color.trigger('colorChanged');
         })
 
       });

@@ -14,7 +14,13 @@ typedef struct RecencyProps {
   void *size_changed_context;
 } RecencyProps;
 
-uint16_t recency_component_size();
+typedef struct RecencyStyle {
+  uint8_t font;
+  uint8_t diameter;
+  uint8_t inset;
+} RecencyStyle;
+
+uint16_t recency_component_height();
 uint16_t recency_component_padding();
 RecencyComponent* recency_component_create(Layer *parent, uint16_t y, bool align_right, void (*size_changed_callback)(GSize, void*), void *size_changed_context);
 void recency_component_destroy(RecencyComponent *c);

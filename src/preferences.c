@@ -77,8 +77,9 @@ void set_prefs(DictionaryIterator *data) {
   s_prefs->update_every_minute = dict_find(data, MESSAGE_KEY_updateEveryMinute)->value->int32;
   s_prefs->time_align = dict_find(data, MESSAGE_KEY_timeAlign)->value->int32;
   s_prefs->battery_loc = dict_find(data, MESSAGE_KEY_batteryLoc)->value->int32;
-  s_prefs->recency_loc = dict_find(data, MESSAGE_KEY_recencyLoc)->value->int32;
   s_prefs->conn_status_loc = dict_find(data, MESSAGE_KEY_connStatusLoc)->value->int32;
+  s_prefs->recency_loc = dict_find(data, MESSAGE_KEY_recencyLoc)->value->int32;
+  s_prefs->recency_style = dict_find(data, MESSAGE_KEY_recencyStyle)->value->int32;
   s_prefs->point_shape = dict_find(data, MESSAGE_KEY_pointShape)->value->int32;
   s_prefs->point_rect_height = dict_find(data, MESSAGE_KEY_pointRectHeight)->value->int32;
   s_prefs->point_width = dict_find(data, MESSAGE_KEY_pointWidth)->value->int32;

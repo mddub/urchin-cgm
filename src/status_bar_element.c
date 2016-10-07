@@ -58,12 +58,12 @@ StatusBarElement* status_bar_element_create(Layer *parent) {
       lines = (bounds.size.h - text_y) / (font.height + font.padding_top);
     }
     // vertically align with the center of the first/last line of text
-    int16_t recency_y = text_y + (font.height + font.padding_top) * (lines - 1) + font.padding_top + font.height / 2 - recency_component_size() / 2;
+    int16_t recency_y = text_y + (font.height + font.padding_top) * (lines - 1) + font.padding_top + font.height / 2 - recency_component_height() / 2;
     // keep it within the bounds
     if (recency_y + recency_component_padding() < 0) {
       recency_y = -recency_component_padding();
-    } else if (recency_y + recency_component_size() > bounds.size.h) {
-      recency_y = bounds.size.h - recency_component_size() + recency_component_padding();
+    } else if (recency_y + recency_component_height() > bounds.size.h) {
+      recency_y = bounds.size.h - recency_component_height() + recency_component_padding();
     }
 
     recency = recency_component_create(parent, recency_y, true, NULL, NULL);

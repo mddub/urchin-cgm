@@ -34,14 +34,16 @@
       // v0.0.11: IOB from /pebble now handles both Care Portal and devicestatus IOB
       config.statusContent = 'pebbleiob';
     }
-    if (!config.customLayout.recencyLoc) {
-      // v0.0.12: new layout property
-      config.customLayout.recencyLoc = 'none';
+
+    // v0.0.12: new layout properties
+    if (config.customLayout) {
+      config.customLayout.connStatusLoc = config.customLayout.connStatusLoc || c.DEFAULT_CONFIG.customLayout.connStatusLoc;
+      config.customLayout.recencyLoc = config.customLayout.recencyLoc || c.DEFAULT_CONFIG.customLayout.recencyLoc;
+      config.customLayout.recencyStyle = config.customLayout.recencyStyle || c.DEFAULT_CONFIG.customLayout.recencyStyle;
+      config.customLayout.recencyColorCircle = config.customLayout.recencyColorCircle || c.DEFAULT_CONFIG.customLayout.recencyColorCircle;
+      config.customLayout.recencyColorText = config.customLayout.recencyColorText || c.DEFAULT_CONFIG.customLayout.recencyColorText;
     }
-    if (!config.customLayout.connStatusLoc) {
-      // v0.0.12: new layout property
-      config.customLayout.connStatusLoc = 'graphTopLeft';
-    }
+
     return config;
   }
 
@@ -288,13 +290,16 @@
 
     elements = assignWidths(elements);
 
-    return {
+    var out = {
       elements: elements,
       batteryLoc: $('#batteryLoc').val(),
       timeAlign: $('#timeAlign').val(),
-      recencyLoc: $('#recencyLoc').val(),
       connStatusLoc: $('#connStatusLoc').val(),
+      recencyLoc: $('#recencyLoc').val(),
+      recencyStyle: $('[name=recencyStyle].active').attr('value'),
     };
+    encodeLayoutColors(out);
+    return out;
   }
 
   function decodeLayout(layoutKey) {
@@ -321,6 +326,9 @@
         $('.layout-element-config [data-element=' + elName + '] [name=' + propName + ']')
           .prop('checked', elementConfig[propName]);
       });
+
+      toggleRecencySettings();
+      populateColors(layout);
     });
 
     [
@@ -331,6 +339,9 @@
     ].forEach(function(prefKey) {
       $('[name=' + prefKey + ']').val(layout[prefKey]);
     });
+
+    $('[name=recencyStyle]').removeClass('active');
+    $('[name=recencyStyle][value=' + layout.recencyStyle + ']').addClass('active');
   }
 
   function showLayoutPreview(layout) {
@@ -349,6 +360,7 @@
     updateLayoutUpDownEnabledState();
     reorderLayoutInputs();
     updateVisibleHistoryLength();
+    toggleRecencySettings();
   }
 
   function elementsEqual(a, b) {
@@ -385,6 +397,15 @@
       $('[name=layout][value=' + layout + ']').addClass('active');
       showLayoutPreview(layout);
     }
+  }
+
+  function toggleRecencySettings() {
+    var recencyLoc = $('[name=recencyLoc]').val();
+    var recencyStyle = $('[name=recencyStyle].active').attr('value');
+    $('.recency-settings').toggle(recencyLoc !== 'none');
+    $('.recency-color-circle').toggle(
+      ['smallNoCircle', 'mediumNoCircle', 'largeNoCircle'].indexOf(recencyStyle) === -1
+    );
   }
 
   function initializeStatusOptions(current) {
@@ -479,12 +500,23 @@
 
   function populateColors(current) {
     c.COLOR_KEYS.forEach(function(key) {
-      $('[name=' + key + ']').val(current[key]);
+      if (current[key]) {
+        $('[name=' + key + ']').val(current[key]);
+        $('[name=' + key + ']').parent().find('.color-box.selectable[data-value="' + current[key] + '"]').click();
+      }
     });
   }
 
-  function encodeColors(out) {
-    c.COLOR_KEYS.forEach(function(key) {
+  function encodeNonLayoutColors(out) {
+    c.COLOR_KEYS.filter(function(key) {
+      return c.LAYOUT_COLOR_KEYS.indexOf(key) === -1;
+    }).forEach(function(key) {
+      out[key] = $('[name=' + key + ']').val();
+    });
+  }
+
+  function encodeLayoutColors(out) {
+    c.LAYOUT_COLOR_KEYS.forEach(function(key) {
       out[key] = $('[name=' + key + ']').val();
     });
   }
@@ -568,7 +600,7 @@
     };
     encodeSliders(out, MAIN_SLIDER_KEYS);
     encodePointConfig(out);
-    encodeColors(out);
+    encodeNonLayoutColors(out);
     return out;
   }
 
@@ -680,6 +712,19 @@
       '[name=recencyLoc]',
       '[name=connStatusLoc]',
     ].join(', ')).on('change', updateSelectedLayout);
+    $('[name=recencyStyle]').on('click', function() {
+      // wait until this option has the "active" class
+      setTimeout(function() {
+        updateSelectedLayout();
+        toggleRecencySettings();
+      }, 0);
+    });
+    c.LAYOUT_COLOR_KEYS.forEach(function(key) {
+      $('[name=' + key + ']').on('colorChanged', updateSelectedLayout);
+    });
+
+    $('[name=recencyLoc]').on('change', toggleRecencySettings);
+    toggleRecencySettings();
 
     $('.tabs-menu a').on('click', onTabClick);
 

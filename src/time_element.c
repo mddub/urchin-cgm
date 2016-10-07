@@ -49,10 +49,10 @@ static RecencyComponent *create_recency_component(Layer *parent, unsigned int re
     y = 0;
     align_right = true;
   } else if (recency_loc == RECENCY_LOC_TIME_BOTTOM_LEFT) {
-    y = bounds.size.h - recency_component_size();
+    y = bounds.size.h - recency_component_height();
     align_right = false;
   } else if (recency_loc == RECENCY_LOC_TIME_BOTTOM_RIGHT) {
-    y = bounds.size.h - recency_component_size();
+    y = bounds.size.h - recency_component_height();
     align_right = true;
   }
 
