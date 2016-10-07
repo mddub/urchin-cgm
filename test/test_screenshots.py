@@ -53,7 +53,7 @@ def default_entries(direction, count=50):
         in zip(default_sgv_series(count), default_dates(count))
     ]
 
-def some_real_life_entries(*args):
+def some_real_life_entries(self=None, minutes_old=0):
     sgvs = [190, 188, 180, 184, 184, 177, 174, 163, 152, 141, 134, 127, 124, 121, 117, 109, 103, 97, 94, 88, 79, 79, 75, 79, 84, 87, 88, 91, 91, 91, 94, 99, 102, 107, 106, 108, 107, 108, 115, 111, 114, 113, 115, 118, 120, 119, 120, 122, 123, 126, 122, 125, 125, 126, 125, 122, 122, 122, 119, 118, 118, 118, 117, 116, 115, 114, 114, 115, 114, 113, 114, 115, 111, 114, 115, 114, 114, 116, 117, 117, 118, 119, 121, 124, 125, 128, 126, 128, 131, 133, 135, 136, 135, 134, 132, 130, 132, 130, 129, 131, 129, 128, 128, 127, 125, 124, 125, 126]
     return [
         {
@@ -64,7 +64,7 @@ def some_real_life_entries(*args):
             'trend': 4,
         }
         for sgv, date
-        in zip(sgvs, default_dates(len(sgvs)))
+        in zip(sgvs, default_dates(len(sgvs), offset=-60 * minutes_old))
     ]
 
 def sgvs_from_array(arr):
@@ -72,11 +72,6 @@ def sgvs_from_array(arr):
         {'date': date, 'sgv': sgv, 'direction': 'Flat'}
         for date, sgv in zip(default_dates(len(arr)), arr)
     ]
-
-def real_sgvs_minutes_old(minutes_old):
-    sgvs = some_real_life_entries()
-    sgvs[0]['date'] = int((datetime.now() - timedelta(minutes=minutes_old)).strftime('%s')) * 1000
-    return sgvs
 
 def some_fake_temp_basals(*args):
     rates = [2, 1, 0, 0.1, 0.4, 0, 0.5, 1.5, 0.8, 0]
@@ -146,17 +141,11 @@ class TestSGVsAtBoundsAndGridlines(ScreenshotTest):
                 s['sgv'] = BASE_CONFIG['bottomOfRange']
         return sgvs
 
+
 class TestStaleServerData(ScreenshotTest):
-    """Test that when server data is stale, an icon appears."""
+    """Test that when server data is stale, an icon appears, and no trend/delta is shown in the sidebar."""
     def sgvs(self):
         return default_entries('SingleDown')[7:]
-
-
-class TestNotRecentButNotYetStaleSidebar(ScreenshotTest):
-    """Test that trend and delta are not shown in the sidebar when data is not recent."""
-    config = {'layout': 'a'}
-    def sgvs(self):
-        return default_entries('SingleDown')[2:]
 
 
 class TestNotRecentButNotYetStaleBGRow(ScreenshotTest):
@@ -231,6 +220,8 @@ class TestBlackBackground(ScreenshotTest):
 
         for el in layout['elements']:
             el['black'] = True
+        layout['recencyColorText'] = '0x00FFFF'
+
         return {
             'layout': 'custom',
             'customLayout': layout,
@@ -266,7 +257,7 @@ def layout_test_config(config):
 
 class TestLayoutA(ScreenshotTest):
     """Test layout A."""
-    sgvs = partial(real_sgvs_minutes_old, 3)
+    sgvs = partial(some_real_life_entries, minutes_old=3)
     config = layout_test_config({
         'layout': 'a',
         'statusContent': 'customtext',
@@ -276,7 +267,7 @@ class TestLayoutA(ScreenshotTest):
 
 class TestLayoutB(ScreenshotTest):
     """Test layout B."""
-    sgvs = partial(real_sgvs_minutes_old, 3)
+    sgvs = partial(some_real_life_entries, minutes_old=3)
     config = layout_test_config({
         'layout': 'b',
         'statusContent': 'customtext',
@@ -290,7 +281,7 @@ class TestLayoutB(ScreenshotTest):
 
 class TestLayoutC(ScreenshotTest):
     """Test layout C."""
-    sgvs = partial(real_sgvs_minutes_old, 3)
+    sgvs = partial(some_real_life_entries, minutes_old=3)
     config = layout_test_config({
         'layout': 'c',
         'statusContent': 'customtext',
@@ -301,7 +292,7 @@ class TestLayoutC(ScreenshotTest):
 
 class TestLayoutD(ScreenshotTest):
     """Test layout D."""
-    sgvs = partial(real_sgvs_minutes_old, 3)
+    sgvs = partial(some_real_life_entries, minutes_old=3)
     config = layout_test_config({
         'layout': 'd',
         'pointShape': 'circle',
@@ -312,7 +303,7 @@ class TestLayoutD(ScreenshotTest):
 
 class TestLayoutE(ScreenshotTest):
     """Test layout E."""
-    sgvs = partial(real_sgvs_minutes_old, 3)
+    sgvs = partial(some_real_life_entries, minutes_old=3)
     config = layout_test_config({
         'layout': 'e',
         'pointWidth': 2,
@@ -654,7 +645,7 @@ class TestStatusRecencyFormatBracketRight(ScreenshotTest):
     devicestatus = uploader_battery_devicestatus(min_ago=12)
 
 class TestRecencyLargePieGraphBottomLeft(ScreenshotTest):
-    sgvs = partial(real_sgvs_minutes_old, 2)
+    sgvs = partial(some_real_life_entries, minutes_old=2)
 
     @property
     def config(self):
@@ -671,7 +662,7 @@ class TestRecencyLargePieGraphBottomLeft(ScreenshotTest):
         }
 
 class TestRecencyMediumRingTimeBottomRight(ScreenshotTest):
-    sgvs = partial(real_sgvs_minutes_old, 1)
+    sgvs = partial(some_real_life_entries, minutes_old=1)
 
     @property
     def config(self):
@@ -691,7 +682,7 @@ class TestRecencyMediumRingTimeBottomRight(ScreenshotTest):
         }
 
 class TestRecencyMediumPieStatusBottomRight(ScreenshotTest):
-    sgvs = partial(real_sgvs_minutes_old, 3)
+    sgvs = partial(some_real_life_entries, minutes_old=3)
 
     @property
     def config(self):
@@ -712,7 +703,7 @@ class TestRecencyMediumPieStatusBottomRight(ScreenshotTest):
         }
 
 class TestRecencySmallNoCircleStatusTopRight(ScreenshotTest):
-    sgvs = partial(real_sgvs_minutes_old, 4)
+    sgvs = partial(some_real_life_entries, minutes_old=4)
 
     @property
     def config(self):
@@ -732,7 +723,7 @@ class TestRecencySmallNoCircleStatusTopRight(ScreenshotTest):
         }
 
 class TestRecencyLongTextLeftAligned(ScreenshotTest):
-    sgvs = partial(real_sgvs_minutes_old, 87)
+    sgvs = partial(some_real_life_entries, minutes_old=87)
 
     @property
     def config(self):
@@ -752,7 +743,7 @@ class TestRecencyLongTextLeftAligned(ScreenshotTest):
         }
 
 class TestRecencyLongTextRightAligned(ScreenshotTest):
-    sgvs = partial(real_sgvs_minutes_old, 87)
+    sgvs = partial(some_real_life_entries, minutes_old=87)
 
     @property
     def config(self):
@@ -770,7 +761,7 @@ class TestRecencyLongTextRightAligned(ScreenshotTest):
         }
 
 class TestRecencyStatusBarVerticallyCentered(ScreenshotTest):
-    sgvs = partial(real_sgvs_minutes_old, 1)
+    sgvs = partial(some_real_life_entries, minutes_old=1)
 
     @property
     def config(self):
@@ -790,7 +781,7 @@ class TestRecencyStatusBarVerticallyCentered(ScreenshotTest):
 
 class TestRecencySuperOld(ScreenshotTest):
     def sgvs(self):
-        return [real_sgvs_minutes_old(999)[0]]
+        return [some_real_life_entries(minutes_old=999)[0]]
 
     @property
     def config(self):
@@ -808,7 +799,7 @@ class TestRecencySuperOld(ScreenshotTest):
         }
 
 class TestRecencyConnStatusBottomLeftWithBasal(ScreenshotTest):
-    sgvs = partial(real_sgvs_minutes_old, 9)
+    sgvs = partial(some_real_life_entries, minutes_old=9)
 
     @property
     def config(self):
@@ -827,7 +818,7 @@ class TestRecencyConnStatusBottomLeftWithBasal(ScreenshotTest):
         }
 
 class TestNiceLayout(ScreenshotTest):
-    sgvs = partial(real_sgvs_minutes_old, 3)
+    sgvs = partial(some_real_life_entries, minutes_old=3)
 
     @property
     def config(self):
