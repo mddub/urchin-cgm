@@ -628,3 +628,181 @@ class TestStatusRecencyFormatBracketRight(ScreenshotTest):
     )
     sgvs = some_real_life_entries
     devicestatus = uploader_battery_devicestatus(min_ago=12)
+
+def sgvs_minutes_old(minutes_old):
+    sgvs = some_real_life_entries()
+    sgvs[0]['date'] = int((datetime.now() - timedelta(minutes=minutes_old)).strftime('%s')) * 1000
+    return sgvs
+
+class TestRecencyLargePieGraphBottomLeft(ScreenshotTest):
+    sgvs = partial(sgvs_minutes_old, 2)
+
+    @property
+    def config(self):
+        layout = copy.deepcopy(CONSTANTS['LAYOUTS']['d'])
+        layout.update({
+          'recencyLoc': 'graphBottomLeft',
+          'recencyStyle': 'largePie',
+          'recencyColorCircle': '0x00FFFF',
+          'recencyColorText': '0x5555FF',
+        })
+        return {
+            'layout': 'custom',
+            'customLayout': layout,
+        }
+
+class TestRecencyMediumRingTimeBottomRight(ScreenshotTest):
+    sgvs = partial(sgvs_minutes_old, 1)
+
+    @property
+    def config(self):
+        layout = copy.deepcopy(CONSTANTS['LAYOUTS']['d'])
+        mutate_element(layout, 'TIME_AREA_ELEMENT', {'height': 30})
+        layout.update({
+          'recencyLoc': 'timeBottomRight',
+          'recencyStyle': 'mediumRing',
+          'recencyColorCircle': '0x000055',
+          'recencyColorText': '0x005500',
+        })
+        return {
+            'layout': 'custom',
+            'customLayout': layout,
+            'statusContent': 'customtext',
+            'statusText': 'a b c d e f g h i j',
+        }
+
+class TestRecencyMediumPieStatusBottomRight(ScreenshotTest):
+    sgvs = partial(sgvs_minutes_old, 3)
+
+    @property
+    def config(self):
+        layout = copy.deepcopy(CONSTANTS['LAYOUTS']['a'])
+        mutate_element(layout, 'STATUS_BAR_ELEMENT', {'black': True, 'height': 27})
+        layout.update({
+          'batteryLoc': 'none',
+          'recencyLoc': 'statusBottomRight',
+          'recencyStyle': 'mediumPie',
+          'recencyColorCircle': '0x5555FF',
+          'recencyColorText': '0xFF0000',
+        })
+        return {
+            'layout': 'custom',
+            'customLayout': layout,
+            'statusContent': 'customtext',
+            'statusText': 'a b c d e f g h i j\nk l m n o p q r s'
+        }
+
+class TestRecencySmallNoCircleStatusTopRight(ScreenshotTest):
+    sgvs = partial(sgvs_minutes_old, 4)
+
+    @property
+    def config(self):
+        layout = copy.deepcopy(CONSTANTS['LAYOUTS']['a'])
+        mutate_element(layout, 'STATUS_BAR_ELEMENT', {'black': True, 'height': 27})
+        layout.update({
+          'batteryLoc': 'none',
+          'recencyLoc': 'statusTopRight',
+          'recencyStyle': 'smallNoCircle',
+          'recencyColorText': '0xFFFFFF',
+        })
+        return {
+            'layout': 'custom',
+            'customLayout': layout,
+            'statusContent': 'customtext',
+            'statusText': 'a b c d e f g h i j\nk l m n o p q r s'
+        }
+
+class TestRecencyLongTextLeftAligned(ScreenshotTest):
+    sgvs = partial(sgvs_minutes_old, 87)
+
+    @property
+    def config(self):
+        layout = copy.deepcopy(CONSTANTS['LAYOUTS']['d'])
+        mutate_element(layout, 'TIME_AREA_ELEMENT', {'height': 30})
+        layout.update({
+          'batteryLoc': 'timeTopLeft',
+          'timeAlign': 'right',
+          'recencyLoc': 'timeBottomLeft',
+          'recencyStyle': 'mediumRing',
+          'recencyColorCircle': '0x000055',
+          'recencyColorText': '0x00AA00',
+        })
+        return {
+            'layout': 'custom',
+            'customLayout': layout,
+        }
+
+class TestRecencyLongTextRightAligned(ScreenshotTest):
+    sgvs = partial(sgvs_minutes_old, 87)
+
+    @property
+    def config(self):
+        layout = copy.deepcopy(CONSTANTS['LAYOUTS']['d'])
+        mutate_element(layout, 'TIME_AREA_ELEMENT', {'height': 30})
+        layout.update({
+          'batteryLoc': 'timeBottomRight',
+          'recencyLoc': 'timeTopRight',
+          'recencyStyle': 'largeRing',
+          'recencyColorText': '0xFF0000',
+        })
+        return {
+            'layout': 'custom',
+            'customLayout': layout,
+        }
+
+class TestRecencyStatusBarVerticallyCentered(ScreenshotTest):
+    sgvs = partial(sgvs_minutes_old, 1)
+
+    @property
+    def config(self):
+        layout = copy.deepcopy(CONSTANTS['LAYOUTS']['d'])
+        mutate_element(layout, 'BG_ROW_ELEMENT', {'black': True})
+        mutate_element(layout, 'STATUS_BAR_ELEMENT', {'enabled': True, 'height': 15})
+        layout.update({
+          'recencyLoc': 'statusTopRight',
+          'recencyStyle': 'mediumPie',
+        })
+        return {
+            'layout': 'custom',
+            'customLayout': layout,
+            'statusContent': 'customtext',
+            'statusText': 'a b c d e f g h i'
+        }
+
+class TestRecencySuperOld(ScreenshotTest):
+    def sgvs(self):
+        return [sgvs_minutes_old(999)[0]]
+
+    @property
+    def config(self):
+        layout = copy.deepcopy(CONSTANTS['LAYOUTS']['d'])
+        layout.update({
+          'connStatusLoc': 'graphBottomLeft',
+          'recencyLoc': 'graphBottomLeft',
+          'recencyStyle': 'largePie',
+          'recencyColorCircle': '0x00FFFF',
+          'recencyColorText': '0x5555FF',
+        })
+        return {
+            'layout': 'custom',
+            'customLayout': layout,
+        }
+
+class TestRecencyConnStatusBottomLeftWithBasal(ScreenshotTest):
+    sgvs = partial(sgvs_minutes_old, 9)
+
+    @property
+    def config(self):
+        layout = copy.deepcopy(CONSTANTS['LAYOUTS']['d'])
+        layout.update({
+          'connStatusLoc': 'graphBottomLeft',
+          'recencyLoc': 'graphBottomLeft',
+          'recencyStyle': 'mediumNoCircle',
+          'recencyColorText': '0x55AA00',
+        })
+        return {
+            'layout': 'custom',
+            'customLayout': layout,
+            'basalGraph': True,
+            'basalHeight': 20,
+        }
