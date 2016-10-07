@@ -63,6 +63,48 @@
   background: url(../images/layouts.png) -720px 0;
 }
 
+.recency-style-option {
+  display: inline-block;
+  vertical-align: middle;
+  height: 29px;
+}
+
+.active .recency-style-option {
+  filter: invert(100%);
+  -webkit-filter: invert(100%);
+  -moz-filter: invert(100%);
+}
+
+.recency-style-small-no-circle {
+  width: 6px;
+  background: url(../images/recency-styles.png) 0 0;
+}
+
+.recency-style-medium-pie {
+  width: 23px;
+  background: url(../images/recency-styles.png) -6px 0;
+}
+.recency-style-medium-ring {
+  width: 23px;
+  background: url(../images/recency-styles.png) -29px 0;
+}
+.recency-style-medium-no-circle {
+  width: 8px;
+  background: url(../images/recency-styles.png) -52px 0;
+}
+.recency-style-large-pie {
+  width: 29px;
+  background: url(../images/recency-styles.png) -60px 0;
+}
+.recency-style-large-ring {
+  width: 29px;
+  background: url(../images/recency-styles.png) -89px 0;
+}
+.recency-style-large-no-circle {
+  width: 9px;
+  background: url(../images/recency-styles.png) -118px 0;
+}
+
 .point-style-option {
   display: inline-block;
   vertical-align: middle;

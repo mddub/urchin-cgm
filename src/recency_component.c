@@ -12,9 +12,9 @@ RecencyStyle get_style() {
     case RECENCY_STYLE_SMALL_NO_CIRCLE:
       return (RecencyStyle) {.font = FONT_18_BOLD, .diameter = 11, .inset = 0};
     case RECENCY_STYLE_MEDIUM_PIE:
-      return (RecencyStyle) {.font = FONT_24_BOLD, .diameter = 21, .inset = 21};
+      return (RecencyStyle) {.font = FONT_24_BOLD, .diameter = 23, .inset = 23};
     case RECENCY_STYLE_MEDIUM_RING:
-      return (RecencyStyle) {.font = FONT_24_BOLD, .diameter = 21, .inset = 3};
+      return (RecencyStyle) {.font = FONT_24_BOLD, .diameter = 23, .inset = 3};
     case RECENCY_STYLE_MEDIUM_NO_CIRCLE:
       return (RecencyStyle) {.font = FONT_24_BOLD, .diameter = 15, .inset = 0};
     case RECENCY_STYLE_LARGE_PIE:
