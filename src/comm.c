@@ -168,7 +168,10 @@ static void init_app_message() {
   app_message_register_inbox_received(in_received_handler);
   app_message_register_inbox_dropped(in_dropped_handler);
   app_message_register_outbox_failed(out_failed_handler);
-  app_message_open(CONTENT_SIZE, APP_MESSAGE_OUTBOX_SIZE_MINIMUM);
+  AppMessageResult open_result = app_message_open(CONTENT_SIZE, 8);
+  if (open_result != APP_MSG_OK) {
+    request_state_callback(REQUEST_STATE_OPEN_FAILED, open_result);
+  }
 }
 
 void init_comm(

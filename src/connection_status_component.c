@@ -161,6 +161,7 @@ void connection_status_component_show_request_state(ConnectionStatusComponent *c
       case REQUEST_STATE_IN_DROPPED:        strcpy(state_text, "Msg dropped");    break;
       case REQUEST_STATE_BEGIN_FAILED:      strcpy(state_text, "Begin failed");   break;
       case REQUEST_STATE_SEND_FAILED:       strcpy(state_text, "Send failed");    break;
+      case REQUEST_STATE_OPEN_FAILED:       strcpy(state_text, "Open failed");    break;
       default:                              strcpy(state_text, "Msg error");      break;
     }
 
