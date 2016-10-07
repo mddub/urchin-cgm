@@ -336,6 +336,7 @@ class BaseBatteryLocInStatusTest(ScreenshotTest):
     def config(self):
         layout = copy.deepcopy(CONSTANTS['LAYOUTS']['e'])
         layout['batteryLoc'] = 'statusRight'
+        layout['recencyLoc'] = 'none'
         mutate_element(layout, 'STATUS_BAR_ELEMENT', self.status_props)
         return {
             'layout': 'custom',
