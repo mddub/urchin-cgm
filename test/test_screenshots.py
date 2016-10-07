@@ -54,7 +54,7 @@ def default_entries(direction, count=50):
     ]
 
 def some_real_life_entries(*args):
-    sgvs = [190, 188, 180, 184, 184, 177, 174, 163, 152, 141, 134, 127, 124, 121, 117, 109, 103, 97, 94, 88, 79, 79, 75, 79, 84, 87, 88, 91, 91, 91, 94, 99, 102, 107, 106, 108, 107, 108, 115, 111, 114, 113, 115, 118, 120, 119, 120, 122, 123, 126, 122, 125, 125, 126, 125, 122, 122, 122, 119, 118, 118, 118, 117, 116, 115, 114, 114, 115, 114, 113, 114, 115, 111, 114, 115, 114, 114, 116, 117, 117, 118, 119, 121, 124, 125, 128, 126, 128, 131, 133, 135, 136, 135, 134, 132, 130]
+    sgvs = [190, 188, 180, 184, 184, 177, 174, 163, 152, 141, 134, 127, 124, 121, 117, 109, 103, 97, 94, 88, 79, 79, 75, 79, 84, 87, 88, 91, 91, 91, 94, 99, 102, 107, 106, 108, 107, 108, 115, 111, 114, 113, 115, 118, 120, 119, 120, 122, 123, 126, 122, 125, 125, 126, 125, 122, 122, 122, 119, 118, 118, 118, 117, 116, 115, 114, 114, 115, 114, 113, 114, 115, 111, 114, 115, 114, 114, 116, 117, 117, 118, 119, 121, 124, 125, 128, 126, 128, 131, 133, 135, 136, 135, 134, 132, 130, 132, 130, 129, 131, 129, 128, 128, 127, 125, 124, 125, 126]
     return [
         {
             'type': 'sgv',
@@ -72,6 +72,11 @@ def sgvs_from_array(arr):
         {'date': date, 'sgv': sgv, 'direction': 'Flat'}
         for date, sgv in zip(default_dates(len(arr)), arr)
     ]
+
+def real_sgvs_minutes_old(minutes_old):
+    sgvs = some_real_life_entries()
+    sgvs[0]['date'] = int((datetime.now() - timedelta(minutes=minutes_old)).strftime('%s')) * 1000
+    return sgvs
 
 def some_fake_temp_basals(*args):
     rates = [2, 1, 0, 0.1, 0.4, 0, 0.5, 1.5, 0.8, 0]
@@ -250,63 +255,82 @@ class TestStatusTextTooLong(ScreenshotTest):
     sgvs = partial(default_entries, 'Flat')
 
 
+def layout_test_config(config):
+    return dict({
+        'pointColorLow': '0xFF0000',
+        'pointColorHigh': '0xFFAA00',
+        'pointColorDefault': '0x0000FF',
+        'topOfRange': 160,
+        'bottomOfRange': 80,
+    }, **config)
+
 class TestLayoutA(ScreenshotTest):
     """Test layout A."""
-    sgvs = some_real_life_entries
-    config = {
+    sgvs = partial(real_sgvs_minutes_old, 3)
+    config = layout_test_config({
         'layout': 'a',
         'statusContent': 'customtext',
-        'statusText': 'Cln 179 186 187',
-    }
+        'statusText': '3.1 U 16 g',
+    })
 
 
 class TestLayoutB(ScreenshotTest):
     """Test layout B."""
-    sgvs = some_real_life_entries
-    config = {
+    sgvs = partial(real_sgvs_minutes_old, 3)
+    config = layout_test_config({
         'layout': 'b',
         'statusContent': 'customtext',
         'statusText': 'Cln 179 186 187',
-    }
+        'pointShape': 'rectangle',
+        'pointColorLow': '0xFF00AA',
+        'pointColorHigh': '0x0000AA',
+        'pointColorDefault': '0x00AAAA',
+    })
 
 
 class TestLayoutC(ScreenshotTest):
     """Test layout C."""
-    sgvs = some_real_life_entries
-    config = {
+    sgvs = partial(real_sgvs_minutes_old, 3)
+    config = layout_test_config({
         'layout': 'c',
         'statusContent': 'customtext',
-        'statusText': 'Cln 179 186 187',
-    }
+        'statusText': 'Sat Nov 5',
+        'batteryAsNumber': True,
+    })
 
 
 class TestLayoutD(ScreenshotTest):
     """Test layout D."""
-    sgvs = some_real_life_entries
-    config = {
+    sgvs = partial(real_sgvs_minutes_old, 3)
+    config = layout_test_config({
         'layout': 'd',
-    }
+        'pointShape': 'circle',
+        'pointWidth': 5,
+        'pointRightMargin': 2,
+    })
 
 
 class TestLayoutE(ScreenshotTest):
     """Test layout E."""
-    sgvs = some_real_life_entries
-    config = {
+    sgvs = partial(real_sgvs_minutes_old, 3)
+    config = layout_test_config({
         'layout': 'e',
+        'pointWidth': 2,
+        'pointMargin': -1,
         'statusContent': 'customtext',
-        'statusText': 'More space for extra long text. Monitoring a DIY artificial pancreas, perhaps?',
-    }
+        'statusText': 'Extra long text. This example uses point width and margin of 2/-1 to view 9hr.',
+    })
 
 
 class TestLayoutCustom(ScreenshotTest):
     """Test the default custom layout."""
     sgvs = some_real_life_entries
-    config = {
+    config = layout_test_config({
         'layout': 'custom',
         'customLayout': BASE_CONFIG['customLayout'],
         'statusContent': 'customtext',
         'statusText': 'You are marvelous. The gods wait to delight in you.'
-    }
+    })
 
 
 class BaseBatteryLocInStatusTest(ScreenshotTest):
@@ -629,13 +653,8 @@ class TestStatusRecencyFormatBracketRight(ScreenshotTest):
     sgvs = some_real_life_entries
     devicestatus = uploader_battery_devicestatus(min_ago=12)
 
-def sgvs_minutes_old(minutes_old):
-    sgvs = some_real_life_entries()
-    sgvs[0]['date'] = int((datetime.now() - timedelta(minutes=minutes_old)).strftime('%s')) * 1000
-    return sgvs
-
 class TestRecencyLargePieGraphBottomLeft(ScreenshotTest):
-    sgvs = partial(sgvs_minutes_old, 2)
+    sgvs = partial(real_sgvs_minutes_old, 2)
 
     @property
     def config(self):
@@ -652,7 +671,7 @@ class TestRecencyLargePieGraphBottomLeft(ScreenshotTest):
         }
 
 class TestRecencyMediumRingTimeBottomRight(ScreenshotTest):
-    sgvs = partial(sgvs_minutes_old, 1)
+    sgvs = partial(real_sgvs_minutes_old, 1)
 
     @property
     def config(self):
@@ -672,7 +691,7 @@ class TestRecencyMediumRingTimeBottomRight(ScreenshotTest):
         }
 
 class TestRecencyMediumPieStatusBottomRight(ScreenshotTest):
-    sgvs = partial(sgvs_minutes_old, 3)
+    sgvs = partial(real_sgvs_minutes_old, 3)
 
     @property
     def config(self):
@@ -693,7 +712,7 @@ class TestRecencyMediumPieStatusBottomRight(ScreenshotTest):
         }
 
 class TestRecencySmallNoCircleStatusTopRight(ScreenshotTest):
-    sgvs = partial(sgvs_minutes_old, 4)
+    sgvs = partial(real_sgvs_minutes_old, 4)
 
     @property
     def config(self):
@@ -713,7 +732,7 @@ class TestRecencySmallNoCircleStatusTopRight(ScreenshotTest):
         }
 
 class TestRecencyLongTextLeftAligned(ScreenshotTest):
-    sgvs = partial(sgvs_minutes_old, 87)
+    sgvs = partial(real_sgvs_minutes_old, 87)
 
     @property
     def config(self):
@@ -733,7 +752,7 @@ class TestRecencyLongTextLeftAligned(ScreenshotTest):
         }
 
 class TestRecencyLongTextRightAligned(ScreenshotTest):
-    sgvs = partial(sgvs_minutes_old, 87)
+    sgvs = partial(real_sgvs_minutes_old, 87)
 
     @property
     def config(self):
@@ -751,7 +770,7 @@ class TestRecencyLongTextRightAligned(ScreenshotTest):
         }
 
 class TestRecencyStatusBarVerticallyCentered(ScreenshotTest):
-    sgvs = partial(sgvs_minutes_old, 1)
+    sgvs = partial(real_sgvs_minutes_old, 1)
 
     @property
     def config(self):
@@ -771,7 +790,7 @@ class TestRecencyStatusBarVerticallyCentered(ScreenshotTest):
 
 class TestRecencySuperOld(ScreenshotTest):
     def sgvs(self):
-        return [sgvs_minutes_old(999)[0]]
+        return [real_sgvs_minutes_old(999)[0]]
 
     @property
     def config(self):
@@ -789,7 +808,7 @@ class TestRecencySuperOld(ScreenshotTest):
         }
 
 class TestRecencyConnStatusBottomLeftWithBasal(ScreenshotTest):
-    sgvs = partial(sgvs_minutes_old, 9)
+    sgvs = partial(real_sgvs_minutes_old, 9)
 
     @property
     def config(self):
@@ -805,4 +824,39 @@ class TestRecencyConnStatusBottomLeftWithBasal(ScreenshotTest):
             'customLayout': layout,
             'basalGraph': True,
             'basalHeight': 20,
+        }
+
+class TestNiceLayout(ScreenshotTest):
+    sgvs = partial(real_sgvs_minutes_old, 3)
+
+    @property
+    def config(self):
+        layout = {
+            'elements': [
+                {'el': 3, 'enabled': True, 'width': 100, 'height': 23, 'black': False, 'bottom': True, 'right': False},
+                {'el': 0, 'enabled': True, 'width': 100, 'height': 0, 'black': False, 'bottom': True, 'right': False},
+                {'el': 1, 'enabled': False, 'width': 100, 'height': 0, 'black': False, 'bottom': False, 'right': False},
+                {'el': 2, 'enabled': True, 'width': 100, 'height': 16, 'black': True, 'bottom': False, 'right': False},
+                {'el': 4, 'enabled': True, 'width': 100, 'height': 23, 'black': False, 'bottom': False, 'right': False}
+            ],
+            'batteryLoc': 'timeTopRight',
+            'timeAlign': 'left',
+            'connStatusLoc': 'graphBottomLeft',
+            'recencyLoc': 'statusTopRight',
+            'recencyStyle': 'mediumPie',
+            'recencyColorCircle': '0xAA55FF',
+            'recencyColorText': '0xFFFFFF',
+        }
+        return {
+            'layout': 'custom',
+            'customLayout': layout,
+            'topOfGraph': 251,
+            'topOfRange': 160,
+            'bottomOfRange': 80,
+            'bottomOfGraph': 51,
+            'pointColorLow': '0xFF0000',
+            'pointColorHigh': '0xFFAA00',
+            'pointColorDefault': '0x0000FF',
+            'statusContent': 'customtext',
+            'statusText': '3.1 U 16 g',
         }

@@ -75,7 +75,7 @@
          "batteryLoc" : "statusRight",
          "timeAlign" : "center",
          "connStatusLoc" : "graphTopLeft",
-         "recencyLoc" : "timeBottomRight",
+         "recencyLoc" : "graphTopLeft",
          "recencyStyle" : "mediumRing",
          "recencyColorCircle" : "0x00AAAA",
          "recencyColorText" : "0x000000"
@@ -93,7 +93,7 @@
          "connStatusLoc" : "graphTopLeft",
          "recencyLoc" : "timeTopRight",
          "recencyStyle" : "mediumRing",
-         "recencyColorCircle" : "0x55AA55",
+         "recencyColorCircle" : "0x00AAAA",
          "recencyColorText" : "0x000000"
       },
       "c": {
@@ -123,8 +123,8 @@
          "batteryLoc" : "timeTopRight",
          "timeAlign" : "left",
          "connStatusLoc" : "graphTopLeft",
-         "recencyLoc" : "timeBottomLeft",
-         "recencyStyle" : "mediumRing",
+         "recencyLoc" : "timeBottomRight",
+         "recencyStyle" : "largePie",
          "recencyColorCircle" : "0x00FF00",
          "recencyColorText" : "0x000000"
       },
@@ -139,7 +139,7 @@
          "batteryLoc" : "timeBottomLeft",
          "timeAlign" : "right",
          "connStatusLoc" : "graphTopLeft",
-         "recencyLoc" : "none",
+         "recencyLoc" : "statusBottomRight",
          "recencyStyle" : "mediumRing",
          "recencyColorCircle" : "0x00AA55",
          "recencyColorText" : "0x005500"
