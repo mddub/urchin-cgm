@@ -19,7 +19,8 @@ run () {
   python "$TEST_DIR/set_config.py" --test-class $@
 
   # Requires watchdog
-  watchmedo shell-command --patterns="**/test_screenshots.py" --recursive --command="python $TEST_DIR/set_config.py --test-class $@" $TEST_DIR
+  COMMAND="python $TEST_DIR/set_config.py --test-class $@"
+  watchmedo shell-command --patterns="**/test_screenshots.py" --recursive --command="$COMMAND" $TEST_DIR
 
   kill -9 $PID
 

@@ -36,6 +36,13 @@ def pebble_install_and_run(platforms):
     # Give the watchface time to show up
     time.sleep(10)
 
+def pebble_reinstall(platforms):
+    _call('pebble kill')
+    _call('pebble wipe')
+    for platform in platforms:
+        _call('pebble install --emulator {}'.format(platform))
+    time.sleep(10)
+
 def set_config(config, platforms):
     for platform in platforms:
         emu = ManagedEmulatorTransport(platform)
@@ -113,14 +120,19 @@ class ScreenshotTest(object):
 
     @classmethod
     def ensure_environment(cls):
-        if hasattr(ScreenshotTest, '_loaded_environment'):
-            return
-        pebble_install_and_run(PLATFORMS)
-        ensure_empty_dir(cls.out_dir())
-        os.mkdir(os.path.join(cls.out_dir(), 'img'))
-        os.mkdir(os.path.join(cls.out_dir(), 'diff'))
-        ScreenshotTest.summary_file = SummaryFile(cls.summary_filename(), BASE_CONFIG)
-        ScreenshotTest._loaded_environment = True
+        if not hasattr(ScreenshotTest, '_loaded_environment'):
+            ScreenshotTest.test_count = 0
+            pebble_install_and_run(PLATFORMS)
+            ensure_empty_dir(cls.out_dir())
+            os.mkdir(os.path.join(cls.out_dir(), 'img'))
+            os.mkdir(os.path.join(cls.out_dir(), 'diff'))
+            ScreenshotTest.summary_file = SummaryFile(cls.summary_filename(), BASE_CONFIG)
+            ScreenshotTest._loaded_environment = True
+        else:
+            ScreenshotTest.test_count += 1
+            # The Pebble emulator gets flaky after a while
+            if ScreenshotTest.test_count % 10 == 0:
+                pebble_reinstall(PLATFORMS)
 
     def sgvs(self):
         raise NotImplementedError
