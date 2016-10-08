@@ -56,7 +56,7 @@
          "batteryLoc" : "timeBottomLeft",
          "timeAlign" : "right",
          "connStatusLoc" : "graphTopLeft",
-         "recencyLoc" : "none",
+         "recencyLoc" : "graphTopLeft",
          "recencyStyle" : "mediumRing",
          "recencyColorCircle" : "0x55AA55",
          "recencyColorText" : "0x000000"
