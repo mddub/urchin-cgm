@@ -5,13 +5,14 @@
 #include "staleness.h"
 #include "status_bar_element.h"
 
+#define SM_TEXT_MARGIN (2)
+
 StatusBarElement* status_bar_element_create(Layer *parent) {
   GRect bounds = element_get_bounds(parent);
 
-  int sm_text_margin = 2;
   FontChoice font = get_font(FONT_18_BOLD);
 
-  int text_y, height;
+  int16_t text_y, height;
   if (bounds.size.h <= font.height * 2 + font.padding_top + font.padding_bottom) {
     // vertically center text if there is only room for one line
     text_y = (bounds.size.h - font.height) / 2 - font.padding_top;
@@ -22,36 +23,39 @@ StatusBarElement* status_bar_element_create(Layer *parent) {
     height = bounds.size.h - text_y;
   }
 
-  TextLayer *text = text_layer_create(GRect(
-    sm_text_margin,
+  StatusBarElement *el = malloc(sizeof(StatusBarElement));
+
+  el->text = text_layer_create(GRect(
+    SM_TEXT_MARGIN,
     text_y,
-    bounds.size.w - sm_text_margin,
+    bounds.size.w - SM_TEXT_MARGIN,
     height
   ));
-  text_layer_set_text_alignment(text, GTextAlignmentLeft);
-  text_layer_set_background_color(text, GColorClear);
-  text_layer_set_text_color(text, element_fg(parent));
+  text_layer_set_text_alignment(el->text, GTextAlignmentLeft);
+  text_layer_set_background_color(el->text, GColorClear);
+  text_layer_set_text_color(el->text, element_fg(parent));
 
-  text_layer_set_font(text, fonts_get_system_font(font.key));
-  text_layer_set_overflow_mode(text, GTextOverflowModeWordWrap);
-  layer_add_child(parent, text_layer_get_layer(text));
+  text_layer_set_font(el->text, fonts_get_system_font(font.key));
+  text_layer_set_overflow_mode(el->text, GTextOverflowModeWordWrap);
+  layer_add_child(parent, text_layer_get_layer(el->text));
 
-  BatteryComponent *battery = NULL;
+  int8_t lines;
+
+  el->battery = NULL;
   if (get_prefs()->battery_loc == BATTERY_LOC_STATUS_RIGHT) {
     // align the battery to the middle of the lowest line of text
-    int lines = (bounds.size.h - text_y) / (font.height + font.padding_top);
-    int battery_y = text_y + (font.height + font.padding_top) * (lines - 1) + font.padding_top + font.height / 2 - battery_component_height() / 2;
+    lines = (bounds.size.h - text_y) / (font.height + font.padding_top);
+    int8_t battery_y = text_y + (font.height + font.padding_top) * (lines - 1) + font.padding_top + font.height / 2 - battery_component_height() / 2;
     // ...unless that places it too close to the bottom
-    if (battery_y + battery_component_height() - battery_component_vertical_padding() > bounds.size.h - sm_text_margin) {
-      battery_y = bounds.size.h - battery_component_height() + battery_component_vertical_padding() - sm_text_margin;
+    if (battery_y + battery_component_height() - battery_component_vertical_padding() > bounds.size.h - SM_TEXT_MARGIN) {
+      battery_y = bounds.size.h - battery_component_height() + battery_component_vertical_padding() - SM_TEXT_MARGIN;
     }
 
-    battery = battery_component_create(parent, bounds.size.w - battery_component_width() - sm_text_margin, battery_y, true);
+    el->battery = battery_component_create(parent, bounds.size.w - battery_component_width() - SM_TEXT_MARGIN, battery_y, true);
   }
 
-  RecencyComponent* recency = NULL;
+  el->recency = NULL;
   if (get_prefs()->recency_loc == RECENCY_LOC_STATUS_TOP_RIGHT || get_prefs()->recency_loc == RECENCY_LOC_STATUS_BOTTOM_RIGHT) {
-    int lines;
     if (get_prefs()->recency_loc == RECENCY_LOC_STATUS_TOP_RIGHT) {
       lines = 1;
     } else {
@@ -66,13 +70,9 @@ StatusBarElement* status_bar_element_create(Layer *parent) {
       recency_y = bounds.size.h - recency_component_height() + recency_component_padding();
     }
 
-    recency = recency_component_create(parent, recency_y, true, NULL, NULL);
+    el->recency = recency_component_create(parent, recency_y, true, NULL, NULL);
   }
 
-  StatusBarElement *el = malloc(sizeof(StatusBarElement));
-  el->text = text;
-  el->battery = battery;
-  el->recency = recency;
   return el;
 }
 

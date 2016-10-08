@@ -11,15 +11,11 @@ static void set_empty_prefs() {
   s_prefs->num_elements = 0;
 }
 
-static int preferences_size() {
-  return sizeof(Preferences);
-}
-
 void init_prefs() {
-  if (preferences_size() > PERSIST_DATA_MAX_LENGTH) {
+  if (sizeof(Preferences) > PERSIST_DATA_MAX_LENGTH) {
     APP_LOG(APP_LOG_LEVEL_ERROR, "Preferences data too big!");
   }
-  s_prefs = malloc(preferences_size());
+  s_prefs = malloc(sizeof(Preferences));
 
   if (
       persist_exists(PERSIST_KEY_VERSION) && \
@@ -40,7 +36,7 @@ Preferences* get_prefs() {
   return s_prefs;
 }
 
-static ElementConfig decode_layout_element(uint8_t *encoded, int offset) {
+static ElementConfig decode_layout_element(uint8_t *encoded, uint8_t offset) {
   ElementConfig decoded;
   decoded.el = encoded[offset + ELEMENT_TYPE];
   decoded.w = encoded[offset + ELEMENT_WIDTH];
@@ -51,8 +47,8 @@ static ElementConfig decode_layout_element(uint8_t *encoded, int offset) {
   return decoded;
 }
 
-static void decode_layout_elements(Preferences *prefs, int num_elements, uint8_t *encoded) {
-  for(int i = 0; i < num_elements; i++) {
+static void decode_layout_elements(Preferences *prefs, uint8_t num_elements, uint8_t *encoded) {
+  for(uint8_t i = 0; i < num_elements; i++) {
     ElementConfig el = decode_layout_element(encoded, NUM_ELEMENT_PROPERTIES * i);
     memcpy(&prefs->elements[i], &el, sizeof(ElementConfig));
   }

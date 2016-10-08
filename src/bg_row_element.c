@@ -10,10 +10,10 @@
 static void bg_row_element_rearrange(BGRowElement *el) {
   GSize bg_size = text_layer_get_content_size(el->bg_text);
   GSize delta_size = text_layer_get_content_size(el->delta_text);
-  int total_width = bg_size.w \
+  uint8_t total_width = bg_size.w \
     + (trend_arrow_component_hidden(el->trend) ? 0 : BG_TREND_PADDING + trend_arrow_component_width()) \
     + (layer_get_hidden(text_layer_get_layer(el->delta_text)) ? 0 : TREND_DELTA_PADDING + delta_size.w);
-  int bg_x = (el->parent_size.w - total_width) / 2;
+  int16_t bg_x = (el->parent_size.w - total_width) / 2;
 
   GRect bg_frame = layer_get_frame(text_layer_get_layer(el->bg_text));
   layer_set_frame(text_layer_get_layer(el->bg_text), GRect(
@@ -30,7 +30,7 @@ static void bg_row_element_rearrange(BGRowElement *el) {
   );
 
   GRect delta_frame = layer_get_frame(text_layer_get_layer(el->delta_text));
-  int delta_x = bg_x + bg_size.w \
+  int16_t delta_x = bg_x + bg_size.w \
     + (trend_arrow_component_hidden(el->trend) \
         ? MISSING_TREND_BG_DELTA_PADDING \
         : BG_TREND_PADDING + trend_arrow_component_width() + TREND_DELTA_PADDING);

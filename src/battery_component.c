@@ -14,7 +14,7 @@
 // XXX need to keep reference to this for battery_handler
 static BatteryComponent *s_component;
 
-static int battery_icon_id(BatteryChargeState charge_state) {
+static uint32_t battery_icon_id(BatteryChargeState charge_state) {
   if (charge_state.is_charging) {
     return RESOURCE_ID_BATTERY_CHARGING;
   } else if (charge_state.charge_percent <= 10) {
@@ -57,19 +57,19 @@ static void battery_handler(BatteryChargeState charge_state) {
   }
 }
 
-int battery_component_width() {
+uint8_t battery_component_width() {
   return get_prefs()->battery_as_number ? BATTERY_TEXT_WIDTH : BATTERY_ICON_WIDTH;
 }
 
-int battery_component_height() {
+uint8_t battery_component_height() {
   return get_prefs()->battery_as_number ? get_font(BATTERY_FONT).height + 2 * get_font(BATTERY_FONT).padding_bottom : BATTERY_ICON_HEIGHT;
 }
 
-int battery_component_vertical_padding() {
+uint8_t battery_component_vertical_padding() {
   return get_prefs()->battery_as_number ? get_font(BATTERY_FONT).padding_bottom : BATTERY_ICON_PADDING;
 }
 
-BatteryComponent* battery_component_create(Layer *parent, int x, int y, bool align_right) {
+BatteryComponent* battery_component_create(Layer *parent, int16_t x, int16_t y, bool align_right) {
   battery_state_service_subscribe(battery_handler);
 
   BatteryComponent *c = malloc(sizeof(BatteryComponent));

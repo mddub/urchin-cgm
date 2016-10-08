@@ -19,9 +19,6 @@ typedef struct GraphElement {
 
 typedef struct GraphData {
   GColor color;
-  uint16_t count;
-  uint8_t* sgvs;
-  uint8_t* extra;
 } GraphData;
 
 GraphElement* graph_element_create(Layer *parent);

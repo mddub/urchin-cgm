@@ -1,7 +1,7 @@
 #include "fonts.h"
 #include "layout.h"
 
-static int s_num_elements;
+static uint8_t s_num_elements;
 static Layer** s_layers;
 static GSize *s_pixel_sizes;
 static TextLayer* s_need_prefs_message;
@@ -18,8 +18,8 @@ GCompOp element_comp_op(Layer* layer) {
   return get_element_data(layer)->black ? GCompOpSet : GCompOpAnd;
 }
 
-static Layer* get_layer_for_element(int element) {
-  for(int i = 0; i < get_prefs()->num_elements; i++) {
+static Layer* get_layer_for_element(uint8_t element) {
+  for(uint8_t i = 0; i < get_prefs()->num_elements; i++) {
     if(get_element_data(s_layers[i])->el == element) {
       return s_layers[i];
     }
@@ -46,14 +46,14 @@ static Layer* position_layer(Layer *parent, GPoint *pos, ElementConfig config, G
   Layer *layer = NULL;
   GSize parent_size = layer_get_bounds(parent).size;
 
-  int width;
+  uint8_t width;
   if (size.w == 0) {
     width = parent_size.w - pos->x;
   } else {
     width = size.w;
   }
   width += config.right;
-  int height = size.h + config.bottom;
+  uint8_t height = size.h + config.bottom;
 
   if (actually_make_layer) {
     layer = layer_create_with_data(
@@ -76,21 +76,21 @@ static Layer* position_layer(Layer *parent, GPoint *pos, ElementConfig config, G
 
 static void compute_pixel_sizes(GSize *result, Layer *parent, ElementConfig *elements) {
   GSize screen_size = layer_get_bounds(parent).size;
-  for(int i = 0; i < s_num_elements; i++) {
+  for(uint8_t i = 0; i < s_num_elements; i++) {
     result[i].h = (float)screen_size.h * (float)elements[i].h / 100.0f + 0.5f;
     result[i].w = (float)screen_size.w * (float)elements[i].w / 100.0f + 0.5f;
   }
 }
 
-static int compute_auto_height(Layer *parent) {
+static uint8_t compute_auto_height(Layer *parent) {
   GPoint pos = {.x = 0, .y = 0};
-  int num_rows_auto_height = 0;
-  for(int i = 0; i < s_num_elements; i++) {
+  uint8_t num_rows_auto_height = 0;
+  for(uint8_t i = 0; i < s_num_elements; i++) {
     num_rows_auto_height += (pos.x == 0 && get_prefs()->elements[i].h == 0);
     position_layer(parent, &pos, get_prefs()->elements[i], s_pixel_sizes[i], false);
   }
-  int total_height = layer_get_bounds(parent).size.h;
-  int remaining_height = total_height - pos.y;
+  uint8_t total_height = layer_get_bounds(parent).size.h;
+  uint8_t remaining_height = total_height - pos.y;
 
   return remaining_height / num_rows_auto_height;
 }
@@ -136,15 +136,15 @@ LayoutLayers init_layout(Window* window) {
 
   compute_pixel_sizes(s_pixel_sizes, window_layer, get_prefs()->elements);
 
-  int auto_height = compute_auto_height(window_layer);
-  for(int i = 0; i < get_prefs()->num_elements; i++) {
+  uint8_t auto_height = compute_auto_height(window_layer);
+  for(uint8_t i = 0; i < get_prefs()->num_elements; i++) {
     if (s_pixel_sizes[i].h == 0) {
       s_pixel_sizes[i].h = auto_height;
     }
   }
 
   GPoint pos = {.x = 0, .y = 0};
-  for(int i = 0; i < get_prefs()->num_elements; i++) {
+  for(uint8_t i = 0; i < get_prefs()->num_elements; i++) {
     s_layers[i] = position_layer(window_layer, &pos, get_prefs()->elements[i], s_pixel_sizes[i], true);
   }
 
@@ -160,7 +160,7 @@ LayoutLayers init_layout(Window* window) {
 }
 
 void deinit_layout() {
-  for(int i = 0; i < s_num_elements; i++) {
+  for(uint8_t i = 0; i < s_num_elements; i++) {
     layer_destroy(s_layers[i]);
   }
   if (s_need_prefs_message != NULL) {

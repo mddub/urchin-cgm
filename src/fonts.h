@@ -6,8 +6,8 @@
 typedef struct FontChoice {
   const char *key;
   uint8_t height;
-  uint8_t padding_top;
-  uint8_t padding_bottom;
+  unsigned int padding_top:4;
+  unsigned int padding_bottom:4;
 } FontChoice;
 
 enum {

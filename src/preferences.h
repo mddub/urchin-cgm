@@ -97,9 +97,9 @@ enum {
 };
 
 typedef struct __attribute__((__packed__)) ElementConfig {
-  int el;
-  int w;
-  int h;
+  unsigned int el:3;
+  uint8_t w;
+  uint8_t h;
   bool black;
   bool bottom;
   bool right;

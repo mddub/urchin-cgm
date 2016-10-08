@@ -7,9 +7,9 @@ SidebarElement* sidebar_element_create(Layer *parent) {
   GRect bounds = element_get_bounds(parent);
   FontChoice font = get_font(FONT_24_BOLD);
 
-  int trend_arrow_y = (bounds.size.h - trend_arrow_component_height()) / 2;
-  int last_bg_y = (trend_arrow_y / 4 + bounds.size.h / 8) - font.height / 2 - font.padding_top;
-  int delta_y = ((bounds.size.h + trend_arrow_y + trend_arrow_component_height()) / 4 + bounds.size.h * 3 / 8) - font.height / 2 - font.padding_top;
+  int16_t trend_arrow_y = (bounds.size.h - trend_arrow_component_height()) / 2;
+  int16_t last_bg_y = (trend_arrow_y / 4 + bounds.size.h / 8) - font.height / 2 - font.padding_top;
+  int16_t delta_y = ((bounds.size.h + trend_arrow_y + trend_arrow_component_height()) / 4 + bounds.size.h * 3 / 8) - font.height / 2 - font.padding_top;
 
   TextLayer *last_bg_text = text_layer_create(GRect(0, last_bg_y, bounds.size.w, font.height + font.padding_top + font.padding_bottom));
   text_layer_set_font(last_bg_text, fonts_get_system_font(font.key));

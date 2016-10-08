@@ -6,7 +6,7 @@
 #include "generated/test_maybe.h"
 #define TESTING_TIME_DISPLAY "13:37"
 
-static BatteryComponent *create_battery_component(Layer *parent, unsigned int battery_loc) {
+static BatteryComponent *create_battery_component(Layer *parent, uint8_t battery_loc) {
   GRect bounds = element_get_bounds(parent);
   int x = -1;
   int y = -1;
@@ -38,7 +38,7 @@ static BatteryComponent *create_battery_component(Layer *parent, unsigned int ba
   }
 }
 
-static RecencyComponent *create_recency_component(Layer *parent, unsigned int recency_loc) {
+static RecencyComponent *create_recency_component(Layer *parent, uint8_t recency_loc) {
   GRect bounds = element_get_bounds(parent);
   int16_t y = -1;
   bool align_right;

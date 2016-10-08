@@ -8,8 +8,8 @@ typedef struct BatteryComponent {
   TextLayer *text_layer;
 } BatteryComponent;
 
-int battery_component_width();
-int battery_component_height();
-int battery_component_vertical_padding();
-BatteryComponent* battery_component_create(Layer *parent, int x, int y, bool align_right);
+uint8_t battery_component_width();
+uint8_t battery_component_height();
+uint8_t battery_component_vertical_padding();
+BatteryComponent* battery_component_create(Layer *parent, int16_t x, int16_t y, bool align_right);
 void battery_component_destroy(BatteryComponent *c);

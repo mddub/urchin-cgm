@@ -17,7 +17,7 @@ const uint32_t CONN_ISSUE_ICONS[] = {
   RESOURCE_ID_CONN_ISSUE_RIG,
 };
 
-ConnectionStatusComponent* connection_status_component_create(Layer *parent, int x, int y, bool align_bottom) {
+ConnectionStatusComponent* connection_status_component_create(Layer *parent, int16_t x, int16_t y, bool align_bottom) {
   BitmapLayer *icon_layer = bitmap_layer_create(GRect(x, y, REASON_ICON_WIDTH, REASON_ICON_WIDTH));
   // draw the icon background over the graph
   bitmap_layer_set_compositing_mode(icon_layer, get_element_data(parent)->black ? GCompOpAssignInverted : GCompOpAssign);

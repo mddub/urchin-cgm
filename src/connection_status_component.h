@@ -14,7 +14,7 @@ typedef struct ConnectionStatusComponent {
   bool is_showing_request_state;
 } ConnectionStatusComponent;
 
-ConnectionStatusComponent* connection_status_component_create(Layer *parent, int x, int y, bool align_bottom);
+ConnectionStatusComponent* connection_status_component_create(Layer *parent, int16_t x, int16_t y, bool align_bottom);
 void connection_status_component_destroy(ConnectionStatusComponent *c);
 void connection_status_component_tick(ConnectionStatusComponent *c);
 void connection_status_component_update_offset(ConnectionStatusComponent* c, GSize size);
