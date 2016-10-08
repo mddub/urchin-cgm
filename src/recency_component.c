@@ -73,7 +73,7 @@ static void draw_text(Layer *layer, GContext *ctx, int32_t seconds, bool has_cir
     new_size = GSize(style.diameter, style.diameter);
   }
 
-  graphics_context_set_text_color(ctx, get_prefs()->colors[COLOR_KEY_RECENCY_TEXT]);
+  graphics_context_set_text_color(ctx, COLOR_FALLBACK(get_prefs()->colors[COLOR_KEY_RECENCY_TEXT], props->parent_fg));
   graphics_draw_text(ctx, string, fonts_get_system_font(font.key), text_bounds, GTextOverflowModeWordWrap, alignment, NULL);
 
   if (props->size_changed_callback != NULL) {
@@ -106,7 +106,7 @@ static void draw_circle_and_text(Layer *layer, GContext *ctx) {
     graphics_context_set_fill_color(ctx, props->parent_bg);
     graphics_fill_radial(ctx, circle_bounds, GOvalScaleModeFitCircle, style.diameter, DEG_TO_TRIGANGLE(0), DEG_TO_TRIGANGLE(360));
 
-    graphics_context_set_fill_color(ctx, get_prefs()->colors[COLOR_KEY_RECENCY_CIRCLE]);
+    graphics_context_set_fill_color(ctx, COLOR_FALLBACK(get_prefs()->colors[COLOR_KEY_RECENCY_CIRCLE], GColorLightGray));
     graphics_fill_radial(ctx, circle_bounds, GOvalScaleModeFitCircle, style.inset, DEG_TO_TRIGANGLE(start), DEG_TO_TRIGANGLE(end));
   }
 
