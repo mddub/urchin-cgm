@@ -29,6 +29,8 @@
       "statusLine1" : "none",
       "statusLine2" : "none",
       "statusLine3" : "none",
+      "statusDateFormat" : "ddd mmm d",
+      "statusDateCustomFormat" : "ddd, mmm d, yyyy",
       "statusRawCount" : 2,
       "statusUrl" : "",
       "statusJsonUrl" : "",

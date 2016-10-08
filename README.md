@@ -32,6 +32,7 @@ You can choose the shape and size of the points on the graph so that the glucose
 
 The status bar can display content from a variety of sources:
 
+* **Date** - in whatever format you want. (e.g. `Sat Oct 7`)
 * **Uploader battery level** - if your Nightscout data comes from a wired rig/xDrip. (e.g. `36%`)
 * **Raw Dexcom readings** - [raw sensor readings][raw-dexcom-readings] plus noise level. (e.g. `Cln 97 104 106`)
 * **Uploader battery, Dexcom raw** - combination of the above two. (e.g. `36% Cln 97 104 106`)
@@ -179,7 +180,6 @@ The most effective method of integration testing I've found is to [compare scree
 ## To do:
 * High/low BG alerts
 * Stale data alerts
-* Show date when space allows
 * More color configurability
 * A fixed layout which supports Pebble Time Round
 * Use data directly from Dexcom Share (no Nightscout site required)

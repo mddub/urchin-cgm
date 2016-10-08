@@ -5,6 +5,7 @@ require('./vendor/lie.polyfill');
 
 var cache = require('./cache');
 var debounce = require('./debounce');
+var dateFormatter = require('./date_formatter');
 var Debug = require('./debug');
 
 var data = function(c, maxSGVCount) {
@@ -591,6 +592,11 @@ var data = function(c, maxSGVCount) {
     });
   };
 
+  d.getStatusDate = function(config) {
+    var format = config.statusDateFormat === 'custom' ? config.statusDateCustomFormat : config.statusDateFormat;
+    return Promise.resolve({text: dateFormatter(format)});
+  };
+
   d.getNone = function() {
     return Promise.resolve({text: ''});
   };
@@ -599,6 +605,7 @@ var data = function(c, maxSGVCount) {
     var defaultFn = d.getNone;
     return {
       'none': d.getNone,
+      'date': d.getStatusDate,
       'rigbattery': d.getRigBatteryLevel,
       'rawdata': d.getRawData,
       'rig-raw': d.getRigBatteryAndRawData,
