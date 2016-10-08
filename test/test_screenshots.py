@@ -309,7 +309,7 @@ class TestLayoutE(ScreenshotTest):
         'pointWidth': 2,
         'pointMargin': -1,
         'statusContent': 'customtext',
-        'statusText': 'Extra long text. This example uses point width and margin of 2/-1 to view 9hr.',
+        'statusText': 'Extra long text. This example uses point width 2 and margin -1 to view 9 hrs.',
     })
 
 

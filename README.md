@@ -16,7 +16,7 @@ In the Pebble app on your phone, open the "Settings" screen to set your Nightsco
 
 The layout is one of the most Ridiculously Configurable aspects of Urchin. The settings page includes a handful of pre-set layouts to get you started:
 
-![](http://i.imgur.com/4DhR6s8.png) ![](http://i.imgur.com/3dV3dKa.png) ![](http://i.imgur.com/tX352M2.png)
+![](http://i.imgur.com/4DhR6s8.png) ![](http://i.imgur.com/3dV3dKa.png) ![](http://i.imgur.com/KMhoWEv.png)
 
 Use one as a starting point to build your own watchface: reorder the elements, change heights and colors, toggle borders, move the icons...
 
