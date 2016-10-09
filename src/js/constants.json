@@ -54,7 +54,12 @@
             {"el": 2, "enabled": true, "width": 100, "height": 32, "black": false, "bottom": false, "right": false}
          ],
          "batteryLoc" : "timeBottomLeft",
-         "timeAlign" : "right"
+         "timeAlign" : "right",
+         "connStatusLoc" : "graphTopLeft",
+         "recencyLoc" : "graphTopLeft",
+         "recencyStyle" : "mediumRing",
+         "recencyColorCircle" : "0x55AA55",
+         "recencyColorText" : "0x000000"
       }
    },
 
@@ -68,7 +73,12 @@
             {"el": 4, "enabled": false, "width": 100, "height": 0, "black": false, "bottom": false, "right": false}
          ],
          "batteryLoc" : "statusRight",
-         "timeAlign" : "center"
+         "timeAlign" : "center",
+         "connStatusLoc" : "graphTopLeft",
+         "recencyLoc" : "graphTopLeft",
+         "recencyStyle" : "mediumRing",
+         "recencyColorCircle" : "0x00AAAA",
+         "recencyColorText" : "0x000000"
       },
       "b": {
          "elements": [
@@ -79,7 +89,12 @@
             {"el": 4, "enabled": false, "width": 100, "height": 0, "black": false, "bottom": false, "right": false}
          ],
          "batteryLoc" : "statusRight",
-         "timeAlign" : "center"
+         "timeAlign" : "center",
+         "connStatusLoc" : "graphTopLeft",
+         "recencyLoc" : "timeTopRight",
+         "recencyStyle" : "mediumRing",
+         "recencyColorCircle" : "0x00AAAA",
+         "recencyColorText" : "0x000000"
       },
       "c": {
          "elements": [
@@ -90,18 +105,28 @@
             {"el": 3, "enabled": true, "width": 100, "height": 0, "black": false, "bottom": false, "right": false}
          ],
          "batteryLoc" : "statusRight",
-         "timeAlign" : "center"
+         "timeAlign" : "center",
+         "connStatusLoc" : "graphTopLeft",
+         "recencyLoc" : "graphBottomLeft",
+         "recencyStyle" : "mediumNoCircle",
+         "recencyColorCircle" : "0x55AA55",
+         "recencyColorText" : "0x000000"
       },
       "d": {
          "elements": [
-            {"el": 3, "enabled": true, "width": 100, "height": 23, "black": false, "bottom": true, "right": false},
+            {"el": 3, "enabled": true, "width": 100, "height": 31, "black": false, "bottom": true, "right": false},
             {"el": 0, "enabled": true, "width": 100, "height": 0, "black": false, "bottom": true, "right": false},
             {"el": 1, "enabled": false, "width": 100, "height": 0, "black": false, "bottom": true, "right": false},
-            {"el": 4, "enabled": true, "width": 100, "height": 25, "black": false, "bottom": false, "right": false},
+            {"el": 4, "enabled": true, "width": 100, "height": 23, "black": false, "bottom": false, "right": false},
             {"el": 2, "enabled": false, "width": 100, "height": 0, "black": false, "bottom": false, "right": false}
          ],
          "batteryLoc" : "timeTopRight",
-         "timeAlign" : "left"
+         "timeAlign" : "left",
+         "connStatusLoc" : "graphTopLeft",
+         "recencyLoc" : "timeBottomRight",
+         "recencyStyle" : "largePie",
+         "recencyColorCircle" : "0x00FF00",
+         "recencyColorText" : "0x000000"
       },
       "e": {
          "elements": [
@@ -112,7 +137,12 @@
             {"el": 4, "enabled": false, "width": 100, "height": 0, "black": false, "bottom": false, "right": false}
          ],
          "batteryLoc" : "timeBottomLeft",
-         "timeAlign" : "right"
+         "timeAlign" : "right",
+         "connStatusLoc" : "graphTopLeft",
+         "recencyLoc" : "statusBottomRight",
+         "recencyStyle" : "mediumRing",
+         "recencyColorCircle" : "0x00AA55",
+         "recencyColorText" : "0x005500"
       }
    },
 
@@ -154,7 +184,14 @@
       "pointColorDefault",
       "pointColorHigh",
       "pointColorLow",
-      "plotLineColor"
+      "plotLineColor",
+      "recencyColorCircle",
+      "recencyColorText"
+   ],
+
+   "LAYOUT_COLOR_KEYS": [
+      "recencyColorCircle",
+      "recencyColorText"
    ],
 
    "ELEMENTS": [
@@ -188,6 +225,34 @@
       "timeTopLeft" : 2,
       "none" : 0,
       "statusRight" : 1
+   },
+
+   "CONN_STATUS_LOC": {
+      "none" : 0,
+      "graphTopLeft" : 1,
+      "graphBottomLeft" : 2
+   },
+
+   "RECENCY_LOC" : {
+      "none" : 0,
+      "graphTopLeft" : 1,
+      "graphBottomLeft" : 2,
+      "statusTopRight" : 3,
+      "statusBottomRight" : 4,
+      "timeTopLeft" : 5,
+      "timeTopRight" : 6,
+      "timeBottomLeft" : 7,
+      "timeBottomRight" : 8
+   },
+
+   "RECENCY_STYLE" : {
+      "smallNoCircle" : 0,
+      "mediumPie" : 1,
+      "mediumRing" : 2,
+      "mediumNoCircle" : 3,
+      "largePie" : 4,
+      "largeRing" : 5,
+      "largeNoCircle" : 6
    },
 
    "POINT_SHAPE" : {

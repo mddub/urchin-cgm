@@ -6,24 +6,24 @@
 #include "generated/test_maybe.h"
 #define TESTING_TIME_DISPLAY "13:37"
 
-static BatteryComponent *create_battery_component(Layer *parent, unsigned int battery_loc) {
+static BatteryComponent *create_battery_component(Layer *parent, uint8_t battery_loc) {
   GRect bounds = element_get_bounds(parent);
   int x = -1;
   int y = -1;
   bool align_right;
-  if (get_prefs()->battery_loc == BATTERY_LOC_TIME_TOP_LEFT) {
+  if (battery_loc == BATTERY_LOC_TIME_TOP_LEFT) {
     x = battery_component_vertical_padding();
     y = 0;
     align_right = false;
-  } else if (get_prefs()->battery_loc == BATTERY_LOC_TIME_TOP_RIGHT) {
+  } else if (battery_loc == BATTERY_LOC_TIME_TOP_RIGHT) {
     x = bounds.size.w - battery_component_width() - battery_component_vertical_padding();
     y = 0;
     align_right = true;
-  } else if (get_prefs()->battery_loc == BATTERY_LOC_TIME_BOTTOM_LEFT) {
+  } else if (battery_loc == BATTERY_LOC_TIME_BOTTOM_LEFT) {
     x = battery_component_vertical_padding();
     y = bounds.size.h - battery_component_height();
     align_right = false;
-  } else if (get_prefs()->battery_loc == BATTERY_LOC_TIME_BOTTOM_RIGHT) {
+  } else if (battery_loc == BATTERY_LOC_TIME_BOTTOM_RIGHT) {
     x = bounds.size.w - battery_component_width() - battery_component_vertical_padding();
     y = bounds.size.h - battery_component_height();
     align_right = true;
@@ -33,6 +33,31 @@ static BatteryComponent *create_battery_component(Layer *parent, unsigned int ba
   }
   if (x != -1) {
     return battery_component_create(parent, x, y, align_right);
+  } else {
+    return NULL;
+  }
+}
+
+static RecencyComponent *create_recency_component(Layer *parent, uint8_t recency_loc) {
+  GRect bounds = element_get_bounds(parent);
+  int16_t y = -1;
+  bool align_right;
+  if (recency_loc == RECENCY_LOC_TIME_TOP_LEFT) {
+    y = 0;
+    align_right = false;
+  } else if (recency_loc == RECENCY_LOC_TIME_TOP_RIGHT) {
+    y = 0;
+    align_right = true;
+  } else if (recency_loc == RECENCY_LOC_TIME_BOTTOM_LEFT) {
+    y = bounds.size.h - recency_component_height();
+    align_right = false;
+  } else if (recency_loc == RECENCY_LOC_TIME_BOTTOM_RIGHT) {
+    y = bounds.size.h - recency_component_height();
+    align_right = true;
+  }
+
+  if (y != -1) {
+    return recency_component_create(parent, y, align_right, NULL, NULL);
   } else {
     return NULL;
   }
@@ -69,10 +94,10 @@ TimeElement* time_element_create(Layer* parent) {
 
   layer_add_child(parent, text_layer_get_layer(time_text));
 
-  BatteryComponent *battery = create_battery_component(parent, get_prefs()->battery_loc);
   TimeElement* out = malloc(sizeof(TimeElement));
   out->time_text = time_text;
-  out->battery = battery;
+  out->battery = create_battery_component(parent, get_prefs()->battery_loc);
+  out->recency = create_recency_component(parent, get_prefs()->recency_loc);
   return out;
 }
 
@@ -81,10 +106,15 @@ void time_element_destroy(TimeElement* el) {
   if (el->battery != NULL) {
     battery_component_destroy(el->battery);
   }
+  if (el->recency != NULL) {
+    recency_component_destroy(el->recency);
+  }
   free(el);
 }
 
-void time_element_update(TimeElement *el, DataMessage *data) {}
+void time_element_update(TimeElement *el, DataMessage *data) {
+  time_element_tick(el);
+}
 
 void time_element_tick(TimeElement *el) {
   static char buffer[16];
@@ -105,4 +135,8 @@ void time_element_tick(TimeElement *el) {
 #endif
 
   text_layer_set_text(el->time_text, buffer);
+
+  if (el->recency != NULL) {
+    recency_component_tick(el->recency);
+  }
 }

@@ -203,13 +203,20 @@
           $item.find('.color-box-wrap').toggleClass('show');
         });
 
-        $item.find('.color-box.selectable').on('click', function(ev) {
-          ev.preventDefault();
-
-          var value = $(this).data('value');
+        function changeSelectedColor(value) {
           $color.val(value);
           $valueDisplay.css('background-color', value.replace(/^0x/, '#'));
+        }
+
+        $color.on('changeValue', function(ev, value) {
+          changeSelectedColor(value);
+        });
+
+        $item.find('.color-box.selectable').on('click', function(ev) {
+          ev.preventDefault();
+          changeSelectedColor($(this).data('value'));
           $item.find('.color-box-wrap').removeClass('show');
+          $color.trigger('colorChangedByClick');
         })
 
       });

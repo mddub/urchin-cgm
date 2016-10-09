@@ -5,7 +5,7 @@
 #define PERSIST_KEY_VERSION 0
 #define PERSIST_KEY_PREFERENCES_OBJECT 1
 
-#define PREFERENCES_SCHEMA_VERSION 12
+#define PREFERENCES_SCHEMA_VERSION 13
 
 enum {
   ALIGN_LEFT,
@@ -20,6 +20,34 @@ enum {
   BATTERY_LOC_TIME_TOP_RIGHT,
   BATTERY_LOC_TIME_BOTTOM_LEFT,
   BATTERY_LOC_TIME_BOTTOM_RIGHT,
+};
+
+enum {
+  CONN_STATUS_LOC_NONE,
+  CONN_STATUS_LOC_GRAPH_TOP_LEFT,
+  CONN_STATUS_LOC_GRAPH_BOTTOM_LEFT,
+};
+
+enum {
+  RECENCY_LOC_NONE,
+  RECENCY_LOC_GRAPH_TOP_LEFT,
+  RECENCY_LOC_GRAPH_BOTTOM_LEFT,
+  RECENCY_LOC_STATUS_TOP_RIGHT,
+  RECENCY_LOC_STATUS_BOTTOM_RIGHT,
+  RECENCY_LOC_TIME_TOP_LEFT,
+  RECENCY_LOC_TIME_TOP_RIGHT,
+  RECENCY_LOC_TIME_BOTTOM_LEFT,
+  RECENCY_LOC_TIME_BOTTOM_RIGHT,
+};
+
+enum {
+  RECENCY_STYLE_SMALL_NO_CIRCLE,
+  RECENCY_STYLE_MEDIUM_PIE,
+  RECENCY_STYLE_MEDIUM_RING,
+  RECENCY_STYLE_MEDIUM_NO_CIRCLE,
+  RECENCY_STYLE_LARGE_PIE,
+  RECENCY_STYLE_LARGE_RING,
+  RECENCY_STYLE_LARGE_NO_CIRCLE,
 };
 
 enum {
@@ -53,6 +81,8 @@ enum {
   COLOR_KEY_POINT_HIGH,
   COLOR_KEY_POINT_LOW,
   COLOR_KEY_PLOT_LINE,
+  COLOR_KEY_RECENCY_CIRCLE,
+  COLOR_KEY_RECENCY_TEXT,
   NUM_COLOR_KEYS,
 };
 
@@ -67,9 +97,9 @@ enum {
 };
 
 typedef struct __attribute__((__packed__)) ElementConfig {
-  int el;
-  int w;
-  int h;
+  unsigned int el:3;
+  uint8_t w;
+  uint8_t h;
   bool black;
   bool bottom;
   bool right;
@@ -88,6 +118,9 @@ typedef struct __attribute__((__packed__)) Preferences {
   bool update_every_minute;
   unsigned int time_align:2;
   unsigned int battery_loc:3;
+  unsigned int conn_status_loc:2;
+  unsigned int recency_loc:4;
+  unsigned int recency_style:3;
   unsigned int point_shape:2;
   unsigned int point_rect_height:5;
   unsigned int point_width:5;

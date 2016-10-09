@@ -34,6 +34,16 @@
       // v0.0.11: IOB from /pebble now handles both Care Portal and devicestatus IOB
       config.statusContent = 'pebbleiob';
     }
+
+    // v0.0.12: new layout properties
+    if (config.customLayout) {
+      config.customLayout.connStatusLoc = config.customLayout.connStatusLoc || c.DEFAULT_CONFIG.customLayout.connStatusLoc;
+      config.customLayout.recencyLoc = config.customLayout.recencyLoc || c.DEFAULT_CONFIG.customLayout.recencyLoc;
+      config.customLayout.recencyStyle = config.customLayout.recencyStyle || c.DEFAULT_CONFIG.customLayout.recencyStyle;
+      config.customLayout.recencyColorCircle = config.customLayout.recencyColorCircle || c.DEFAULT_CONFIG.customLayout.recencyColorCircle;
+      config.customLayout.recencyColorText = config.customLayout.recencyColorText || c.DEFAULT_CONFIG.customLayout.recencyColorText;
+    }
+
     return config;
   }
 
@@ -280,11 +290,16 @@
 
     elements = assignWidths(elements);
 
-    return {
+    var out = {
       elements: elements,
-      batteryLoc: document.getElementById('batteryLoc').value,
-      timeAlign: document.getElementById('timeAlign').value,
+      batteryLoc: $('#batteryLoc').val(),
+      timeAlign: $('#timeAlign').val(),
+      connStatusLoc: $('#connStatusLoc').val(),
+      recencyLoc: $('#recencyLoc').val(),
+      recencyStyle: $('[name=recencyStyle].active').attr('value'),
     };
+    encodeLayoutColors(out);
+    return out;
   }
 
   function decodeLayout(layoutKey) {
@@ -316,9 +331,17 @@
     [
       'batteryLoc',
       'timeAlign',
+      'recencyLoc',
+      'connStatusLoc',
     ].forEach(function(prefKey) {
       $('[name=' + prefKey + ']').val(layout[prefKey]);
     });
+
+    $('[name=recencyStyle]').removeClass('active');
+    $('[name=recencyStyle][value=' + layout.recencyStyle + ']').addClass('active');
+
+    toggleRecencySettings();
+    populateColors(layout);
   }
 
   function showLayoutPreview(layout) {
@@ -337,6 +360,7 @@
     updateLayoutUpDownEnabledState();
     reorderLayoutInputs();
     updateVisibleHistoryLength();
+    toggleRecencySettings();
   }
 
   function elementsEqual(a, b) {
@@ -349,8 +373,8 @@
     // TODO use deep-equal + browserify instead of this brittle homebrew comparison
     return Object.keys(a).reduce(function(equal, key) {
       if (key === 'elements') {
-        return a['elements'].reduce(function(equal, el, i) {
-          return equal && elementsEqual(el, b['elements'][i]);
+        return equal && a['elements'].reduce(function(elEql, el, i) {
+          return elEql && elementsEqual(el, b['elements'][i]);
         }, true);
       } else {
         return equal && JSON.stringify(a[key]) === JSON.stringify(b[key]);
@@ -373,6 +397,15 @@
       $('[name=layout][value=' + layout + ']').addClass('active');
       showLayoutPreview(layout);
     }
+  }
+
+  function toggleRecencySettings() {
+    var recencyLoc = $('[name=recencyLoc]').val();
+    var recencyStyle = $('[name=recencyStyle].active').attr('value');
+    $('.recency-settings').toggle(recencyLoc !== 'none');
+    $('.recency-color-circle').toggle(
+      ['smallNoCircle', 'mediumNoCircle', 'largeNoCircle'].indexOf(recencyStyle) === -1
+    );
   }
 
   function initializeStatusOptions(current) {
@@ -467,12 +500,24 @@
 
   function populateColors(current) {
     c.COLOR_KEYS.forEach(function(key) {
-      $('[name=' + key + ']').val(current[key]);
+      if (current[key]) {
+        // the first one is needed for page load, before Slate JS has bound to the event
+        $('[name=' + key + ']').val(current[key]);
+        $('[name=' + key + ']').trigger('changeValue', [current[key]]);
+      }
     });
   }
 
-  function encodeColors(out) {
-    c.COLOR_KEYS.forEach(function(key) {
+  function encodeNonLayoutColors(out) {
+    c.COLOR_KEYS.filter(function(key) {
+      return c.LAYOUT_COLOR_KEYS.indexOf(key) === -1;
+    }).forEach(function(key) {
+      out[key] = $('[name=' + key + ']').val();
+    });
+  }
+
+  function encodeLayoutColors(out) {
+    c.LAYOUT_COLOR_KEYS.forEach(function(key) {
       out[key] = $('[name=' + key + ']').val();
     });
   }
@@ -556,7 +601,7 @@
     };
     encodeSliders(out, MAIN_SLIDER_KEYS);
     encodePointConfig(out);
-    encodeColors(out);
+    encodeNonLayoutColors(out);
     return out;
   }
 
@@ -617,7 +662,7 @@
 
     $('[name=pointStyle]').on('click', onPointStyleClick);
 
-    $('[name=pointShape]').on('click', onPointSettingsChange);
+    $('[name=pointShape]').on('click', setTimeout.bind(this, onPointSettingsChange, 0));
     $('#pointRectHeight, #pointRectHeight-val').on('change', onPointSettingsChange);
     $('#pointWidth, #pointWidth-val').on('change', onPointSettingsChange);
     $('#pointMargin, #pointMargin-val').on('change', onPointSettingsChange);
@@ -665,7 +710,22 @@
       '.layout-element-config input',
       '[name=timeAlign]',
       '[name=batteryLoc]',
+      '[name=recencyLoc]',
+      '[name=connStatusLoc]',
     ].join(', ')).on('change', updateSelectedLayout);
+    $('[name=recencyStyle]').on('click', function() {
+      // wait until this option has the "active" class
+      setTimeout(function() {
+        updateSelectedLayout();
+        toggleRecencySettings();
+      }, 0);
+    });
+    c.LAYOUT_COLOR_KEYS.forEach(function(key) {
+      $('[name=' + key + ']').on('colorChangedByClick', updateSelectedLayout);
+    });
+
+    $('[name=recencyLoc]').on('change', toggleRecencySettings);
+    toggleRecencySettings();
 
     $('.tabs-menu a').on('click', onTabClick);
 

@@ -6,7 +6,7 @@
 #define TREND_ARROW_WIDTH 25
 
 // TODO define a "big" and "small" set of icons
-const int TREND_ICONS[] = {
+const int8_t TREND_ICONS[] = {
   NO_ICON,
   RESOURCE_ID_ARROW_DOUBLE_UP,
   RESOURCE_ID_ARROW_SINGLE_UP,
@@ -19,15 +19,15 @@ const int TREND_ICONS[] = {
   NO_ICON
 };
 
-int trend_arrow_component_width() {
+uint8_t trend_arrow_component_width() {
   return TREND_ARROW_WIDTH;
 }
 
-int trend_arrow_component_height() {
+uint8_t trend_arrow_component_height() {
   return TREND_ARROW_WIDTH;
 }
 
-TrendArrowComponent* trend_arrow_component_create(Layer *parent, int x, int y) {
+TrendArrowComponent* trend_arrow_component_create(Layer *parent, int16_t x, int16_t y) {
   BitmapLayer *icon_layer = bitmap_layer_create(GRect(x, y, TREND_ARROW_WIDTH, TREND_ARROW_WIDTH));
   bitmap_layer_set_compositing_mode(icon_layer, element_comp_op(parent));
   layer_set_hidden(bitmap_layer_get_layer(icon_layer), true);
@@ -72,7 +72,7 @@ void trend_arrow_component_update(TrendArrowComponent *c, DataMessage *data) {
   }
 }
 
-void trend_arrow_component_reposition(TrendArrowComponent *c, int x, int y) {
+void trend_arrow_component_reposition(TrendArrowComponent *c, int16_t x, int16_t y) {
   GRect frame = layer_get_frame(bitmap_layer_get_layer(c->icon_layer));
   layer_set_frame(
     bitmap_layer_get_layer(c->icon_layer),

@@ -125,7 +125,11 @@ function app(Pebble, c) {
 
   function encodeColorsForPebble(config) {
     return c.COLOR_KEYS.map(function(key) {
-      return colorHexTo8Bit(config[key]);
+      if (c.LAYOUT_COLOR_KEYS.indexOf(key) !== -1) {
+        return colorHexTo8Bit(getLayout(config)[key]);
+      } else {
+        return colorHexTo8Bit(config[key]);
+      }
     });
   }
 
@@ -144,6 +148,9 @@ function app(Pebble, c) {
       updateEveryMinute: config.updateEveryMinute ? 1 : 0,
       timeAlign: c.ALIGN[getLayout(config).timeAlign],
       batteryLoc: c.BATTERY_LOC[getLayout(config).batteryLoc],
+      connStatusLoc: c.CONN_STATUS_LOC[getLayout(config).connStatusLoc],
+      recencyLoc: c.RECENCY_LOC[getLayout(config).recencyLoc],
+      recencyStyle: c.RECENCY_STYLE[getLayout(config).recencyStyle],
       pointShape: c.POINT_SHAPE[config.pointShape],
       pointRectHeight: config.pointRectHeight,
       pointWidth: config.pointWidth,

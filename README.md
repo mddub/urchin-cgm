@@ -1,6 +1,6 @@
 A Pebble watchface for viewing [Nightscout](https://github.com/nightscout/cgm-remote-monitor) CGM data in graph format, like this:
 
-![Screenshot](http://i.imgur.com/yc5EQTW.png)
+![Screenshot](http://i.imgur.com/HzBtKpf.png)
 
 To install, enable Developer Mode in the Pebble app on your phone, then open [this pbw file][pbw] in the Pebble app.
 
@@ -10,9 +10,23 @@ Urchin CGM is an **U**nopinionated, **R**idiculously **C**onfigurable **H**uman 
 
 ## Setup
 
-Set your Nightscout host and display units on the phone. You can customize the graph:
+In the Pebble app on your phone, open the "Settings" screen to set your Nightscout URL.
 
-![](http://i.imgur.com/43SfgkQ.png) ![](http://i.imgur.com/X5RyYZq.png)
+## Layout
+
+The layout is one of the most Ridiculously Configurable aspects of Urchin. The settings page includes a handful of pre-set layouts to get you started:
+
+![](http://i.imgur.com/4DhR6s8.png) ![](http://i.imgur.com/3dV3dKa.png) ![](http://i.imgur.com/KMhoWEv.png)
+
+Use one as a starting point to build your own watchface: reorder the elements, change heights and colors, toggle borders, move the icons...
+
+## Graph
+
+Set the bounds and target range of the graph on your phone.
+
+You can choose the shape and size of the points on the graph so that the glucose history is as long or as short as you want. To show up to 12 hours of BGs, plot the points super-thin or overlapping. For a "sparkline" view of the last hour, plot bigger points with more space in between.
+
+![](http://i.imgur.com/D91OqLn.png) ![](http://i.imgur.com/7RBWAhe.png)
 
 ## Status bar content
 
@@ -30,39 +44,27 @@ The status bar can display content from a variety of sources:
 * **Custom text** - remind yourself whose glucose readings you're looking at, or leave a terse inspirational message.
 * **Multiple** - Up to 3 of the above, one on each line.
 
-## How can I tell how recent the data is?
-
-You can tell by the graph whether the data is recent. If there is no data missing, then the data is up to date. If the data is not recent, there will be a gap:
-
-![](http://i.imgur.com/toDzQea.png)
-
-## How can I tell why the data is not recent?
-
-The data that you see on your watch travels like this: `Rig -> Nightscout -> Phone -> Pebble`.
-
-![](http://i.imgur.com/FqYEiSx.png) There is a problem with the Phone -> Pebble connection; the last time the Pebble heard from the phone was 17 minutes ago. Maybe your phone is out of range. Maybe it's on airplane mode. Maybe you need to charge your phone.
-
-![](http://i.imgur.com/KuzqNK5.png) There is a problem with the Nightscout -> Phone connection; the last time your phone successfully reached Nightscout was 11 minutes ago. Maybe your phone has bad reception. Maybe your Nightscout server is down.
-
-![](http://i.imgur.com/ayrbxEm.png) There is a problem with the Rig -> Nightscout connection; the most recent data point in your Nightscout server is from 26 minutes ago. Maybe there's a problem with your receiver or uploader. Maybe the sensor fell out.
-
-## Layout
-
-The configuration page includes a handful of layout options, such as:
-
-![](http://i.imgur.com/dOxW8UY.png) ![](http://i.imgur.com/0p89kGG.png) ![](http://i.imgur.com/qsUxN2f.png)
-
-For the adventurous, any layout can be customized: reorder the elements, change their heights, set a different background color...
-
-![](http://i.imgur.com/sANZi9C.png) ![](http://i.imgur.com/648FVQB.png)
-
 ## Pump data
 
 If you are using Nightscout to track data from an insulin pump, you may choose to display **bolus history** (as ticks) and/or **basal history** (as a bar graph):
 
-![](http://i.imgur.com/quJuxYL.png)
+![](http://i.imgur.com/UmQ5Yqx.png)
 
-You can enter this data manually in [Nightcout Care Portal][care-portal] or with the ["CarePortal" Pebble app][pebble-care-portal]. Alternatively, you can set up an [OpenAPS uploader][openaps] to upload it automatically.
+To enter pump data manually, you can use [Nightcout Care Portal][care-portal] or the ["CarePortal" Pebble app][pebble-care-portal].
+
+To upload pump data automatically, you can use [RileyLink][rileylink_ios] or [Loop][loop] on iOS, or build an [OpenAPS uploader][openaps].
+
+## What do the icons mean?
+
+The data that you see on your watch travels like this: `Rig -> Nightscout -> Phone -> Pebble`.
+
+![](http://i.imgur.com/8D9uIWo.png) There is a problem with the Phone -> Pebble connection; the last time the Pebble heard from the phone was 17 minutes ago. Maybe your phone is out of range. Maybe it's on airplane mode. Maybe you need to charge your phone.
+
+![](http://i.imgur.com/cNiLolr.png) There is a problem with the Nightscout -> Phone connection; the last time your phone successfully reached Nightscout was 11 minutes ago. Maybe your phone has bad reception. Maybe your Nightscout server is down.
+
+![](http://i.imgur.com/gfaaZnQ.png) There is a problem with the Rig -> Nightscout connection; the most recent data point in your Nightscout server is from 26 minutes ago. Maybe there's a problem with your receiver or uploader. Maybe the sensor fell out.
+
+When the watch fails to fetch data, a message describing the problem briefly appears in the graph.
 
 ## Contributing
 
@@ -181,7 +183,6 @@ The most effective method of integration testing I've found is to [compare scree
 * More color configurability
 * A fixed layout which supports Pebble Time Round
 * Use data directly from Dexcom Share (no Nightscout site required)
-* Recency indicator (like Dexcom's warm-up pie chart)
 * More dynamic sizing of content (e.g. bigger/smaller time and BG)
 * etc.
 
@@ -196,6 +197,7 @@ This project is intended for educational and informational purposes only. It is 
 [Flask]: http://flask.pocoo.org/
 [ImageMagick]: http://www.imagemagick.org/
 [js-unit-tests]: https://github.com/mddub/urchin-cgm/tree/master/test/js
+[loop]: https://github.com/LoopKit/Loop
 [minimed-connect]: http://www.nightscout.info/wiki/welcome/website-features/funnel-cake-0-8-features/minimed-connect-and-nightscout
 [Mocha]: https://mochajs.org/
 [Node]: https://nodejs.org/
@@ -205,5 +207,6 @@ This project is intended for educational and informational purposes only. It is 
 [Pebble SDK Tool]: https://developer.getpebble.com/sdk/
 [pebble-care-portal]: https://apps.getpebble.com/en_US/application/568fb97705f633b362000045
 [raw-dexcom-readings]: http://www.nightscout.info/wiki/labs/interpreting-raw-dexcom-data
+[rileylink_ios]: https://github.com/ps2/rileylink_ios
 [screenshots-artifact]: https://circleci.com/api/v1/project/mddub/urchin-cgm/latest/artifacts/0/$CIRCLE_ARTIFACTS/output/screenshots.html
 [Syntastic]: https://github.com/scrooloose/syntastic

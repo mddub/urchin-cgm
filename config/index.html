@@ -566,215 +566,296 @@
           </div>
         </div>
 
-        <div class="item-container advanced-layout">
-          <div class="item-container-header">Layout order</div>
-          <div class="item-container-content">
-            <div class="layout-order">
+        <div class="advanced-layout">
+
+          <div class="item-container">
+            <div class="item-container-header">Layout order</div>
+            <div class="item-container-content">
+              <div class="layout-order">
+                <label class="item" data-element="GRAPH_ELEMENT">
+                  <input type="checkbox" class="item-checkbox">
+                  Graph
+                </label>
+                <label class="item" data-element="SIDEBAR_ELEMENT">
+                  <input type="checkbox" class="item-checkbox">
+                  Sidebar
+                </label>
+                <label class="item" data-element="STATUS_BAR_ELEMENT">
+                  <input type="checkbox" class="item-checkbox">
+                  Status bar
+                </label>
+                <label class="item" data-element="TIME_AREA_ELEMENT">
+                  <input type="checkbox" class="item-checkbox">
+                  Time area
+                </label>
+                <label class="item" data-element="BG_ROW_ELEMENT">
+                  <input type="checkbox" class="item-checkbox">
+                  BG row
+                </label>
+              </div>
+            </div>
+            <div class="item-container-footer">
+              Sidebar must come before or after graph.
+            </div>
+          </div>
+
+          <div class="item-container">
+            <div class="item-container-header">Height (0% - 100%)</div>
+            <div class="item-container-content layout-height">
               <label class="item" data-element="GRAPH_ELEMENT">
-                <input type="checkbox" class="item-checkbox">
                 Graph
+                <div class="item-input-wrapper item-slider-text">
+                  <input type="tel" min="0" max="100" class="item-input">
+                </div>
               </label>
               <label class="item" data-element="SIDEBAR_ELEMENT">
-                <input type="checkbox" class="item-checkbox">
                 Sidebar
+                <div class="item-input-wrapper item-slider-text">
+                  <input type="tel" min="0" max="100" class="item-input" disabled="disabled">
+                </div>
               </label>
               <label class="item" data-element="STATUS_BAR_ELEMENT">
-                <input type="checkbox" class="item-checkbox">
                 Status bar
+                <div class="item-input-wrapper item-slider-text">
+                  <input type="tel" min="0" max="100" class="item-input">
+                </div>
               </label>
               <label class="item" data-element="TIME_AREA_ELEMENT">
-                <input type="checkbox" class="item-checkbox">
                 Time area
+                <div class="item-input-wrapper item-slider-text">
+                  <input type="tel" min="0" max="100" class="item-input">
+                </div>
               </label>
               <label class="item" data-element="BG_ROW_ELEMENT">
-                <input type="checkbox" class="item-checkbox">
                 BG row
+                <div class="item-input-wrapper item-slider-text">
+                  <input type="tel" min="0" max="100" class="item-input">
+                </div>
               </label>
             </div>
-          </div>
-          <div class="item-container-footer">
-            Sidebar must come before or after graph.
-          </div>
-        </div>
-
-        <div class="item-container advanced-layout">
-          <div class="item-container-header">Height (0% - 100%)</div>
-          <div class="item-container-content layout-height">
-            <label class="item" data-element="GRAPH_ELEMENT">
-              Graph
-              <div class="item-input-wrapper item-slider-text">
-                <input type="tel" min="0" max="100" class="item-input">
-              </div>
-            </label>
-            <label class="item" data-element="SIDEBAR_ELEMENT">
-              Sidebar
-              <div class="item-input-wrapper item-slider-text">
-                <input type="tel" min="0" max="100" class="item-input" disabled="disabled">
-              </div>
-            </label>
-            <label class="item" data-element="STATUS_BAR_ELEMENT">
-              Status bar
-              <div class="item-input-wrapper item-slider-text">
-                <input type="tel" min="0" max="100" class="item-input">
-              </div>
-            </label>
-            <label class="item" data-element="TIME_AREA_ELEMENT">
-              Time area
-              <div class="item-input-wrapper item-slider-text">
-                <input type="tel" min="0" max="100" class="item-input">
-              </div>
-            </label>
-            <label class="item" data-element="BG_ROW_ELEMENT">
-              BG row
-              <div class="item-input-wrapper item-slider-text">
-                <input type="tel" min="0" max="100" class="item-input">
-              </div>
-            </label>
-          </div>
-          <div class="item-container-footer">
-            All elements with a height of 0% will share the space remaining from elements with non-zero height. The sidebar always has the same height as the graph.
-          </div>
-        </div>
-
-        <div class="layout-element-config advanced-layout">
-          <div class="item-container" data-element="GRAPH_ELEMENT">
-            <div class="item-container-header">
-              Graph
+            <div class="item-container-footer">
+              All elements with a height of 0% will share the space remaining from elements with non-zero height. The sidebar always has the same height as the graph.
             </div>
+          </div>
+
+          <div class="layout-element-config">
+            <div class="item-container" data-element="GRAPH_ELEMENT">
+              <div class="item-container-header">
+                Graph
+              </div>
+              <div class="item-container-content">
+                <label class="item">
+                  <input type="checkbox" class="item-checkbox" name="black">
+                  Black background
+                </label>
+                <label class="item">
+                  <input type="checkbox" class="item-checkbox" name="bottom">
+                  Bottom border
+                </label>
+                <label class="item">
+                  <input type="checkbox" class="item-checkbox" name="right">
+                  Right border
+                </label>
+              </div>
+            </div>
+
+            <div class="item-container" data-element="SIDEBAR_ELEMENT">
+              <div class="item-container-header">
+                Sidebar
+              </div>
+              <div class="item-container-content">
+                <label class="item">
+                  <input type="checkbox" class="item-checkbox" name="black">
+                  Black background
+                </label>
+                <label class="item">
+                  <input type="checkbox" class="item-checkbox" name="bottom">
+                  Bottom border
+                </label>
+                <label class="item">
+                  <input type="checkbox" class="item-checkbox" name="right">
+                  Right border
+                </label>
+              </div>
+            </div>
+
+            <div class="item-container" data-element="STATUS_BAR_ELEMENT">
+              <div class="item-container-header">
+                Status bar
+              </div>
+              <div class="item-container-content">
+                <label class="item">
+                  <input type="checkbox" class="item-checkbox" name="black">
+                  Black background
+                </label>
+                <label class="item">
+                  <input type="checkbox" class="item-checkbox" name="bottom">
+                  Bottom border
+                </label>
+                <label class="item">
+                  <input type="checkbox" class="item-checkbox" name="right">
+                  Right border
+                </label>
+              </div>
+            </div>
+
+            <div class="item-container" data-element="TIME_AREA_ELEMENT">
+              <div class="item-container-header">
+                Time area
+              </div>
+              <div class="item-container-content">
+                <label class="item">
+                  <input type="checkbox" class="item-checkbox" name="black">
+                  Black background
+                </label>
+                <label class="item">
+                  <input type="checkbox" class="item-checkbox" name="bottom">
+                  Bottom border
+                </label>
+                <label class="item">
+                  <input type="checkbox" class="item-checkbox" name="right">
+                  Right border
+                </label>
+              </div>
+            </div>
+
+            <div class="item-container" data-element="BG_ROW_ELEMENT">
+              <div class="item-container-header">
+                BG row
+              </div>
+              <div class="item-container-content">
+                <label class="item">
+                  <input type="checkbox" class="item-checkbox" name="black">
+                  Black background
+                </label>
+                <label class="item">
+                  <input type="checkbox" class="item-checkbox" name="bottom">
+                  Bottom border
+                </label>
+                <label class="item">
+                  <input type="checkbox" class="item-checkbox" name="right">
+                  Right border
+                </label>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="item-container">
+            <div class="item-container-header">Time alignment</div>
             <div class="item-container-content">
               <label class="item">
-                <input type="checkbox" class="item-checkbox" name="black">
-                Black background
-              </label>
-              <label class="item">
-                <input type="checkbox" class="item-checkbox" name="bottom">
-                Bottom border
-              </label>
-              <label class="item">
-                <input type="checkbox" class="item-checkbox" name="right">
-                Right border
+                &nbsp;
+                <select id="timeAlign" name="timeAlign" dir="rtl" class="item-select">
+                  <option value="left" class="item-select-option">Left</option>
+                  <option value="center" class="item-select-option">Center</option>
+                  <option value="right" class="item-select-option">Right</option>
+                </select>
               </label>
             </div>
           </div>
 
-          <div class="item-container" data-element="SIDEBAR_ELEMENT">
-            <div class="item-container-header">
-              Sidebar
-            </div>
+          <div class="item-container">
+            <div class="item-container-header">Battery location</div>
             <div class="item-container-content">
               <label class="item">
-                <input type="checkbox" class="item-checkbox" name="black">
-                Black background
-              </label>
-              <label class="item">
-                <input type="checkbox" class="item-checkbox" name="bottom">
-                Bottom border
-              </label>
-              <label class="item">
-                <input type="checkbox" class="item-checkbox" name="right">
-                Right border
+                &nbsp;
+                <select id="batteryLoc" name="batteryLoc" dir="rtl" class="item-select">
+                  <option value="none" class="item-select-option">Don't show</option>
+                  <option value="statusRight" class="item-select-option">Status bar - bottom right</option>
+                  <option value="timeTopLeft" class="item-select-option">Time - top left</option>
+                  <option value="timeTopRight" class="item-select-option">Time - top right</option>
+                  <option value="timeBottomLeft" class="item-select-option">Time - bottom left</option>
+                  <option value="timeBottomRight" class="item-select-option">Time - bottom right</option>
+                </select>
               </label>
             </div>
           </div>
 
-          <div class="item-container" data-element="STATUS_BAR_ELEMENT">
-            <div class="item-container-header">
-              Status bar
-            </div>
+          <div class="item-container">
+            <div class="item-container-header">Connection status location</div>
             <div class="item-container-content">
               <label class="item">
-                <input type="checkbox" class="item-checkbox" name="black">
-                Black background
-              </label>
-              <label class="item">
-                <input type="checkbox" class="item-checkbox" name="bottom">
-                Bottom border
-              </label>
-              <label class="item">
-                <input type="checkbox" class="item-checkbox" name="right">
-                Right border
+                &nbsp;
+                <select id="connStatusLoc" name="connStatusLoc" dir="rtl" class="item-select">
+                  <option value="none" class="item-select-option">Don't show</option>
+                  <option value="graphTopLeft" class="item-select-option">Graph - top left</option>
+                  <option value="graphBottomLeft" class="item-select-option">Graph - bottom left</option>
+                </select>
               </label>
             </div>
           </div>
 
-          <div class="item-container" data-element="TIME_AREA_ELEMENT">
-            <div class="item-container-header">
-              Time area
-            </div>
+          <div class="item-container">
+            <div class="item-container-header">Minutes-ago location</div>
             <div class="item-container-content">
               <label class="item">
-                <input type="checkbox" class="item-checkbox" name="black">
-                Black background
-              </label>
-              <label class="item">
-                <input type="checkbox" class="item-checkbox" name="bottom">
-                Bottom border
-              </label>
-              <label class="item">
-                <input type="checkbox" class="item-checkbox" name="right">
-                Right border
+                &nbsp;
+                <select id="recencyLoc" name="recencyLoc" dir="rtl" class="item-select">
+                  <option value="none" class="item-select-option">Don't show</option>
+                  <option value="graphTopLeft" class="item-select-option">Graph - top left</option>
+                  <option value="graphBottomLeft" class="item-select-option">Graph - bottom left</option>
+                  <option value="statusTopRight" class="item-select-option">Status bar - top right</option>
+                  <option value="statusBottomRight" class="item-select-option">Status bar - bottom right</option>
+                  <option value="timeTopLeft" class="item-select-option">Time - top left</option>
+                  <option value="timeTopRight" class="item-select-option">Time - top right</option>
+                  <option value="timeBottomLeft" class="item-select-option">Time - bottom left</option>
+                  <option value="timeBottomRight" class="item-select-option">Time - bottom right</option>
+                </select>
               </label>
             </div>
           </div>
 
-          <div class="item-container" data-element="BG_ROW_ELEMENT">
-            <div class="item-container-header">
-              BG row
-            </div>
+          <div class="item-container recency-settings">
+            <div class="item-container-header">Minutes-ago style</div>
             <div class="item-container-content">
-              <label class="item">
-                <input type="checkbox" class="item-checkbox" name="black">
-                Black background
-              </label>
-              <label class="item">
-                <input type="checkbox" class="item-checkbox" name="bottom">
-                Bottom border
-              </label>
-              <label class="item">
-                <input type="checkbox" class="item-checkbox" name="right">
-                Right border
-              </label>
+              <div class="item tab-buttons recency-style-options">
+                <a name="recencyStyle" value="smallNoCircle" class="tab-button">
+                  <div class="recency-style-option recency-style-small-no-circle"></div>
+                </a>
+                <a name="recencyStyle" value="mediumPie" class="tab-button">
+                  <div class="recency-style-option recency-style-medium-pie"></div>
+                </a>
+                <a name="recencyStyle" value="mediumRing" class="tab-button">
+                  <div class="recency-style-option recency-style-medium-ring"></div>
+                </a>
+                <a name="recencyStyle" value="mediumNoCircle" class="tab-button">
+                  <div class="recency-style-option recency-style-medium-no-circle"></div>
+                </a>
+                <a name="recencyStyle" value="largePie" class="tab-button">
+                  <div class="recency-style-option recency-style-large-pie"></div>
+                </a>
+                <a name="recencyStyle" value="largeRing" class="tab-button">
+                  <div class="recency-style-option recency-style-large-ring"></div>
+                </a>
+                <a name="recencyStyle" value="largeNoCircle" class="tab-button">
+                  <div class="recency-style-option recency-style-large-no-circle"></div>
+                </a>
+              </div>
             </div>
           </div>
 
-        </div>
-
-        <div class="item-container advanced-layout">
-          <div class="item-container-header">Time alignment</div>
-          <div class="item-container-content">
-            <label class="item">
-              &nbsp;
-              <select id="timeAlign" name="timeAlign" dir="rtl" class="item-select">
-                <option value="left" class="item-select-option">Left</option>
-                <option value="center" class="item-select-option">Center</option>
-                <option value="right" class="item-select-option">Right</option>
-              </select>
-            </label>
+          <div class="color-platforms-only">
+            <div class="item-container recency-settings">
+              <div class="item-container-header">Minutes-ago colors</div>
+              <div class="item-container-content">
+                <label class="item">
+                  Text
+                  <input type="text" class="item-color item-color-normal" name="recencyColorText" value="#000000">
+                </label>
+                <label class="item recency-color-circle">
+                  Circle
+                  <input type="text" class="item-color item-color-normal" name="recencyColorCircle" value="#000000">
+                </label>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div class="item-container advanced-layout">
-          <div class="item-container-header">Battery location</div>
-          <div class="item-container-content">
-            <label class="item">
-              &nbsp;
-              <select id="batteryLoc" name="batteryLoc" dir="rtl" class="item-select">
-                <option value="none" class="item-select-option">Don't show</option>
-                <option value="statusRight" class="item-select-option">Status bar</option>
-                <option value="timeTopLeft" class="item-select-option">Time - top left</option>
-                <option value="timeTopRight" class="item-select-option">Time - top right</option>
-                <option value="timeBottomLeft" class="item-select-option">Time - bottom left</option>
-                <option value="timeBottomRight" class="item-select-option">Time - bottom right</option>
-              </select>
-            </label>
+          <div class="item-container">
+            <div class="item-container-footer">
+              Crafted a beautiful custom layout? Improved a preset layout? Found a bug? Please share: post an issue on the Urchin CGM GitHub page!
+            </div>
           </div>
-        </div>
-
-        <div class="item-container advanced-layout">
-          <div class="item-container-footer">
-            Crafted a beautiful custom layout? Improved a preset layout? Found a bug? Please share: post an issue on the Urchin CGM GitHub page!
-          </div>
-        </div>
 
         </div>
 
