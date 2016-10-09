@@ -10,6 +10,7 @@ DEBUG = os.environ.get('DEBUG')
 CONSTANTS_FILE = 'src/js/constants.json'
 INCLUDES_FOR_CONFIG_PAGE = [
     'config/js/vendor.min.js',
+    'src/js/date_formatter.js',
     'src/js/points.js'
 ]
 

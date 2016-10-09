@@ -310,6 +310,7 @@
               &nbsp;
               <select id="statusContent" dir="rtl" class="item-select">
                 <option value="none" class="item-select-option">None</option>
+                <option value="date" class="item-select-option">Date</option>
                 <option value="rigbattery" class="item-select-option">Uploader battery level</option>
                 <option value="rawdata" class="item-select-option">Raw Dexcom reading</option>
                 <option value="rig-raw" class="item-select-option">Uploader battery, Dexcom raw</option>
@@ -336,6 +337,47 @@
 
         <div class="item-container status-extra status-line-option" data-keys="multiple" data-field="statusLine3">
           <div class="item-container-header">Status line 3</div>
+        </div>
+
+        <div class="item-container status-extra" data-keys="date">
+          <div class="item-container-header">Date format</div>
+          <div class="item-container-content">
+            <label class="item">
+              &nbsp;
+              <select name="statusDateFormat" class="item-select">
+                <option value="ddd mmm d" class="item-select-option"></option>
+                <option value="ddd d mmm" class="item-select-option"></option>
+                <option value="dddd, mmm d" class="item-select-option"></option>
+                <option value="d mmm dddd" class="item-select-option"></option>
+                <option value="ddd yyyy-mm-dd" class="item-select-option"></option>
+                <option value="ddd yyyy/mm/dd" class="item-select-option"></option>
+                <option value="ddd m/d/yyyy" class="item-select-option"></option>
+                <option value="ddd mmm d yyyy" class="item-select-option"></option>
+                <option value="mmmm d, yyyy" class="item-select-option"></option>
+                <option value="custom" class="item-select-option">Custom</option>
+              </select>
+            </label>
+          </div>
+          <div class="item-container-footer" style="text-align: right;">
+            <code class="status-date-format-string"></code>
+          </div>
+        </div>
+
+        <div class="item-container status-date-custom-format" data-keys="date">
+          <div class="item-container-header">Custom date format</div>
+          <div class="item-container-content">
+            <label class="item">
+              <div class="item-input-wrapper">
+                <input name="statusDateCustomFormat" type="text" size="255" class="item-input">
+              </div>
+            </label>
+          </div>
+          <div class="item-container-footer">
+            <strong class="status-date-preview"></strong>
+            <div>
+              <code>yy</code>/<code>yyyy</code> = year. <code>m</code>/<code>mm</code>/<code>mmm</code>/<code>mmmm</code> = month. <code>d</code>/<code>dd</code> = date. <code>ddd</code>/<code>dddd</code> = day of week.
+            </div>
+          </div>
         </div>
 
         <div class="item-container status-extra" data-keys="rawdata rig-raw">

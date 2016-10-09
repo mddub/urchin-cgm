@@ -1,6 +1,6 @@
 A Pebble watchface for viewing [Nightscout](https://github.com/nightscout/cgm-remote-monitor) CGM data in graph format, like this:
 
-![Screenshot](http://i.imgur.com/HzBtKpf.png)
+![Screenshot](http://i.imgur.com/xefGk6A.png)
 
 To install, enable Developer Mode in the Pebble app on your phone, then open [this pbw file][pbw] in the Pebble app.
 
@@ -16,7 +16,7 @@ In the Pebble app on your phone, open the "Settings" screen to set your Nightsco
 
 The layout is one of the most Ridiculously Configurable aspects of Urchin. The settings page includes a handful of pre-set layouts to get you started:
 
-![](http://i.imgur.com/4DhR6s8.png) ![](http://i.imgur.com/3dV3dKa.png) ![](http://i.imgur.com/KMhoWEv.png)
+![](http://i.imgur.com/o8hLgv9.png) ![](http://i.imgur.com/c81Yr4R.png) ![](http://i.imgur.com/KMhoWEv.png)
 
 Use one as a starting point to build your own watchface: reorder the elements, change heights and colors, toggle borders, move the icons...
 
@@ -32,17 +32,20 @@ You can choose the shape and size of the points on the graph so that the glucose
 
 The status bar can display content from a variety of sources:
 
+* **Date** - in whatever format you want. (e.g. `Sat Oct 7`)
 * **Uploader battery level** - if your Nightscout data comes from a wired rig/xDrip. (e.g. `36%`)
 * **Raw Dexcom readings** - [raw sensor readings][raw-dexcom-readings] plus noise level. (e.g. `Cln 97 104 106`)
 * **Uploader battery, Dexcom raw** - combination of the above two. (e.g. `36% Cln 97 104 106`)
-* **Active basal - NS Care Portal** - the currently-active basal rate based on treatments in [Nightscout Care Portal][care-portal]. If a temp basal is currently active, shows the difference from normal basal and how many minutes ago the temp basal began. (e.g. `1.5u/h +0.6 (19)`)
+* **Active basal - NS Care Portal** - the currently-active basal rate based on treatments in [Nightscout Care Portal][care-portal]. If a temp basal is currently active, shows the difference from normal basal and how many minutes ago the temp basal began. (e.g. `(19) 1.5u/h +0.6`)
 * **Insulin on board** - this can be calculated from treatments entered manually in [Nightscout Care Portal][care-portal], or reported automatically by a [MiniMed Connect][minimed-connect] or [OpenAPS][openaps-status-uploads] device. (e.g. `2.3 u`)
 * **Insulin + carbs on board** - same IOB as above plus carbs-on-board entered in Care Portal. (e.g. `2.3 u  31 g`)
-* **IOB and temp - OpenAPS** - IOB and currently-active temp basal rate from the most recent [OpenAPS status upload][openaps-status-uploads], or if the most recent status indicates failure, the time since that failure plus the time and IOB from the last successful status. (e.g. `(2) 1.1u 1.9x13` or `(4) -- | (23) 2.2u`)
+* **IOB and temp - OpenAPS** - IOB and currently-active temp basal rate from the most recent [OpenAPS status upload][openaps-status-uploads], or if the most recent status indicates failure, the time since that failure plus the time and IOB from the last successful status. (e.g. `(2) 1.1u 1.9x13` or `(4) -- | (+23) 2.2u`)
 * **Custom URL - text** - if you want to summarize your data in a custom way.
 * **Custom URL - JSON** - show custom text, with support for a `timestamp` field to display recency (e.g. `(3) your text`).
 * **Custom text** - remind yourself whose glucose readings you're looking at, or leave a terse inspirational message.
 * **Multiple** - Up to 3 of the above, one on each line.
+
+The recency indicator in the status bar is configurable. You can choose the format (`(3)`, `3:`, etc.) and the conditions under which it is shown (for example, "don't show the recency as long as it's fewer than 10 minutes old," or "don't show the status at all when it's more than 30 minutes old")
 
 ## Pump data
 
@@ -179,7 +182,6 @@ The most effective method of integration testing I've found is to [compare scree
 ## To do:
 * High/low BG alerts
 * Stale data alerts
-* Show date when space allows
 * More color configurability
 * A fixed layout which supports Pebble Time Round
 * Use data directly from Dexcom Share (no Nightscout site required)

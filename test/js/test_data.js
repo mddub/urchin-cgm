@@ -946,3 +946,49 @@ describe('getShareSGVsDateDescending', function() {
       .then(afterThirdFetch);
   });
 });
+
+describe('getStatusDate', function() {
+  var d;
+
+  beforeEach(function() {
+    timekeeper.freeze(new Date("2016-08-07T09:20:25-07:00"));
+    d = defaultData();
+  });
+
+  it('should format "ddd yyyy-mm-dd"', function() {
+    return d.getStatusText({
+      statusContent: 'date',
+      statusDateFormat: 'ddd yyyy-mm-dd',
+    }).then(function(date) {
+      expect(date.text).to.be('Sun 2016-08-07');
+    });
+  });
+
+  it('should format "ddd m/d/yy"', function() {
+    return d.getStatusText({
+      statusContent: 'date',
+      statusDateFormat: 'ddd m/d/yy',
+    }).then(function(date) {
+      expect(date.text).to.be('Sun 8/7/16');
+    });
+  });
+
+  it('should format "d mmm ddd"', function() {
+    return d.getStatusText({
+      statusContent: 'date',
+      statusDateFormat: 'd mmm ddd',
+    }).then(function(date) {
+      expect(date.text).to.be('7 Aug Sun');
+    });
+  });
+
+  it('should accept custom format, and format "dddd, mmm d yyyy"', function() {
+    return d.getStatusText({
+      statusContent: 'date',
+      statusDateFormat: 'custom',
+      statusDateCustomFormat: 'dddd, mmmm d, yyyy',
+    }).then(function(date) {
+      expect(date.text).to.be('Sunday, August 7, 2016');
+    });
+  });
+});

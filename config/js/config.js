@@ -34,7 +34,6 @@
       // v0.0.11: IOB from /pebble now handles both Care Portal and devicestatus IOB
       config.statusContent = 'pebbleiob';
     }
-
     // v0.0.12: new layout properties
     if (config.customLayout) {
       config.customLayout.connStatusLoc = config.customLayout.connStatusLoc || c.DEFAULT_CONFIG.customLayout.connStatusLoc;
@@ -43,6 +42,9 @@
       config.customLayout.recencyColorCircle = config.customLayout.recencyColorCircle || c.DEFAULT_CONFIG.customLayout.recencyColorCircle;
       config.customLayout.recencyColorText = config.customLayout.recencyColorText || c.DEFAULT_CONFIG.customLayout.recencyColorText;
     }
+    // v0.0.12: new status option
+    config.statusDateFormat = config.statusDateFormat || c.DEFAULT_CONFIG.statusDateFormat;
+    config.statusDateCustomFormat = config.statusDateCustomFormat || c.DEFAULT_CONFIG.statusDateCustomFormat;
 
     return config;
   }
@@ -412,6 +414,13 @@
     createMultipleStatusLineOptions(current);
     $('#statusContent').on('change', toggleStatusExtraOptions);
     toggleStatusExtraOptions();
+
+    $('[name=statusDateFormat] option').forEach(function(o) {
+      var format = $(o).val();
+      if (format !== 'custom') {
+        $(o).text(window.dateFormatter(format));
+      }
+    });
   }
 
   function createMultipleStatusLineOptions(current) {
@@ -444,8 +453,25 @@
       );
     });
 
-    var showStatusRecencyOptions = ['none', 'rawdata', 'customurl', 'customtext'].indexOf(mainKey) === -1;
+    var showStatusRecencyOptions = ['none', 'date', 'rawdata', 'customurl', 'customtext'].indexOf(mainKey) === -1;
     $('.status-recency-options').toggle(showStatusRecencyOptions);
+  }
+
+  function onStatusDateFormatChange() {
+    var format = $('[name=statusDateFormat]').val();
+    if (format === 'custom') {
+      $('.status-date-custom-format').show();
+      $('.status-date-format-string').hide();
+    } else {
+      $('.status-date-custom-format').hide();
+      $('.status-date-format-string').show().text(format);
+    }
+  }
+
+  function onStatusDateCustomFormatChange() {
+    $('.status-date-preview').text(
+      window.dateFormatter($('[name=statusDateCustomFormat]').val())
+    );
   }
 
   function onTabClick(e) {
@@ -466,8 +492,8 @@
 
   function populateSliders(current, sliderKeys) {
     sliderKeys.forEach(function(key) {
-      document.getElementById(key).value = current[key] !== undefined ? current[key] : '';
-      document.getElementById(key + '-val').value = current[key] !== undefined ? current[key] : '';
+      $('#' + key).val(current[key] !== undefined ? current[key] : '');
+      $('#' + key + '-val').val(current[key] !== undefined ? current[key] : '');
     });
   }
 
@@ -523,12 +549,12 @@
   }
 
   function populateValues(current) {
-    document.getElementById('ns-url').value = current['nightscout_url'] || '';
+    $('#ns-url').val(current['nightscout_url'] || '');
 
     if (current.mmol === true) {
-      document.getElementById('units-mmol').className += ' active';
+      $('#units-mmol').addClass('active');
     } else {
-      document.getElementById('units-mgdl').className += ' active';
+      $('#units-mgdl').addClass('active');
     }
 
     populateSliders(current, MAIN_SLIDER_KEYS);
@@ -537,12 +563,14 @@
 
     $('[name=plotLineIsCustomColor]').val(current['plotLineIsCustomColor'] ? 'true' : 'false');
 
-    document.getElementById('hGridlines').value = current['hGridlines'];
+    $('#hGridlines').val(current['hGridlines']);
 
-    document.getElementById('statusContent').value = current['statusContent'];
-    document.getElementById('statusText').value = current['statusText'] || '';
-    document.getElementById('statusUrl').value = current['statusUrl'] || '';
-    document.getElementById('statusJsonUrl').value = current['statusJsonUrl'] || '';
+    $('[name=statusDateFormat]').val(current['statusDateFormat']);
+    $('[name=statusDateCustomFormat]').val(current['statusDateCustomFormat']);
+    $('#statusContent').val(current['statusContent']);
+    $('#statusText').val(current['statusText'] || '');
+    $('#statusUrl').val(current['statusUrl'] || '');
+    $('#statusJsonUrl').val(current['statusJsonUrl'] || '');
     $('[name=statusOpenAPSNetBasal]').val(current['statusOpenAPSNetBasal'] ? 'true' : 'false');
     $('[name=statusOpenAPSEvBG]').prop('checked', !!current['statusOpenAPSEvBG']);
     $('[name=statusMinRecencyToShowMinutes]').val(current['statusMinRecencyToShowMinutes']);
@@ -572,17 +600,19 @@
     if (layout === 'custom') {
       customLayout = encodeLayout();
     }
-    var mmol = document.getElementById('units-mgdl').className.indexOf('active') === -1;
+    var mmol = $('#units-mmol').hasClass('active');
     var out = {
       version: c.VERSION,
       mmol: mmol,
-      nightscout_url: document.getElementById('ns-url').value.replace(/\/$/, ''),
-      hGridlines: tryParseInt(document.getElementById('hGridlines').value),
+      nightscout_url: $('#ns-url').val().replace(/\/$/, ''),
+      hGridlines: tryParseInt($('#hGridlines').val()),
       plotLineIsCustomColor: $('[name=plotLineIsCustomColor]').val() === 'true',
-      statusContent: document.getElementById('statusContent').value,
-      statusText: document.getElementById('statusText').value,
-      statusUrl: document.getElementById('statusUrl').value,
-      statusJsonUrl: document.getElementById('statusJsonUrl').value,
+      statusContent: $('#statusContent').val(),
+      statusDateFormat: $('[name=statusDateFormat]').val(),
+      statusDateCustomFormat: $('[name=statusDateCustomFormat]').val(),
+      statusText: $('#statusText').val(),
+      statusUrl: $('#statusUrl').val(),
+      statusJsonUrl: $('#statusJsonUrl').val(),
       statusOpenAPSNetBasal: $('[name=statusOpenAPSNetBasal]').val() === 'true',
       statusOpenAPSEvBG: $('[name=statusOpenAPSEvBG]').is(':checked'),
       statusLine1: $('#statusLine1').val(),
@@ -654,6 +684,11 @@
     $('.color-platforms-only').toggle(['aplite', 'diorite'].indexOf(getQueryParam('pf')) === -1);
 
     initializeStatusOptions(current);
+
+    $('[name=statusDateFormat]').on('change', onStatusDateFormatChange);
+    onStatusDateFormatChange();
+    $('[name=statusDateCustomFormat]').on('keyup', onStatusDateCustomFormatChange);
+    onStatusDateCustomFormatChange();
 
     $('#basalGraph').on('change', function(evt) {
       $('#basal-height-container').toggle($(evt.currentTarget).is(':checked'));
@@ -729,7 +764,7 @@
 
     $('.tabs-menu a').on('click', onTabClick);
 
-    document.getElementById('config-form').addEventListener('submit', onSubmit);
+    $('#config-form').on('submit', onSubmit);
 
     trackGA();
 
