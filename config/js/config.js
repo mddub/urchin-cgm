@@ -662,7 +662,7 @@
 
     $('[name=pointStyle]').on('click', onPointStyleClick);
 
-    $('[name=pointShape]').on('click', onPointSettingsChange);
+    $('[name=pointShape]').on('click', setTimeout.bind(this, onPointSettingsChange, 0));
     $('#pointRectHeight, #pointRectHeight-val').on('change', onPointSettingsChange);
     $('#pointWidth, #pointWidth-val').on('change', onPointSettingsChange);
     $('#pointMargin, #pointMargin-val').on('change', onPointSettingsChange);
