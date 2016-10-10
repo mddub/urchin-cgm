@@ -3,7 +3,6 @@
 #include "preferences.h"
 #include "time_element.h"
 
-#include "generated/test_maybe.h"
 #define TESTING_TIME_DISPLAY "13:37"
 
 static BatteryComponent *create_battery_component(Layer *parent, uint8_t battery_loc) {

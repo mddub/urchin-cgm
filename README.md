@@ -83,7 +83,7 @@ Contributions are welcome in the form of bugs and pull requests. To report a bug
 
 * Build and run the watchface with a command like:
   ```
-  pebble clean && pebble build && pebble install --emulator basalt && pebble logs
+  pebble build && pebble install --emulator basalt && pebble logs
   ```
 
 * The watchface will ask for settings from the "phone." Open the configuration page with this command and hit "save" in your browser (you'll need to do this only once):
@@ -146,7 +146,7 @@ The most effective method of integration testing I've found is to [compare scree
 
   Build the watchface as usual:
   ```
-  pebble clean && pebble build && pebble install --emulator basalt && pebble logs
+  pebble build && pebble install --emulator basalt && pebble logs
   ```
 
   Use an editor to save mock data, send it to the server, verify it:

@@ -1,5 +1,4 @@
 build
-src/generated
 src/js/generated
 config/js/generated
 test/output

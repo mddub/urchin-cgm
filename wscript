@@ -4,69 +4,34 @@ import os
 
 from waflib.Task import Task
 
-DEFAULT_BUILD_ENV = 'production'
-BUILD_ENV = os.environ.get('BUILD_ENV', DEFAULT_BUILD_ENV)
-DEBUG = os.environ.get('DEBUG')
-CONSTANTS_FILE = 'src/js/constants.json'
-INCLUDES_FOR_CONFIG_PAGE = [
-    'config/js/vendor.min.js',
-    'src/js/date_formatter.js',
-    'src/js/points.js'
-]
-
-ENV_CONSTANTS_OVERRIDES = {
-    'test': {
+def add_environment_specific_constants(out, build_env, debug):
+    if build_env == 'test':
         # Don't clobber config in localStorage with test config
-        'LOCAL_STORAGE_KEY_CONFIG': 'test_config',
-    },
-    'development': {
+        out['LOCAL_STORAGE_KEY_CONFIG'] = 'test_config'
+    elif build_env == 'development':
         # Can't use `pebble emu-app-config --file` because it bypasses the JS
         # which adds current config as a query param when it opens the page:
         # https://github.com/pebble/pebble-tool/blob/0e51fa/pebble_tool/commands/emucontrol.py#L116
-        'CONFIG_URL': 'file://{}/config/index.html'.format(os.path.abspath(os.path.curdir))
-    }
-}
+        out['CONFIG_URL'] = 'file://{}/config/index.html'.format(os.path.abspath(os.path.curdir))
+    if debug:
+        out['DEBUG'] = True
 
-TEST_HEADERS = """
-#define IS_TEST_BUILD 1
-"""
+class generate_constants_json(Task):
+    vars = ['BUILD_ENV', 'DEBUG']
+    def run(self):
+        constants = json.loads(self.inputs[0].read())
+        add_environment_specific_constants(constants, self.env.BUILD_ENV, self.env.DEBUG)
+        self.outputs[0].write(json.dumps(constants))
 
-def ensure_dir(filename):
-    try:
-        os.makedirs(os.path.dirname(filename))
-    except OSError as e:
-        if e.errno != errno.EEXIST:
-            raise
-
-def constants_for_environment():
-    constants = json.loads(open(CONSTANTS_FILE).read())
-    constants.update(ENV_CONSTANTS_OVERRIDES.get(BUILD_ENV, {}))
-    constants.update(DEBUG=DEBUG)
-    return constants
-
-def generate_constants_file(ctx):
-    target = 'src/js/generated/constants.json'
-    ensure_dir(target)
-    with open(target, 'w') as f:
-        f.write(json.dumps(constants_for_environment()))
-
-def generate_testing_headers_maybe(ctx):
-    target = 'src/generated/test_maybe.h'
-    ensure_dir(target)
-    if BUILD_ENV == 'test':
-        with open(target, 'w') as f:
-            f.write(TEST_HEADERS)
-    else:
-        open(target, 'w').close()
-
-def include_js_for_config_page(ctx):
-    target = 'config/js/generated/includes.js'
-    ensure_dir(target)
-    includes = "window.CONSTANTS = {};".format(json.dumps(constants_for_environment()))
-    for js_file in INCLUDES_FOR_CONFIG_PAGE:
-        includes += '\n(function() { /* %s */\n%s\n})();' % (js_file, open(js_file).read())
-    with open(target, 'w') as f:
-        f.write(includes)
+class generate_js_includes_for_config_page(Task):
+    vars = ['BUILD_ENV', 'DEBUG']
+    def run(self):
+        constants = json.loads(self.inputs[0].read())
+        add_environment_specific_constants(constants, self.env.BUILD_ENV, self.env.DEBUG)
+        includes = "window.CONSTANTS = {};".format(json.dumps(constants))
+        for js_file in self.inputs[1:]:
+            includes += '\n(function() { /* %s */\n%s\n})();' % (js_file.relpath(), js_file.read())
+        self.outputs[0].write(includes)
 
 top = '.'
 out = 'build'
@@ -80,21 +45,47 @@ def configure(ctx):
 def build(ctx):
     ctx.load('pebble_sdk')
 
-    # TODO: specify these the right way so that they can be rebuilt without `pebble clean`
-    ctx.add_pre_fun(generate_testing_headers_maybe)
-    ctx.add_pre_fun(generate_constants_file)
-    ctx.add_pre_fun(include_js_for_config_page)
-
     binaries = []
 
     for p in ctx.env.TARGET_PLATFORMS:
         ctx.set_env(ctx.all_envs[p])
         ctx.set_group(ctx.env.PLATFORM_NAME)
+        if os.environ.get('BUILD_ENV') == 'test':
+            # When running screenshot tests, the watchface needs to know it's
+            # under test so that fake data can be shown (e.g. current time).
+            ctx.env.append_value('DEFINES', 'IS_TEST_BUILD')
+
         app_elf='{}/pebble-app.elf'.format(ctx.env.BUILD_DIR)
         ctx.pbl_program(source=ctx.path.ant_glob('src/**/*.c'), target=app_elf)
         binaries.append({'platform': p, 'app_elf': app_elf})
 
     ctx.set_group('bundle')
-    ctx.pbl_bundle(binaries=binaries,
-                   js=ctx.path.ant_glob(['src/js/**/*.js', 'src/js/**/*.json']),
-                   js_entry_file='src/js/app.js')
+
+    ctx.env.BUILD_ENV = os.environ.get('BUILD_ENV', 'production')
+    ctx.env.DEBUG = os.environ.get('DEBUG')
+
+    config_js_includes = ctx.srcnode.make_node('config/js/generated/includes.js')
+    config_js_includes.parent.mkdir()
+    gen_js_includes = generate_js_includes_for_config_page(env=ctx.env)
+    gen_js_includes.set_inputs([
+        ctx.path.find_resource('src/js/constants.json'),
+        ctx.path.find_resource('config/js/vendor.min.js'),
+        ctx.path.find_resource('src/js/date_formatter.js'),
+        ctx.path.find_resource('src/js/points.js'),
+    ])
+    gen_js_includes.set_outputs(config_js_includes)
+    ctx.add_to_group(gen_js_includes)
+
+    # This must be in the src/ directory to be available to `require` in JS
+    constants_json = ctx.srcnode.make_node('src/js/generated/constants.json')
+    constants_json.parent.mkdir()
+    gen_constants = generate_constants_json(env=ctx.env)
+    gen_constants.set_inputs(ctx.path.find_resource('src/js/constants.json'))
+    gen_constants.set_outputs(constants_json)
+    ctx.add_to_group(gen_constants)
+
+    ctx.pbl_bundle(
+        binaries=binaries,
+        js=ctx.path.ant_glob(['src/js/**/*.js', 'src/js/**/*.json']),
+        js_entry_file='src/js/app.js'
+    )
