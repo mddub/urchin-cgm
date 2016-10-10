@@ -280,7 +280,9 @@ var data = function(c, maxSGVCount) {
       d.getRawData(config),
     ]).then(function(results) {
       var rigBattery = results[0];
-      var text = results.filter(
+      var text = results.map(function(v) {
+        return v.text;
+      }).filter(
         function(v) { return v !== '-'; }
       ).join(' ') || '-';
       return {text: text, recency: rigBattery.recency};
