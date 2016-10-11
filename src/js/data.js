@@ -5,14 +5,15 @@ require('./vendor/lie.polyfill');
 
 var cache = require('./cache');
 var debounce = require('./debounce');
-var dateFormatter = require('./date_formatter');
 var Debug = require('./debug');
+var statusFormatters = require('./status_formatters');
 
 var data = function(c, maxSGVCount) {
   var MAX_UPLOADER_BATTERIES = 1;
   var MAX_CALIBRATIONS = 1;
   var MAX_OPENAPS_STATUSES = 24;
   var MAX_LOOP_STATUSES = 1;
+  var MAX_LOOP_ENACTED = 1;
   var MAX_BOLUSES_PER_HOUR_TO_CACHE = 6;
 
   var sgvCache = new cache.WithMaxAge('sgv', (maxSGVCount + 1) * 5 * 60);
@@ -21,6 +22,7 @@ var data = function(c, maxSGVCount) {
   var uploaderBatteryCache = new cache.WithMaxSize('uploaderBattery', MAX_UPLOADER_BATTERIES);
   var calibrationCache = new cache.WithMaxSize('calibration', MAX_CALIBRATIONS);
   var loopStatusCache = new cache.WithMaxSize('loop', MAX_LOOP_STATUSES);
+  var loopEnactedCache = new cache.WithMaxSize('loopEnacted', MAX_LOOP_ENACTED);
   var openAPSStatusCache = new cache.WithMaxSize('openAPSStatus', MAX_OPENAPS_STATUSES);
   var profileCache;
 
@@ -377,36 +379,58 @@ var data = function(c, maxSGVCount) {
   };
 
   d.getLoopStatus = function(config) {
-    var fetches = [d.getLastLoopStatus(config)];
-    if (config.statusLoopShowBattery) {
-      fetches.push(d.getLastUploaderBattery(config));
-    }
+    var fetchEnacted = config.statusLoopFormat.match(/temprate/i);
+    var fetchBattery = config.statusLoopFormat.match(/(pumpbat|pumpvoltage|phonebat)/i);
+    var fetches = [
+      d.getLastLoopStatus(config),
+      fetchEnacted ? d.getLastLoopEnacted(config) : Promise.resolve([]),
+      fetchBattery ? d.getLastUploaderBattery(config) : Promise.resolve([]),
+    ];
     return Promise.all(fetches).then(function(results) {
-      var loop = results[0][0],
-        battery = results[1];
+      var loop = results[0][0]['loop'],
+        createdAtEpoch = new Date(results[0][0]['created_at']).getTime(),
+        enacted = results[1][0],
+        battery = results[2][0];
 
-      var out = [];
-      if (loop['prediction'] && loop['prediction'].length) {
-        out.push(Math.round(loop['prediction'][loop['prediction'].length - 1]['value']));
+      var props = {};
+
+      if (loop['predicted'] && loop['predicted']['values'] && loop['predicted']['values'].length) {
+        props.evbg = Math.round(loop['predicted']['values'][loop['predicted']['values'].length - 1]);
       }
 
       if (loop['iob'] && loop['iob']['iob'] !== undefined) {
-        out.push(roundOrZero(loop['iob']['iob']) + 'U');
+        props.iob = roundOrZero(loop['iob']['iob']);
       }
 
       if (loop['cob'] && loop['cob']['cob'] !== undefined) {
-        out.push(Math.round(loop['cob']['cob']) + 'g');
+        props.cob = Math.round(loop['cob']['cob']);
       }
 
-      if (battery !== undefined && battery.length && battery[0]['uploader'] && battery[0]['uploader']['battery']) {
-        if (Math.abs(new Date(battery[0]['created_at']) - new Date(loop['created_at'])) < 10 * 60 * 1000) {
-          out.push(battery[0]['uploader']['battery'] + '%');
+      if (enacted && enacted['loop']['enacted']['duration'] && enacted['loop']['enacted']['rate'] !== undefined) {
+        var endTimeEpoch = new Date(enacted['loop']['enacted']['timestamp']).getTime() + enacted['loop']['enacted']['duration'] * 60 * 1000;
+        if (createdAtEpoch < endTimeEpoch) {
+          props.temprate = enacted['loop']['enacted']['rate'];
+        }
+      }
+
+      if (battery && Math.abs(createdAtEpoch - new Date(battery['created_at']).getTime()) <= 20 * 60 * 1000) {
+        // show battery only from within 20 minutes of loop status
+        if (battery['pump'] && battery['pump']['battery'] && battery['pump']['battery']['voltage'] !== undefined) {
+          props.pumpvoltage = battery['pump']['battery']['voltage'];
+        }
+
+        if (battery['pump'] && battery['pump']['battery'] && battery['pump']['battery']['percent'] !== undefined) {
+          props.pumpbat = battery['pump']['battery']['percent'];
+        }
+
+        if (battery['uploader'] && battery['uploader']['battery']) {
+          props.phonebat = battery['uploader']['battery'];
         }
       }
 
       return {
-        text: out.join(' '),
-        recency: Math.round((Date.now() - new Date(loop['created_at'])) / 1000),
+        text: statusFormatters.formatLoopStatus(props, config.statusLoopFormat, config.mmol),
+        recency: Math.round((Date.now() - createdAtEpoch) / 1000),
       };
     });
   };
@@ -634,7 +658,7 @@ var data = function(c, maxSGVCount) {
 
   d.getStatusDate = function(config) {
     var format = config.statusDateFormat === 'custom' ? config.statusDateCustomFormat : config.statusDateFormat;
-    return Promise.resolve({text: dateFormatter(format)});
+    return Promise.resolve({text: statusFormatters.formatDate(format)});
   };
 
   d.getNone = function() {
@@ -757,8 +781,16 @@ var data = function(c, maxSGVCount) {
 
   d.getLastLoopStatus = debounce(function(config) {
     return getUsingCache(
-      config.nightscout_url + '/api/v1/devicestatus.json?find[startDate][$exists]=true&find[prediction][$exists]=true&count=' + MAX_LOOP_STATUSES,
+      config.nightscout_url + '/api/v1/devicestatus.json?find[loop][$exists]=true&find[loop.failureReason][$not][$exists]=true&count=' + loopStatusCache.maxSize,
       loopStatusCache,
+      'created_at'
+    );
+  });
+
+  d.getLastLoopEnacted = debounce(function(config) {
+    return getUsingCache(
+      config.nightscout_url + '/api/v1/devicestatus.json?find[loop.enacted][$exists]=true&count=' + loopEnactedCache.maxSize,
+      loopEnactedCache,
       'created_at'
     );
   });

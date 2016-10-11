@@ -37,8 +37,9 @@ The status bar can display content from a variety of sources:
 * **Raw Dexcom readings** - [raw sensor readings][raw-dexcom-readings] plus noise level. (e.g. `Cln 97 104 106`)
 * **Uploader battery, Dexcom raw** - combination of the above two. (e.g. `36% Cln 97 104 106`)
 * **Active basal - NS Care Portal** - the currently-active basal rate based on treatments in [Nightscout Care Portal][care-portal]. If a temp basal is currently active, shows the difference from normal basal and how many minutes ago the temp basal began. (e.g. `(19) 1.5U/h +0.6`)
-* **Insulin on board** - this can be calculated from treatments entered manually in [Nightscout Care Portal][care-portal], or reported automatically by a [MiniMed Connect][minimed-connect] or [OpenAPS][openaps-status-uploads] device. (e.g. `2.3 U`)
+* **Insulin on board** - this can be calculated from treatments entered manually in [Nightscout Care Portal][care-portal], or reported automatically from [MiniMed Connect][minimed-connect], [Loop][loop], or [OpenAPS][openaps-status-uploads]. (e.g. `2.3 U`)
 * **Insulin + carbs on board** - same IOB as above plus carbs-on-board entered in Care Portal. (e.g. `2.3 U  31 g`)
+* **Loop status** - status from the [Loop][loop] iOS app -- predicted BG, IOB, COB, current temp basal, pump battery, phone battery -- in whatever format you want. (e.g. `143 0.2U 13g 1.50`, or `1.50U/h 0.2 U 13 g | 1.57v 83%`)
 * **IOB and temp - OpenAPS** - IOB and currently-active temp basal rate from the most recent [OpenAPS status upload][openaps-status-uploads], or if the most recent status indicates failure, the time since that failure plus the time and IOB from the last successful status. (e.g. `(2) 1.1U 1.9x13` or `(4) -- | (+23) 2.2U`)
 * **Custom URL - text** - if you want to summarize your data in a custom way.
 * **Custom URL - JSON** - show custom text, with support for a `timestamp` field to display recency (e.g. `(3) your text`).

@@ -992,3 +992,114 @@ describe('getStatusDate', function() {
     });
   });
 });
+
+describe('getLoopStatus', function() {
+  var d;
+  var status, enacted, battery;
+
+  beforeEach(function() {
+    d = defaultData();
+
+    timekeeper.freeze(new Date("2016-10-10T20:09:25-07:00"));
+
+    status = {
+      loop: {
+        iob: {iob: 1.37423},
+        cob: {cob: 98.76543},
+        predicted: {values: [130, 140, 150]},
+      },
+      created_at: "2016-10-11T03:02:27Z",
+    };
+    d.getLastLoopStatus = function() { return Promise.resolve([status]); };
+
+    enacted = {
+      loop: {
+        enacted: {
+          duration: 30,
+          rate: 1.575,
+          timestamp: "2016-10-11T02:52:00Z",
+        }
+      }
+    };
+    d.getLastLoopEnacted = function() { return Promise.resolve([enacted]); };
+
+    battery = {
+      pump: {
+        battery: {
+          voltage: 1.54,
+          percent: 75,
+        },
+      },
+      uploader: {
+        battery: 39,
+      },
+      created_at: "2016-10-11T03:01:00Z",
+    };
+    d.getLastUploaderBattery = function() { return Promise.resolve([battery]); };
+  });
+
+  it('should format the loop status according to the format string', function() {
+    return d.getLoopStatus({statusLoopFormat: 'evbg  iobu  cobu  temprate_u \\n phonebatu  pumpvoltageu'}).then(function(s) {
+      expect(s.text).to.be('150  1.4U  99g  1.57 U/h\n39%  1.54v');
+    });
+  });
+
+  it('should toggle units according to the format string', function() {
+    return d.getLoopStatus({statusLoopFormat: 'evbg_u  iob  cob  temprate \\n phonebat  pumpvoltage  pumpbat_u'}).then(function(s) {
+      expect(s.text).to.be('150 mg/dL  1.4  99  1.57\n39  1.54  75 %');
+    });
+  });
+
+  it('should be case-insensitive', function() {
+    return d.getLoopStatus({statusLoopFormat: 'eVbGU  IOB  Cob  TempRate \\n PhoneBat  PumpVoltage  Pumpbat'}).then(function(s) {
+      expect(s.text).to.be('150mg/dL  1.4  99  1.57\n39  1.54  75');
+    });
+  });
+
+  it('should support mmol', function() {
+    return d.getLoopStatus({statusLoopFormat: 'evbg', mmol: true}).then(function(s) {
+      expect(s.text).to.be('8.3');
+    });
+  });
+
+  it('should show two digits after the decimal point for temp rate', function() {
+    enacted.loop.enacted.rate = 2;
+    return d.getLoopStatus({statusLoopFormat: 'temprateu'}).then(function(s) {
+      expect(s.text).to.be('2.00U/h');
+    });
+  });
+
+  it('should show a temp which is in progress as of loop status time', function() {
+    enacted.loop.enacted.timestamp = '2016-10-11T02:32:28Z';
+    return d.getLoopStatus({statusLoopFormat: 'temprate_u'}).then(function(s) {
+      expect(s.text).to.be('1.57 U/h');
+    });
+  });
+
+  it('should not show a temp which has ended as of loop status time', function() {
+    enacted.loop.enacted.timestamp = '2016-10-11T02:32:26Z';
+    return d.getLoopStatus({statusLoopFormat: 'temprate_u'}).then(function(s) {
+      expect(s.text).to.be('');
+    });
+  });
+
+  it('should use created_at for recency', function() {
+    return d.getLoopStatus({statusLoopFormat: ''}).then(function(s) {
+      expect(s.recency).to.be(418);
+    });
+  });
+
+  it('should show recent battery', function() {
+    battery.created_at = '2016-10-11T02:42:27Z';
+    return d.getLoopStatus({statusLoopFormat: 'phonebat, pumpbatu, pumpvoltage_u'}).then(function(s) {
+      expect(s.text).to.be('39, 75%, 1.54 v');
+    });
+  });
+
+  it('should not show stale battery', function() {
+    battery.created_at = '2016-10-11T02:42:26Z';
+    return d.getLoopStatus({statusLoopFormat: 'phonebat, pumpbatu, pumpvoltage_u'}).then(function(s) {
+      expect(s.text).to.be(',,');
+    });
+  });
+});

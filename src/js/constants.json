@@ -35,6 +35,7 @@
       "statusUrl" : "",
       "statusJsonUrl" : "",
       "statusText" : "",
+      "statusLoopFormat": "evbg  iobu  cobu  temprate \\n phonebatu  pumpvoltageu",
       "statusOpenAPSNetBasal": false,
       "statusOpenAPSEvBG": false,
       "statusMinRecencyToShowMinutes": 10,

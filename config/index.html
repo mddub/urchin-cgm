@@ -364,19 +364,21 @@
           </div>
         </div>
 
-        <div class="item-container status-date-custom-format" data-keys="date">
-          <div class="item-container-header">Custom date format</div>
-          <div class="item-container-content">
-            <label class="item">
-              <div class="item-input-wrapper">
-                <input name="statusDateCustomFormat" type="text" size="255" class="item-input">
+        <div class="status-date-custom-format">
+          <div class="item-container status-extra" data-keys="date">
+            <div class="item-container-header">Custom date format</div>
+            <div class="item-container-content">
+              <label class="item">
+                <div class="item-input-wrapper">
+                  <input name="statusDateCustomFormat" type="text" size="255" class="item-input">
+                </div>
+              </label>
+            </div>
+            <div class="item-container-footer">
+              <strong class="status-date-preview"></strong>
+              <div>
+                <code>yy</code>/<code>yyyy</code> = year. <code>m</code>/<code>mm</code>/<code>mmm</code>/<code>mmmm</code> = month. <code>d</code>/<code>dd</code> = date. <code>ddd</code>/<code>dddd</code> = day of week.
               </div>
-            </label>
-          </div>
-          <div class="item-container-footer">
-            <strong class="status-date-preview"></strong>
-            <div>
-              <code>yy</code>/<code>yyyy</code> = year. <code>m</code>/<code>mm</code>/<code>mmm</code>/<code>mmmm</code> = month. <code>d</code>/<code>dd</code> = date. <code>ddd</code>/<code>dddd</code> = day of week.
             </div>
           </div>
         </div>
@@ -394,12 +396,24 @@
         </div>
 
         <div class="item-container status-extra" data-keys="loop">
-          <div class="item-container-header">Loop status</div>
+          <div class="item-container-header">Loop status format</div>
           <div class="item-container-content">
             <label class="item">
-              <input name="statusLoopShowBattery" type="checkbox" class="item-checkbox">
-              Show phone battery %
+              <div class="item-input-wrapper">
+                <input name="statusLoopFormat" type="text" class="item-input">
+              </div>
             </label>
+          </div>
+          <div class="item-container-footer">
+            <strong class="status-loop-format-preview"></strong>
+            <br>
+            Available fields: <code>evbg</code>, <code>iob</code>, <code>cob</code>, <code>temprate</code>, <code>pumpvoltage</code>, <code>pumpbat</code>, <code>phonebat</code>.
+            <br>
+            Append <code>u</code> or <code>_u</code> to include units with/without a space (<code>iobu</code> = "3.2U", <code>temprate_u</code> = "0.7 U/h").
+            <br>
+            Default: <code>evbg  iobu  cobu  temprate \n phonebatu  pumpvoltageu</code>
+            <br>
+            Try double-spaces for readability. Use <code>\n</code> for newline.
           </div>
         </div>
 
