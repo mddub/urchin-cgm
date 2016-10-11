@@ -10,7 +10,7 @@ var translations = {
   // TODO
 };
 
-function dateFormatter(format) {
+function formatDate(format) {
   var now = new Date();
   var year = 1900 + now.getYear();
   var month = now.getMonth();
@@ -56,10 +56,56 @@ function dateFormatter(format) {
     .replace('%D%', d);
 }
 
+function formatLoopStatus(props, format, convertToMmol) {
+  if (convertToMmol && props.evbg !== undefined) {
+    props.evbg = (props.evbg / 18.0).toFixed(1);
+  }
+
+  if (props.temprate !== undefined) {
+    props.temprate = props.temprate.toFixed(2);
+  }
+
+  var units = {
+    'evbg': (convertToMmol ? 'mmol/L' : 'mg/dL'),
+    'iob': 'U',
+    'cob': 'g',
+    'temprate': 'U/h',
+    'pumpvoltage': 'v',
+    'pumpbat': '%',
+    'phonebat': '%',
+  };
+
+  var text = format;
+
+  text = text.replace(/\\n/g, '\n');
+  ['evbg', 'iob', 'cob', 'temprate', 'pumpvoltage', 'pumpbat', 'phonebat'].forEach(function(key) {
+    if (props[key] !== undefined) {
+      text = text
+        .replace(new RegExp(key + 'u', 'i'), props[key] + units[key])
+        .replace(new RegExp(key + '_u', 'i'), props[key] + ' ' + units[key])
+        .replace(new RegExp(key, 'i'), props[key]);
+    } else {
+      text = text.replace(new RegExp(key + '(u|_u)?', 'i'), '%UNDEF%');
+    }
+  });
+
+  text = text
+    .replace(/ *%UNDEF%/g, '')
+    .replace(/ +\n +/g, '\n')
+    .replace(/(^ +| +$)/g, '');
+
+  return text;
+}
+
+var formatters = {
+  formatDate: formatDate,
+  formatLoopStatus: formatLoopStatus,
+};
+
 // TODO: include this in the config page in a better way
 if (typeof(module) !== 'undefined') {
-  module.exports = dateFormatter;
+  module.exports = formatters;
 }
 if (typeof(window) !== 'undefined') {
-  window.dateFormatter = dateFormatter;
+  window.statusFormatters = formatters;
 }

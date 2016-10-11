@@ -42,9 +42,6 @@
       config.customLayout.recencyColorCircle = config.customLayout.recencyColorCircle || c.DEFAULT_CONFIG.customLayout.recencyColorCircle;
       config.customLayout.recencyColorText = config.customLayout.recencyColorText || c.DEFAULT_CONFIG.customLayout.recencyColorText;
     }
-    // v0.0.12: new status option
-    config.statusDateFormat = config.statusDateFormat || c.DEFAULT_CONFIG.statusDateFormat;
-    config.statusDateCustomFormat = config.statusDateCustomFormat || c.DEFAULT_CONFIG.statusDateCustomFormat;
 
     return config;
   }
@@ -418,7 +415,7 @@
     $('[name=statusDateFormat] option').forEach(function(o) {
       var format = $(o).val();
       if (format !== 'custom') {
-        $(o).text(window.dateFormatter(format));
+        $(o).text(window.statusFormatters.formatDate(format));
       }
     });
   }
@@ -470,7 +467,16 @@
 
   function onStatusDateCustomFormatChange() {
     $('.status-date-preview').text(
-      window.dateFormatter($('[name=statusDateCustomFormat]').val())
+      window.statusFormatters.formatDate($('[name=statusDateCustomFormat]').val())
+    );
+  }
+
+  function onStatusLoopFormatChange() {
+    var sampleData = {evbg: 82, iob: 0.9, cob: 4, temprate: 0.15, pumpvoltage: 1.56, pumpbat: 75, phonebat: 64};
+    var format = $('[name=statusLoopFormat]').val();
+    var mmol = $('#units-mmol').hasClass('active');
+    $('.status-loop-format-preview').text(
+      window.statusFormatters.formatLoopStatus(sampleData, format, mmol).replace('\n', ' | ')
     );
   }
 
@@ -571,6 +577,7 @@
     $('#statusText').val(current['statusText'] || '');
     $('#statusUrl').val(current['statusUrl'] || '');
     $('#statusJsonUrl').val(current['statusJsonUrl'] || '');
+    $('[name=statusLoopFormat]').val(current['statusLoopFormat']);
     $('[name=statusOpenAPSNetBasal]').val(current['statusOpenAPSNetBasal'] ? 'true' : 'false');
     $('[name=statusOpenAPSEvBG]').prop('checked', !!current['statusOpenAPSEvBG']);
     $('[name=statusMinRecencyToShowMinutes]').val(current['statusMinRecencyToShowMinutes']);
@@ -613,6 +620,7 @@
       statusText: $('#statusText').val(),
       statusUrl: $('#statusUrl').val(),
       statusJsonUrl: $('#statusJsonUrl').val(),
+      statusLoopFormat: $('[name=statusLoopFormat]').val(),
       statusOpenAPSNetBasal: $('[name=statusOpenAPSNetBasal]').val() === 'true',
       statusOpenAPSEvBG: $('[name=statusOpenAPSEvBG]').is(':checked'),
       statusLine1: $('#statusLine1').val(),
@@ -689,6 +697,10 @@
     onStatusDateFormatChange();
     $('[name=statusDateCustomFormat]').on('keyup', onStatusDateCustomFormatChange);
     onStatusDateCustomFormatChange();
+
+    $('[name=statusLoopFormat]').on('keyup', onStatusLoopFormatChange);
+    $('#units-mgdl, #units-mmol').on('click', setTimeout.bind(this, onStatusLoopFormatChange, 0));
+    onStatusLoopFormatChange();
 
     $('#basalGraph').on('change', function(evt) {
       $('#basal-height-container').toggle($(evt.currentTarget).is(':checked'));

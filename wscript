@@ -70,8 +70,8 @@ def build(ctx):
     gen_js_includes.set_inputs([
         ctx.path.find_resource('src/js/constants.json'),
         ctx.path.find_resource('config/js/vendor.min.js'),
-        ctx.path.find_resource('src/js/date_formatter.js'),
         ctx.path.find_resource('src/js/points.js'),
+        ctx.path.find_resource('src/js/status_formatters.js'),
     ])
     gen_js_includes.set_outputs(config_js_includes)
     ctx.add_to_group(gen_js_includes)

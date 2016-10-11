@@ -5,13 +5,15 @@ require('./vendor/lie.polyfill');
 
 var cache = require('./cache');
 var debounce = require('./debounce');
-var dateFormatter = require('./date_formatter');
 var Debug = require('./debug');
+var statusFormatters = require('./status_formatters');
 
 var data = function(c, maxSGVCount) {
   var MAX_UPLOADER_BATTERIES = 1;
   var MAX_CALIBRATIONS = 1;
   var MAX_OPENAPS_STATUSES = 24;
+  var MAX_LOOP_STATUSES = 1;
+  var MAX_LOOP_ENACTED = 1;
   var MAX_BOLUSES_PER_HOUR_TO_CACHE = 6;
 
   var sgvCache = new cache.WithMaxAge('sgv', (maxSGVCount + 1) * 5 * 60);
@@ -19,6 +21,8 @@ var data = function(c, maxSGVCount) {
   var bolusCache = new cache.WithMaxSize('bolus', Math.ceil(maxSGVCount / 12 * MAX_BOLUSES_PER_HOUR_TO_CACHE));
   var uploaderBatteryCache = new cache.WithMaxSize('uploaderBattery', MAX_UPLOADER_BATTERIES);
   var calibrationCache = new cache.WithMaxSize('calibration', MAX_CALIBRATIONS);
+  var loopStatusCache = new cache.WithMaxSize('loop', MAX_LOOP_STATUSES);
+  var loopEnactedCache = new cache.WithMaxSize('loopEnacted', MAX_LOOP_ENACTED);
   var openAPSStatusCache = new cache.WithMaxSize('openAPSStatus', MAX_OPENAPS_STATUSES);
   var profileCache;
 
@@ -47,6 +51,7 @@ var data = function(c, maxSGVCount) {
     bolusCache.clear();
     uploaderBatteryCache.clear();
     calibrationCache.clear();
+    loopStatusCache.clear();
     openAPSStatusCache.clear();
     profileCache = undefined;
     dexcomToken = undefined;
@@ -144,7 +149,7 @@ var data = function(c, maxSGVCount) {
     return d.getPebbleEndpoint(config).then(function(data) {
       if (data && !isNaN(parseFloat(data['iob']))) {
         return {
-          text: parseFloat(data['iob']).toFixed(1).toString() + ' u',
+          text: parseFloat(data['iob']).toFixed(1).toString() + ' U',
           recency: 0,
         };
       } else {
@@ -157,7 +162,7 @@ var data = function(c, maxSGVCount) {
     return d.getPebbleEndpoint(config).then(function(data) {
       var out = [];
       if (data && !isNaN(parseFloat(data['iob']))) {
-        out.push(parseFloat(data['iob']).toFixed(1).toString() + ' u');
+        out.push(parseFloat(data['iob']).toFixed(1).toString() + ' U');
       }
       if (data && !isNaN(parseFloat(data['cob']))) {
         out.push(Math.round(parseFloat(data['cob'])) + ' g');
@@ -361,15 +366,72 @@ var data = function(c, maxSGVCount) {
       } else if (tempBasal !== undefined && Date.now() - tempBasal.start < tempBasal.duration * 60 * 1000) {
         var diff = tempBasal.rate - profileBasal;
         return {
-          text: _roundBasal(tempBasal.rate) + 'u/h ' + (diff >= 0 ? '+' : '') + _roundBasal(diff),
+          text: _roundBasal(tempBasal.rate) + 'U/h ' + (diff >= 0 ? '+' : '') + _roundBasal(diff),
           recency: Math.round((new Date() - tempBasal.start) / 1000),
         };
       } else {
         return {
-          text: _roundBasal(profileBasal) + 'u/h',
+          text: _roundBasal(profileBasal) + 'U/h',
           recency: 0
         };
       }
+    });
+  };
+
+  d.getLoopStatus = function(config) {
+    var fetchEnacted = config.statusLoopFormat.match(/temprate/i);
+    var fetchBattery = config.statusLoopFormat.match(/(pumpbat|pumpvoltage|phonebat)/i);
+    var fetches = [
+      d.getLastLoopStatus(config),
+      fetchEnacted ? d.getLastLoopEnacted(config) : Promise.resolve([]),
+      fetchBattery ? d.getLastUploaderBattery(config) : Promise.resolve([]),
+    ];
+    return Promise.all(fetches).then(function(results) {
+      var loop = results[0][0]['loop'],
+        createdAtEpoch = new Date(results[0][0]['created_at']).getTime(),
+        enacted = results[1][0],
+        battery = results[2][0];
+
+      var props = {};
+
+      if (loop['predicted'] && loop['predicted']['values'] && loop['predicted']['values'].length) {
+        props.evbg = Math.round(loop['predicted']['values'][loop['predicted']['values'].length - 1]);
+      }
+
+      if (loop['iob'] && loop['iob']['iob'] !== undefined) {
+        props.iob = roundOrZero(loop['iob']['iob']);
+      }
+
+      if (loop['cob'] && loop['cob']['cob'] !== undefined) {
+        props.cob = Math.round(loop['cob']['cob']);
+      }
+
+      if (enacted && enacted['loop']['enacted']['duration'] && enacted['loop']['enacted']['rate'] !== undefined) {
+        var endTimeEpoch = new Date(enacted['loop']['enacted']['timestamp']).getTime() + enacted['loop']['enacted']['duration'] * 60 * 1000;
+        if (createdAtEpoch < endTimeEpoch) {
+          props.temprate = enacted['loop']['enacted']['rate'];
+        }
+      }
+
+      if (battery && Math.abs(createdAtEpoch - new Date(battery['created_at']).getTime()) <= 20 * 60 * 1000) {
+        // show battery only from within 20 minutes of loop status
+        if (battery['pump'] && battery['pump']['battery'] && battery['pump']['battery']['voltage'] !== undefined) {
+          props.pumpvoltage = battery['pump']['battery']['voltage'];
+        }
+
+        if (battery['pump'] && battery['pump']['battery'] && battery['pump']['battery']['percent'] !== undefined) {
+          props.pumpbat = battery['pump']['battery']['percent'];
+        }
+
+        if (battery['uploader'] && battery['uploader']['battery']) {
+          props.phonebat = battery['uploader']['battery'];
+        }
+      }
+
+      return {
+        text: statusFormatters.formatLoopStatus(props, config.statusLoopFormat, config.mmol),
+        recency: Math.round((Date.now() - createdAtEpoch) / 1000),
+      };
     });
   };
 
@@ -486,7 +548,7 @@ var data = function(c, maxSGVCount) {
       iob = iob[0];
     }
     if (openAPSIsFresh(entries, 'iob') && iob['iob'] !== undefined) {
-      return roundOrZero(iob['iob']) + 'u';
+      return roundOrZero(iob['iob']) + 'U';
     } else {
       return '';
     }
@@ -596,7 +658,7 @@ var data = function(c, maxSGVCount) {
 
   d.getStatusDate = function(config) {
     var format = config.statusDateFormat === 'custom' ? config.statusDateCustomFormat : config.statusDateFormat;
-    return Promise.resolve({text: dateFormatter(format)});
+    return Promise.resolve({text: statusFormatters.formatDate(format)});
   };
 
   d.getNone = function() {
@@ -614,6 +676,7 @@ var data = function(c, maxSGVCount) {
       'basal': d.getActiveBasal,
       'pebbleiob': d.getPebbleIOB,
       'pebbleiobandcob': d.getPebbleIOBAndCOB,
+      'loop': d.getLoopStatus,
       'openaps': d.getOpenAPSStatus,
       'customurl': d.getCustomUrl,
       'customjson': d.getCustomJsonUrl,
@@ -712,6 +775,22 @@ var data = function(c, maxSGVCount) {
     return getUsingCache(
       config.nightscout_url + '/api/v1/devicestatus.json?find[openaps][$exists]=true&count=' + openAPSStatusCache.maxSize,
       openAPSStatusCache,
+      'created_at'
+    );
+  });
+
+  d.getLastLoopStatus = debounce(function(config) {
+    return getUsingCache(
+      config.nightscout_url + '/api/v1/devicestatus.json?find[loop][$exists]=true&find[loop.failureReason][$not][$exists]=true&count=' + loopStatusCache.maxSize,
+      loopStatusCache,
+      'created_at'
+    );
+  });
+
+  d.getLastLoopEnacted = debounce(function(config) {
+    return getUsingCache(
+      config.nightscout_url + '/api/v1/devicestatus.json?find[loop.enacted][$exists]=true&count=' + loopEnactedCache.maxSize,
+      loopEnactedCache,
       'created_at'
     );
   });

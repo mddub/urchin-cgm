@@ -80,7 +80,7 @@ describe('basals', function() {
       timekeeper.freeze(new Date("2015-12-03T14:20:25-08:00"));
 
       return d.getActiveBasal({}).then(function(basal) {
-        expect(basal.text).to.be('0u/h -0.65');
+        expect(basal.text).to.be('0U/h -0.65');
         expect(basal.recency).to.be(480);
       });
     });
@@ -91,7 +91,7 @@ describe('basals', function() {
       timekeeper.freeze(new Date("2015-12-03T14:28:25-08:00"));
 
       return d.getActiveBasal({}).then(function(basal) {
-        expect(basal.text).to.be('0u/h -0.65');
+        expect(basal.text).to.be('0U/h -0.65');
         expect(basal.recency).to.be(960);
       });
     });
@@ -102,7 +102,7 @@ describe('basals', function() {
       timekeeper.freeze(new Date("2015-12-03T14:50:25-08:00"));
 
       return d.getActiveBasal({}).then(function(basal) {
-        expect(basal.text).to.be('0.65u/h');
+        expect(basal.text).to.be('0.65U/h');
         expect(basal.recency).to.be(0);
       });
     });
@@ -113,7 +113,7 @@ describe('basals', function() {
       timekeeper.freeze(new Date("2015-12-03T20:50:25-08:00"));
 
       return d.getActiveBasal({}).then(function(basal) {
-        expect(basal.text).to.be('0.55u/h');
+        expect(basal.text).to.be('0.55U/h');
         expect(basal.recency).to.be(0);
       });
     });
@@ -337,7 +337,7 @@ describe('getPebbleIOB', function() {
     });
 
     return d.getPebbleIOB({}).then(function(iob) {
-      expect(iob.text).to.be('1.3 u');
+      expect(iob.text).to.be('1.3 U');
       expect(iob.recency).to.be(0);
     });
   });
@@ -351,7 +351,7 @@ describe('getPebbleIOBAndCOB', function() {
       'pebble': {"bgs": [{"iob": "2.67", "cob": "28.63"}]}
     });
     return d.getPebbleIOBAndCOB({}).then(function(s) {
-      expect(s.text).to.be('2.7 u  29 g');
+      expect(s.text).to.be('2.7 U  29 g');
       expect(s.recency).to.be(0);
     });
   });
@@ -362,7 +362,7 @@ describe('getPebbleIOBAndCOB', function() {
       'pebble': {"bgs": [{"iob": 1.83, "cob": "foo"}]}
     });
     return d.getPebbleIOBAndCOB({}).then(function(s) {
-      expect(s.text).to.be('1.8 u');
+      expect(s.text).to.be('1.8 U');
       expect(s.recency).to.be(0);
     });
   });
@@ -469,7 +469,7 @@ describe('getOpenAPSStatus', function() {
 
     it('should report IOB', function() {
       return d.getOpenAPSStatus({}).then(function(result) {
-        expect(result.text).to.contain('1.1u');
+        expect(result.text).to.contain('1.1U');
       });
     });
 
@@ -521,7 +521,7 @@ describe('getOpenAPSStatus', function() {
 
     it('should report IOB', function() {
       return d.getOpenAPSStatus({}).then(function(result) {
-        expect(result.text).to.contain('1.1u');
+        expect(result.text).to.contain('1.1U');
       });
     });
 
@@ -549,7 +549,7 @@ describe('getOpenAPSStatus', function() {
     timekeeper.freeze(new Date('2016-03-01T16:48:00Z'));
 
     return d.getOpenAPSStatus({}).then(function(result) {
-      expect(result.text).to.be('1.1u');
+      expect(result.text).to.be('1.1U');
       expect(result.recency).to.be(180);
     });
   });
@@ -566,7 +566,7 @@ describe('getOpenAPSStatus', function() {
     timekeeper.freeze(new Date('2016-03-01T16:48:00Z'));
 
     return d.getOpenAPSStatus({}).then(function(result) {
-      expect(result.text).not.to.contain('1.1u');
+      expect(result.text).not.to.contain('1.1U');
     });
   });
 
@@ -612,7 +612,7 @@ describe('getOpenAPSStatus', function() {
     timekeeper.freeze(new Date('2016-03-01T16:58:00Z'));
 
     return d.getOpenAPSStatus({}).then(function(result) {
-      expect(result.text).to.be('-- | (+15m) 3.1u');
+      expect(result.text).to.be('-- | (+15m) 3.1U');
       expect(result.recency).to.be(818);
     });
   });
@@ -671,7 +671,7 @@ describe('getOpenAPSStatus', function() {
         ],
       });
       return d.getOpenAPSStatus({}).then(function(result) {
-        expect(result.text).to.contain('1.1u');
+        expect(result.text).to.contain('1.1U');
         expect(result.recency).to.be(420);
       });
     });
@@ -689,7 +689,7 @@ describe('getOpenAPSStatus', function() {
         ],
       });
       return d.getOpenAPSStatus({}).then(function(result) {
-        expect(result.text).to.be('-- | (+8m) 1.1u');
+        expect(result.text).to.be('-- | (+8m) 1.1U');
         expect(result.recency).to.be(420);
       });
     });
@@ -989,6 +989,117 @@ describe('getStatusDate', function() {
       statusDateCustomFormat: 'dddd, mmmm d, yyyy',
     }).then(function(date) {
       expect(date.text).to.be('Sunday, August 7, 2016');
+    });
+  });
+});
+
+describe('getLoopStatus', function() {
+  var d;
+  var status, enacted, battery;
+
+  beforeEach(function() {
+    d = defaultData();
+
+    timekeeper.freeze(new Date("2016-10-10T20:09:25-07:00"));
+
+    status = {
+      loop: {
+        iob: {iob: 1.37423},
+        cob: {cob: 98.76543},
+        predicted: {values: [130, 140, 150]},
+      },
+      created_at: "2016-10-11T03:02:27Z",
+    };
+    d.getLastLoopStatus = function() { return Promise.resolve([status]); };
+
+    enacted = {
+      loop: {
+        enacted: {
+          duration: 30,
+          rate: 1.575,
+          timestamp: "2016-10-11T02:52:00Z",
+        }
+      }
+    };
+    d.getLastLoopEnacted = function() { return Promise.resolve([enacted]); };
+
+    battery = {
+      pump: {
+        battery: {
+          voltage: 1.54,
+          percent: 75,
+        },
+      },
+      uploader: {
+        battery: 39,
+      },
+      created_at: "2016-10-11T03:01:00Z",
+    };
+    d.getLastUploaderBattery = function() { return Promise.resolve([battery]); };
+  });
+
+  it('should format the loop status according to the format string', function() {
+    return d.getLoopStatus({statusLoopFormat: 'evbg  iobu  cobu  temprate_u \\n phonebatu  pumpvoltageu'}).then(function(s) {
+      expect(s.text).to.be('150  1.4U  99g  1.57 U/h\n39%  1.54v');
+    });
+  });
+
+  it('should toggle units according to the format string', function() {
+    return d.getLoopStatus({statusLoopFormat: 'evbg_u  iob  cob  temprate \\n phonebat  pumpvoltage  pumpbat_u'}).then(function(s) {
+      expect(s.text).to.be('150 mg/dL  1.4  99  1.57\n39  1.54  75 %');
+    });
+  });
+
+  it('should be case-insensitive', function() {
+    return d.getLoopStatus({statusLoopFormat: 'eVbGU  IOB  Cob  TempRate \\n PhoneBat  PumpVoltage  Pumpbat'}).then(function(s) {
+      expect(s.text).to.be('150mg/dL  1.4  99  1.57\n39  1.54  75');
+    });
+  });
+
+  it('should support mmol', function() {
+    return d.getLoopStatus({statusLoopFormat: 'evbg', mmol: true}).then(function(s) {
+      expect(s.text).to.be('8.3');
+    });
+  });
+
+  it('should show two digits after the decimal point for temp rate', function() {
+    enacted.loop.enacted.rate = 2;
+    return d.getLoopStatus({statusLoopFormat: 'temprateu'}).then(function(s) {
+      expect(s.text).to.be('2.00U/h');
+    });
+  });
+
+  it('should show a temp which is in progress as of loop status time', function() {
+    enacted.loop.enacted.timestamp = '2016-10-11T02:32:28Z';
+    return d.getLoopStatus({statusLoopFormat: 'temprate_u'}).then(function(s) {
+      expect(s.text).to.be('1.57 U/h');
+    });
+  });
+
+  it('should not show a temp which has ended as of loop status time', function() {
+    enacted.loop.enacted.timestamp = '2016-10-11T02:32:26Z';
+    return d.getLoopStatus({statusLoopFormat: 'temprate_u'}).then(function(s) {
+      expect(s.text).to.be('');
+    });
+  });
+
+  it('should use created_at for recency', function() {
+    return d.getLoopStatus({statusLoopFormat: ''}).then(function(s) {
+      expect(s.recency).to.be(418);
+    });
+  });
+
+  it('should show recent battery', function() {
+    battery.created_at = '2016-10-11T02:42:27Z';
+    return d.getLoopStatus({statusLoopFormat: 'phonebat, pumpbatu, pumpvoltage_u'}).then(function(s) {
+      expect(s.text).to.be('39, 75%, 1.54 v');
+    });
+  });
+
+  it('should not show stale battery', function() {
+    battery.created_at = '2016-10-11T02:42:26Z';
+    return d.getLoopStatus({statusLoopFormat: 'phonebat, pumpbatu, pumpvoltage_u'}).then(function(s) {
+      expect(s.text).to.be(',,');
     });
   });
 });
