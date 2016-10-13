@@ -17,6 +17,21 @@ const uint32_t CONN_ISSUE_ICONS[] = {
   RESOURCE_ID_CONN_ISSUE_RIG,
 };
 
+// This matches REQUEST_STATE_*
+const char* REQUEST_STATE_MESSAGES[] = {
+  "",
+  "",
+  "",
+  "Bad app msg",
+  "Timed out",
+  "No BT",
+  "Msg failed",
+  "Msg dropped",
+  "Begin failed",
+  "Send failed",
+  "Open failed",
+};
+
 ConnectionStatusComponent* connection_status_component_create(Layer *parent, int16_t x, int16_t y, bool align_bottom) {
   BitmapLayer *icon_layer = bitmap_layer_create(GRect(x, y, REASON_ICON_WIDTH, REASON_ICON_WIDTH));
   // draw the icon background over the graph
@@ -153,17 +168,7 @@ void connection_status_component_show_request_state(ConnectionStatusComponent *c
     layer_set_hidden(text_layer_get_layer(c->reason_text), false);
 
     static char state_text[32];
-    switch(state) {
-      case REQUEST_STATE_BAD_APP_MESSAGE:   strcpy(state_text, "Bad app msg");    break;
-      case REQUEST_STATE_TIMED_OUT:         strcpy(state_text, "Timed out");      break;
-      case REQUEST_STATE_NO_BLUETOOTH:      strcpy(state_text, "No BT");          break;
-      case REQUEST_STATE_OUT_FAILED:        strcpy(state_text, "Msg failed");     break;
-      case REQUEST_STATE_IN_DROPPED:        strcpy(state_text, "Msg dropped");    break;
-      case REQUEST_STATE_BEGIN_FAILED:      strcpy(state_text, "Begin failed");   break;
-      case REQUEST_STATE_SEND_FAILED:       strcpy(state_text, "Send failed");    break;
-      case REQUEST_STATE_OPEN_FAILED:       strcpy(state_text, "Open failed");    break;
-      default:                              strcpy(state_text, "Msg error");      break;
-    }
+    strcpy(state_text, REQUEST_STATE_MESSAGES[state]);
 
     if (reason != 0) {
       static char reason_text[16];
