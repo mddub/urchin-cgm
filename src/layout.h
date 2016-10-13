@@ -11,6 +11,7 @@ typedef struct LayoutLayers {
   Layer *bg_row;
 } LayoutLayers;
 
+TextLayer* add_text_layer(Layer *parent, GRect bounds, GFont font, GColor fg_color, GTextAlignment alignment);
 GColor element_bg(Layer* layer);
 GColor element_fg(Layer* layer);
 GCompOp element_comp_op(Layer* layer);

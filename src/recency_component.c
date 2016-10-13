@@ -96,7 +96,10 @@ static void draw_circle_and_text(Layer *layer, GContext *ctx) {
   };
 
   int32_t seconds = time(NULL) - last_data_message()->received_at + last_data_message()->recency;
-  int32_t minutes = (float)seconds / 60.0f + 0.5f;
+  int32_t minutes = seconds / 60;
+  if (seconds - minutes * 60 >= 30) {
+    minutes += 1;
+  }
 
   int32_t start = 360 * (minutes - 1) / 5;
   int32_t end = 360;

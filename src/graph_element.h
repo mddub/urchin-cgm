@@ -6,11 +6,6 @@
 #include "connection_status_component.h"
 #include "recency_component.h"
 
-#define GRAPH_EXTRA_BOLUS_OFFSET 0
-#define GRAPH_EXTRA_BOLUS_BITS 1
-#define GRAPH_EXTRA_BASAL_OFFSET 1
-#define GRAPH_EXTRA_BASAL_BITS 5
-
 typedef struct GraphElement {
   Layer *graph_layer;
   ConnectionStatusComponent *conn_status;

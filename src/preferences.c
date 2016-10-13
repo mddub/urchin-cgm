@@ -12,9 +12,11 @@ static void set_empty_prefs() {
 }
 
 void init_prefs() {
+#ifndef PBL_APLITE
   if (sizeof(Preferences) > PERSIST_DATA_MAX_LENGTH) {
     APP_LOG(APP_LOG_LEVEL_ERROR, "Preferences data too big!");
   }
+#endif
   s_prefs = malloc(sizeof(Preferences));
 
   if (
@@ -60,35 +62,39 @@ static void decode_colors(Preferences *prefs, uint8_t *values) {
   }
 }
 
-void set_prefs(DictionaryIterator *data) {
-  s_prefs->mmol = dict_find(data, MESSAGE_KEY_mmol)->value->int32;
-  s_prefs->top_of_graph = dict_find(data, MESSAGE_KEY_topOfGraph)->value->int32;
-  s_prefs->top_of_range = dict_find(data, MESSAGE_KEY_topOfRange)->value->int32;
-  s_prefs->bottom_of_range = dict_find(data, MESSAGE_KEY_bottomOfRange)->value->int32;
-  s_prefs->bottom_of_graph = dict_find(data, MESSAGE_KEY_bottomOfGraph)->value->int32;
-  s_prefs->h_gridlines = dict_find(data, MESSAGE_KEY_hGridlines)->value->int32;
-  s_prefs->battery_as_number = dict_find(data, MESSAGE_KEY_batteryAsNumber)->value->int32;
-  s_prefs->basal_graph = dict_find(data, MESSAGE_KEY_basalGraph)->value->int32;
-  s_prefs->basal_height = dict_find(data, MESSAGE_KEY_basalHeight)->value->int32;
-  s_prefs->update_every_minute = dict_find(data, MESSAGE_KEY_updateEveryMinute)->value->int32;
-  s_prefs->time_align = dict_find(data, MESSAGE_KEY_timeAlign)->value->int32;
-  s_prefs->battery_loc = dict_find(data, MESSAGE_KEY_batteryLoc)->value->int32;
-  s_prefs->conn_status_loc = dict_find(data, MESSAGE_KEY_connStatusLoc)->value->int32;
-  s_prefs->recency_loc = dict_find(data, MESSAGE_KEY_recencyLoc)->value->int32;
-  s_prefs->recency_style = dict_find(data, MESSAGE_KEY_recencyStyle)->value->int32;
-  s_prefs->point_shape = dict_find(data, MESSAGE_KEY_pointShape)->value->int32;
-  s_prefs->point_rect_height = dict_find(data, MESSAGE_KEY_pointRectHeight)->value->int32;
-  s_prefs->point_width = dict_find(data, MESSAGE_KEY_pointWidth)->value->int32;
-  s_prefs->point_margin = dict_find(data, MESSAGE_KEY_pointMargin)->value->int32;
-  s_prefs->point_right_margin = dict_find(data, MESSAGE_KEY_pointRightMargin)->value->int32;
-  s_prefs->plot_line = dict_find(data, MESSAGE_KEY_plotLine)->value->int32;
-  s_prefs->plot_line_width = dict_find(data, MESSAGE_KEY_plotLineWidth)->value->int32;
-  s_prefs->plot_line_is_custom_color = dict_find(data, MESSAGE_KEY_plotLineIsCustomColor)->value->int32;
-  s_prefs->status_min_recency_to_show_minutes = dict_find(data, MESSAGE_KEY_statusMinRecencyToShowMinutes)->value->int32;
-  s_prefs->status_max_age_minutes = dict_find(data, MESSAGE_KEY_statusMaxAgeMinutes)->value->int32;
-  s_prefs->status_recency_format = dict_find(data, MESSAGE_KEY_statusRecencyFormat)->value->int32;
+static int32_t get_int32(DictionaryIterator *data, uint8_t key) {
+  return dict_find(data, key)->value->int32;
+}
 
-  s_prefs->num_elements = dict_find(data, MESSAGE_KEY_numElements)->value->int32;
+void set_prefs(DictionaryIterator *data) {
+  s_prefs->mmol = get_int32(data, MESSAGE_KEY_mmol);
+  s_prefs->top_of_graph = get_int32(data, MESSAGE_KEY_topOfGraph);
+  s_prefs->top_of_range = get_int32(data, MESSAGE_KEY_topOfRange);
+  s_prefs->bottom_of_range = get_int32(data, MESSAGE_KEY_bottomOfRange);
+  s_prefs->bottom_of_graph = get_int32(data, MESSAGE_KEY_bottomOfGraph);
+  s_prefs->h_gridlines = get_int32(data, MESSAGE_KEY_hGridlines);
+  s_prefs->battery_as_number = get_int32(data, MESSAGE_KEY_batteryAsNumber);
+  s_prefs->basal_graph = get_int32(data, MESSAGE_KEY_basalGraph);
+  s_prefs->basal_height = get_int32(data, MESSAGE_KEY_basalHeight);
+  s_prefs->update_every_minute = get_int32(data, MESSAGE_KEY_updateEveryMinute);
+  s_prefs->time_align = get_int32(data, MESSAGE_KEY_timeAlign);
+  s_prefs->battery_loc = get_int32(data, MESSAGE_KEY_batteryLoc);
+  s_prefs->conn_status_loc = get_int32(data, MESSAGE_KEY_connStatusLoc);
+  s_prefs->recency_loc = get_int32(data, MESSAGE_KEY_recencyLoc);
+  s_prefs->recency_style = get_int32(data, MESSAGE_KEY_recencyStyle);
+  s_prefs->point_shape = get_int32(data, MESSAGE_KEY_pointShape);
+  s_prefs->point_rect_height = get_int32(data, MESSAGE_KEY_pointRectHeight);
+  s_prefs->point_width = get_int32(data, MESSAGE_KEY_pointWidth);
+  s_prefs->point_margin = get_int32(data, MESSAGE_KEY_pointMargin);
+  s_prefs->point_right_margin = get_int32(data, MESSAGE_KEY_pointRightMargin);
+  s_prefs->plot_line = get_int32(data, MESSAGE_KEY_plotLine);
+  s_prefs->plot_line_width = get_int32(data, MESSAGE_KEY_plotLineWidth);
+  s_prefs->plot_line_is_custom_color = get_int32(data, MESSAGE_KEY_plotLineIsCustomColor);
+  s_prefs->status_min_recency_to_show_minutes = get_int32(data, MESSAGE_KEY_statusMinRecencyToShowMinutes);
+  s_prefs->status_max_age_minutes = get_int32(data, MESSAGE_KEY_statusMaxAgeMinutes);
+  s_prefs->status_recency_format = get_int32(data, MESSAGE_KEY_statusRecencyFormat);
+
+  s_prefs->num_elements = get_int32(data, MESSAGE_KEY_numElements);
   decode_layout_elements(s_prefs, s_prefs->num_elements, dict_find(data, MESSAGE_KEY_elements)->value->data);
 
   decode_colors(s_prefs, dict_find(data, MESSAGE_KEY_colors)->value->data);

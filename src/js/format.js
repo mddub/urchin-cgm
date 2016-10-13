@@ -124,6 +124,7 @@ var format = function(c) {
     var out = [];
     var bits;
     for(var i = 0; i < boluses.length; i++) {
+      // See GraphExtra in graph_element.c
       bits = 0;
       bits += _encodeBits(boluses[i], c.GRAPH_EXTRA_BOLUS_OFFSET, c.GRAPH_EXTRA_BOLUS_BITS);
       bits += _encodeBits(basals[i], c.GRAPH_EXTRA_BASAL_OFFSET, c.GRAPH_EXTRA_BASAL_BITS);
@@ -148,7 +149,11 @@ var format = function(c) {
   };
 
   f.lastSgv = function(sgvs) {
-    return sgvs.length > 0 ? parseInt(sgvs[0]['sgv'], 10) : 0;
+    if (sgvs.length === 0) {
+      return 0;
+    }
+    var last = parseInt(sgvs[0]['sgv'], 10);
+    return last <= c.DEXCOM_ERROR_CODE_MAX ? 0 : last;
   };
 
   f.lastDelta = function(ys) {

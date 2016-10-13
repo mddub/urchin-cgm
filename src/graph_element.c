@@ -23,20 +23,20 @@ static void plot_point(int16_t x, int16_t y, GColor c, GContext *ctx) {
   }
 }
 
-static void plot_tick(int16_t x, int16_t bottom_y, GContext *ctx) {
+static void plot_tick(int16_t x, int16_t bottom_y, GContext *ctx, uint8_t point_width) {
   uint8_t width;
-  if (get_prefs()->point_width >= 5 && get_prefs()->point_width % 2 == 1) {
+  if (point_width >= 5 && point_width % 2 == 1) {
     width = 3;
   } else {
     width = 2;
   }
-  graphics_fill_rect(ctx, GRect(x + get_prefs()->point_width / 2 - width / 2, bottom_y - BOLUS_TICK_HEIGHT, width, BOLUS_TICK_HEIGHT), 0, GCornerNone);
+  graphics_fill_rect(ctx, GRect(x + point_width / 2 - width / 2, bottom_y - BOLUS_TICK_HEIGHT, width, BOLUS_TICK_HEIGHT), 0, GCornerNone);
 }
 
-static int16_t bg_to_y(int16_t height, int16_t bg) {
+static int16_t bg_to_y(int16_t height, int16_t bg, Preferences *prefs) {
   // Graph lower bound, graph upper bound
-  uint8_t graph_min = get_prefs()->bottom_of_graph;
-  uint16_t graph_max = get_prefs()->top_of_graph;
+  uint8_t graph_min = prefs->bottom_of_graph;
+  uint16_t graph_max = prefs->top_of_graph;
   return (float)height - (float)(bg - graph_min) / (float)(graph_max - graph_min) * (float)height + 0.5f;
 }
 
@@ -44,11 +44,11 @@ static int16_t index_to_x(uint8_t i, uint8_t graph_width, uint8_t padding) {
   return graph_width - (get_prefs()->point_width + get_prefs()->point_margin) * (1 + i + padding) + get_prefs()->point_margin - get_prefs()->point_right_margin;
 }
 
-static int16_t bg_to_y_for_point(uint8_t height, int16_t bg) {
-  uint8_t diameter = get_prefs()->point_shape == POINT_SHAPE_CIRCLE ? get_prefs()->point_width : get_prefs()->point_rect_height;
+static int16_t bg_to_y_for_point(uint8_t height, int16_t bg, Preferences *prefs) {
+  uint8_t diameter = prefs->point_shape == POINT_SHAPE_CIRCLE ? prefs->point_width : prefs->point_rect_height;
   uint8_t max = height - diameter;
 
-  int16_t y = (float)bg_to_y(height, bg) - diameter / 2.0f + 0.5f;
+  int16_t y = bg_to_y(height, bg, prefs) - diameter / 2;
   if (y < 0) {
     return 0;
   } else if (y > max) {
@@ -58,13 +58,13 @@ static int16_t bg_to_y_for_point(uint8_t height, int16_t bg) {
   }
 }
 
-static GColor color_for_bg(int16_t bg) {
-  if (bg > get_prefs()->top_of_range) {
-    return get_prefs()->colors[COLOR_KEY_POINT_HIGH];
-  } else if (bg < get_prefs()->bottom_of_range) {
-    return get_prefs()->colors[COLOR_KEY_POINT_LOW];
+static GColor color_for_bg(int16_t bg, Preferences *prefs) {
+  if (bg > prefs->top_of_range) {
+    return prefs->colors[COLOR_KEY_POINT_HIGH];
+  } else if (bg < prefs->bottom_of_range) {
+    return prefs->colors[COLOR_KEY_POINT_LOW];
   } else {
-    return get_prefs()->colors[COLOR_KEY_POINT_DEFAULT];
+    return prefs->colors[COLOR_KEY_POINT_DEFAULT];
   }
 }
 
@@ -72,10 +72,6 @@ static void fill_rect_gray(GContext *ctx, GRect bounds, GColor previous_color) {
   graphics_context_set_fill_color(ctx, GColorLightGray);
   graphics_fill_rect(ctx, bounds, 0, GCornerNone);
   graphics_context_set_fill_color(ctx, previous_color);
-}
-
-static uint8_t decode_bits(uint8_t value, uint8_t offset, uint8_t bits) {
-  return (value >> offset) & (0xff >> (8 - bits));
 }
 
 static uint8_t sgv_graph_height(int16_t available_height) {
@@ -88,6 +84,7 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
   GSize layer_size = layer_get_bounds(layer).size;
   uint8_t graph_width = layer_size.w;
   uint8_t graph_height = sgv_graph_height(layer_size.h);
+  Preferences *prefs = get_prefs();
 
   GColor color = ((GraphData*)layer_get_data(layer))->color;
   graphics_context_set_stroke_color(ctx, color);
@@ -95,30 +92,20 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
   uint8_t padding = graph_staleness_padding();
 
   // Target range bounds
-  uint16_t limits[2] = {get_prefs()->top_of_range, get_prefs()->bottom_of_range};
-  bool is_top[2] = {true, false};
-  for(i = 0; i < (uint8_t)ARRAY_LENGTH(limits); i++) {
-    y = bg_to_y(graph_height, limits[i]);
-    for(x = 0; x < graph_width; x += 2) {
-      // Draw bounds symmetrically, on the inside of the range
-      if (is_top[i]) {
-        fill_rect_gray(ctx, GRect(0, y - 1, graph_width, 4), color);
-      } else {
-        fill_rect_gray(ctx, GRect(0, y - 2, graph_width, 4), color);
-      }
-    }
-  }
+  // Draw bounds symmetrically, on the inside of the range
+  fill_rect_gray(ctx, GRect(0, bg_to_y(graph_height, prefs->top_of_range, prefs) - 1, graph_width, 4), color);
+  fill_rect_gray(ctx, GRect(0, bg_to_y(graph_height, prefs->bottom_of_range, prefs) - 2, graph_width, 4), color);
 
   // Horizontal gridlines
-  uint8_t h_gridline_frequency = get_prefs()->h_gridlines;
+  uint8_t h_gridline_frequency = prefs->h_gridlines;
   if (h_gridline_frequency > 0) {
-    uint8_t graph_min = get_prefs()->bottom_of_graph;
-    uint16_t graph_max = get_prefs()->top_of_graph;
+    uint8_t graph_min = prefs->bottom_of_graph;
+    uint16_t graph_max = prefs->top_of_graph;
     for(int16_t g = 0; g < graph_max; g += h_gridline_frequency) {
-      if (g <= graph_min || g == limits[0] || g == limits[1]) {
+      if (g <= graph_min || g == prefs->top_of_range || g == prefs->bottom_of_range) {
         continue;
       }
-      y = bg_to_y(graph_height, g);
+      y = bg_to_y(graph_height, g, prefs);
       for(x = 2; x < graph_width; x += 8) {
         graphics_draw_line(ctx, GPoint(x, y), GPoint(x + 1, y));
       }
@@ -140,7 +127,7 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
       continue;
     }
     x = index_to_x(i, graph_width, padding);
-    y = bg_to_y_for_point(graph_height, bg);
+    y = bg_to_y_for_point(graph_height, bg, prefs);
     to_plot[i] = GPoint(x, y);
     // stop plotting if the SGV is off-screen
     if (x < 0) {
@@ -150,8 +137,8 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
   uint8_t plot_count = i;
 
   // Line
-  if (get_prefs()->plot_line) {
-    graphics_context_set_stroke_width(ctx, get_prefs()->plot_line_width);
+  if (prefs->plot_line) {
+    graphics_context_set_stroke_width(ctx, prefs->plot_line_width);
     int16_t last_bg = NO_BG;
     GPoint last_center;
     for(i = 0; i < plot_count; i++) {
@@ -161,10 +148,10 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
       }
       GPoint center = center_of_point(to_plot[i].x, to_plot[i].y);
       if (last_bg != NO_BG) {
-        if (get_prefs()->plot_line_is_custom_color) {
-          graphics_context_set_stroke_color(ctx, COLOR_FALLBACK(get_prefs()->colors[COLOR_KEY_PLOT_LINE], color));
+        if (prefs->plot_line_is_custom_color) {
+          graphics_context_set_stroke_color(ctx, COLOR_FALLBACK(prefs->colors[COLOR_KEY_PLOT_LINE], color));
         } else {
-          graphics_context_set_stroke_color(ctx, COLOR_FALLBACK(color_for_bg(last_bg), color));
+          graphics_context_set_stroke_color(ctx, COLOR_FALLBACK(color_for_bg(last_bg, prefs), color));
         }
         graphics_draw_line(ctx, center, last_center);
       }
@@ -178,7 +165,7 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
   for(i = 0; i < plot_count; i++) {
     bg = data->sgvs[i] * 2;
     if (bg != 0) {
-      plot_point(to_plot[i].x, to_plot[i].y, COLOR_FALLBACK(color_for_bg(bg), color), ctx);
+      plot_point(to_plot[i].x, to_plot[i].y, COLOR_FALLBACK(color_for_bg(bg, prefs), color), ctx);
     }
   }
 
@@ -187,21 +174,20 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
 
   // Boluses
   for(i = 0; i < data->sgv_count; i++) {
-    bool bolus = decode_bits(data->graph_extra[i], GRAPH_EXTRA_BOLUS_OFFSET, GRAPH_EXTRA_BOLUS_BITS);
-    if (bolus) {
+    if (data->graph_extra[i].bolus) {
       x = index_to_x(i, graph_width, padding);
-      plot_tick(x, graph_height, ctx);
+      plot_tick(x, graph_height, ctx, prefs->point_width);
     }
   }
 
   // Basals
-  if (get_prefs()->basal_graph) {
+  if (prefs->basal_graph) {
     graphics_draw_line(ctx, GPoint(0, graph_height), GPoint(graph_width, graph_height));
     for(i = 0; i < data->sgv_count; i++) {
-      uint8_t basal = decode_bits(data->graph_extra[i], GRAPH_EXTRA_BASAL_OFFSET, GRAPH_EXTRA_BASAL_BITS);
+      uint8_t basal = data->graph_extra[i].basal;
       x = index_to_x(i, graph_width, padding);
       y = layer_size.h - basal;
-      uint8_t width = get_prefs()->point_width + get_prefs()->point_margin;
+      uint8_t width = prefs->point_width + prefs->point_margin;
       if (i == data->sgv_count - 1 && x >= 0) {
         // if this is the last point to draw, extend its basal data to the left edge
         width += x;
@@ -214,7 +200,7 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
     }
     if (padding > 0) {
       x = index_to_x(padding - 1, graph_width, 0);
-      graphics_fill_rect(ctx, GRect(x, graph_height, graph_width - x, get_prefs()->basal_height), 0, GCornerNone);
+      graphics_fill_rect(ctx, GRect(x, graph_height, graph_width - x, prefs->basal_height), 0, GCornerNone);
     }
   }
 }
@@ -236,13 +222,16 @@ GraphElement* graph_element_create(Layer *parent) {
   layer_set_update_proc(el->graph_layer, graph_update_proc);
   layer_add_child(parent, el->graph_layer);
 
+  uint8_t conn_status_loc = get_prefs()->conn_status_loc;
+  uint8_t recency_loc = get_prefs()->recency_loc;
+
   el->conn_status = NULL;
   int16_t conn_status_y = -1;
   bool conn_status_align_bottom;
-  if (get_prefs()->conn_status_loc == CONN_STATUS_LOC_GRAPH_TOP_LEFT) {
+  if (conn_status_loc == CONN_STATUS_LOC_GRAPH_TOP_LEFT) {
     conn_status_align_bottom = false;
     conn_status_y = 1;
-  } else if (get_prefs()->conn_status_loc == CONN_STATUS_LOC_GRAPH_BOTTOM_LEFT) {
+  } else if (conn_status_loc == CONN_STATUS_LOC_GRAPH_BOTTOM_LEFT) {
     conn_status_align_bottom = true;
     conn_status_y = sgv_graph_height(bounds.size.h) - connection_status_component_size();
   }
@@ -252,15 +241,15 @@ GraphElement* graph_element_create(Layer *parent) {
 
   el->recency = NULL;
   int16_t recency_y = -1;
-  if (get_prefs()->recency_loc == RECENCY_LOC_GRAPH_TOP_LEFT) {
+  if (recency_loc == RECENCY_LOC_GRAPH_TOP_LEFT) {
     recency_y = 1;
-  } else if (get_prefs()->recency_loc == RECENCY_LOC_GRAPH_BOTTOM_LEFT) {
+  } else if (recency_loc == RECENCY_LOC_GRAPH_BOTTOM_LEFT) {
     recency_y = sgv_graph_height(bounds.size.h) - recency_component_height();
   }
   if (recency_y != -1) {
     if (
-        (get_prefs()->recency_loc == RECENCY_LOC_GRAPH_TOP_LEFT && get_prefs()->conn_status_loc == CONN_STATUS_LOC_GRAPH_TOP_LEFT) ||
-        (get_prefs()->recency_loc == RECENCY_LOC_GRAPH_BOTTOM_LEFT && get_prefs()->conn_status_loc == CONN_STATUS_LOC_GRAPH_BOTTOM_LEFT)
+        (recency_loc == RECENCY_LOC_GRAPH_TOP_LEFT && conn_status_loc == CONN_STATUS_LOC_GRAPH_TOP_LEFT) ||
+        (recency_loc == RECENCY_LOC_GRAPH_BOTTOM_LEFT && conn_status_loc == CONN_STATUS_LOC_GRAPH_BOTTOM_LEFT)
     ) {
       // XXX: If the recency component and connection status component share the
       // same corner, the connection status must subscribe to changes in the

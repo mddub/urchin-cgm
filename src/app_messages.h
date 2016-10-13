@@ -6,6 +6,15 @@
 #define STATUS_BAR_MAX_LENGTH 256
 #define NO_DELTA_VALUE 65536
 
+typedef union GraphExtra {
+  uint8_t raw;
+  struct {
+    uint8_t bolus:1;
+    uint8_t basal:5;
+    uint8_t _unused:2;
+  };
+} GraphExtra;
+
 typedef struct __attribute__((__packed__)) DataMessage {
   time_t received_at;
   int32_t recency;
@@ -16,7 +25,7 @@ typedef struct __attribute__((__packed__)) DataMessage {
   int32_t delta;
   char status_text[STATUS_BAR_MAX_LENGTH];
   int32_t status_recency;
-  uint8_t graph_extra[GRAPH_MAX_SGV_COUNT];
+  GraphExtra graph_extra[GRAPH_MAX_SGV_COUNT];
 } DataMessage;
 
 bool get_int32(DictionaryIterator *data, int32_t *dest, uint8_t key, bool required, int32_t fallback);
