@@ -32,6 +32,15 @@ function app(Pebble, c) {
   }
 
   function sendMessage(data) {
+    Object.keys(data).forEach(function(key) {
+      // These must be explicitly sent as ints, since Pebble Android casts them to strings
+      if (data[key] === true) {
+        data[key] = 1;
+      } else if (data[key] === false) {
+        data[key] = 0;
+      }
+    });
+
     console.log('sending ' + JSON.stringify(data));
     return new Promise(function(resolve, reject) {
       Pebble.sendAppMessage(
@@ -136,16 +145,16 @@ function app(Pebble, c) {
   function sendPreferences() {
     return sendMessage({
       msgType: c.MSG_TYPE_PREFERENCES,
-      mmol: config.mmol ? 1 : 0,
+      mmol: config.mmol,
       topOfGraph: config.topOfGraph,
       topOfRange: config.topOfRange,
       bottomOfRange: config.bottomOfRange,
       bottomOfGraph: config.bottomOfGraph,
       hGridlines: config.hGridlines,
-      batteryAsNumber: config.batteryAsNumber ? 1 : 0,
-      basalGraph: config.basalGraph ? 1 : 0,
+      batteryAsNumber: config.batteryAsNumber,
+      basalGraph: config.basalGraph,
       basalHeight: config.basalHeight,
-      updateEveryMinute: config.updateEveryMinute ? 1 : 0,
+      updateEveryMinute: config.updateEveryMinute,
       timeAlign: c.ALIGN[getLayout(config).timeAlign],
       batteryLoc: c.BATTERY_LOC[getLayout(config).batteryLoc],
       connStatusLoc: c.CONN_STATUS_LOC[getLayout(config).connStatusLoc],
