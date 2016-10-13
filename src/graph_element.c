@@ -74,10 +74,6 @@ static void fill_rect_gray(GContext *ctx, GRect bounds, GColor previous_color) {
   graphics_context_set_fill_color(ctx, previous_color);
 }
 
-static uint8_t decode_bits(uint8_t value, uint8_t offset, uint8_t bits) {
-  return (value >> offset) & (0xff >> (8 - bits));
-}
-
 static uint8_t sgv_graph_height(int16_t available_height) {
   return get_prefs()->basal_graph ? available_height - get_prefs()->basal_height : available_height;
 }
@@ -187,8 +183,7 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
 
   // Boluses
   for(i = 0; i < data->sgv_count; i++) {
-    bool bolus = decode_bits(data->graph_extra[i], GRAPH_EXTRA_BOLUS_OFFSET, GRAPH_EXTRA_BOLUS_BITS);
-    if (bolus) {
+    if (data->graph_extra[i].bolus) {
       x = index_to_x(i, graph_width, padding);
       plot_tick(x, graph_height, ctx);
     }
@@ -198,7 +193,7 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
   if (get_prefs()->basal_graph) {
     graphics_draw_line(ctx, GPoint(0, graph_height), GPoint(graph_width, graph_height));
     for(i = 0; i < data->sgv_count; i++) {
-      uint8_t basal = decode_bits(data->graph_extra[i], GRAPH_EXTRA_BASAL_OFFSET, GRAPH_EXTRA_BASAL_BITS);
+      uint8_t basal = data->graph_extra[i].basal;
       x = index_to_x(i, graph_width, padding);
       y = layer_size.h - basal;
       uint8_t width = get_prefs()->point_width + get_prefs()->point_margin;

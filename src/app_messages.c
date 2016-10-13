@@ -134,7 +134,7 @@ bool validate_data_message(DictionaryIterator *data, DataMessage *out) {
     && get_int32(data, &out->delta, MESSAGE_KEY_delta, false, NO_DELTA_VALUE)
     && get_cstring(data, out->status_text, MESSAGE_KEY_statusText, STATUS_BAR_MAX_LENGTH, false, "")
     && get_int32(data, &out->status_recency, MESSAGE_KEY_statusRecency, false, -1)
-    && get_byte_array(data, out->graph_extra, MESSAGE_KEY_graphExtra, GRAPH_MAX_SGV_COUNT, false, zeroes);
+    && get_byte_array(data, (uint8_t*)out->graph_extra, MESSAGE_KEY_graphExtra, GRAPH_MAX_SGV_COUNT, false, zeroes);
 }
 
 static DataMessage *_last_data_message = NULL;
