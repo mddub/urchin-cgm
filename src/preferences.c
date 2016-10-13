@@ -12,9 +12,11 @@ static void set_empty_prefs() {
 }
 
 void init_prefs() {
+#ifndef PBL_APLITE
   if (sizeof(Preferences) > PERSIST_DATA_MAX_LENGTH) {
     APP_LOG(APP_LOG_LEVEL_ERROR, "Preferences data too big!");
   }
+#endif
   s_prefs = malloc(sizeof(Preferences));
 
   if (
