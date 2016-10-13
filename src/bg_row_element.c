@@ -94,10 +94,6 @@ void bg_row_element_destroy(BGRowElement *el) {
 
 void bg_row_element_update(BGRowElement *el, DataMessage *data) {
   last_bg_text_layer_update(el->bg_text, data);
-  text_layer_set_font(
-    el->bg_text,
-    fonts_get_system_font(is_bg_special_value(data) ? get_font(FONT_28_BOLD).key : get_font(FONT_34_NUMBERS).key)
-  );
   trend_arrow_component_update(el->trend, data);
   delta_text_layer_update(el->delta_text, data);
   layer_set_hidden(

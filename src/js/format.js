@@ -149,7 +149,11 @@ var format = function(c) {
   };
 
   f.lastSgv = function(sgvs) {
-    return sgvs.length > 0 ? parseInt(sgvs[0]['sgv'], 10) : 0;
+    if (sgvs.length === 0) {
+      return 0;
+    }
+    var last = parseInt(sgvs[0]['sgv'], 10);
+    return last <= c.DEXCOM_ERROR_CODE_MAX ? 0 : last;
   };
 
   f.lastDelta = function(ys) {

@@ -10,10 +10,6 @@ void last_bg_text_layer_update(TextLayer *text_layer, DataMessage *data) {
   text_layer_set_text(text_layer, last_bg_buffer);
 }
 
-bool is_bg_special_value(DataMessage *data) {
-  return get_error_string(data->last_sgv) != NULL;
-}
-
 void delta_text_layer_update(TextLayer *text_layer, DataMessage *data) {
   static char delta_buffer[8];
   int delta;
