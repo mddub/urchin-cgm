@@ -77,8 +77,15 @@ static Layer* position_layer(Layer *parent, GPoint *pos, ElementConfig config, G
 static void compute_pixel_sizes(GSize *result, Layer *parent, ElementConfig *elements) {
   GSize screen_size = layer_get_bounds(parent).size;
   for(uint8_t i = 0; i < s_num_elements; i++) {
-    result[i].h = (float)screen_size.h * (float)elements[i].h / 100.0f + 0.5f;
-    result[i].w = (float)screen_size.w * (float)elements[i].w / 100.0f + 0.5f;
+    // division without floats
+    result[i].h = screen_size.h * elements[i].h / 100;
+    if (screen_size.h * elements[i].h / 10 - (10 * result[i].h) >= 5) {
+      result[i].h += 1;
+    }
+    result[i].w = screen_size.w * elements[i].w / 100;
+    if (screen_size.w * elements[i].w / 10 - (10 * result[i].w) >= 5) {
+      result[i].w += 1;
+    }
   }
 }
 

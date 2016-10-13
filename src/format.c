@@ -36,10 +36,12 @@ void format_bg(char* buffer, char buf_size, int mgdl, bool is_delta, bool use_mm
   }
 
   if (use_mmol) {
-    // Pebble snprintf does not support %f:
-    // https://forums.getpebble.com/discussion/8743/petition-please-support-float-double-for-snprintf
+    // Compute (mgdl / 18.0) without floating-point math
     int a = mgdl / 18;
-    int b = ((float)mgdl - a * 18.0f) / 1.8f + 0.5f;
+    int b = 10 * (mgdl - a * 18) / 18;
+    if (10 * mgdl - 180 * a - 18 * b >= 9) {
+      b += 1;
+    }
     if (a == 0 && b == 0) {
       // e.g. "-1 mg/dL" == "+0.0 mmol/L"
       plus_minus = "+";
@@ -51,7 +53,10 @@ void format_bg(char* buffer, char buf_size, int mgdl, bool is_delta, bool use_mm
 }
 
 void format_recency(char* buf, uint16_t buf_size, int32_t seconds) {
-  int32_t minutes = (float)seconds / 60.0f + 0.5f;
+  int32_t minutes = seconds / 60;
+  if (seconds - minutes * 60 >= 30) {
+    minutes += 1;
+  }
   int32_t hours = minutes / 60;
   if (minutes < 60) {
     snprintf(buf, buf_size, "%d", (int)minutes);
@@ -66,7 +71,10 @@ void format_recency(char* buf, uint16_t buf_size, int32_t seconds) {
 
 void format_status_bar_text(char* buffer, uint16_t buf_size, DataMessage *d) {
   int32_t recency = time(NULL) - d->received_at + d->status_recency;
-  int32_t minutes = (float)recency / 60.0f + 0.5f;
+  int32_t minutes = recency / 60;
+  if (recency - minutes * 60 >= 30) {
+    minutes += 1;
+  }
 
   if (d->status_recency == -1 || (get_prefs()->status_min_recency_to_show_minutes > 0 && minutes <= get_prefs()->status_min_recency_to_show_minutes)) {
 
