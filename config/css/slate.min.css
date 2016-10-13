@@ -37,36 +37,40 @@
   height: 168px;
   border: 1px solid #DEDEDE;
   margin: 0 auto 10px;
+  background-image: url(../images/layouts.png);
+  background-position-y: 0;
 }
 
 .layout-preview-a {
-  background: url(../images/layouts.png) 0 0;
+  background-position-x: 0;
 }
 
 .layout-preview-b {
-  background: url(../images/layouts.png) -144px 0;
+  background-position-x: -144px;
 }
 
 .layout-preview-c {
-  background: url(../images/layouts.png) -288px 0;
+  background-position-x: -288px;
 }
 
 .layout-preview-d {
-  background: url(../images/layouts.png) -432px 0;
+  background-position-x: -432px;
 }
 
 .layout-preview-e {
-  background: url(../images/layouts.png) -576px 0;
+  background-position-x: -576px;
 }
 
 .layout-preview-custom {
-  background: url(../images/layouts.png) -720px 0;
+  background-position-x: -720px;
 }
 
 .recency-style-option {
   display: inline-block;
   vertical-align: middle;
   height: 29px;
+  background-image: url(../images/recency-styles.png);
+  background-position-y: 0;
 }
 
 .active .recency-style-option {
@@ -77,32 +81,32 @@
 
 .recency-style-small-no-circle {
   width: 6px;
-  background: url(../images/recency-styles.png) 0 0;
+  background-position-x: 0;
 }
 
 .recency-style-medium-pie {
   width: 23px;
-  background: url(../images/recency-styles.png) -6px 0;
+  background-position-x: -6px;
 }
 .recency-style-medium-ring {
   width: 23px;
-  background: url(../images/recency-styles.png) -29px 0;
+  background-position-x: -29px;
 }
 .recency-style-medium-no-circle {
   width: 8px;
-  background: url(../images/recency-styles.png) -52px 0;
+  background-position-x: -52px;
 }
 .recency-style-large-pie {
   width: 29px;
-  background: url(../images/recency-styles.png) -60px 0;
+  background-position-x: -60px;
 }
 .recency-style-large-ring {
   width: 29px;
-  background: url(../images/recency-styles.png) -89px 0;
+  background-position-x: -89px;
 }
 .recency-style-large-no-circle {
   width: 9px;
-  background: url(../images/recency-styles.png) -118px 0;
+  background-position-x: -118px;
 }
 
 .point-style-option {
@@ -110,6 +114,8 @@
   vertical-align: middle;
   width: 43px;
   height: 22px;
+  background-image: url(../images/point-styles.png);
+  background-position-y: 0;
 }
 
 .active .point-style-option {
@@ -119,19 +125,19 @@
 }
 
 .point-style-a {
-  background: url(../images/point-styles.png) 0 0;
+  background-position-x: 0;
 }
 
 .point-style-b {
-  background: url(../images/point-styles.png) -43px 0;
+ background-position-x: -43px;
 }
 
 .point-style-c {
-  background: url(../images/point-styles.png) -86px 0;
+  background-position-x: -86px;
 }
 
 .point-style-d {
-  background: url(../images/point-styles.png) -129px 0;
+  background-position-x: -129px;
 }
 
 .sub-item {
