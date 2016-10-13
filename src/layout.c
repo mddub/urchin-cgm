@@ -123,13 +123,14 @@ static TextLayer* maybe_create_need_prefs_message(Layer* parent) {
   if (s_num_elements > 0) {
     return NULL;
   } else {
-    TextLayer *t = text_layer_create(layer_get_bounds(parent));
+    TextLayer *t = add_text_layer(
+      parent,
+      layer_get_bounds(parent),
+      fonts_get_system_font(get_font(FONT_28_BOLD).key),
+      GColorBlack,
+      GTextAlignmentCenter
+    );
     text_layer_set_text(t, "Urchin CGM\n\nWaiting for settings from phone...");
-    text_layer_set_text_alignment(t, GTextAlignmentCenter);
-    text_layer_set_background_color(t, GColorClear);
-    text_layer_set_text_color(t, GColorBlack);
-    text_layer_set_font(t, fonts_get_system_font(get_font(FONT_28_BOLD).key));
-    layer_add_child(parent, text_layer_get_layer(t));
     return t;
   }
 }
@@ -175,4 +176,14 @@ void deinit_layout() {
   }
   free(s_layers);
   free(s_pixel_sizes);
+}
+
+TextLayer* add_text_layer(Layer *parent, GRect bounds, GFont font, GColor fg_color, GTextAlignment alignment) {
+  TextLayer *t = text_layer_create(bounds);
+  text_layer_set_font(t, font);
+  text_layer_set_background_color(t, GColorClear);
+  text_layer_set_text_color(t, fg_color);
+  text_layer_set_text_alignment(t, alignment);
+  layer_add_child(parent, text_layer_get_layer(t));
+  return t;
 }

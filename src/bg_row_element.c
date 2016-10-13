@@ -46,17 +46,18 @@ BGRowElement* bg_row_element_create(Layer *parent) {
   GRect bounds = element_get_bounds(parent);
 
   FontChoice bg_font = get_font(FONT_34_NUMBERS);
-  TextLayer *bg_text = text_layer_create(GRect(
-    0,
-    (bounds.size.h - bg_font.height) / 2 - bg_font.padding_top,
-    bounds.size.w,
-    bg_font.height + bg_font.padding_top + bg_font.padding_bottom
-  ));
-  text_layer_set_font(bg_text, fonts_get_system_font(bg_font.key));
-  text_layer_set_text_alignment(bg_text, GTextAlignmentLeft);
-  text_layer_set_background_color(bg_text, GColorClear);
-  text_layer_set_text_color(bg_text, element_fg(parent));
-  layer_add_child(parent, text_layer_get_layer(bg_text));
+  TextLayer *bg_text = add_text_layer(
+    parent,
+    GRect(
+      0,
+      (bounds.size.h - bg_font.height) / 2 - bg_font.padding_top,
+      bounds.size.w,
+      bg_font.height + bg_font.padding_top + bg_font.padding_bottom
+    ),
+    fonts_get_system_font(bg_font.key),
+    element_fg(parent),
+    GTextAlignmentLeft
+  );
 
   TrendArrowComponent *trend = trend_arrow_component_create(
     parent,
@@ -65,17 +66,18 @@ BGRowElement* bg_row_element_create(Layer *parent) {
   );
 
   FontChoice delta_font = get_font(FONT_28_BOLD);
-  TextLayer *delta_text = text_layer_create(GRect(
-    0, // set by bg_row_element_rearrange
-    (bounds.size.h - delta_font.height) / 2 - delta_font.padding_top,
-    bounds.size.w,
-    delta_font.height + delta_font.padding_top + delta_font.padding_bottom
-  ));
-  text_layer_set_font(delta_text, fonts_get_system_font(delta_font.key));
-  text_layer_set_text_alignment(delta_text, GTextAlignmentLeft);
-  text_layer_set_background_color(delta_text, GColorClear);
-  text_layer_set_text_color(delta_text, element_fg(parent));
-  layer_add_child(parent, text_layer_get_layer(delta_text));
+  TextLayer *delta_text = add_text_layer(
+    parent,
+    GRect(
+      0, // set by bg_row_element_rearrange
+      (bounds.size.h - delta_font.height) / 2 - delta_font.padding_top,
+      bounds.size.w,
+      delta_font.height + delta_font.padding_top + delta_font.padding_bottom
+    ),
+    fonts_get_system_font(delta_font.key),
+    element_fg(parent),
+    GTextAlignmentLeft
+  );
 
   BGRowElement *el = malloc(sizeof(BGRowElement));
   el->parent_size = bounds.size;

@@ -42,13 +42,14 @@ ConnectionStatusComponent* connection_status_component_create(Layer *parent, int
   GRect parent_bounds = element_get_bounds(parent);
 
   // The text appears only when there's an issue, and expands to fit content
-  TextLayer *reason_text = text_layer_create(parent_bounds);
-  text_layer_set_font(reason_text, fonts_get_system_font(get_font(CONN_STATUS_FONT).key));
+  TextLayer *reason_text = add_text_layer(
+    parent,
+    parent_bounds,
+    fonts_get_system_font(get_font(CONN_STATUS_FONT).key),
+    element_fg(parent),
+    GTextAlignmentRight
+  );
   text_layer_set_background_color(reason_text, element_bg(parent));
-  text_layer_set_text_color(reason_text, element_fg(parent));
-  text_layer_set_text_alignment(reason_text, GTextAlignmentRight);
-  layer_set_hidden(text_layer_get_layer(reason_text), true);
-  layer_add_child(parent, text_layer_get_layer(reason_text));
 
   ConnectionStatusComponent *c = malloc(sizeof(ConnectionStatusComponent));
   c->icon_layer = icon_layer;

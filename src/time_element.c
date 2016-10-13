@@ -74,29 +74,24 @@ static uint8_t choose_font_for_height(uint8_t height) {
 
 TimeElement* time_element_create(Layer* parent) {
   GRect bounds = element_get_bounds(parent);
+  Preferences *prefs = get_prefs();
 
   const int time_margin = 2;
   FontChoice font = get_font(choose_font_for_height(bounds.size.h));
 
-  TextLayer* time_text = text_layer_create(GRect(time_margin, (bounds.size.h - font.height) / 2 - font.padding_top, bounds.size.w - 2 * time_margin, font.height + font.padding_top + font.padding_bottom));
-  text_layer_set_font(time_text, fonts_get_system_font(font.key));
-  text_layer_set_background_color(time_text, GColorClear);
-  text_layer_set_text_color(time_text, element_fg(parent));
-
-  if (get_prefs()->time_align == ALIGN_LEFT) {
-    text_layer_set_text_alignment(time_text, GTextAlignmentLeft);
-  } else if (get_prefs()->time_align == ALIGN_CENTER) {
-    text_layer_set_text_alignment(time_text, GTextAlignmentCenter);
-  } else {
-    text_layer_set_text_alignment(time_text, GTextAlignmentRight);
-  }
-
-  layer_add_child(parent, text_layer_get_layer(time_text));
-
   TimeElement* out = malloc(sizeof(TimeElement));
+
+  TextLayer* time_text = add_text_layer(
+    parent,
+    GRect(time_margin, (bounds.size.h - font.height) / 2 - font.padding_top, bounds.size.w - 2 * time_margin, font.height + font.padding_top + font.padding_bottom),
+    fonts_get_system_font(font.key),
+    element_fg(parent),
+    prefs->time_align == ALIGN_LEFT ? GTextAlignmentLeft : (prefs->time_align == ALIGN_CENTER ? GTextAlignmentCenter : GTextAlignmentRight)
+  );
+
   out->time_text = time_text;
-  out->battery = create_battery_component(parent, get_prefs()->battery_loc);
-  out->recency = create_recency_component(parent, get_prefs()->recency_loc);
+  out->battery = create_battery_component(parent, prefs->battery_loc);
+  out->recency = create_recency_component(parent, prefs->recency_loc);
   return out;
 }
 

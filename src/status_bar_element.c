@@ -25,19 +25,19 @@ StatusBarElement* status_bar_element_create(Layer *parent) {
 
   StatusBarElement *el = malloc(sizeof(StatusBarElement));
 
-  el->text = text_layer_create(GRect(
-    SM_TEXT_MARGIN,
-    text_y,
-    bounds.size.w - SM_TEXT_MARGIN,
-    height
-  ));
-  text_layer_set_text_alignment(el->text, GTextAlignmentLeft);
-  text_layer_set_background_color(el->text, GColorClear);
-  text_layer_set_text_color(el->text, element_fg(parent));
-
-  text_layer_set_font(el->text, fonts_get_system_font(font.key));
+  el->text = add_text_layer(
+    parent,
+    GRect(
+      SM_TEXT_MARGIN,
+      text_y,
+      bounds.size.w - SM_TEXT_MARGIN,
+      height
+    ),
+    fonts_get_system_font(font.key),
+    element_fg(parent),
+    GTextAlignmentLeft
+  );
   text_layer_set_overflow_mode(el->text, GTextOverflowModeWordWrap);
-  layer_add_child(parent, text_layer_get_layer(el->text));
 
   int8_t lines;
 

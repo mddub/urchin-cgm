@@ -80,12 +80,13 @@ BatteryComponent* battery_component_create(Layer *parent, int16_t x, int16_t y, 
   if (get_prefs()->battery_as_number) {
 
     FontChoice font = get_font(BATTERY_FONT);
-    c->text_layer = text_layer_create(GRect(x, y - font.padding_top + font.padding_bottom, BATTERY_TEXT_WIDTH, font.height + font.padding_top + font.padding_bottom));
-    text_layer_set_text_alignment(c->text_layer, align_right ? GTextAlignmentRight : GTextAlignmentLeft);
-    text_layer_set_background_color(c->text_layer, GColorClear);
-    text_layer_set_text_color(c->text_layer, element_fg(parent));
-    text_layer_set_font(c->text_layer, fonts_get_system_font(font.key));
-    layer_add_child(parent, text_layer_get_layer(c->text_layer));
+    c->text_layer = add_text_layer(
+      parent,
+      GRect(x, y - font.padding_top + font.padding_bottom, BATTERY_TEXT_WIDTH, font.height + font.padding_top + font.padding_bottom),
+      fonts_get_system_font(font.key),
+      element_fg(parent),
+      align_right ? GTextAlignmentRight : GTextAlignmentLeft
+    );
 
   } else {
 
