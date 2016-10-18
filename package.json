@@ -4,7 +4,11 @@
   "version": "0.1.0",
   "keywords": ["pebble-app"],
   "private": true,
-  "dependencies": {},
+  "devDependencies": {
+    "clean-css": "~3.4.20",
+    "html-minifier": "~3.1.0",
+    "uglify-js": "~2.7.3"
+  },
   "pebble": {
     "displayName": "Urchin CGM",
     "uuid": "ea361603-0373-4865-9824-8f52c65c6e07",

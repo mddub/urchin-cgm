@@ -25,6 +25,30 @@
   var customLayout;
   var currentLayoutChoice;
 
+  // On the phone, this string is substituted by the app JS.
+  // On the emulator, it's provided in the query string by pebble-tool.
+  var returnTo = getQueryParam('return_to') || '$$RETURN_TO$$';
+
+  var watchInfo = {};
+  try {
+    watchInfo = JSON.parse(decodeURIComponent('$$WATCH_INFO$$'));
+  } catch (e) {
+    watchInfo = JSON.parse(getQueryParam('watchInfo', '{}'));
+  }
+  // Older versions of Urchin pass these as separate query params
+  watchInfo.version = watchInfo.version || getQueryParam('version');
+  watchInfo.pf = watchInfo.pf || getQueryParam('pf');
+  watchInfo.fw = watchInfo.fw || getQueryParam('fw');
+  watchInfo.at = watchInfo.at || getQueryParam('at');
+  watchInfo.wt = watchInfo.wt || getQueryParam('wt');
+
+  var phoneConfig = {};
+  try {
+    phoneConfig = JSON.parse(decodeURIComponent('$$CURRENT$$'));
+  } catch (e) {
+    phoneConfig = JSON.parse(getQueryParam('current', '{}'));
+  }
+
   function upgradeConfig(config) {
     if (config.layout === undefined) {
       // v0.0.4
@@ -645,10 +669,19 @@
 
   function onSubmit(e) {
     e.preventDefault();
-    document.location = getQueryParam('return_to', 'pebblejs://close#') + encodeURIComponent(JSON.stringify(buildConfig()));
+    document.location = returnTo + encodeURIComponent(JSON.stringify(buildConfig()));
   }
 
+  // TODO remove this
   function trackGA() {
+    // In older versions, this config page is hosted on the web, accessed in a
+    // webview, and this page is responsible for GA tracking.
+    // In v0.0.13 and later, Urchin ships with this config page as a data URI,
+    // accessed offline, and the app JS is responsible for GA tracking.
+    if (document.location.href.indexOf('https://mddub.github.io') === -1) {
+      return;
+    }
+
     /* jshint ignore:start */
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
     (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -657,39 +690,38 @@
     /* jshint ignore:end */
 
     // redact PII
-    var current = JSON.parse(getQueryParam('current', '{}'));
+    var current = JSON.parse(JSON.stringify(phoneConfig));
     delete current['nightscout_url'];
     delete current['statusText'];
     delete current['statusUrl'];
     delete current['statusJsonUrl'];
     var cleansed = [
-      ['version', getQueryParam('version')],
-      ['pf', getQueryParam('pf')],
-      ['fw', getQueryParam('fw')],
-      ['at', getQueryParam('at')],
-      ['wt', getQueryParam('wt')],
+      ['version', watchInfo.version],
+      ['pf', watchInfo.pf],
+      ['fw', watchInfo.fw],
+      ['at', watchInfo.at],
+      ['wt', watchInfo.wt],
       ['current', JSON.stringify(current)],
     ].filter(function(pair) {
-      return pair[1] !== false;
+      return pair[1];
     }).map(function(pair) {
       return pair[0] + '=' + pair[1];
     }).join('&');
 
-    ga('create', 'UA-72399627-1', 'auto');
+    ga('create', c.CONFIG_GA_ID, 'auto');
     ga('send', 'pageview', location.pathname + '?' + cleansed);
   }
 
   $(function() {
 
-    var phoneConfig = JSON.parse(getQueryParam('current', '{}'));
     var current = upgradeConfig(phoneConfig);
     populateValues(current);
 
-    $('#update-available #running-version').text(getQueryParam('version') || '0.0.0');
+    $('#update-available #running-version').text(watchInfo.version || '0.0.0');
     $('#update-available #available-version').text(c.VERSION);
-    $('#update-available').toggle(c.VERSION !== getQueryParam('version'));
+    $('#update-available').toggle(c.VERSION !== watchInfo.version);
 
-    $('.color-platforms-only').toggle(['aplite', 'diorite'].indexOf(getQueryParam('pf')) === -1);
+    $('.color-platforms-only').toggle(['aplite', 'diorite'].indexOf(watchInfo.pf) === -1);
 
     initializeStatusOptions(current);
 

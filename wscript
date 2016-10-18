@@ -4,15 +4,19 @@ import os
 
 from waflib.Task import Task
 
+from make_inline_config import make_inline_config
+
 def add_environment_specific_constants(out, build_env, debug):
+    # This file makes the data URI for the config page viewable in the emulator.
+    out['CONFIG_PROXY_URL'] = 'file://{}/proxy_config.html'.format(os.path.abspath(os.path.curdir))
+
     if build_env == 'test':
         # Don't clobber config in localStorage with test config
         out['LOCAL_STORAGE_KEY_CONFIG'] = 'test_config'
     elif build_env == 'development':
-        # Can't use `pebble emu-app-config --file` because it bypasses the JS
-        # which adds current config as a query param when it opens the page:
-        # https://github.com/pebble/pebble-tool/blob/0e51fa/pebble_tool/commands/emucontrol.py#L116
-        out['CONFIG_URL'] = 'file://{}/config/index.html'.format(os.path.abspath(os.path.curdir))
+        # Normally the config page is stored in a data URI viewed "offline" on
+        # the phone. In development, open the source HTML page locally instead.
+        out['DEV_CONFIG_URL'] = 'file://{}/config/index.html'.format(os.path.abspath(os.path.curdir))
     if debug:
         out['DEBUG'] = True
 
@@ -33,6 +37,11 @@ class generate_js_includes_for_config_page(Task):
             includes += '\n(function() { /* %s */\n%s\n})();' % (js_file.relpath(), js_file.read())
         self.outputs[0].write(includes)
 
+class convert_config_page_to_data_uri(Task):
+    def run(self):
+        html_file = [i for i in self.inputs if i.name == 'index.html'][0]
+        self.outputs[0].write(make_inline_config(self, html_file))
+
 top = '.'
 out = 'build'
 
@@ -41,6 +50,14 @@ def options(ctx):
 
 def configure(ctx):
     ctx.load('pebble_sdk')
+
+def distclean(ctx):
+    for build_dir in (out, 'src/js/generated', 'config/js/generated'):
+        found = ctx.path.find_dir(build_dir)
+        if found:
+            cmd = 'rm -r {}'.format(found.abspath())
+            print cmd
+            ctx.exec_command(cmd)
 
 def build(ctx):
     ctx.load('pebble_sdk')
@@ -84,8 +101,15 @@ def build(ctx):
     gen_constants.set_outputs(constants_json)
     ctx.add_to_group(gen_constants)
 
+    config_page = ctx.srcnode.make_node('src/js/generated/config_page.json')
+    config_page.parent.mkdir()
+    convert_config_page = convert_config_page_to_data_uri(env=ctx.env)
+    convert_config_page.set_inputs(ctx.path.ant_glob('config/**/*'))
+    convert_config_page.set_outputs(config_page)
+    ctx.add_to_group(convert_config_page)
+
     ctx.pbl_bundle(
         binaries=binaries,
-        js=ctx.path.ant_glob(['src/js/**/*.js', 'src/js/**/*.json']),
+        js=ctx.path.ant_glob(['src/js/**/*.js', 'src/js/**/*.json']) + [constants_json, config_page],
         js_entry_file='src/js/app.js'
     )

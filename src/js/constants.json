@@ -2,8 +2,10 @@
    "VERSION" : "0.0.12",
 
    "DEBUG": false,
-   "CONFIG_URL" : "https://mddub.github.io/urchin-cgm/config/",
+   "DEV_CONFIG_URL": "",
+   "CONFIG_PROXY_URL": "",
    "LOCAL_STORAGE_KEY_CONFIG" : "config",
+   "CONFIG_GA_ID": "UA-72399627-1",
 
    "DEFAULT_CONFIG" : {
       "nightscout_url" : "",
