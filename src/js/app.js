@@ -2,6 +2,7 @@
 /* global console, module, Pebble, require */
 
 require('./vendor/lie.polyfill');
+var ga = require('./ga');
 
 function app(Pebble, c) {
 
@@ -26,9 +27,9 @@ function app(Pebble, c) {
     return points.computeVisiblePoints(points.computeGraphWidth(getLayout(config)), config);
   }
 
-  function dataFetchError(e) {
+  function sendDataFetchError(e) {
     console.log(e.stack);
-    sendMessage({msgType: c.MSG_TYPE_ERROR});
+    return sendMessage({msgType: c.MSG_TYPE_ERROR});
   }
 
   function sendMessage(data) {
@@ -64,7 +65,7 @@ function app(Pebble, c) {
         var basals = format.basalGraphArray(endTime, basalHistory, maxSGVs, config);
         var graphExtra = format.graphExtraArray(boluses, basals);
 
-        sendMessage({
+        return sendMessage({
           msgType: c.MSG_TYPE_DATA,
           recency: format.recency(sgvs),
           // XXX: divide BG by 2 to fit into 1 byte
@@ -77,7 +78,7 @@ function app(Pebble, c) {
           statusRecency: status.recency === undefined ? -1 : status.recency,
         });
       } catch (e) {
-        dataFetchError(e);
+        return sendDataFetchError(e);
       }
     }
 
@@ -90,11 +91,11 @@ function app(Pebble, c) {
       return {text: '-'};
     });
 
-    Promise.all([sgvs, bolusHistory, basalHistory, status])
+    return Promise.all([sgvs, bolusHistory, basalHistory, status])
       .then(function(results) {
-        onData.apply(this, results);
+        return onData.apply(this, results);
       })
-      .catch(dataFetchError);
+      .catch(sendDataFetchError);
   }
 
   function getLayout(config) {
@@ -193,7 +194,7 @@ function app(Pebble, c) {
     maxSGVs = computeMaxSGVs(config);
     data = require('./data')(c, maxSGVs);
 
-    Pebble.addEventListener('showConfiguration', function() {
+    function getWatchInfo() {
       var platform = 'unknown';
       var firmware = '0.0.0';
       if (Pebble.getActiveWatchInfo) {
@@ -205,17 +206,39 @@ function app(Pebble, c) {
           firmware += '.' + Pebble.getActiveWatchInfo()['firmware']['suffix'];
         }
       }
-      var query = [
-        ['version', c.VERSION],
-        ['pf', platform],
-        ['fw', firmware],
-        ['at', Pebble.getAccountToken()],
-        ['wt', Pebble.getWatchToken()],
-        ['current', encodeURIComponent(JSON.stringify(config))],
-      ].map(function(pair) {
-        return pair.join('=');
-      }).join('&');
-      Pebble.openURL(c.CONFIG_URL + '?' + query);
+
+      return {
+        version: c.VERSION,
+        pf: platform,
+        fw: firmware,
+        at: Pebble.getAccountToken(),
+        wt: Pebble.getWatchToken(),
+      };
+    }
+
+    Pebble.addEventListener('showConfiguration', function() {
+      var watchInfo = getWatchInfo();
+
+      var configHtml = require('./generated/config_page.json').configPage;
+      configHtml = configHtml.replace('$$WATCH_INFO$$', encodeURIComponent(JSON.stringify(watchInfo)));
+      configHtml = configHtml.replace('$$CURRENT$$', encodeURIComponent(JSON.stringify(config)));
+
+      var configURL;
+      if (c.DEV_CONFIG_URL) {
+        // While developing on the config page, open the source HTML file rather
+        // than the data-URI'd version of it
+        configURL = c.DEV_CONFIG_URL + '?watchInfo=' + encodeURIComponent(JSON.stringify(watchInfo)) + '&current=' + encodeURIComponent(JSON.stringify(config));
+      } else if (!Pebble || Pebble.platform === 'pypkjs') {
+        // If in the emulator, proxy the config page (represented as data URI)
+        // via a webpage which can read the return_to query parameter and
+        // substitute it for $$RETURN_TO$$.
+        configURL = c.CONFIG_PROXY_URL + '#' + encodeURIComponent(configHtml);
+      } else {
+        // In production, use the data URI to show the config page "offline."
+        configHtml = configHtml.replace('$$RETURN_TO$$', 'pebblejs://close#');
+        configURL = 'data:text/html;charset=utf-8,' + encodeURIComponent(configHtml);
+      }
+      Pebble.openURL(configURL);
     });
 
     Pebble.addEventListener('webviewclosed', function(event) {
@@ -251,7 +274,12 @@ function app(Pebble, c) {
 
       localStorage.setItem(c.LOCAL_STORAGE_KEY_CONFIG, JSON.stringify(config));
       console.log('Preferences updated: ' + JSON.stringify(config));
-      sendPreferences().then(requestAndSendData);
+      sendPreferences()
+        .then(requestAndSendData)
+        .then(function() {
+          ga.track(data, c.CONFIG_GA_ID, getWatchInfo(), config);
+        });
+
     });
 
     Pebble.addEventListener('appmessage', function(e) {

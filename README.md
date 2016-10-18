@@ -99,7 +99,7 @@ Contributions are welcome in the form of bugs and pull requests. To report a bug
 
 **Tips:**
 
-* **Testing the configuration page**: If you make changes to the configuration page, you must build the watchface to point to your local copy of the page (`file:///...`). To do this, set `BUILD_ENV` to `development`. (More info [here][build-env-development].)
+* **Testing the configuration page**: For a default build, the contents of `config/index.html` and its dependencies are inlined and converted into a data URI. This data URI is rebuilt and included in the JS during a `pebble build`. When testing changes to the configuration page, however, it's easier if the emulator opens the un-inlined version. To build the watchface to open the HTML file, set `BUILD_ENV` to `development`:
   ```
   BUILD_ENV=development pebble build
   pebble install --emulator basalt
@@ -193,7 +193,6 @@ The most effective method of integration testing I've found is to [compare scree
 
 This project is intended for educational and informational purposes only. It is not FDA approved and should not be used to make medical decisions. It is neither affiliated with nor endorsed by Dexcom.
 
-[build-env-development]: https://github.com/mddub/urchin-cgm/blob/ede29c/wscript#L17
 [care-portal]: http://www.nightscout.info/wiki/welcome/website-features/cgm-remote-monitor-care-portal
 [Expect]: https://github.com/Automattic/expect.js
 [file-issue]: https://github.com/mddub/urchin-cgm/issues
