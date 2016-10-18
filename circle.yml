@@ -4,6 +4,8 @@ machine:
   environment:
     PEBBLE_TOOL: 4.3
     PEBBLE_SDK: 3.14
+  post:
+    - npm install -g npm@3.x.x
 
 dependencies:
   pre:
