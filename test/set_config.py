@@ -10,6 +10,7 @@ import os
 import sys
 
 import test_screenshots
+from util import BASE_CONFIG
 from util import set_config
 
 PORT = os.environ.get('MOCK_SERVER_PORT')
@@ -21,7 +22,8 @@ parser.add_argument('--platform', default='basalt', help='which emulator')
 args = parser.parse_args()
 
 if args.test_class:
-    config = getattr(test_screenshots, args.test_class)().config
+    test_instance = getattr(test_screenshots, args.test_class)()
+    config = dict(BASE_CONFIG, **getattr(test_instance, 'config', {}))
 elif args.config_json:
     config = json.loads(args.config_json)
 else:

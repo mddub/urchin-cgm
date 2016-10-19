@@ -190,7 +190,7 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
     }
     if (sgv_padding > 0) {
       x = index_to_x(padding - 1, graph_width, 0);
-      graphics_fill_rect(ctx, GRect(x, graph_height, prediction_line_x - x, prefs->basal_height), 0, GCornerNone);
+      graphics_fill_rect(ctx, GRect(x, graph_height, prediction_line_x - x + 1, prefs->basal_height), 0, GCornerNone);
     }
   }
 
