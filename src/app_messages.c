@@ -1,6 +1,7 @@
 #include "app_messages.h"
 
 // Exclude logging on Aplite
+#ifdef DEBUG
 #ifndef PBL_PLATFORM_APLITE
 static const char* type_name(TupleType type) {
   switch(type) {
@@ -12,24 +13,31 @@ static const char* type_name(TupleType type) {
   }
 }
 #endif
+#endif
 
 static bool fail_unexpected_type(uint8_t key, TupleType type, const char* expected) {
+#ifdef DEBUG
 #ifndef PBL_PLATFORM_APLITE
   APP_LOG(APP_LOG_LEVEL_ERROR, "Expected key %d to have type %s, but has type %s", (int)key, expected, type_name(type));
+#endif
 #endif
   return false;
 }
 
 static bool fail_missing_required_value(uint8_t key) {
+#ifdef DEBUG
 #ifndef PBL_PLATFORM_APLITE
   APP_LOG(APP_LOG_LEVEL_ERROR, "Missing required value for key %d", (int)key);
+#endif
 #endif
   return false;
 }
 
 static bool pass_default_value(uint8_t key, const char * type) {
+#ifdef DEBUG
 #ifndef PBL_PLATFORM_APLITE
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Missing %s value for key %d, assigning default", type, (int)key);
+#endif
 #endif
   return true;
 }

@@ -106,6 +106,13 @@ Contributions are welcome in the form of bugs and pull requests. To report a bug
   pebble emu-app-config --emulator basalt
   ```
 
+* **Debug logging:** `DEBUG=true` enables extra logging from the watchface and JS:
+  ```
+  DEBUG=true pebble build
+  pebble install --emulator basalt
+  pebble logs --emulator basalt
+  ```
+
 * **Syntax checking:** If you use Vim, I highly recommend using [Syntastic] to display syntax errors. On my OS X system running Pebble Tool v4.1.1, these lines make Syntastic aware of Pebble's header files and suppress warnings generated within those files:
 
   ```
