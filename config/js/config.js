@@ -617,6 +617,10 @@
     $('[name=bolusTicks]').prop('checked', !!current['bolusTicks']);
     $('[name=basalGraph]').prop('checked', !!current['basalGraph']);
 
+    $('[name=predictEnabled]').prop('checked', !!current['predictEnabled']);
+    $('[name=predictSource]').val(current['predictSource']);
+    $('[name=predictMaxLength]').val(current['predictMaxLength']);
+
     $('[name=updateEveryMinute]').val(current['updateEveryMinute'] ? 'true' : 'false');
 
     $('[name=layout][value=' + current.layout + ']').addClass('active');
@@ -656,6 +660,9 @@
       batteryAsNumber: $('[name=batteryAsNumber][value=number]').hasClass('active'),
       bolusTicks: $('[name=bolusTicks]').is(':checked'),
       basalGraph: $('[name=basalGraph]').is(':checked'),
+      predictEnabled: $('[name=predictEnabled]').is(':checked'),
+      predictSource: $('[name=predictSource]').val(),
+      predictMaxLength: tryParseInt($('[name=predictMaxLength]').val()),
       updateEveryMinute: $('[name=updateEveryMinute]').val() === 'true',
       layout: $('[name=layout].active').attr('value'),
       advancedLayout: $('[name=advancedLayout]').is(':checked'),
@@ -738,6 +745,11 @@
       $('#basal-height-container').toggle($(evt.currentTarget).is(':checked'));
     });
     $('#basalGraph').trigger('change');
+
+    $('[name=predictEnabled]').on('change', function(evt) {
+      $('.prediction-setting').toggle($(evt.currentTarget).is(':checked'));
+    });
+    $('[name=predictEnabled]').trigger('change');
 
     $('[name=pointStyle]').on('click', onPointStyleClick);
 

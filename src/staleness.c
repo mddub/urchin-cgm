@@ -27,7 +27,7 @@ static uint32_t total_data_staleness() {
   return rig_to_web_staleness() + web_to_phone_staleness() + phone_to_pebble_staleness();
 }
 
-uint32_t graph_staleness_padding() {
+uint32_t sgv_graph_padding() {
   uint32_t staleness = total_data_staleness();
   uint32_t padding = staleness / GRAPH_INTERVAL_SIZE_SECONDS;
   if (padding == 1 && staleness < GRAPH_INTERVAL_SIZE_SECONDS + GRAPH_STALENESS_GRACE_PERIOD_SECONDS) {
@@ -57,7 +57,7 @@ ConnectionIssue connection_issue() {
     };
   }
 
-  if (graph_staleness_padding() > 0) {
+  if (sgv_graph_padding() > 0) {
     if (phone_to_pebble_staleness() > SGV_UPDATE_FREQUENCY_SECONDS) {
       return (ConnectionIssue) {
         .reason = CONNECTION_ISSUE_BLUETOOTH,

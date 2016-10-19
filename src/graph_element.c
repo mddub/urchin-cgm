@@ -4,6 +4,7 @@
 #include "staleness.h"
 
 #define BOLUS_TICK_HEIGHT 7
+#define MAX_PREDICTION_AGE_TO_SHOW_SECONDS (20*60)
 #define NO_BG 32767
 
 static GPoint center_of_point(int16_t x, int16_t y) {
@@ -40,7 +41,7 @@ static int16_t bg_to_y(int16_t height, int16_t bg, Preferences *prefs) {
   return (float)height - (float)(bg - graph_min) / (float)(graph_max - graph_min) * (float)height + 0.5f;
 }
 
-static int16_t index_to_x(uint8_t i, uint8_t graph_width, uint8_t padding) {
+static int16_t index_to_x(int16_t i, uint8_t graph_width, uint8_t padding) {
   return graph_width - (get_prefs()->point_width + get_prefs()->point_margin) * (1 + i + padding) + get_prefs()->point_margin - get_prefs()->point_right_margin;
 }
 
@@ -58,6 +59,7 @@ static int16_t bg_to_y_for_point(uint8_t height, int16_t bg, Preferences *prefs)
   }
 }
 
+#ifdef PBL_COLOR
 static GColor color_for_bg(int16_t bg, Preferences *prefs) {
   if (bg > prefs->top_of_range) {
     return prefs->colors[COLOR_KEY_POINT_HIGH];
@@ -67,6 +69,17 @@ static GColor color_for_bg(int16_t bg, Preferences *prefs) {
     return prefs->colors[COLOR_KEY_POINT_DEFAULT];
   }
 }
+
+static GColor color_for_predicted_bg(int16_t bg, Preferences *prefs) {
+  if (bg > prefs->top_of_range) {
+    return get_prefs()->colors[COLOR_KEY_PREDICT_HIGH];
+  } else if (bg < prefs->bottom_of_range) {
+    return get_prefs()->colors[COLOR_KEY_PREDICT_LOW];
+  } else {
+    return get_prefs()->colors[COLOR_KEY_PREDICT_DEFAULT];
+  }
+}
+#endif
 
 static void fill_rect_gray(GContext *ctx, GRect bounds, GColor previous_color) {
   graphics_context_set_fill_color(ctx, GColorLightGray);
@@ -79,8 +92,7 @@ static uint8_t sgv_graph_height(int16_t available_height) {
 }
 
 static void graph_update_proc(Layer *layer, GContext *ctx) {
-  uint8_t i;
-  int16_t x, y;
+  int16_t i, x, y;
   GSize layer_size = layer_get_bounds(layer).size;
   uint8_t graph_width = layer_size.w;
   uint8_t graph_height = sgv_graph_height(layer_size.h);
@@ -89,7 +101,6 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
   GColor color = ((GraphData*)layer_get_data(layer))->color;
   graphics_context_set_stroke_color(ctx, color);
   graphics_context_set_fill_color(ctx, color);
-  uint8_t padding = graph_staleness_padding();
 
   // Target range bounds
   // Draw bounds symmetrically, on the inside of the range
@@ -117,6 +128,25 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
     return;
   }
 
+  uint8_t sgv_padding = sgv_graph_padding();
+
+  // Prediction preprocessing
+  uint8_t prediction_skip = 0;
+  uint8_t prediction_padding = 0;
+  if (data->prediction_length > 0) {
+    // Show prediction points starting 2.5 minutes after the most recent SGV
+    time_t future_boundary = data->received_at - data->recency + 5 * 60 * sgv_padding + 150;
+    time_t prediction_start_time = data->received_at - data->prediction_recency;
+    if (prediction_start_time < future_boundary) {
+      prediction_skip = (future_boundary - prediction_start_time + 299) / 300;
+    } else {
+      prediction_padding = (prediction_start_time - future_boundary) / 300;
+    }
+  }
+
+  uint8_t padding = data->prediction_length - prediction_skip + prediction_padding + sgv_padding;
+  int16_t prediction_line_x = index_to_x(-1, graph_width, padding - sgv_padding) - prefs->point_margin - 1;
+
   // Line and point preprocessing
   static GPoint to_plot[GRAPH_MAX_SGV_COUNT];
   int16_t bg;
@@ -135,6 +165,42 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
     }
   }
   uint8_t plot_count = i;
+
+  // Basals
+  if (prefs->basal_graph) {
+    graphics_draw_line(ctx, GPoint(0, graph_height), GPoint(graph_width, graph_height));
+    for(i = 0; i < data->sgv_count; i++) {
+      uint8_t basal = data->graph_extra[i].basal;
+      x = index_to_x(i, graph_width, padding);
+      y = layer_size.h - basal;
+      uint8_t width = prefs->point_width + prefs->point_margin;
+      if (prefs->point_margin < 0 && i == 0) {
+        // if points overlap and this is the rightmost point, extend its basal to the right edge
+        width -= prefs->point_margin;
+      }
+      if (i == data->sgv_count - 1 && x >= 0) {
+        // if this is the last point to draw, extend its basal data to the left edge
+        width += x;
+        x = 0;
+      }
+      graphics_draw_line(ctx, GPoint(x, y), GPoint(x + width - 1, y));
+      if (basal > 1) {
+        fill_rect_gray(ctx, GRect(x, y + 1, width, basal - 1), color);
+      }
+    }
+    if (sgv_padding > 0) {
+      x = index_to_x(padding - 1, graph_width, 0);
+      graphics_fill_rect(ctx, GRect(x, graph_height, prediction_line_x - x, prefs->basal_height), 0, GCornerNone);
+    }
+  }
+
+  // Vertical line dividing history from prediction
+  if (data->prediction_length > 0) {
+    graphics_context_set_stroke_color(ctx, color);
+    for (y = 1; y < layer_size.h; y += 2) {
+      graphics_draw_pixel(ctx, GPoint(prediction_line_x, y));
+    }
+  }
 
   // Line
   if (prefs->plot_line) {
@@ -169,6 +235,22 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
     }
   }
 
+  // Prediction
+  if (data->prediction_length > 0 && data->received_at - data->prediction_recency >= time(NULL) - MAX_PREDICTION_AGE_TO_SHOW_SECONDS) {
+    uint8_t* series[3] = {data->prediction_1, data->prediction_2, data->prediction_3};
+    for(uint8_t si = 0; si < 3; si++) {
+      for(i = prediction_skip; i < data->prediction_length; i++) {
+        bg = series[si][i] * 2;
+        if (bg == 0) {
+          continue;
+        }
+        x = index_to_x(-i + prediction_skip - prediction_padding - 1, graph_width, padding - sgv_padding);
+        y = bg_to_y_for_point(graph_height, bg, prefs);
+        plot_point(x, y, COLOR_FALLBACK(color_for_predicted_bg(bg, prefs), GColorLightGray), ctx);
+      }
+    }
+  }
+
   graphics_context_set_fill_color(ctx, color);
   graphics_context_set_stroke_color(ctx, color);
 
@@ -177,30 +259,6 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
     if (data->graph_extra[i].bolus) {
       x = index_to_x(i, graph_width, padding);
       plot_tick(x, graph_height, ctx, prefs->point_width);
-    }
-  }
-
-  // Basals
-  if (prefs->basal_graph) {
-    graphics_draw_line(ctx, GPoint(0, graph_height), GPoint(graph_width, graph_height));
-    for(i = 0; i < data->sgv_count; i++) {
-      uint8_t basal = data->graph_extra[i].basal;
-      x = index_to_x(i, graph_width, padding);
-      y = layer_size.h - basal;
-      uint8_t width = prefs->point_width + prefs->point_margin;
-      if (i == data->sgv_count - 1 && x >= 0) {
-        // if this is the last point to draw, extend its basal data to the left edge
-        width += x;
-        x = 0;
-      }
-      graphics_draw_line(ctx, GPoint(x, y), GPoint(x + width - 1, y));
-      if (basal > 1) {
-        fill_rect_gray(ctx, GRect(x, y + 1, width, basal - 1), color);
-      }
-    }
-    if (padding > 0) {
-      x = index_to_x(padding - 1, graph_width, 0);
-      graphics_fill_rect(ctx, GRect(x, graph_height, graph_width - x, prefs->basal_height), 0, GCornerNone);
     }
   }
 }

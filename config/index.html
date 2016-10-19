@@ -581,6 +581,58 @@
         </div>
 
         <div class="item-container">
+          <h3>PREDICTED BGS:</h3>
+          <div class="item-container-footer">
+            Predicted BG values can be shown from Loop or OpenAPS. If you enable predictions, you should also adjust the point size under the "Graph" tab so that more readings can be shown.
+          </div>
+        </div>
+
+        <div class="item-container">
+          <div class="item-container-content">
+            <label class="item">
+              <input name="predictEnabled" type="checkbox" class="item-checkbox">
+              Show predicted BGs
+            </label>
+            <label class="item prediction-setting">
+              Prediction source
+              <select name="predictSource" dir="rtl" class="item-select">
+                <option value="loop" class="item-select-option">Loop</option>
+                <option value="openaps" class="item-select-option">OpenAPS</option>
+              </select>
+            </label>
+            <label class="item prediction-setting">
+              Maximum length
+              <select name="predictMaxLength" class="item-select">
+                <option value="6" class="item-select-option">30 minutes</option>
+                <option value="12" class="item-select-option">1 hour</option>
+                <option value="18" class="item-select-option">1.5 hours</option>
+                <option value="24" class="item-select-option">2 hours</option>
+                <option value="30" class="item-select-option">2.5 hours</option>
+                <option value="36" class="item-select-option">3 hours</option>
+                <option value="42" class="item-select-option">3.5 hours</option>
+                <option value="48" class="item-select-option">4 hours</option>
+                <option value="54" class="item-select-option">4.5 hours</option>
+                <option value="60" class="item-select-option">5 hours</option>
+              </select>
+            </label>
+            <div class="color-platforms-only">
+              <label class="item prediction-setting">
+                Color in range
+                <input type="text" class="item-color item-color-normal" name="predictColorDefault" value="#000000">
+              </label>
+              <label class="item prediction-setting">
+                Color above range
+                <input type="text" class="item-color item-color-normal" name="predictColorHigh" value="#000000">
+              </label>
+              <label class="item prediction-setting">
+                Color below range
+                <input type="text" class="item-color item-color-normal" name="predictColorLow" value="#000000">
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="item-container">
           <h3>UPDATE SETTINGS:</h3>
         </div>
 
