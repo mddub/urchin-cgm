@@ -41,7 +41,7 @@ static int16_t bg_to_y(int16_t height, int16_t bg, Preferences *prefs) {
   return (float)height - (float)(bg - graph_min) / (float)(graph_max - graph_min) * (float)height + 0.5f;
 }
 
-static int16_t index_to_x(int16_t i, uint8_t graph_width, uint8_t padding) {
+static int16_t index_to_x(int16_t i, uint16_t graph_width, uint16_t padding) {
   return graph_width - (get_prefs()->point_width + get_prefs()->point_margin) * (1 + i + padding) + get_prefs()->point_margin - get_prefs()->point_right_margin;
 }
 
@@ -94,8 +94,8 @@ static uint8_t sgv_graph_height(int16_t available_height) {
 static void graph_update_proc(Layer *layer, GContext *ctx) {
   int16_t i, x, y;
   GSize layer_size = layer_get_bounds(layer).size;
-  uint8_t graph_width = layer_size.w;
-  uint8_t graph_height = sgv_graph_height(layer_size.h);
+  uint16_t graph_width = layer_size.w;
+  uint16_t graph_height = sgv_graph_height(layer_size.h);
   Preferences *prefs = get_prefs();
 
   GColor color = ((GraphData*)layer_get_data(layer))->color;
@@ -128,7 +128,7 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
     return;
   }
 
-  uint8_t sgv_padding = sgv_graph_padding();
+  uint16_t sgv_padding = sgv_graph_padding();
 
   // Prediction preprocessing
   uint8_t prediction_skip = 0;
@@ -144,7 +144,7 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
     }
   }
 
-  uint8_t padding = data->prediction_length - prediction_skip + prediction_padding + sgv_padding;
+  uint16_t padding = data->prediction_length - prediction_skip + prediction_padding + sgv_padding;
   int16_t prediction_line_x = index_to_x(-1, graph_width, padding - sgv_padding) - prefs->point_margin - 1;
 
   // Line and point preprocessing

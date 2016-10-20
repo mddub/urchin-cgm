@@ -1,3 +1,4 @@
+#include "app_messages.h"
 #include "config.h"
 #include "staleness.h"
 
@@ -32,6 +33,9 @@ uint32_t sgv_graph_padding() {
   uint32_t padding = staleness / GRAPH_INTERVAL_SIZE_SECONDS;
   if (padding == 1 && staleness < GRAPH_INTERVAL_SIZE_SECONDS + GRAPH_STALENESS_GRACE_PERIOD_SECONDS) {
     padding = 0;
+  }
+  if (padding > GRAPH_MAX_SGV_COUNT) {
+    padding = GRAPH_MAX_SGV_COUNT;
   }
   return padding;
 }
