@@ -1029,6 +1029,7 @@ describe('getLoopStatus', function() {
           voltage: 1.54,
           percent: 75,
         },
+        reservoir: 109.8,
       },
       uploader: {
         battery: 39,
@@ -1045,8 +1046,8 @@ describe('getLoopStatus', function() {
   });
 
   it('should toggle units according to the format string', function() {
-    return d.getLoopStatus({statusLoopFormat: 'evbg_u  iob  cob  temprate \\n phonebat  pumpvoltage  pumpbat_u'}).then(function(s) {
-      expect(s.text).to.be('150 mg/dL  1.4  99  1.57\n39  1.54  75 %');
+    return d.getLoopStatus({statusLoopFormat: 'evbg_u  iob  cob  temprate \\n reservoir_u  phonebat  pumpvoltage  pumpbat_u'}).then(function(s) {
+      expect(s.text).to.be('150 mg/dL  1.4  99  1.57\n110 U  39  1.54  75 %');
     });
   });
 
