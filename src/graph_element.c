@@ -197,9 +197,16 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
   // Vertical line dividing history from prediction
   if (data->prediction_length > 0) {
     graphics_context_set_stroke_color(ctx, color);
+#ifdef PBL_COLOR
     for (y = 1; y < layer_size.h; y += 2) {
       graphics_draw_pixel(ctx, GPoint(prediction_line_x, y));
     }
+#else
+    // BW displays can't distinguish future points by color, so make the dividing line more visible
+    for (y = 1; y < layer_size.h; y += 4) {
+      graphics_draw_line(ctx, GPoint(prediction_line_x, y), GPoint(prediction_line_x, y + 2));
+    }
+#endif
   }
 
   // Line
@@ -246,7 +253,7 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
         }
         x = index_to_x(-i + prediction_skip - prediction_padding - 1, graph_width, padding - sgv_padding);
         y = bg_to_y_for_point(graph_height, bg, prefs);
-        plot_point(x, y, COLOR_FALLBACK(color_for_predicted_bg(bg, prefs), GColorLightGray), ctx);
+        plot_point(x, y, COLOR_FALLBACK(color_for_predicted_bg(bg, prefs), GColorBlack), ctx);
       }
     }
   }
