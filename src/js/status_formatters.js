@@ -72,13 +72,14 @@ function formatLoopStatus(props, format, convertToMmol) {
     'temprate': 'U/h',
     'pumpvoltage': 'v',
     'pumpbat': '%',
+    'reservoir': 'U',
     'phonebat': '%',
   };
 
   var text = format;
 
   text = text.replace(/\\n/g, '\n');
-  ['evbg', 'iob', 'cob', 'temprate', 'pumpvoltage', 'pumpbat', 'phonebat'].forEach(function(key) {
+  ['evbg', 'iob', 'cob', 'temprate', 'pumpvoltage', 'pumpbat', 'reservoir', 'phonebat'].forEach(function(key) {
     if (props[key] !== undefined) {
       text = text
         .replace(new RegExp(key + 'u', 'i'), props[key] + units[key])

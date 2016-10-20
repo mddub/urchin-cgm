@@ -381,7 +381,7 @@ var data = function(c, maxSGVCount) {
 
   d.getLoopStatus = function(config) {
     var fetchEnacted = config.statusLoopFormat.match(/temprate/i);
-    var fetchBattery = config.statusLoopFormat.match(/(pumpbat|pumpvoltage|phonebat)/i);
+    var fetchBattery = config.statusLoopFormat.match(/(pumpbat|pumpvoltage|reservoir|phonebat)/i);
     var fetches = [
       d.getLastLoopStatus(config),
       fetchEnacted ? d.getLastLoopEnacted(config) : Promise.resolve([]),
@@ -422,6 +422,10 @@ var data = function(c, maxSGVCount) {
 
         if (battery['pump'] && battery['pump']['battery'] && battery['pump']['battery']['percent'] !== undefined) {
           props.pumpbat = battery['pump']['battery']['percent'];
+        }
+
+        if (battery['pump'] && battery['pump']['reservoir'] !== undefined) {
+          props.reservoir = Math.round(battery['pump']['reservoir']);
         }
 
         if (battery['uploader'] && battery['uploader']['battery']) {
