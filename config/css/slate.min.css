@@ -216,3 +216,12 @@
 .save-button {
   clear: both;
 }
+
+.config-page-version {
+  font-size: 0.6em;
+  color: #a8a8a8;
+  text-align: right;
+  margin-bottom: -2em;
+  padding-right: 0.5em;
+  margin-top: 1em;
+}

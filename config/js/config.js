@@ -728,6 +728,8 @@
     $('#update-available #available-version').text(c.VERSION);
     $('#update-available').toggle(c.VERSION !== watchInfo.version);
 
+    $('.config-page-version').text('v' + c.VERSION);
+
     $('.color-platforms-only').toggle(['aplite', 'diorite'].indexOf(watchInfo.pf) === -1);
 
     initializeStatusOptions(current);
