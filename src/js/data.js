@@ -52,6 +52,7 @@ var data = function(c, maxSGVCount) {
     uploaderBatteryCache.clear();
     calibrationCache.clear();
     loopStatusCache.clear();
+    loopEnactedCache.clear();
     openAPSStatusCache.clear();
     profileCache = undefined;
     dexcomToken = undefined;
@@ -892,6 +893,74 @@ var data = function(c, maxSGVCount) {
       });
       return out;
     });
+  };
+
+  d.getLoopPredictedBGs = function(config) {
+    return d.getLastLoopStatus(config).then(function(statuses) {
+      if (statuses.length === 0 || statuses[0]['loop']['predicted'] === undefined) {
+        return {};
+      } else {
+        return {
+          series: [statuses[0]['loop']['predicted']['values']],
+          startDate: new Date(statuses[0]['loop']['predicted']['startDate']).getTime(),
+        };
+      }
+    });
+  };
+
+  d.getOpenAPSPredictedBGs = function(config) {
+    return d.getOpenAPSStatusHistory(config).then(function(history) {
+      var lastSuggested;
+      var lastEnacted;
+      var lastPredicted;
+      var entries = openAPSEntriesFromLastSuccessfulDevice(history);
+      for (var i = 0; i < entries.length; i++) {
+        lastSuggested = entries[i]['openaps']['suggested'];
+        lastEnacted = entries[i]['openaps']['enacted'];
+
+        if (lastSuggested || lastEnacted) {
+          break;
+        }
+      }
+
+      if (lastEnacted && lastSuggested) {
+        var enactedTimestamp = lastEnacted['timestamp'] || lastEnacted['time'];
+        var suggestedTimestamp = lastSuggested['timestamp'] || lastEnacted['time'];
+        if (enactedTimestamp >= suggestedTimestamp) {
+          lastPredicted = lastEnacted;
+        } else {
+          lastPredicted = lastSuggested;
+        }
+      } else if (lastEnacted) {
+        lastPredicted = lastEnacted;
+      } else if (lastSuggested) {
+        lastPredicted = lastSuggested;
+      }
+
+      if (lastPredicted && lastPredicted['predBGs']) {
+        var series = [
+          lastPredicted['predBGs']['IOB'],
+          lastPredicted['predBGs']['COB'],
+          lastPredicted['predBGs']['aCOB'],
+        ].filter(function(s) {
+          return s !== undefined;
+        });
+        return {
+          series: series,
+          startDate: new Date(lastPredicted['timestamp']).getTime(),
+        };
+      } else {
+        return {};
+      }
+    });
+  };
+
+  d.getPredictedBGs = function(config) {
+    if (config.predictSource === 'loop') {
+      return d.getLoopPredictedBGs(config);
+    } else if (config.predictSource === 'openaps') {
+      return d.getOpenAPSPredictedBGs(config);
+    }
   };
 
   d.getShareSGVsDateDescending = function(config) {

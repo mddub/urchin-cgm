@@ -21,6 +21,9 @@ DIRECTION_TO_TREND = dict([
     ('DoubleDown', 7),
 ])
 
+def iso_date(dt):
+    return dt.replace(tzinfo=tzlocal()).isoformat()
+
 def default_sgv_series(count=50):
     return [
         max(30, int(200 - 3 * i + 10 * math.sin(2 * i / math.pi)))
@@ -36,7 +39,7 @@ def default_dates(count=50, offset=0):
 
 def default_dates_as_iso(*args, **kwargs):
     return [
-        datetime.fromtimestamp(date / 1000).replace(tzinfo=tzlocal()).isoformat()
+        iso_date(datetime.fromtimestamp(date / 1000))
         for date in default_dates(*args, **kwargs)
     ]
 
@@ -67,10 +70,10 @@ def some_real_life_entries(self=None, minutes_old=0):
         in zip(sgvs, default_dates(len(sgvs), offset=-60 * minutes_old))
     ]
 
-def sgvs_from_array(arr):
+def sgvs_from_array(arr, offset=0):
     return [
         {'date': date, 'sgv': sgv, 'direction': 'Flat'}
-        for date, sgv in zip(default_dates(len(arr)), arr)
+        for date, sgv in zip(default_dates(len(arr), offset=offset), arr)
     ]
 
 def some_fake_temp_basals(*args):
@@ -92,8 +95,41 @@ def some_fake_boluses(*args):
         {'created_at': dates[40], 'insulin': 1},
     ]
 
+def boluses_from_array(arr, offset=0):
+    return [
+        {
+            'created_at': iso_date(datetime.now() + timedelta(seconds=(-offset + b_offset - 5 * 60 * i))),
+            'insulin': insulin,
+        }
+        for i, (b_offset, insulin)
+        in enumerate(arr)
+    ]
+
+def basals_from_array(arr, offset=0):
+    return [
+        {
+            'created_at': iso_date(datetime.now() + timedelta(seconds=(-offset + b_offset - 5 * 60 * i))),
+            'duration': duration,
+            'absolute': rate,
+        }
+        for i, (b_offset, duration, rate)
+        in enumerate(arr)
+    ]
+
 def profile_with_one_basal(rate):
     return [{"basal": [{"time": "00:00", "value": rate}]}]
+
+def loop_devicestatus(prediction_series, min_ago):
+    start_iso = iso_date(datetime.now() - timedelta(minutes=min_ago))
+    return [{
+        'loop': {
+            'predicted': {
+            'values': prediction_series,
+                'startDate': start_iso,
+            },
+        },
+        'created_at': start_iso,
+    }]
 
 def mutate_element(layout, el_name, props):
     for el in layout['elements']:
@@ -605,7 +641,7 @@ def uploader_battery_devicestatus(min_ago):
     def devicestatus(self):
         return [{
             'uploaderBattery': 85,
-            'created_at': (datetime.now() - timedelta(minutes=min_ago)).replace(tzinfo=tzlocal()).isoformat()
+            'created_at': iso_date(datetime.now() - timedelta(minutes=min_ago))
         }]
     return devicestatus
 
@@ -858,4 +894,204 @@ class TestNiceLayout(ScreenshotTest):
             'pointColorDefault': '0x0000FF',
             'statusContent': 'customtext',
             'statusText': '3.1 U 16 g',
+        }
+
+def predictions_config(config=None):
+    return dict({
+        'predictEnabled': True,
+        'predictSource': 'loop',
+        'predictMaxLength': 48,
+        'layout': 'd',
+        'pointWidth': 5,
+        'pointRectHeight': 5,
+    }, **(config or {}))
+
+class BasePredictionsTest(ScreenshotTest):
+    sgv_min_ago = None
+    predictions_min_ago = None
+    config = predictions_config()
+
+    sgv_series = [150, 175, 150, 175, 150, 125]
+    predictions = [150, 125, 100, 75, 100, 125]
+
+    def sgvs(self):
+        return sgvs_from_array(self.sgv_series, offset=(-60 * self.sgv_min_ago))
+
+    def devicestatus(self):
+        return loop_devicestatus(self.predictions, self.predictions_min_ago)
+
+    @property
+    def __test__(self):
+        return not self.__class__ == BasePredictionsTest
+
+class TestPredictionsDefault(BasePredictionsTest):
+    sgv_min_ago = 3
+    predictions_min_ago = 2
+
+class TestPredictionsSGVNotQuiteStale(BasePredictionsTest):
+    sgv_min_ago = 7
+    predictions_min_ago = 7
+
+class TestPredictionsSGVBarelyStale(BasePredictionsTest):
+    sgv_min_ago = 9
+    predictions_min_ago = 9
+
+class TestPredictionsSGVStalePredictionFresh(BasePredictionsTest):
+    sgv_min_ago = 18
+    predictions_min_ago = 1
+
+class TestPredictionsSGVFreshPredictionStale(BasePredictionsTest):
+    sgv_min_ago = 2
+    predictions_min_ago = 12
+
+class TestPredictionsWithAGap(BasePredictionsTest):
+    sgv_min_ago = 2
+    predictions_min_ago = -10
+
+class TestPredictionsNegativeMargin(BasePredictionsTest):
+    sgv_min_ago = 2
+    predictions_min_ago = 2
+    config = predictions_config({
+        'pointRectHeight': 5,
+        'pointWidth': 5,
+        'pointMargin': -2,
+    })
+
+class TestPredictionsColors(BasePredictionsTest):
+    sgv_min_ago = 2
+    predictions_min_ago = 2
+    predictions = range(300, 25, -25)
+    config = predictions_config({
+        'predictColorDefault': '0x00AA00',
+        'predictColorHigh': '0xFFAA00',
+        'predictColorLow': '0xFF0055',
+    })
+
+def boluses_basals_config():
+    layout = copy.deepcopy(CONSTANTS['LAYOUTS']['d'])
+    layout.update({
+        'recencyStyle': 'mediumRing',
+        'recencyColorText': '0x000000',
+        'recencyColorCircle': '0x005555',
+    })
+    mutate_element(layout, 'TIME_AREA_ELEMENT', {'enabled': True, 'height': 27})
+    return {
+        'layout': 'custom',
+        'customLayout': layout,
+        'basalGraph': True,
+        'basalHeight': 20,
+        'bolusTicks': True,
+        'pointColorDefault': '0x0000FF',
+        'predictEnabled': True,
+        'predictMaxLength': 48,
+        'pointWidth': 3,
+        'pointMargin': -1,
+    }
+
+class TestPredictionsWithBolusesAndBasals(ScreenshotTest):
+    def sgvs(self):
+        return sgvs_from_array(
+            [102, 97, 94, 93, 94, 96, 97, 96, 98, 101, 104, 106, 104, 105, 106, 108, 112, 113, 115, 116, 117, 119, 121, 122, 126, 129, 131, 133, 135, 136, 138, 141, 143, 145, 146, 148, 149, 152, 153, 152, 153, 153, 153, 152, 152, 150, 147, 148, 146, 148, 129, 137, 137, 129, 127, 126, 98, 104, 87, 85, 85, 83, 90, 108, 110, 117, 123, 129, 139, 130, 145, 142, 147, 148, 151, 150, 152, 156, 163, 167, 165, 182, 171, 185],
+            offset=(-3 * 60)
+        )
+
+    def devicestatus(self):
+        return loop_devicestatus(
+            [102, 102, 106, 109, 111, 111, 111, 110, 108, 107, 106, 105, 105, 106, 107, 109, 110, 112, 114, 116, 118, 120, 123, 126, 128, 131, 132, 134, 135, 136, 137, 137, 137, 137, 137, 138, 139, 140, 140, 140, 141, 140, 141, 143, 144, 144, 144, 144],
+            min_ago=1
+        )
+
+    def treatments(self):
+        ts = []
+        ts += boluses_from_array([
+            (-1558, 5),
+            (-3683, 3.5),
+            (-21357, 1.5)
+        ])
+        ts += basals_from_array([
+            (-190, 30, 3.575),
+            (-462, 30, 2.85),
+            (-1058, 0, 0),
+            (-1987, 30, 0),
+            (-3159, 30, 0),
+            (-4060, 0, 0),
+            (-4360, 30, 0),
+            (-10726, 0, 0),
+            (-11028, 30, 1.375),
+            (-11602, 30, 1.45),
+            (-11628, 0, 0),
+            (-11928, 30, 1.4),
+            (-12828, 0, 0),
+            (-13125, 30, 1.55),
+            (-13685, 30, 1.775),
+            (-14286, 0, 0),
+        ])
+        return ts
+
+    profile = partial(profile_with_one_basal, 0.65)
+
+    config = boluses_basals_config()
+
+class TestPredictionsMaxLength(TestPredictionsWithBolusesAndBasals):
+    config = dict(boluses_basals_config(), predictMaxLength=18)
+
+class TestPredictionsWithMultipleSeries(ScreenshotTest):
+    def sgvs(self):
+        return sgvs_from_array(
+            [77, 77, 78, 79, 80, 82, 83, 84, 84, 84, 83, 85, 84, 84, 86, 87, 89, 91, 92],
+            offset=(-3 * 60)
+        )
+
+    def devicestatus(self):
+        return [
+            {
+                'created_at': iso_date(datetime.now()),
+                'device': 'openaps://indy-e1',
+                'openaps': {
+                    'suggested': {
+                        'predBGs': {
+                            'COB': [77, 76, 75, 75, 76, 77, 79, 82, 85, 89, 92, 96, 99, 103, 107, 110, 114, 117, 120, 124, 126, 129, 132, 134, 136, 138, 139, 141, 142, 143, 144, 145, 146, 147, 147, 148, 148, 149, 149, 150, 150, 151],
+                            'aCOB': [77, 83, 88, 93, 98, 102, 106, 110, 112, 114, 116, 119, 121, 124, 126, 128, 131, 133, 135, 137, 139, 140, 142, 143, 144, 145, 146, 147, 147, 148],
+                            'IOB': [77, 75, 75, 74, 75, 76, 77, 79, 81, 84, 86, 89, 91, 93, 96, 98, 101, 103, 105, 107, 109, 110, 112, 113, 114, 115, 116, 117, 117, 118],
+                        },
+                    }
+                },
+            },
+            {
+                'created_at': iso_date(datetime.now() - timedelta(minutes=5)),
+                'device': 'openaps://indy-e1',
+                'openaps': {'suggested': {}}
+            }
+        ]
+
+    @property
+    def config(self):
+        layout = copy.deepcopy(CONSTANTS['LAYOUTS']['d'])
+        layout.update({
+            'recencyColorText': '0x000000',
+            'recencyColorCircle': '0xAAFFAA',
+            'recencyLoc': 'timeTopLeft',
+            'batteryLoc': 'timeBottomLeft',
+            'timeAlign': 'right',
+        })
+        mutate_element(layout, 'TIME_AREA_ELEMENT', {'enabled': True, 'bottom': False})
+        mutate_element(layout, 'BG_ROW_ELEMENT', {'bottom': True})
+        layout['elements'] = [
+            [e for e in layout['elements'] if CONSTANTS['ELEMENTS'][e['el']] == el][0]
+            for el in
+            ('BG_ROW_ELEMENT', 'GRAPH_ELEMENT', 'TIME_AREA_ELEMENT')
+        ]
+        return {
+            'layout': 'custom',
+            'customLayout': layout,
+            'pointColorDefault': '0x0000FF',
+            'pointColorLow': '0x0000FF',
+            'predictEnabled': True,
+            'predictSource': 'openaps',
+            'predictMaxLength': 30,
+            'hGridlines': 0,
+            'bottomOfGraph': 50,
+            'topOfGraph': 225,
+            'bottomOfRange': 80,
+            'topOfRange': 160,
         }

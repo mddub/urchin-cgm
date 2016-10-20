@@ -14,7 +14,7 @@ typedef struct ConnectionIssue {
   uint32_t staleness;
 } ConnectionIssue;
 
-uint32_t graph_staleness_padding();
+uint32_t sgv_graph_padding();
 ConnectionIssue connection_issue();
 void init_staleness();
 void staleness_on_request_state_changed(RequestState state);

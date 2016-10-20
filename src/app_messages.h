@@ -4,6 +4,7 @@
 
 #define GRAPH_MAX_SGV_COUNT 144
 #define STATUS_BAR_MAX_LENGTH 256
+#define PREDICTION_MAX_LENGTH 60
 #define NO_DELTA_VALUE 65536
 
 typedef union GraphExtra {
@@ -26,6 +27,11 @@ typedef struct __attribute__((__packed__)) DataMessage {
   char status_text[STATUS_BAR_MAX_LENGTH];
   int32_t status_recency;
   GraphExtra graph_extra[GRAPH_MAX_SGV_COUNT];
+  uint8_t prediction_length;
+  uint8_t prediction_1[PREDICTION_MAX_LENGTH];
+  uint8_t prediction_2[PREDICTION_MAX_LENGTH];
+  uint8_t prediction_3[PREDICTION_MAX_LENGTH];
+  int32_t prediction_recency;
 } DataMessage;
 
 bool get_int32(DictionaryIterator *data, int32_t *dest, uint8_t key, bool required, int32_t fallback);

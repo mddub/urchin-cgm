@@ -49,7 +49,7 @@ void trend_arrow_component_destroy(TrendArrowComponent *c) {
 }
 
 void trend_arrow_component_update(TrendArrowComponent *c, DataMessage *data) {
-  if (graph_staleness_padding() > 0) {
+  if (sgv_graph_padding() > 0) {
     c->last_trend = -1;
     layer_set_hidden(bitmap_layer_get_layer(c->icon_layer), true);
     return;

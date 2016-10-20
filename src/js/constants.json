@@ -47,6 +47,12 @@
       "bolusTicks": false,
       "basalGraph": false,
       "basalHeight": 15,
+      "predictEnabled": false,
+      "predictSource": "loop",
+      "predictMaxLength": 48,
+      "predictColorDefault": "0xFF00AA",
+      "predictColorHigh": "0xFF00AA",
+      "predictColorLow": "0xFF00AA",
       "updateEveryMinute": false,
       "layout" : "a",
       "advancedLayout": false,
@@ -191,7 +197,10 @@
       "pointColorLow",
       "plotLineColor",
       "recencyColorCircle",
-      "recencyColorText"
+      "recencyColorText",
+      "predictColorDefault",
+      "predictColorHigh",
+      "predictColorLow"
    ],
 
    "LAYOUT_COLOR_KEYS": [
