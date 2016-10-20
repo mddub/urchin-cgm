@@ -13,7 +13,7 @@ void last_bg_text_layer_update(TextLayer *text_layer, DataMessage *data) {
 void delta_text_layer_update(TextLayer *text_layer, DataMessage *data) {
   static char delta_buffer[8];
   int delta;
-  if (graph_staleness_padding() > 0) {
+  if (sgv_graph_padding() > 0) {
     delta = NO_DELTA_VALUE;
   } else {
     delta = data->delta;

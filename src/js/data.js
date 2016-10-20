@@ -52,6 +52,7 @@ var data = function(c, maxSGVCount) {
     uploaderBatteryCache.clear();
     calibrationCache.clear();
     loopStatusCache.clear();
+    loopEnactedCache.clear();
     openAPSStatusCache.clear();
     profileCache = undefined;
     dexcomToken = undefined;
@@ -892,6 +893,55 @@ var data = function(c, maxSGVCount) {
       });
       return out;
     });
+  };
+
+  d.getLoopPredictedBGs = function(config) {
+    return d.getLastLoopStatus(config).then(function(statuses) {
+      if (statuses.length === 0 || statuses[0]['loop']['predicted'] === undefined) {
+        return {};
+      } else {
+        return {
+          series: [statuses[0]['loop']['predicted']['values']],
+          startDate: new Date(statuses[0]['loop']['predicted']['startDate']).getTime(),
+        };
+      }
+    });
+  };
+
+  d.getOpenAPSPredictedBGs = function(config) {
+    return d.getOpenAPSStatusHistory(config).then(function(history) {
+      var lastSuggested;
+      var entries = openAPSEntriesFromLastSuccessfulDevice(history);
+      for (var i = 0; i < entries.length; i++) {
+        if (entries[i]['openaps']['suggested']) {
+          lastSuggested = entries[i]['openaps']['suggested'];
+          break;
+        }
+      }
+      if (lastSuggested && lastSuggested['predBGs']) {
+        var series = [
+          lastSuggested['predBGs']['IOB'],
+          lastSuggested['predBGs']['COB'],
+          lastSuggested['predBGs']['aCOB'],
+        ].filter(function(s) {
+          return s !== undefined;
+        });
+        return {
+          series: series,
+          startDate: new Date(lastSuggested['timestamp']).getTime(),
+        };
+      } else {
+        return {};
+      }
+    });
+  };
+
+  d.getPredictedBGs = function(config) {
+    if (config.predictSource === 'loop') {
+      return d.getLoopPredictedBGs(config);
+    } else if (config.predictSource === 'openaps') {
+      return d.getOpenAPSPredictedBGs(config);
+    }
   };
 
   d.getShareSGVsDateDescending = function(config) {

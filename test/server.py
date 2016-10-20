@@ -20,6 +20,7 @@ import test_screenshots
 parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('--port')
 parser.add_argument('--test-class')
+parser.add_argument('--debug', action='store_true')
 args, _ = parser.parse_known_args()
 
 port = int(args.port or os.environ.get('MOCK_SERVER_PORT') or 0)
@@ -91,4 +92,4 @@ def set_sgv():
     return set_collection('entries')
 
 if __name__ == "__main__":
-    app.run(port=port)
+    app.run(port=port, debug=args.debug)

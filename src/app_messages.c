@@ -1,6 +1,7 @@
 #include "app_messages.h"
 
 // Exclude logging on Aplite
+#ifdef DEBUG
 #ifndef PBL_PLATFORM_APLITE
 static const char* type_name(TupleType type) {
   switch(type) {
@@ -12,24 +13,31 @@ static const char* type_name(TupleType type) {
   }
 }
 #endif
+#endif
 
 static bool fail_unexpected_type(uint8_t key, TupleType type, const char* expected) {
+#ifdef DEBUG
 #ifndef PBL_PLATFORM_APLITE
   APP_LOG(APP_LOG_LEVEL_ERROR, "Expected key %d to have type %s, but has type %s", (int)key, expected, type_name(type));
+#endif
 #endif
   return false;
 }
 
 static bool fail_missing_required_value(uint8_t key) {
+#ifdef DEBUG
 #ifndef PBL_PLATFORM_APLITE
   APP_LOG(APP_LOG_LEVEL_ERROR, "Missing required value for key %d", (int)key);
+#endif
 #endif
   return false;
 }
 
 static bool pass_default_value(uint8_t key, const char * type) {
+#ifdef DEBUG
 #ifndef PBL_PLATFORM_APLITE
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Missing %s value for key %d, assigning default", type, (int)key);
+#endif
 #endif
   return true;
 }
@@ -77,7 +85,7 @@ bool get_byte_array(DictionaryIterator *data, uint8_t *dest, uint8_t key, size_t
     if (required) {
       return fail_missing_required_value(key);
     } else {
-      memcpy(dest, fallback, ARRAY_LENGTH(fallback));
+      memcpy(dest, fallback, max_length * sizeof(uint8_t));
       return pass_default_value(key, "byte array");
     }
   }
@@ -113,6 +121,15 @@ bool get_cstring(DictionaryIterator *data, char *dest, uint8_t key, size_t max_l
   }
 }
 
+static void get_prediction(DictionaryIterator *data, uint8_t *dest, uint8_t key, uint8_t *max_length) {
+  Tuple *t = dict_find(data, key);
+  if (t && t->type == TUPLE_BYTE_ARRAY) {
+    uint8_t length = t->length < PREDICTION_MAX_LENGTH ? t->length : PREDICTION_MAX_LENGTH;
+    memcpy(dest, t->value->data, length);
+    *max_length = length > *max_length ? length : *max_length;
+  }
+}
+
 bool validate_data_message(DictionaryIterator *data, DataMessage *out) {
   /*
    * Validation is not necessary for messages from the PebbleKit JS half of
@@ -125,7 +142,12 @@ bool validate_data_message(DictionaryIterator *data, DataMessage *out) {
 
   out->received_at = time(NULL);
 
-  return true
+  // If the series are of different lengths, pad the shorter ones with zeroes
+  memcpy(out->prediction_1, zeroes, PREDICTION_MAX_LENGTH * sizeof(uint8_t));
+  memcpy(out->prediction_2, zeroes, PREDICTION_MAX_LENGTH * sizeof(uint8_t));
+  memcpy(out->prediction_3, zeroes, PREDICTION_MAX_LENGTH * sizeof(uint8_t));
+
+  bool success = true
     && get_int32(data, &out->recency, MESSAGE_KEY_recency, false, 0)
     && get_byte_array(data, out->sgvs, MESSAGE_KEY_sgvs, GRAPH_MAX_SGV_COUNT, true, NULL)
     && get_byte_array_length(data, &out->sgv_count, GRAPH_MAX_SGV_COUNT, MESSAGE_KEY_sgvs)
@@ -135,6 +157,16 @@ bool validate_data_message(DictionaryIterator *data, DataMessage *out) {
     && get_cstring(data, out->status_text, MESSAGE_KEY_statusText, STATUS_BAR_MAX_LENGTH, false, "")
     && get_int32(data, &out->status_recency, MESSAGE_KEY_statusRecency, false, -1)
     && get_byte_array(data, (uint8_t*)out->graph_extra, MESSAGE_KEY_graphExtra, GRAPH_MAX_SGV_COUNT, false, zeroes);
+
+  out->prediction_length = 0;
+  get_prediction(data, out->prediction_1, MESSAGE_KEY_prediction1, &out->prediction_length);
+  get_prediction(data, out->prediction_2, MESSAGE_KEY_prediction2, &out->prediction_length);
+  get_prediction(data, out->prediction_3, MESSAGE_KEY_prediction3, &out->prediction_length);
+  if (out->prediction_length > 0) {
+    success = success && get_int32(data, &out->prediction_recency, MESSAGE_KEY_predictionRecency, false, 0);
+  }
+
+  return success;
 }
 
 static DataMessage *_last_data_message = NULL;

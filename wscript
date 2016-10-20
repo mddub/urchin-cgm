@@ -71,6 +71,8 @@ def build(ctx):
             # When running screenshot tests, the watchface needs to know it's
             # under test so that fake data can be shown (e.g. current time).
             ctx.env.append_value('DEFINES', 'IS_TEST_BUILD')
+        if os.environ.get('DEBUG'):
+            ctx.env.append_value('DEFINES', 'DEBUG')
 
         app_elf='{}/pebble-app.elf'.format(ctx.env.BUILD_DIR)
         ctx.pbl_program(source=ctx.path.ant_glob('src/**/*.c'), target=app_elf)

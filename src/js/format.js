@@ -174,6 +174,33 @@ var format = function(c) {
     }
   };
 
+  f.predictions = function(predictedBGs, maxLength) {
+    if (!predictedBGs.series) {
+      predictedBGs.series = [];
+    }
+
+    var recency;
+    if (predictedBGs.startDate) {
+      recency = Math.round((Date.now() - predictedBGs.startDate) / 1000);
+    }
+
+    var formattedSeries = predictedBGs.series.map(function(series) {
+      return series.slice(0, maxLength);
+    }).map(function(series) {
+      return series.map(function(y) {
+        // 0 == "no BG"
+        return Math.max(1, Math.min(255, Math.floor(y / 2)));
+      });
+    });
+
+    return {
+      series1: formattedSeries[0],
+      series2: formattedSeries[1],
+      series3: formattedSeries[2],
+      recency: recency,
+    };
+  };
+
   return f;
 };
 

@@ -56,14 +56,19 @@ function app(Pebble, c) {
   }
 
   function requestAndSendData() {
-    function onData(sgvs, bolusHistory, basalHistory, status) {
+    function onData(sgvs, bolusHistory, basalHistory, predictedBGs, status) {
       try {
-        var endTime = sgvs.length > 0 ? sgvs[0]['date'] : new Date();
+        var endTime = sgvs.length > 0 ? sgvs[0]['date'] : Date.now();
         var ys = format.sgvArray(endTime, sgvs, maxSGVs);
 
-        var boluses = format.bolusGraphArray(endTime, bolusHistory, maxSGVs);
-        var basals = format.basalGraphArray(endTime, basalHistory, maxSGVs, config);
-        var graphExtra = format.graphExtraArray(boluses, basals);
+        var graphExtra;
+        if (config.bolusTicks || config.basalGraph) {
+          var boluses = format.bolusGraphArray(endTime, bolusHistory, maxSGVs);
+          var basals = format.basalGraphArray(endTime, basalHistory, maxSGVs, config);
+          graphExtra = format.graphExtraArray(boluses, basals);
+        }
+
+        var predictions = format.predictions(predictedBGs, config.predictMaxLength);
 
         return sendMessage({
           msgType: c.MSG_TYPE_DATA,
@@ -76,6 +81,10 @@ function app(Pebble, c) {
           statusText: status.text.substr(0, 255),
           graphExtra: graphExtra,
           statusRecency: status.recency === undefined ? -1 : status.recency,
+          prediction1: predictions.series1,
+          prediction2: predictions.series2,
+          prediction3: predictions.series3,
+          predictionRecency: predictions.recency,
         });
       } catch (e) {
         return sendDataFetchError(e);
@@ -85,13 +94,14 @@ function app(Pebble, c) {
     var sgvs = data.getSGVsDateDescending(config);
     var bolusHistory = config.bolusTicks ? data.getBolusHistory(config) : Promise.resolve([]);
     var basalHistory = config.basalGraph ? data.getBasalHistory(config) : Promise.resolve([]);
+    var predictedBGs = config.predictEnabled ? data.getPredictedBGs(config) : Promise.resolve({});
     // recover from status text errors
     var status = data.getStatusText(config).catch(function(e) {
       console.log(e.stack);
       return {text: '-'};
     });
 
-    return Promise.all([sgvs, bolusHistory, basalHistory, status])
+    return Promise.all([sgvs, bolusHistory, basalHistory, predictedBGs, status])
       .then(function(results) {
         return onData.apply(this, results);
       })
