@@ -911,24 +911,43 @@ var data = function(c, maxSGVCount) {
   d.getOpenAPSPredictedBGs = function(config) {
     return d.getOpenAPSStatusHistory(config).then(function(history) {
       var lastSuggested;
+      var lastEnacted;
+      var lastPredicted;
       var entries = openAPSEntriesFromLastSuccessfulDevice(history);
       for (var i = 0; i < entries.length; i++) {
-        if (entries[i]['openaps']['suggested']) {
-          lastSuggested = entries[i]['openaps']['suggested'];
+        lastSuggested = entries[i]['openaps']['suggested'];
+        lastEnacted = entries[i]['openaps']['enacted'];
+
+        if (lastSuggested || lastEnacted) {
           break;
         }
       }
-      if (lastSuggested && lastSuggested['predBGs']) {
+
+      if (lastEnacted && lastSuggested) {
+        var enactedTimestamp = lastEnacted['timestamp'] || lastEnacted['time'];
+        var suggestedTimestamp = lastSuggested['timestamp'] || lastEnacted['time'];
+        if (enactedTimestamp >= suggestedTimestamp) {
+          lastPredicted = lastEnacted;
+        } else {
+          lastPredicted = lastSuggested;
+        }
+      } else if (lastEnacted) {
+        lastPredicted = lastEnacted;
+      } else if (lastSuggested) {
+        lastPredicted = lastSuggested;
+      }
+
+      if (lastPredicted && lastPredicted['predBGs']) {
         var series = [
-          lastSuggested['predBGs']['IOB'],
-          lastSuggested['predBGs']['COB'],
-          lastSuggested['predBGs']['aCOB'],
+          lastPredicted['predBGs']['IOB'],
+          lastPredicted['predBGs']['COB'],
+          lastPredicted['predBGs']['aCOB'],
         ].filter(function(s) {
           return s !== undefined;
         });
         return {
           series: series,
-          startDate: new Date(lastSuggested['timestamp']).getTime(),
+          startDate: new Date(lastPredicted['timestamp']).getTime(),
         };
       } else {
         return {};
