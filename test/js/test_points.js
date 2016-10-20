@@ -83,7 +83,7 @@ describe('points', function() {
         pointMargin: -1,
         pointRightMargin: 0,
       };
-      expect(points.computeVisiblePoints(108, config)).to.be(54);
+      expect(points.computeVisiblePoints(108, config)).to.be(55);
     });
 
   });

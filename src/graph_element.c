@@ -160,7 +160,7 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
     y = bg_to_y_for_point(graph_height, bg, prefs);
     to_plot[i] = GPoint(x, y);
     // stop plotting if the SGV is off-screen
-    if (x < 0) {
+    if ((prefs->point_margin >= 0 && x < 0) || x <= -prefs->point_width) {
       break;
     }
   }

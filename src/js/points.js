@@ -15,6 +15,9 @@ function points(c) {
   p.computeVisiblePoints = function(width, config) {
     var available = width - config.pointRightMargin;
     var points = Math.floor((available + Math.max(0, config.pointMargin)) / (config.pointWidth + config.pointMargin));
+    if (config.pointMargin < 0) {
+      points += 1;
+    }
     return Math.max(0, points);
   };
 
