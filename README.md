@@ -58,6 +58,12 @@ To enter pump data manually, you can use [Nightcout Care Portal][care-portal] or
 
 To upload pump data automatically, you can use [RileyLink][rileylink_ios] or [Loop][loop] on iOS, or build an [OpenAPS uploader][openaps].
 
+## Predictions
+
+Like pump data, predicted future BGs can be plotted if you are using [Loop][loop] on iOS, or [OpenAPS][openaps] with the Advanced Meal Assist (AMA) feature of the oref0 algorithm. For example, AMA generates three different projections assuming no carbs, normal carb absorption, and accelerated carb absorption.
+
+![](http://i.imgur.com/eaR84wh.png) ![](http://i.imgur.com/BSed3ru.png)
+
 ## What do the icons mean?
 
 The data that you see on your watch travels like this: `Rig -> Nightscout -> Phone -> Pebble`.
@@ -128,24 +134,48 @@ Since this software displays real-time health data, it is important to be able t
 
 The most effective method of integration testing I've found is to [compare screenshots][screenshots-artifact]. This relies on [ImageMagick] to compute diffs. Screenshot tests and JavaScript unit tests are run automatically by CircleCI.
 
-* **Running screenshot tests locally**
+* **Install testing dependencies**
 
   Install [ImageMagick], then use `pip` to install Python testing dependencies:
   ```
   pip install -r requirements.txt --user
   ```
 
-  Run the tests:
+* **Use the live-reload tool**
+
+  This is the fastest way to test the watchface against specific configuration and data.
+
+  Create a new test class in `test/test_screenshots.py`:
+  ```python
+  class TestSomething(ScreenshotTest):
+      config = {...}
+      def sgvs(self):
+          return [...]
+  ```
+
+  Build and install the watchface:
+  ```
+  pebble build && pebble install --emulator basalt
+  ```
+
+  Start the live-reload tool:
+  ```
+  . test/live_reload.sh TestSomething
+  ```
+
+  Whenever `test/test_screenshots.py` is modified, the `config` property of the test will be sent to the watchface. When the watchface makes a request for new data, the corresponding `sgvs()`/`treatments()`/etc. method on the test will be evaluated.
+
+* **Run the screenshot test suite locally**
   ```
   . test/do_screenshots.sh
   ```
 
-* **Running an individual screenshot test**
+* **Run an individual screenshot test locally**
   ```
   . test/do_screenshots.sh -k TestName
   ```
 
-* **Using the mock Nightscout server**
+* **Use the mock Nightscout server directly**
 
   Start the server:
   ```
@@ -177,7 +207,7 @@ The most effective method of integration testing I've found is to [compare scree
   pebble emu-app-config --emulator basalt
   ```
 
-* **Running JavaScript unit tests locally**
+* **Run JavaScript unit tests locally**
 
   These require [Node]. See the [Mocha] and [Expect] docs.
 
