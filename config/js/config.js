@@ -496,7 +496,7 @@
   }
 
   function onStatusLoopFormatChange() {
-    var sampleData = {evbg: 82, iob: 0.9, cob: 4, temprate: 0.15, pumpvoltage: 1.56, pumpbat: 75, phonebat: 64};
+    var sampleData = {evbg: 82, iob: 0.9, cob: 4, temprate: 0.15, pumpvoltage: 1.56, pumpbat: 75, reservoir: 102, phonebat: 64};
     var format = $('[name=statusLoopFormat]').val();
     var mmol = $('#units-mmol').hasClass('active');
     $('.status-loop-format-preview').text(
