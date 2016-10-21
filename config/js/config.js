@@ -25,9 +25,16 @@
   var customLayout;
   var currentLayoutChoice;
 
-  // On the phone, this string is substituted by the app JS.
-  // On the emulator, it's provided in the query string by pebble-tool.
-  var returnTo = getQueryParam('return_to') || '$$RETURN_TO$$';
+
+  var returnTo;
+  if ('$$NEW_OFFLINE_CONFIG$$' === 'true') {
+    // On the phone, this string is substituted by the app JS.
+    // On the emulator, it's provided in the query string by pebble-tool.
+    returnTo = getQueryParam('return_to') || '$$RETURN_TO$$';
+  } else {
+    // TODO remove this, it's for compatibility with <v0.0.13
+    returnTo = getQueryParam('return_to') || 'pebblejs://close#';
+  }
 
   var watchInfo = {};
   try {
@@ -702,21 +709,31 @@
     delete current['statusText'];
     delete current['statusUrl'];
     delete current['statusJsonUrl'];
-    var cleansed = [
-      ['version', watchInfo.version],
-      ['pf', watchInfo.pf],
-      ['fw', watchInfo.fw],
-      ['at', watchInfo.at],
-      ['wt', watchInfo.wt],
-      ['current', JSON.stringify(current)],
-    ].filter(function(pair) {
-      return pair[1];
-    }).map(function(pair) {
-      return pair[0] + '=' + pair[1];
-    }).join('&');
+
+    var customLayout = current['customLayout'];
+    delete current['customLayout'];
+
+    function path(key, val) {
+      var cleansed = [
+        ['version', watchInfo.version],
+        ['pf', watchInfo.pf],
+        ['fw', watchInfo.fw],
+        ['at', watchInfo.at],
+        ['wt', watchInfo.wt],
+        [key, JSON.stringify(val)],
+      ].filter(function(pair) {
+        return pair[1];
+      }).map(function(pair) {
+        return pair[0] + '=' + pair[1];
+      }).join('&');
+      return location.pathname + '?' + cleansed;
+    }
 
     ga('create', c.CONFIG_GA_ID, 'auto');
-    ga('send', 'pageview', location.pathname + '?' + cleansed);
+    ga('send', 'pageview', path('current', current));
+    if (current['layout'] === 'custom') {
+      ga('send', 'pageview', path('cl', customLayout));
+    }
   }
 
   $(function() {
