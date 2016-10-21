@@ -233,6 +233,9 @@ function app(Pebble, c) {
       configHtml = configHtml.replace('$$WATCH_INFO$$', encodeURIComponent(JSON.stringify(watchInfo)));
       configHtml = configHtml.replace('$$CURRENT$$', encodeURIComponent(JSON.stringify(config)));
 
+      // TODO remove this when online-config is disabled
+      configHtml = configHtml.replace('$$NEW_OFFLINE_CONFIG$$', 'true');
+
       var configURL;
       if (c.DEV_CONFIG_URL) {
         // While developing on the config page, open the source HTML file rather
@@ -278,7 +281,7 @@ function app(Pebble, c) {
         data.clearCache();
         if (config.__CLEAR_CACHE__) {
           // present only for tests
-          delete newConfig.__CLEAR_CACHE__;
+          delete config.__CLEAR_CACHE__;
         }
       }
 

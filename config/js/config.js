@@ -25,9 +25,16 @@
   var customLayout;
   var currentLayoutChoice;
 
-  // On the phone, this string is substituted by the app JS.
-  // On the emulator, it's provided in the query string by pebble-tool.
-  var returnTo = getQueryParam('return_to') || '$$RETURN_TO$$';
+
+  var returnTo;
+  if ('$$NEW_OFFLINE_CONFIG$$' === 'true') {
+    // On the phone, this string is substituted by the app JS.
+    // On the emulator, it's provided in the query string by pebble-tool.
+    returnTo = getQueryParam('return_to') || '$$RETURN_TO$$';
+  } else {
+    // TODO remove this, it's for compatibility with <v0.0.13
+    returnTo = getQueryParam('return_to') || 'pebblejs://close#';
+  }
 
   var watchInfo = {};
   try {
