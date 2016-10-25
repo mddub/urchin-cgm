@@ -84,7 +84,8 @@ var data = function(c, maxSGVCount) {
           if (xhr.status === 200) {
             resolve(xhr.responseText);
           } else {
-            reject(new Error('Request failed, status ' + xhr.status + ': ' + url));
+            var msg = 'Request failed, status ' + xhr.status + ': ' + url + (xhr.responseText ? '\n' + xhr.responseText : '');
+            reject(new Error(msg));
           }
         }
       };
@@ -695,7 +696,7 @@ var data = function(c, maxSGVCount) {
   };
 
   d.getSGVsDateDescending = function(config) {
-    if (config.source === 'dexcom') {
+    if (config.dataSource === 'dexcom') {
       return d.getShareSGVsDateDescending(config);
     } else {
       return d.getNightscoutSGVsDateDescending(config);
@@ -964,13 +965,19 @@ var data = function(c, maxSGVCount) {
   };
 
   d.getShareSGVsDateDescending = function(config) {
-    return d.getDexcomToken(config).then(d.requestDexcomSGVs.bind(this, config))
-      .then(d.assertTokenStillValid)
-      .catch(function(e) {
-        console.log('Requesting new Dexcom token: ' + e);
-        dexcomToken = undefined;
-        return d.getDexcomToken(config).then(d.requestDexcomSGVs.bind(this, config));
-      })
+    var sgvs;
+    if (dexcomToken === undefined) {
+      sgvs = d.getDexcomToken(config).then(d.requestDexcomSGVs.bind(this, config));
+    } else {
+      sgvs = d.requestDexcomSGVs(config, dexcomToken)
+        .then(d.assertTokenStillValid)
+        .catch(function(e) {
+          console.log('Requesting new Dexcom token: ' + e);
+          dexcomToken = undefined;
+          return d.getDexcomToken(config).then(d.requestDexcomSGVs.bind(this, config));
+        });
+    }
+    return sgvs
       .then(d.convertShareSGVs)
       .then(function(sgvs) {
         var newSGVs = sgvs.filter(function(sgv) {

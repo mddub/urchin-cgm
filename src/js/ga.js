@@ -4,6 +4,8 @@ function track(data, trackingId, watchInfo, config) {
   // redact PII
   var current = JSON.parse(JSON.stringify(config));
   delete current['nightscout_url'];
+  delete current['dexcomUsername'];
+  delete current['dexcomPassword'];
   delete current['statusText'];
   delete current['statusUrl'];
   delete current['statusJsonUrl'];

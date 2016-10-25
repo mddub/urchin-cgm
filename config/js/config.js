@@ -438,6 +438,17 @@
     );
   }
 
+  function onDataSourceChange() {
+    var source = $('[name=dataSource].active').attr('value');
+    $('.source-dependent').each(function(i, el) {
+      var available = $(el).data('sources').indexOf(source) !== -1;
+      $(el).toggle(available);
+      if ($(el).is('option')) {
+        $(el).prop('disabled', !available);
+      }
+    });
+  }
+
   function initializeStatusOptions(current) {
     createMultipleStatusLineOptions(current);
     $('#statusContent').on('change', toggleStatusExtraOptions);
@@ -475,13 +486,16 @@
     $('.status-extra').each(function(i, el) {
       var keys = $(el).data('keys').split(' ');
       $(el).toggle(
-        selected.reduce(function(acc, key) {
-          return acc || keys.indexOf(key) !== -1;
-        }, false)
+        selected.filter(function(key) {
+          return keys.indexOf(key) !== -1;
+        }).length > 0
       );
     });
 
-    var showStatusRecencyOptions = ['none', 'date', 'rawdata', 'customurl', 'customtext'].indexOf(mainKey) === -1;
+    var noRecencyOptions = ['multiple', 'none', 'date', 'rawdata', 'customurl', 'customtext'];
+    var showStatusRecencyOptions = selected.filter(function(key) {
+      return noRecencyOptions.indexOf(key) === -1;
+    }).length > 0;
     $('.status-recency-options').toggle(showStatusRecencyOptions);
   }
 
@@ -585,8 +599,36 @@
     });
   }
 
+  function ensureConfigMatchesDataSource(out) {
+    // It's better to validate these upon save than to automatically undo settings
+    // the moment the user toggles the data source.
+
+    var allowedStatuses = $('#statusContent option')
+      .toArray()
+      .filter(function(el) {
+        return !$(el).hasClass('source-dependent') || $(el).data('sources').indexOf(out.dataSource) !== -1;
+      }).map(function(el) {
+        return $(el).attr('value');
+      });
+    ['statusContent', 'statusLine1', 'statusLine2', 'statusLine3'].forEach(function(key) {
+      if (allowedStatuses.indexOf(out[key]) === -1) {
+        out[key] = 'none';
+      }
+    });
+
+    if (out.dataSource === 'dexcom') {
+      out.bolusTicks = false;
+      out.basalGraph = false;
+      out.predictEnabled = false;
+    }
+  }
+
   function populateValues(current) {
+    $('[name=dataSource][value=' + current['dataSource'] + ']').addClass('active');
     $('#ns-url').val(current['nightscout_url'] || '');
+    $('[name=dexcomUsername]').val(current['dexcomUsername'] || '');
+    $('[name=dexcomPassword]').val(current['dexcomPassword'] || '');
+    $('[name=dexcomIsUS]').val(current['dexcomIsUS'] ? 'true' : 'false');
 
     if (current.mmol === true) {
       $('#units-mmol').addClass('active');
@@ -646,7 +688,11 @@
     var out = {
       version: c.VERSION,
       mmol: mmol,
+      dataSource: $('[name=dataSource].active').attr('value'),
       nightscout_url: $('#ns-url').val().replace(/\/$/, ''),
+      dexcomUsername: $('[name=dexcomUsername]').val(),
+      dexcomPassword: $('[name=dexcomPassword]').val(),
+      dexcomIsUS: $('[name=dexcomIsUS]').val() === 'true',
       hGridlines: tryParseInt($('#hGridlines').val()),
       plotLineIsCustomColor: $('[name=plotLineIsCustomColor]').val() === 'true',
       statusContent: $('#statusContent').val(),
@@ -678,6 +724,7 @@
     encodeSliders(out, MAIN_SLIDER_KEYS);
     encodePointConfig(out);
     encodeNonLayoutColors(out);
+    ensureConfigMatchesDataSource(out);
     return out;
   }
 
@@ -706,6 +753,8 @@
     // redact PII
     var current = JSON.parse(JSON.stringify(phoneConfig));
     delete current['nightscout_url'];
+    delete current['dexcomUsername'];
+    delete current['dexcomPassword'];
     delete current['statusText'];
     delete current['statusUrl'];
     delete current['statusJsonUrl'];
@@ -748,6 +797,9 @@
     $('.config-page-version').text('v' + c.VERSION);
 
     $('.color-platforms-only').toggle(['aplite', 'diorite'].indexOf(watchInfo.pf) === -1);
+
+    $('[name=dataSource]').on('click', setTimeout.bind(this, onDataSourceChange, 0));
+    onDataSourceChange();
 
     initializeStatusOptions(current);
 

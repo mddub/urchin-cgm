@@ -845,7 +845,7 @@ describe('getMultiple', function() {
 });
 
 describe('getShareSGVsDateDescending', function() {
-  var config = {source: 'dexcom'};
+  var config = {dataSource: 'dexcom'};
 
   function mockDexcomAPI(data, sgvs, token) {
     mockDexcomAPIQueue(data, [sgvs], token);

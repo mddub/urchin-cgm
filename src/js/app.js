@@ -270,14 +270,21 @@ function app(Pebble, c) {
         return;
       }
 
-      var oldNightscoutURL = config.nightscout_url;
-      var oldMaxSGVs = computeMaxSGVs(config);
-
+      var oldConfig = config;
       config = mergeConfig(newConfig, c.DEFAULT_CONFIG);
       maxSGVs = computeMaxSGVs(config);
       data.setMaxSGVCount(maxSGVs);
 
-      if (config.nightscout_url !== oldNightscoutURL || maxSGVs > oldMaxSGVs || config.__CLEAR_CACHE__) {
+      var clearCache = (
+        config.dataSource !== oldConfig.dataSource ||
+        config.nightscout_url !== oldConfig.nightscout_url ||
+        config.dexcomUsername !== oldConfig.dexcomUsername ||
+        config.dexcomPassword !== oldConfig.dexcomPassword ||
+        config.dexcomIsUS !== oldConfig.dexcomIsUS ||
+        maxSGVs > computeMaxSGVs(oldConfig) ||
+        config.__CLEAR_CACHE__
+      );
+      if (clearCache) {
         data.clearCache();
         if (config.__CLEAR_CACHE__) {
           // present only for tests

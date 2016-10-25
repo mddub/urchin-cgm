@@ -8,7 +8,11 @@
    "CONFIG_GA_ID": "UA-72399627-1",
 
    "DEFAULT_CONFIG" : {
+      "dataSource": "nightscout",
       "nightscout_url" : "",
+      "dexcomUsername": "",
+      "dexcomPassword": "",
+      "dexcomIsUS": true,
       "mmol" : false,
       "topOfGraph" : 250,
       "topOfRange" : 200,
