@@ -12,7 +12,6 @@
       "nightscout_url" : "",
       "dexcomUsername": "",
       "dexcomPassword": "",
-      "dexcomIsUS": true,
       "mmol" : false,
       "topOfGraph" : 250,
       "topOfRange" : 200,
