@@ -366,8 +366,9 @@ var data = function(c, maxSGVCount) {
         return {text: '-'};
       } else if (tempBasal !== undefined && Date.now() - tempBasal.start < tempBasal.duration * 60 * 1000) {
         var diff = tempBasal.rate - profileBasal;
+        var percentDiff = Math.round(100 * (diff / profileBasal));
         return {
-          text: _roundBasal(tempBasal.rate) + 'U/h ' + (diff >= 0 ? '+' : '') + _roundBasal(diff),
+          text: _roundBasal(tempBasal.rate) + 'U/h ' + (diff >= 0 ? '+' : '') + percentDiff + '%',
           recency: Math.round((new Date() - tempBasal.start) / 1000),
         };
       } else {

@@ -10,7 +10,7 @@
 StatusBarElement* status_bar_element_create(Layer *parent) {
   GRect bounds = element_get_bounds(parent);
 
-  FontChoice font = get_font(FONT_18_BOLD);
+  FontChoice font = get_font(FONT_28_BOLD);
 
   int16_t text_y, height;
   if (bounds.size.h <= font.height * 2 + font.padding_top + font.padding_bottom) {
