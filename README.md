@@ -1,16 +1,20 @@
-A Pebble watchface for viewing [Nightscout](https://github.com/nightscout/cgm-remote-monitor) CGM data in graph format, like this:
+A Pebble watchface to view data from a continuous glucose monitor in graph format, like this:
 
 ![Screenshot](http://i.imgur.com/xefGk6A.png)
 
 To install, enable Developer Mode in the Pebble app on your phone, then open [this pbw file][pbw] in the Pebble app.
 
-Urchin CGM is an **U**nopinionated, **R**idiculously **C**onfigurable **H**uman **I**nterface to **N**ightscout. It's not released yet / in beta / a work-in-progress.
+Urchin CGM is an **U**nopinionated, **R**idiculously **C**onfigurable **H**uman **IN**nterface to your CGM. It's not released yet / in beta / a work-in-progress.
 
 [![Circle CI](https://circleci.com/gh/mddub/urchin-cgm.svg?style=shield)](https://circleci.com/gh/mddub/urchin-cgm)
 
 ## Setup
 
-In the Pebble app on your phone, open the "Settings" screen to set your Nightscout URL.
+* Open [the latest release][pbw] in your phone's browser, then open the file with the Pebble app to install.
+* In the Pebble app on your phone, open the "Settings" screen for Urchin.
+* To view data from a [Nightscout][cgm-remote-monitor] site, enter your site's URL.
+* To view data from [Dexcom Share][dexcom-share], enter your username and password. (These credentials never leave your phone except to authorize with Dexcom's servers.)
+* Optionally, personalize your watchface using the settings described below.
 
 ## Layout
 
@@ -39,7 +43,7 @@ The status bar can display content from a variety of sources:
 * **Active basal - NS Care Portal** - the currently-active basal rate based on treatments in [Nightscout Care Portal][care-portal]. If a temp basal is currently active, shows the difference from normal basal and how many minutes ago the temp basal began. (e.g. `(19) 1.5U/h +0.6`)
 * **Insulin on board** - this can be calculated from treatments entered manually in [Nightscout Care Portal][care-portal], or reported automatically from [MiniMed Connect][minimed-connect], [Loop][loop], or [OpenAPS][openaps-status-uploads]. (e.g. `2.3 U`)
 * **Insulin + carbs on board** - same IOB as above plus carbs-on-board entered in Care Portal. (e.g. `2.3 U  31 g`)
-* **Loop status** - status from the [Loop][loop] iOS app -- predicted BG, IOB, COB, current temp basal, pump battery, phone battery -- in whatever format you want. (e.g. `143 0.2U 13g 1.50`, or `1.50U/h 0.2 U 13 g | 1.57v 83%`)
+* **Loop status** - status from the [Loop][loop] iOS app -- predicted BG, IOB, COB, current temp basal, pump battery, pump reservoir, phone battery -- in whatever format you want. (e.g. `143 0.2U 13g 1.50`, or `1.50U/h 0.2 U 13 g | 1.57v 109U 83%`)
 * **IOB and temp - OpenAPS** - IOB and currently-active temp basal rate from the most recent [OpenAPS status upload][openaps-status-uploads], or if the most recent status indicates failure, the time since that failure plus the time and IOB from the last successful status. (e.g. `(2) 1.1U 1.9x13` or `(4) -- | (+23) 2.2U`)
 * **Custom URL - text** - if you want to summarize your data in a custom way.
 * **Custom URL - JSON** - show custom text, with support for a `timestamp` field to display recency (e.g. `(3) your text`).
@@ -66,13 +70,13 @@ Like pump data, predicted future BGs can be plotted if you are using [Loop][loop
 
 ## What do the icons mean?
 
-The data that you see on your watch travels like this: `Rig -> Nightscout -> Phone -> Pebble`.
+The data that you see on your watch travels like this: `Sensor/Receiver -> Server -> Phone -> Pebble`.
 
-![](http://i.imgur.com/8D9uIWo.png) There is a problem with the Phone -> Pebble connection; the last time the Pebble heard from the phone was 17 minutes ago. Maybe your phone is out of range. Maybe it's on airplane mode. Maybe you need to charge your phone.
+![](http://i.imgur.com/8D9uIWo.png) There is a problem with the Phone -> Pebble connection: it's been a while since your watch has been able to reach your phone. Maybe your phone is out of range. Maybe it's on airplane mode. Maybe you need to charge your phone.
 
-![](http://i.imgur.com/cNiLolr.png) There is a problem with the Nightscout -> Phone connection; the last time your phone successfully reached Nightscout was 11 minutes ago. Maybe your phone has bad reception. Maybe your Nightscout server is down.
+![](http://i.imgur.com/cNiLolr.png) There is a problem with the Server -> Phone connection: it's been a while since your phone has been able to reach the server. Maybe your phone's network connection is bad. Maybe your Nightscout server / Dexcom's server is down.
 
-![](http://i.imgur.com/gfaaZnQ.png) There is a problem with the Rig -> Nightscout connection; the most recent data point in your Nightscout server is from 26 minutes ago. Maybe there's a problem with your receiver or uploader. Maybe the sensor fell out.
+![](http://i.imgur.com/gfaaZnQ.png) There is a problem with the Sensor/Receiver -> Server connection: the latest data on the server is old. Maybe there's a problem with your receiver or uploader. Maybe the sensor fell out.
 
 When the watch fails to fetch data, a message describing the problem briefly appears in the graph.
 
@@ -222,7 +226,6 @@ The most effective method of integration testing I've found is to [compare scree
 * Stale data alerts
 * More color configurability
 * A fixed layout which supports Pebble Time Round
-* Use data directly from Dexcom Share (no Nightscout site required)
 * More dynamic sizing of content (e.g. bigger/smaller time and BG)
 * etc.
 
@@ -231,17 +234,17 @@ The most effective method of integration testing I've found is to [compare scree
 This project is intended for educational and informational purposes only. It is not FDA approved and should not be used to make medical decisions. It is neither affiliated with nor endorsed by Dexcom.
 
 [care-portal]: http://www.nightscout.info/wiki/welcome/website-features/cgm-remote-monitor-care-portal
+[cgm-remote-monitor]: https://github.com/nightscout/cgm-remote-monitor
+[dexcom-share]: http://www.dexcom.com/apps
 [Expect]: https://github.com/Automattic/expect.js
 [file-issue]: https://github.com/mddub/urchin-cgm/issues
-[Flask]: http://flask.pocoo.org/
 [ImageMagick]: http://www.imagemagick.org/
-[js-unit-tests]: https://github.com/mddub/urchin-cgm/tree/master/test/js
 [loop]: https://github.com/LoopKit/Loop
 [minimed-connect]: http://www.nightscout.info/wiki/welcome/website-features/funnel-cake-0-8-features/minimed-connect-and-nightscout
 [Mocha]: https://mochajs.org/
 [Node]: https://nodejs.org/
 [openaps]: https://github.com/openaps/docs
-[openaps-status-uploads]: http://openaps.readthedocs.io/en/latest/docs/walkthrough/phase-1/visualization.html
+[openaps-status-uploads]: http://openaps.readthedocs.io/en/latest/docs/walkthrough/phase-1/nightscout-setup.html
 [pbw]: https://raw.githubusercontent.com/mddub/urchin-cgm/master/release/urchin-cgm.pbw
 [Pebble SDK Tool]: https://developer.getpebble.com/sdk/
 [pebble-care-portal]: https://apps.getpebble.com/en_US/application/568fb97705f633b362000045

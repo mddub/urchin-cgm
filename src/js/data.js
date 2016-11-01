@@ -27,8 +27,7 @@ var data = function(c, maxSGVCount) {
   var profileCache;
 
   // TODO this file should be split into several smaller modules
-  var DEXCOM_SERVER_US = 'https://share1.dexcom.com';
-  var DEXCOM_SERVER_NON_US = 'https://shareous1.dexcom.com';
+  var DEXCOM_SERVER = 'https://share1.dexcom.com';
   var DEXCOM_LOGIN_PATH = '/ShareWebServices/Services/General/LoginPublisherAccountByName';
   var DEXCOM_LATEST_GLUCOSE_PATH = '/ShareWebServices/Services/Publisher/ReadPublisherLatestGlucoseValues';
   var DEXCOM_HEADERS = {
@@ -84,7 +83,8 @@ var data = function(c, maxSGVCount) {
           if (xhr.status === 200) {
             resolve(xhr.responseText);
           } else {
-            reject(new Error('Request failed, status ' + xhr.status + ': ' + url));
+            var msg = 'Request failed, status ' + xhr.status + ': ' + url + (xhr.responseText ? '\n' + xhr.responseText : '');
+            reject(new Error(msg));
           }
         }
       };
@@ -695,7 +695,7 @@ var data = function(c, maxSGVCount) {
   };
 
   d.getSGVsDateDescending = function(config) {
-    if (config.source === 'dexcom') {
+    if (config.dataSource === 'dexcom') {
       return d.getShareSGVsDateDescending(config);
     } else {
       return d.getNightscoutSGVsDateDescending(config);
@@ -964,19 +964,34 @@ var data = function(c, maxSGVCount) {
   };
 
   d.getShareSGVsDateDescending = function(config) {
-    return d.getDexcomToken(config).then(d.requestDexcomSGVs.bind(this, config));
+    var sgvs;
+    if (dexcomToken === undefined) {
+      sgvs = d.getDexcomToken(config).then(d.requestDexcomSGVs.bind(this, config));
+    } else {
+      sgvs = d.requestDexcomSGVs(config, dexcomToken)
+        .then(d.assertTokenStillValid)
+        .catch(function(e) {
+          console.log('Requesting new Dexcom token: ' + e);
+          dexcomToken = undefined;
+          return d.getDexcomToken(config).then(d.requestDexcomSGVs.bind(this, config));
+        });
+    }
+    return sgvs
+      .then(d.convertShareSGVs)
+      .then(function(sgvs) {
+        var newSGVs = sgvs.filter(function(sgv) {
+          return sgvCache.entries.length === 0 || sgv['date'] > sgvCache.entries[0]['date'];
+        });
+        return sgvCache.update(newSGVs);
+      });
   };
-
-  function dexcomServer(config) {
-    return config.dexcomIsUS ? DEXCOM_SERVER_US : DEXCOM_SERVER_NON_US;
-  }
 
   d.getDexcomToken = function(config) {
     if (dexcomToken !== undefined) {
       return Promise.resolve(dexcomToken);
     } else {
       return d.postJSON(
-        dexcomServer(config) + DEXCOM_LOGIN_PATH,
+        DEXCOM_SERVER + DEXCOM_LOGIN_PATH,
         DEXCOM_HEADERS,
         {
           'applicationId': DEXCOM_APPLICATION_ID,
@@ -990,6 +1005,14 @@ var data = function(c, maxSGVCount) {
     }
   };
 
+  d.assertTokenStillValid = function(response) {
+    if (response['Code'] === 'SessionNotValid') {
+      throw new Error(JSON.stringify(response));
+    } else {
+      return response;
+    }
+  };
+
   d.requestDexcomSGVs = function(config, token) {
     var count;
     if (sgvCache.entries.length) {
@@ -999,20 +1022,13 @@ var data = function(c, maxSGVCount) {
       count = maxSGVCount;
     }
     var url = [
-      dexcomServer(config),
+      DEXCOM_SERVER,
       DEXCOM_LATEST_GLUCOSE_PATH,
       '?sessionId=' + token,
       '&minutes=' + 1440,
       '&maxCount=' + count,
     ].join('');
-    return d.postJSON(url, DEXCOM_HEADERS)
-      .then(d.convertShareSGVs)
-      .then(function(sgvs) {
-        var newSGVs = sgvs.filter(function(sgv) {
-          return sgvCache.entries.length === 0 || sgv['date'] > sgvCache.entries[0]['date'];
-        });
-        return sgvCache.update(newSGVs);
-      });
+    return d.postJSON(url, DEXCOM_HEADERS);
   };
 
   d.convertShareSGVs = function(sgvs) {

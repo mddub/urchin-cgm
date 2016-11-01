@@ -27,6 +27,16 @@
       <div class="tab active" id="tab-cgm">
 
         <div class="item-container">
+          <h3>DATA SOURCE:</h3>
+          <div class="item-container-content">
+            <div class="item tab-buttons">
+              <a name="dataSource" value="nightscout" class="tab-button">Nightscout</a>
+              <a name="dataSource" value="dexcom" class="tab-button">Dexcom Share</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="item-container source-dependent" data-sources="nightscout">
           <div class="item-container-header">Nightscout URL</div>
           <div class="item-container-content">
             <label class="item">
@@ -40,8 +50,30 @@
           </div>
         </div>
 
+        <div class="item-container source-dependent" data-sources="dexcom">
+          <div class="item-container-header">Share username</div>
+          <div class="item-container-content">
+            <label class="item">
+              <div class="item-input-wrapper">
+                <input name="dexcomUsername" class="item-input" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">
+              </div>
+            </label>
+          </div>
+          <div class="item-container-header">Share password</div>
+          <div class="item-container-content">
+            <label class="item">
+              <div class="item-input-wrapper">
+                <input name="dexcomPassword" type="password" class="item-input">
+              </div>
+            </label>
+          </div>
+          <div class="item-container-footer">
+            Your login information is sent only to Dexcom's servers. Otherwise it is stored only on your phone.
+          </div>
+        </div>
+
         <div class="item-container">
-          <div class="item-container-header">Units</div>
+          <h3>UNITS:</h3>
           <div class="item-container-content">
             <div class="item tab-buttons">
               <a id="units-mgdl" name="units" class="tab-button">mg/dL</a>
@@ -312,14 +344,14 @@
               <select id="statusContent" dir="rtl" class="item-select">
                 <option value="none" class="item-select-option">None</option>
                 <option value="date" class="item-select-option">Date</option>
-                <option value="rigbattery" class="item-select-option">Uploader battery level</option>
-                <option value="rawdata" class="item-select-option">Raw Dexcom reading</option>
-                <option value="rig-raw" class="item-select-option">Uploader battery, Dexcom raw</option>
-                <option value="basal" class="item-select-option">Active basal - NS Care Portal</option>
-                <option value="pebbleiob" class="item-select-option">Insulin on board</option>
-                <option value="pebbleiobandcob" class="item-select-option">Insulin + carbs on board</option>
-                <option value="loop" class="item-select-option">Loop status</option>
-                <option value="openaps" class="item-select-option">IOB and temp - OpenAPS</option>
+                <option value="rigbattery" class="item-select-option source-dependent" data-sources="nightscout">Uploader battery level</option>
+                <option value="rawdata" class="item-select-option source-dependent" data-sources="nightscout">Raw Dexcom reading</option>
+                <option value="rig-raw" class="item-select-option source-dependent" data-sources="nightscout">Uploader battery, Dexcom raw</option>
+                <option value="basal" class="item-select-option source-dependent" data-sources="nightscout">Active basal - NS Care Portal</option>
+                <option value="pebbleiob" class="item-select-option source-dependent" data-sources="nightscout">Insulin on board</option>
+                <option value="pebbleiobandcob" class="item-select-option source-dependent" data-sources="nightscout">Insulin + carbs on board</option>
+                <option value="loop" class="item-select-option source-dependent" data-sources="nightscout">Loop status</option>
+                <option value="openaps" class="item-select-option source-dependent" data-sources="nightscout">IOB and temp - OpenAPS</option>
                 <option value="customurl" class="item-select-option">Custom URL - text</option>
                 <option value="customjson" class="item-select-option">Custom URL - JSON</option>
                 <option value="customtext" class="item-select-option">Custom text</option>
@@ -543,95 +575,101 @@
 
         </div>
 
-        <div class="item-container">
-          <h3>PUMP DATA:</h3>
-          <div class="item-container-footer">
-            You can enter pump data with the Care Portal plugin on your Nightscout site, via the "CarePortal" Pebble app, or automatically with an OpenAPS uploader.
-          </div>
-        </div>
-
-        <div class="item-container">
-          <div class="item-container-header">Bolus history</div>
-          <div class="item-container-content">
-            <label class="item">
-              <input name="bolusTicks" type="checkbox" class="item-checkbox">
-              Show bolus history
-            </label>
-            <label class="item">
-              <input name="basalGraph" id="basalGraph" type="checkbox" class="item-checkbox">
-              Show basal rate history
-            </label>
-          </div>
-          <div class="item-container-footer">
-            Bolus treatments from Nightscout Care Portal appear as ticks along the bottom of the graph. Basal rate history appears as a bar graph below the graph of glucose readings.
-          </div>
-        </div>
-
-        <div class="item-container" id="basal-height-container">
-          <div class="item-container-header">Basal rate graph height</div>
-          <div class="item-container-content">
-            <label class="item">
-              <input id="basalHeight" name="basalHeight" type="range" class="item-slider" min="2" max="30" step="1">
-              <div class="item-input-wrapper item-slider-text">
-                <input id="basalHeight-val" name="basalHeight" type="tel" class="item-input">
-              </div>
-            </label>
-          </div>
-          <div class="item-container-footer">
-            NOTE: This height is in pixels, but the heights for layout elements (below) are percentages.
-          </div>
-        </div>
-
-        <div class="item-container">
-          <h3>PREDICTED BGS:</h3>
-          <div class="item-container-footer">
-            Predicted BG values can be shown from Loop or OpenAPS. If you enable predictions, you should also adjust the point size under the "Graph" tab so that more readings can be shown.
-          </div>
-        </div>
-
-        <div class="item-container">
-          <div class="item-container-content">
-            <label class="item">
-              <input name="predictEnabled" type="checkbox" class="item-checkbox">
-              Show predicted BGs
-            </label>
-            <label class="item prediction-setting">
-              Prediction source
-              <select name="predictSource" dir="rtl" class="item-select">
-                <option value="loop" class="item-select-option">Loop</option>
-                <option value="openaps" class="item-select-option">OpenAPS</option>
-              </select>
-            </label>
-            <label class="item prediction-setting">
-              Maximum length
-              <select name="predictMaxLength" class="item-select">
-                <option value="6" class="item-select-option">30 minutes</option>
-                <option value="12" class="item-select-option">1 hour</option>
-                <option value="18" class="item-select-option">1.5 hours</option>
-                <option value="24" class="item-select-option">2 hours</option>
-                <option value="30" class="item-select-option">2.5 hours</option>
-                <option value="36" class="item-select-option">3 hours</option>
-                <option value="42" class="item-select-option">3.5 hours</option>
-                <option value="48" class="item-select-option">4 hours</option>
-                <option value="54" class="item-select-option">4.5 hours</option>
-                <option value="60" class="item-select-option">5 hours</option>
-              </select>
-            </label>
-            <div class="color-platforms-only">
-              <label class="item prediction-setting">
-                Color in range
-                <input type="text" class="item-color item-color-normal" name="predictColorDefault" value="#000000">
-              </label>
-              <label class="item prediction-setting">
-                Color above range
-                <input type="text" class="item-color item-color-normal" name="predictColorHigh" value="#000000">
-              </label>
-              <label class="item prediction-setting">
-                Color below range
-                <input type="text" class="item-color item-color-normal" name="predictColorLow" value="#000000">
-              </label>
+        <div class="source-dependent" data-sources="nightscout">
+          <div class="item-container">
+            <h3>PUMP DATA:</h3>
+            <div class="item-container-footer">
+              You can enter pump data with the Care Portal plugin on your Nightscout site, via the "CarePortal" Pebble app, or automatically with an OpenAPS uploader.
             </div>
           </div>
+
+          <div class="item-container">
+            <div class="item-container-header">Bolus history</div>
+            <div class="item-container-content">
+              <label class="item">
+                <input name="bolusTicks" type="checkbox" class="item-checkbox">
+                Show bolus history
+              </label>
+              <label class="item">
+                <input name="basalGraph" id="basalGraph" type="checkbox" class="item-checkbox">
+                Show basal rate history
+              </label>
+            </div>
+            <div class="item-container-footer">
+              Bolus treatments from Nightscout Care Portal appear as ticks along the bottom of the graph. Basal rate history appears as a bar graph below the graph of glucose readings.
+            </div>
+          </div>
+
+          <div class="item-container" id="basal-height-container">
+            <div class="item-container-header">Basal rate graph height</div>
+            <div class="item-container-content">
+              <label class="item">
+                <input id="basalHeight" name="basalHeight" type="range" class="item-slider" min="2" max="30" step="1">
+                <div class="item-input-wrapper item-slider-text">
+                  <input id="basalHeight-val" name="basalHeight" type="tel" class="item-input">
+                </div>
+              </label>
+            </div>
+            <div class="item-container-footer">
+              NOTE: This height is in pixels, but the heights for elements in the "Layout" tab are percentages.
+            </div>
+          </div>
+        </div>
+
+        <div class="source-dependent" data-sources="nightscout">
+
+          <div class="item-container">
+            <h3>PREDICTED BGS:</h3>
+            <div class="item-container-footer">
+              Predicted BG values can be shown from Loop or OpenAPS. If you enable predictions, you should also adjust the point size under the "Graph" tab so that more readings can be shown.
+            </div>
+          </div>
+
+          <div class="item-container">
+            <div class="item-container-content">
+              <label class="item">
+                <input name="predictEnabled" type="checkbox" class="item-checkbox">
+                Show predicted BGs
+              </label>
+              <label class="item prediction-setting">
+                Prediction source
+                <select name="predictSource" dir="rtl" class="item-select">
+                  <option value="loop" class="item-select-option">Loop</option>
+                  <option value="openaps" class="item-select-option">OpenAPS</option>
+                </select>
+              </label>
+              <label class="item prediction-setting">
+                Maximum length
+                <select name="predictMaxLength" class="item-select">
+                  <option value="6" class="item-select-option">30 minutes</option>
+                  <option value="12" class="item-select-option">1 hour</option>
+                  <option value="18" class="item-select-option">1.5 hours</option>
+                  <option value="24" class="item-select-option">2 hours</option>
+                  <option value="30" class="item-select-option">2.5 hours</option>
+                  <option value="36" class="item-select-option">3 hours</option>
+                  <option value="42" class="item-select-option">3.5 hours</option>
+                  <option value="48" class="item-select-option">4 hours</option>
+                  <option value="54" class="item-select-option">4.5 hours</option>
+                  <option value="60" class="item-select-option">5 hours</option>
+                </select>
+              </label>
+              <div class="color-platforms-only">
+                <label class="item prediction-setting">
+                  Color in range
+                  <input type="text" class="item-color item-color-normal" name="predictColorDefault" value="#000000">
+                </label>
+                <label class="item prediction-setting">
+                  Color above range
+                  <input type="text" class="item-color item-color-normal" name="predictColorHigh" value="#000000">
+                </label>
+                <label class="item prediction-setting">
+                  Color below range
+                  <input type="text" class="item-color item-color-normal" name="predictColorLow" value="#000000">
+                </label>
+              </div>
+            </div>
+          </div>
+
         </div>
 
         <div class="item-container">
