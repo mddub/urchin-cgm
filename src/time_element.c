@@ -5,17 +5,19 @@
 
 #define TESTING_TIME_DISPLAY "13:37"
 
+int16_t battery_x_offset = PBL_IF_ROUND_ELSE(8,0);
+
 static BatteryComponent *create_battery_component(Layer *parent, uint8_t battery_loc) {
   GRect bounds = element_get_bounds(parent);
   int x = -1;
   int y = -1;
   bool align_right;
   if (battery_loc == BATTERY_LOC_TIME_TOP_LEFT) {
-    x = battery_component_vertical_padding();
+    x = battery_component_vertical_padding() + battery_x_offset;
     y = 0;
     align_right = false;
   } else if (battery_loc == BATTERY_LOC_TIME_TOP_RIGHT) {
-    x = bounds.size.w - battery_component_width() - battery_component_vertical_padding();
+    x = bounds.size.w - battery_component_width() - battery_component_vertical_padding() - battery_x_offset;
     y = 0;
     align_right = true;
   } else if (battery_loc == BATTERY_LOC_TIME_BOTTOM_LEFT) {
@@ -81,9 +83,11 @@ TimeElement* time_element_create(Layer* parent) {
 
   TimeElement* out = malloc(sizeof(TimeElement));
 
+  // Extra y-shift for time element on round:
+  int time_offset = PBL_IF_ROUND_ELSE(3, 0);
   TextLayer* time_text = add_text_layer(
     parent,
-    GRect(time_margin, (bounds.size.h - font.height) / 2 - font.padding_top, bounds.size.w - 2 * time_margin, font.height + font.padding_top + font.padding_bottom),
+    GRect(time_margin, time_offset + (bounds.size.h - font.height) / 2 - font.padding_top, bounds.size.w - 2 * time_margin, font.height + font.padding_top + font.padding_bottom),
     fonts_get_system_font(font.key),
     element_fg(parent),
     prefs->time_align == ALIGN_LEFT ? GTextAlignmentLeft : (prefs->time_align == ALIGN_CENTER ? GTextAlignmentCenter : GTextAlignmentRight)
