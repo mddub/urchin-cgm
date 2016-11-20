@@ -7,6 +7,8 @@
 #define TREND_DELTA_PADDING 5
 #define MISSING_TREND_BG_DELTA_PADDING 10
 
+int y_offset = PBL_IF_ROUND_ELSE(9, 0);
+
 static void bg_row_element_rearrange(BGRowElement *el) {
   GSize bg_size = text_layer_get_content_size(el->bg_text);
   GSize delta_size = text_layer_get_content_size(el->delta_text);
@@ -26,7 +28,7 @@ static void bg_row_element_rearrange(BGRowElement *el) {
   trend_arrow_component_reposition(
     el->trend,
     bg_x + bg_size.w + BG_TREND_PADDING,
-    (el->parent_size.h - trend_arrow_component_height()) / 2
+    y_offset + (el->parent_size.h - trend_arrow_component_height()) / 2
   );
 
   GRect delta_frame = layer_get_frame(text_layer_get_layer(el->delta_text));
@@ -50,7 +52,7 @@ BGRowElement* bg_row_element_create(Layer *parent) {
     parent,
     GRect(
       0,
-      (bounds.size.h - bg_font.height) / 2 - bg_font.padding_top,
+      y_offset + (bounds.size.h - bg_font.height) / 2 - bg_font.padding_top,
       bounds.size.w,
       bg_font.height + bg_font.padding_top + bg_font.padding_bottom
     ),
@@ -70,7 +72,7 @@ BGRowElement* bg_row_element_create(Layer *parent) {
     parent,
     GRect(
       0, // set by bg_row_element_rearrange
-      (bounds.size.h - delta_font.height) / 2 - delta_font.padding_top,
+      y_offset + (bounds.size.h - delta_font.height) / 2 - delta_font.padding_top,
       bounds.size.w,
       delta_font.height + delta_font.padding_top + delta_font.padding_bottom
     ),
