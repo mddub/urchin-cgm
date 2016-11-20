@@ -17,7 +17,8 @@
     "enableMultiJS": true,
     "targetPlatforms": [
       "aplite",
-      "basalt"
+      "basalt",
+      "chalk"
     ],
     "watchapp": {
       "watchface": true
