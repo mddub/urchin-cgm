@@ -5,7 +5,7 @@
 
 #define TESTING_TIME_DISPLAY "13:37"
 
-int16_t battery_x_offset = PBL_IF_ROUND_ELSE(8,0);
+int16_t battery_x_offset = PBL_IF_ROUND_ELSE(16,0);
 
 static BatteryComponent *create_battery_component(Layer *parent, uint8_t battery_loc) {
   GRect bounds = element_get_bounds(parent);
