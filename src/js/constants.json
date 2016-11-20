@@ -157,6 +157,22 @@
          "recencyStyle" : "mediumRing",
          "recencyColorCircle" : "0x00AA55",
          "recencyColorText" : "0x005500"
+      },
+      "f": {
+         "elements": [
+            {"el": 4, "enabled": true, "width": 100, "height": 25, "black": false, "bottom": true, "right": false},
+            {"el": 0, "enabled": true, "width": 100, "height": 30, "black": false, "bottom": true, "right": true},
+            {"el": 1, "enabled": false, "width": 100, "height": 30, "black": false, "bottom": true, "right": false},
+            {"el": 2, "enabled": true, "width": 100, "height": 21, "black": false, "bottom": true, "right": false},
+            {"el": 3, "enabled": true, "width": 100, "height": 16, "black": false, "bottom": false, "right": false}
+         ],
+	 "batteryLoc":"timeTopRight",
+	 "timeAlign":"center",
+	 "connStatusLoc":"graphTopLeft",
+	 "recencyLoc":"graphTopLeft",
+	 "recencyStyle":"largeRing",
+	 "recencyColorCircle":"0x55AA55",
+	 "recencyColorText":"0x000000"
       }
    },
 
