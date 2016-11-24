@@ -1,4 +1,6 @@
 machine:
+  python:
+    version: 2.7.12
   node:
     version: 0.12.0
   environment:
