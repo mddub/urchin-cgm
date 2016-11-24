@@ -73,6 +73,7 @@
       config.customLayout.recencyColorCircle = config.customLayout.recencyColorCircle || c.DEFAULT_CONFIG.customLayout.recencyColorCircle;
       config.customLayout.recencyColorText = config.customLayout.recencyColorText || c.DEFAULT_CONFIG.customLayout.recencyColorText;
     }
+    config.statusRecencyFormat = config.statusRecencyFormat || c.DEFAULT_CONFIG.statusRecencyFormat;
 
     return config;
   }
@@ -792,7 +793,7 @@
     $('#update-available #available-version').text(c.VERSION);
     $('#update-available').toggle(c.VERSION !== watchInfo.version);
 
-    $('.config-page-version').text('v' + c.VERSION);
+    $('.config-page-version').text('Settings page: v' + c.VERSION);
 
     $('.color-platforms-only').toggle(['aplite', 'diorite'].indexOf(watchInfo.pf) === -1);
 

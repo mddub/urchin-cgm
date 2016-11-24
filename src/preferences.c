@@ -63,7 +63,13 @@ static void decode_colors(Preferences *prefs, uint8_t *values) {
 }
 
 static int32_t get_int32(DictionaryIterator *data, uint8_t key) {
-  return dict_find(data, key)->value->int32;
+  Tuple *t = dict_find(data, key);
+  if (t == NULL) {
+    APP_LOG(APP_LOG_LEVEL_ERROR, "No pref %d", (int)key);
+    return 0;
+  } else {
+    return t->value->int32;
+  }
 }
 
 void set_prefs(DictionaryIterator *data) {
