@@ -51,12 +51,11 @@ if [ ! -e ~/imagemagick ]; then
   cd ~/imagemagick
   wget http://www.imagemagick.org/download/ImageMagick.tar.gz
   tar -xvzf ImageMagick.tar.gz
-  IMAGEMAGICK_PATH=`ls -1 | grep ^ImageMagick-`
-  cd $IMAGEMAGICK_PATH
+  cd `ls -1 | grep ^ImageMagick-`
   ./configure
   make
 fi
-cd ~/imagemagick/$IMAGEMAGICK_PATH
+cd ~/imagemagick/`ls -1 ~/imagemagick/ | grep ^ImageMagick-`
 sudo make install
 sudo ldconfig /usr/local/lib
 (convert logo: logo.gif && rm logo.gif) || { echo "ImageMagick install failed"; exit 1; }
