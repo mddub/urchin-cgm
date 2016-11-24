@@ -7,7 +7,6 @@ set -x
 set -e
 
 PEBBLE_TOOL_PATH=pebble-sdk-$PEBBLE_TOOL-linux64
-IMAGEMAGICK_PATH=ImageMagick-7.0.3-0
 
 ######## Python testing dependencies
 
@@ -50,8 +49,9 @@ if [ ! -e ~/imagemagick ]; then
   # http://www.imagemagick.org/script/install-source.php
   mkdir ~/imagemagick
   cd ~/imagemagick
-  wget http://www.imagemagick.org/download/$IMAGEMAGICK_PATH.tar.gz
-  tar -xvzf $IMAGEMAGICK_PATH.tar.gz
+  wget http://www.imagemagick.org/download/ImageMagick.tar.gz
+  tar -xvzf ImageMagick.tar.gz
+  IMAGEMAGICK_PATH=`ls -1 | grep ^ImageMagick-`
   cd $IMAGEMAGICK_PATH
   ./configure
   make
