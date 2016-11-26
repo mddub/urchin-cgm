@@ -35,11 +35,12 @@ StatusBarElement* status_bar_element_create(Layer *parent) {
     ),
     fonts_get_system_font(font.key),
     element_fg(parent),
-    GTextAlignmentLeft
+    PBL_IF_ROUND_ELSE(GTextAlignmentCenter,GTextAlignmentLeft)
   );
   text_layer_set_overflow_mode(el->text, GTextOverflowModeWordWrap);
 
   int8_t lines;
+  int16_t battery_x_offset = PBL_IF_ROUND_ELSE(8,0);
 
   el->battery = NULL;
   if (get_prefs()->battery_loc == BATTERY_LOC_STATUS_RIGHT) {
@@ -51,7 +52,7 @@ StatusBarElement* status_bar_element_create(Layer *parent) {
       battery_y = bounds.size.h - battery_component_height() + battery_component_vertical_padding() - SM_TEXT_MARGIN;
     }
 
-    el->battery = battery_component_create(parent, bounds.size.w - battery_component_width() - SM_TEXT_MARGIN, battery_y, true);
+    el->battery = battery_component_create(parent, bounds.size.w - battery_component_width() - SM_TEXT_MARGIN - battery_x_offset, battery_y, true);
   }
 
   el->recency = NULL;
@@ -64,10 +65,10 @@ StatusBarElement* status_bar_element_create(Layer *parent) {
     // vertically align with the center of the first/last line of text
     int16_t recency_y = text_y + (font.height + font.padding_top) * (lines - 1) + font.padding_top + font.height / 2 - recency_component_height() / 2;
     // keep it within the bounds
-    if (recency_y + recency_component_padding() < 0) {
-      recency_y = -recency_component_padding();
+    if (recency_y + recency_component_y_padding() < 0) {
+      recency_y = -recency_component_y_padding();
     } else if (recency_y + recency_component_height() > bounds.size.h) {
-      recency_y = bounds.size.h - recency_component_height() + recency_component_padding();
+      recency_y = bounds.size.h - recency_component_height() + recency_component_y_padding();
     }
 
     el->recency = recency_component_create(parent, recency_y, true, NULL, NULL);

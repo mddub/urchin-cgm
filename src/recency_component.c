@@ -28,10 +28,14 @@ RecencyStyle get_style() {
 }
 
 uint16_t recency_component_height() {
-  return get_style().diameter + 2 * recency_component_padding();
+  return get_style().diameter + 2 * recency_component_y_padding();
 }
 
-uint16_t recency_component_padding() {
+uint16_t recency_component_x_padding() {
+  return PBL_IF_ROUND_ELSE(8,1);
+}
+
+uint16_t recency_component_y_padding() {
   return 1;
 }
 
@@ -121,9 +125,9 @@ RecencyComponent* recency_component_create(Layer *parent, uint16_t y, bool align
 
   c->circle_layer = layer_create_with_data(
     GRect(
-      recency_component_padding(),
-      y + recency_component_padding(),
-      element_get_bounds(parent).size.w - recency_component_padding() * 2,
+      recency_component_x_padding(),
+      y + recency_component_y_padding(),
+      element_get_bounds(parent).size.w - recency_component_x_padding() * 2,
       get_style().diameter
     ),
     sizeof(RecencyProps)
