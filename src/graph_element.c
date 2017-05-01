@@ -244,8 +244,8 @@ static void graph_update_proc(Layer *layer, GContext *ctx) {
 
   // Prediction
   if (data->prediction_length > 0 && data->received_at - data->prediction_recency >= time(NULL) - MAX_PREDICTION_AGE_TO_SHOW_SECONDS) {
-    uint8_t* series[3] = {data->prediction_1, data->prediction_2, data->prediction_3};
-    for(uint8_t si = 0; si < 3; si++) {
+    uint8_t* series[4] = {data->prediction_1, data->prediction_2, data->prediction_3, data->prediction_4};
+    for(uint8_t si = 0; si < 4; si++) {
       for(i = prediction_skip; i < data->prediction_length; i++) {
         bg = series[si][i] * 2;
         if (bg == 0) {

@@ -197,6 +197,7 @@ var format = function(c) {
       series1: formattedSeries[0],
       series2: formattedSeries[1],
       series3: formattedSeries[2],
+      series4: formattedSeries[3],
       recency: recency,
     };
   };

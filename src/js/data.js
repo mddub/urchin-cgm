@@ -939,6 +939,7 @@ var data = function(c, maxSGVCount) {
 
       if (lastPredicted && lastPredicted['predBGs']) {
         var series = [
+          lastPredicted['predBGs']['UAM'],
           lastPredicted['predBGs']['IOB'],
           lastPredicted['predBGs']['COB'],
           lastPredicted['predBGs']['aCOB'],

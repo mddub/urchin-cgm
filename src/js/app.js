@@ -84,6 +84,7 @@ function app(Pebble, c) {
           prediction1: predictions.series1,
           prediction2: predictions.series2,
           prediction3: predictions.series3,
+          prediction4: predictions.series4,
           predictionRecency: predictions.recency,
         });
       } catch (e) {
