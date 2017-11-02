@@ -942,7 +942,7 @@ var data = function(c, maxSGVCount) {
           lastPredicted['predBGs']['UAM'],
           lastPredicted['predBGs']['IOB'],
           lastPredicted['predBGs']['COB'],
-          lastPredicted['predBGs']['aCOB'],
+          lastPredicted['predBGs']['ZT'] || lastPredicted['predBGs']['aCOB'],
         ].filter(function(s) {
           return s !== undefined;
         });
