@@ -3,11 +3,11 @@
 #include <pebble.h>
 #include "app_messages.h"
 
-// This can theoretically be maxed out to 984 bytes by combining:
+// This can theoretically be maxed out to 1044 bytes by combining:
 //   - status bar text of 255 characters
 //   - point width of 1px (144 points + 144 "graph extra")
-//   - 3 prediction series of length 60
-#define CONTENT_SIZE 1024
+//   - 4 prediction series of length 60
+#define CONTENT_SIZE 1200
 
 // There are many failure modes...
 #define INITIAL_TIMEOUT_HALVED 2500

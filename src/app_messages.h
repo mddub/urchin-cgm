@@ -31,6 +31,7 @@ typedef struct __attribute__((__packed__)) DataMessage {
   uint8_t prediction_1[PREDICTION_MAX_LENGTH];
   uint8_t prediction_2[PREDICTION_MAX_LENGTH];
   uint8_t prediction_3[PREDICTION_MAX_LENGTH];
+  uint8_t prediction_4[PREDICTION_MAX_LENGTH];
   int32_t prediction_recency;
 } DataMessage;
 

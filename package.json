@@ -41,6 +41,7 @@
       "prediction2": 11,
       "prediction3": 12,
       "predictionRecency": 13,
+      "prediction4": 14,
 
       "mmol": 1,
       "topOfGraph": 2,

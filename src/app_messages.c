@@ -146,6 +146,7 @@ bool validate_data_message(DictionaryIterator *data, DataMessage *out) {
   memcpy(out->prediction_1, zeroes, PREDICTION_MAX_LENGTH * sizeof(uint8_t));
   memcpy(out->prediction_2, zeroes, PREDICTION_MAX_LENGTH * sizeof(uint8_t));
   memcpy(out->prediction_3, zeroes, PREDICTION_MAX_LENGTH * sizeof(uint8_t));
+  memcpy(out->prediction_4, zeroes, PREDICTION_MAX_LENGTH * sizeof(uint8_t));
 
   bool success = true
     && get_int32(data, &out->recency, MESSAGE_KEY_recency, false, 0)
@@ -162,6 +163,7 @@ bool validate_data_message(DictionaryIterator *data, DataMessage *out) {
   get_prediction(data, out->prediction_1, MESSAGE_KEY_prediction1, &out->prediction_length);
   get_prediction(data, out->prediction_2, MESSAGE_KEY_prediction2, &out->prediction_length);
   get_prediction(data, out->prediction_3, MESSAGE_KEY_prediction3, &out->prediction_length);
+  get_prediction(data, out->prediction_4, MESSAGE_KEY_prediction4, &out->prediction_length);
   if (out->prediction_length > 0) {
     success = success && get_int32(data, &out->prediction_recency, MESSAGE_KEY_predictionRecency, false, 0);
   }
