@@ -629,7 +629,8 @@
     $('#ns-url').val(current['nightscout_url'] || '');
     $('[name=dexcomUsername]').val(current['dexcomUsername'] || '');
     $('[name=dexcomPassword]').val(current['dexcomPassword'] || '');
-
+    $('[name=dexcomNonUS]').prop('checked', !!current['dexcomNonUS']);
+    
     if (current.mmol === true) {
       $('#units-mmol').addClass('active');
     } else {
@@ -692,6 +693,7 @@
       nightscout_url: $('#ns-url').val().replace(/\/$/, ''),
       dexcomUsername: $('[name=dexcomUsername]').val(),
       dexcomPassword: $('[name=dexcomPassword]').val(),
+      dexcomNonUS: $('[name=dexcomNonUS]').is(':checked'),
       hGridlines: tryParseInt($('#hGridlines').val()),
       plotLineIsCustomColor: $('[name=plotLineIsCustomColor]').val() === 'true',
       statusContent: $('#statusContent').val(),
@@ -754,6 +756,7 @@
     delete current['nightscout_url'];
     delete current['dexcomUsername'];
     delete current['dexcomPassword'];
+    delete current['dexcomNonUS'];
     delete current['statusText'];
     delete current['statusUrl'];
     delete current['statusJsonUrl'];

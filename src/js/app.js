@@ -280,6 +280,7 @@ function app(Pebble, c) {
         config.nightscout_url !== oldConfig.nightscout_url ||
         config.dexcomUsername !== oldConfig.dexcomUsername ||
         config.dexcomPassword !== oldConfig.dexcomPassword ||
+        config.dexcomNonUS !== oldConfig.dexcomNonUS ||
         maxSGVs > computeMaxSGVs(oldConfig) ||
         config.__CLEAR_CACHE__
       );
