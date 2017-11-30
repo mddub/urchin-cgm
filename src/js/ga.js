@@ -6,6 +6,7 @@ function track(data, trackingId, watchInfo, config) {
   delete current['nightscout_url'];
   delete current['dexcomUsername'];
   delete current['dexcomPassword'];
+  delete current['dexcomNonUS'];
   delete current['statusText'];
   delete current['statusUrl'];
   delete current['statusJsonUrl'];

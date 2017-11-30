@@ -28,6 +28,7 @@ var data = function(c, maxSGVCount) {
 
   // TODO this file should be split into several smaller modules
   var DEXCOM_SERVER = 'https://share1.dexcom.com';
+  var DEXCOM_SERVER_NON_US = 'https://shareous1.dexcom.com';
   var DEXCOM_LOGIN_PATH = '/ShareWebServices/Services/General/LoginPublisherAccountByName';
   var DEXCOM_LATEST_GLUCOSE_PATH = '/ShareWebServices/Services/Publisher/ReadPublisherLatestGlucoseValues';
   var DEXCOM_HEADERS = {
@@ -991,7 +992,7 @@ var data = function(c, maxSGVCount) {
       return Promise.resolve(dexcomToken);
     } else {
       return d.postJSON(
-        DEXCOM_SERVER + DEXCOM_LOGIN_PATH,
+        (config.dexcomNonUS ? DEXCOM_SERVER_NON_US : DEXCOM_SERVER) + DEXCOM_LOGIN_PATH,
         DEXCOM_HEADERS,
         {
           'applicationId': DEXCOM_APPLICATION_ID,
@@ -1022,7 +1023,7 @@ var data = function(c, maxSGVCount) {
       count = maxSGVCount;
     }
     var url = [
-      DEXCOM_SERVER,
+      config.dexcomNonUS ? DEXCOM_SERVER_NON_US : DEXCOM_SERVER,
       DEXCOM_LATEST_GLUCOSE_PATH,
       '?sessionId=' + token,
       '&minutes=' + 1440,
