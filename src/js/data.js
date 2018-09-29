@@ -376,7 +376,7 @@ var data = function(c, maxSGVCount) {
               var percent = 100 + tempBasal.rate_percent;
               var value = profileBasal * (percent / 100);
               return {
-                  text: percent + '% (' + _roundBasal(value) + 'U/h)',
+                  text: percent + '% (' + _roundBasal(value) + ' U/h)',
                   recency: Math.round((new Date() - tempBasal.start) / 1000),
               };
           } else {
