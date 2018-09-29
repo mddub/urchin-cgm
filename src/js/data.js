@@ -331,12 +331,18 @@ var data = function(c, maxSGVCount) {
       if (treatments.length && treatments[0]['duration']) {
         var start = new Date(treatments[0]['created_at']);
         var rate;
+        var ratePercent;
+        var rateType;
         if (treatments[0]['percent'] && parseFloat(treatments[0]['percent']) === 0) {
           rate = 0;
+          ratePercent = treatments[0]['percent'];
+          rateType = 'percent';
         } else {
           rate = parseFloat(treatments[0]['absolute']);
+          ratePercent = null;
+          rateType = 'absolute';
         }
-        return {start: start, rate: rate, duration: parseFloat(treatments[0]['duration'])};
+        return {start: start, rate: rate, duration: parseFloat(treatments[0]['duration']), rate_percent: ratePercent, rate_type : rateType };
       } else {
         return undefined;
       }
@@ -365,11 +371,22 @@ var data = function(c, maxSGVCount) {
       if (profileBasal === undefined && tempBasal === undefined) {
         return {text: '-'};
       } else if (tempBasal !== undefined && Date.now() - tempBasal.start < tempBasal.duration * 60 * 1000) {
-        var diff = tempBasal.rate - profileBasal;
-        return {
-          text: _roundBasal(tempBasal.rate) + 'U/h ' + (diff >= 0 ? '+' : '') + _roundBasal(diff),
-          recency: Math.round((new Date() - tempBasal.start) / 1000),
-        };
+
+          if (tempBasal.rate_type == 'percent') {
+              var percent = 100 + tempBasal.rate_percent;
+              var value = profileBasal * (percent / 100);
+              return {
+                  text: percent + '% (' + _roundBasal(value) + 'U/h)',
+                  recency: Math.round((new Date() - tempBasal.start) / 1000),
+              };
+          } else {
+              var diff = tempBasal.rate - profileBasal;
+              return {
+                  text: _roundBasal(tempBasal.rate) + 'U/h ' + (diff >= 0 ? '+' : '') + _roundBasal(diff),
+                  recency: Math.round((new Date() - tempBasal.start) / 1000),
+              };
+          }
+
       } else {
         return {
           text: _roundBasal(profileBasal) + 'U/h',
