@@ -1,3 +1,17 @@
+## About this fork and me (andyrozman/urchin-cgm)
+
+I am Android APS user and I have been using this watchface for a while now... I created very nice configuration which displays
+all data I need. One of the lines I use is 'Active basal - NS Care Portal', which was actually implemented little bit wrong. It worked 
+great for absolute values, but not for percent ones. This change fixes exactly that. So if you use TBR as percent, and use 'Active basal' 
+status line, then this fix is for you. 
+ 
+Here is link to compiled watchface [pbw file][[newpbw], so that you don't need to do it by yourself (it's little bit of hassle to make build work, since 
+original Pebble site is no longer there, but you can use Rebble service instead).  
+ 
+
+
+## Watchface
+
 A Pebble watchface to view data from a continuous glucose monitor in graph format, like this:
 
 ![Screenshot](http://i.imgur.com/xefGk6A.png)
@@ -246,6 +260,7 @@ This project is intended for educational and informational purposes only. It is 
 [openaps]: https://github.com/openaps/docs
 [openaps-status-uploads]: http://openaps.readthedocs.io/en/latest/docs/walkthrough/phase-1/nightscout-setup.html
 [pbw]: https://raw.githubusercontent.com/mddub/urchin-cgm/master/release/urchin-cgm.pbw
+[newpbw]: https://raw.githubusercontent.com/andyrozman/urchin-cgm/master/release/urchin-cgm.pbw
 [Pebble SDK Tool]: https://developer.getpebble.com/sdk/
 [pebble-care-portal]: https://apps.getpebble.com/en_US/application/568fb97705f633b362000045
 [raw-dexcom-readings]: http://www.nightscout.info/wiki/labs/interpreting-raw-dexcom-data

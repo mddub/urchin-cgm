@@ -333,7 +333,7 @@ var data = function(c, maxSGVCount) {
         var rate;
         var ratePercent;
         var rateType;
-        if (treatments[0]['percent'] && parseFloat(treatments[0]['percent']) === 0) {
+        if (treatments[0]['percent']) {
           rate = 0;
           ratePercent = treatments[0]['percent'];
           rateType = 'percent';
@@ -382,14 +382,14 @@ var data = function(c, maxSGVCount) {
           } else {
               var diff = tempBasal.rate - profileBasal;
               return {
-                  text: _roundBasal(tempBasal.rate) + 'U/h ' + (diff >= 0 ? '+' : '') + _roundBasal(diff),
+                  text: _roundBasal(tempBasal.rate) + ' U/h ' + (diff >= 0 ? '+' : '') + _roundBasal(diff),
                   recency: Math.round((new Date() - tempBasal.start) / 1000),
               };
           }
 
       } else {
         return {
-          text: _roundBasal(profileBasal) + 'U/h',
+          text: _roundBasal(profileBasal) + ' U/h',
           recency: 0
         };
       }
