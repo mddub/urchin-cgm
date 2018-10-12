@@ -5,7 +5,7 @@ all data I need. One of the lines I use is 'Active basal - NS Care Portal', whic
 great for absolute values, but not for percent ones. This change fixes exactly that. So if you use TBR as percent, and use 'Active basal' 
 status line, then this fix is for you. 
  
-Here is link to compiled watchface [pbw file][[newpbw], so that you don't need to do it by yourself (it's little bit of hassle to make build work, since 
+Here is link to compiled watchface [pbw file](https://raw.githubusercontent.com/andyrozman/urchin-cgm/master/release/urchin-cgm.pbw), so that you don't need to do it by yourself (it's little bit of hassle to make build work, since 
 original Pebble site is no longer there, but you can use Rebble service instead).  
  
 
@@ -260,7 +260,6 @@ This project is intended for educational and informational purposes only. It is 
 [openaps]: https://github.com/openaps/docs
 [openaps-status-uploads]: http://openaps.readthedocs.io/en/latest/docs/walkthrough/phase-1/nightscout-setup.html
 [pbw]: https://raw.githubusercontent.com/mddub/urchin-cgm/master/release/urchin-cgm.pbw
-[newpbw]: https://raw.githubusercontent.com/andyrozman/urchin-cgm/master/release/urchin-cgm.pbw
 [Pebble SDK Tool]: https://developer.getpebble.com/sdk/
 [pebble-care-portal]: https://apps.getpebble.com/en_US/application/568fb97705f633b362000045
 [raw-dexcom-readings]: http://www.nightscout.info/wiki/labs/interpreting-raw-dexcom-data
