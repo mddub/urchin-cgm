@@ -278,6 +278,7 @@ function app(Pebble, c) {
       var clearCache = (
         config.dataSource !== oldConfig.dataSource ||
         config.nightscout_url !== oldConfig.nightscout_url ||
+        config.nightscout_token !== oldConfig.nightscout_token ||
         config.dexcomUsername !== oldConfig.dexcomUsername ||
         config.dexcomPassword !== oldConfig.dexcomPassword ||
         maxSGVs > computeMaxSGVs(oldConfig) ||
