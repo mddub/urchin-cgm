@@ -133,8 +133,14 @@ var data = function(c, maxSGVCount) {
     });
   };
 
+  d.addTokenToUrl = function(url, token)
+  {
+    if (token != "")
+      return url + "&token=" + token;
+  }
+
   d.getPebbleEndpoint = debounce(function(config) {
-    return d.getJSON(config.nightscout_url + '/pebble').then(function(pebbleData) {
+    return d.getJSON(d.addTokenToUrl(config.nightscout_url + '/pebble'), config.nightscout_token).then(function(pebbleData) {
       if (pebbleData['bgs'] !== undefined && pebbleData['bgs'].length) {
         return pebbleData['bgs'][0];
       } else {
@@ -734,7 +740,7 @@ var data = function(c, maxSGVCount) {
     } else {
       start = new Date() - sgvCache.maxSecondsOld * 1000;
     }
-    var url = config.nightscout_url + '/api/v1/entries/sgv.json?count=1000&find[date][$gt]=' + start;
+    var url = d.addTokenToUrl(config.nightscout_url + '/api/v1/entries/sgv.json?count=1000&find[date][$gt]=' + start, config.nightscout_token);
     return d.getJSON(url).then(function(newEntries) {
       return sgvCache.update(
         filterKeys(newEntries, ['date', 'sgv', 'trend', 'direction', 'filtered', 'unfiltered', 'noise'])
@@ -744,7 +750,7 @@ var data = function(c, maxSGVCount) {
 
   d.getTempBasals = debounce(function(config) {
     return getUsingCache(
-      config.nightscout_url + '/api/v1/treatments.json?find[eventType]=Temp+Basal&count=' + tempBasalCache.maxSize,
+      d.addTokenToUrl(config.nightscout_url + '/api/v1/treatments.json?find[eventType]=Temp+Basal&count=' + tempBasalCache.maxSize, config.nightscout_token),
       tempBasalCache,
       'created_at',
       ['created_at', 'duration', 'absolute', 'percent']
@@ -753,7 +759,7 @@ var data = function(c, maxSGVCount) {
 
   d.getLastUploaderBattery = debounce(function(config) {
     return getUsingCache(
-      config.nightscout_url + '/api/v1/devicestatus.json?find[$or][0][uploaderBattery][$exists]=true&find[$or][1][uploader][$exists]=true&count=' + uploaderBatteryCache.maxSize,
+      d.addTokenToUrl(config.nightscout_url + '/api/v1/devicestatus.json?find[$or][0][uploaderBattery][$exists]=true&find[$or][1][uploader][$exists]=true&count=' + uploaderBatteryCache.maxSize, config.nightscout_token),
       uploaderBatteryCache,
       'created_at'
     );
@@ -761,7 +767,7 @@ var data = function(c, maxSGVCount) {
 
   d.getLastCalibration = debounce(function(config) {
     return getUsingCache(
-      config.nightscout_url + '/api/v1/entries/cal.json?count=' + calibrationCache.maxSize,
+      d.addTokenToUrl(config.nightscout_url + '/api/v1/entries/cal.json?count=' + calibrationCache.maxSize, config.nightscout_token),
       calibrationCache,
       'date'
     );
@@ -769,7 +775,7 @@ var data = function(c, maxSGVCount) {
 
   d.getBolusHistory = debounce(function(config) {
     return getUsingCache(
-      config.nightscout_url + '/api/v1/treatments.json?find[insulin][$exists]=true&count=' + bolusCache.maxSize,
+      d.addTokenToUrl(config.nightscout_url + '/api/v1/treatments.json?find[insulin][$exists]=true&count=' + bolusCache.maxSize, config.nightscout_token),
       bolusCache,
       'created_at',
       ['created_at', 'insulin']
@@ -778,7 +784,7 @@ var data = function(c, maxSGVCount) {
 
   d.getOpenAPSStatusHistory = debounce(function(config) {
     return getUsingCache(
-      config.nightscout_url + '/api/v1/devicestatus.json?find[openaps][$exists]=true&count=' + openAPSStatusCache.maxSize,
+      d.addTokenToUrl(config.nightscout_url + '/api/v1/devicestatus.json?find[openaps][$exists]=true&count=' + openAPSStatusCache.maxSize, config.nightscout_token),
       openAPSStatusCache,
       'created_at'
     );
@@ -786,7 +792,7 @@ var data = function(c, maxSGVCount) {
 
   d.getLastLoopStatus = debounce(function(config) {
     return getUsingCache(
-      config.nightscout_url + '/api/v1/devicestatus.json?find[loop][$exists]=true&find[loop.failureReason][$not][$exists]=true&count=' + loopStatusCache.maxSize,
+      d.addTokenToUrl(config.nightscout_url + '/api/v1/devicestatus.json?find[loop][$exists]=true&find[loop.failureReason][$not][$exists]=true&count=' + loopStatusCache.maxSize, config.nightscout_token),
       loopStatusCache,
       'created_at'
     );
@@ -794,7 +800,7 @@ var data = function(c, maxSGVCount) {
 
   d.getLastLoopEnacted = debounce(function(config) {
     return getUsingCache(
-      config.nightscout_url + '/api/v1/devicestatus.json?find[loop.enacted][$exists]=true&count=' + loopEnactedCache.maxSize,
+      d.addTokenToUrl(config.nightscout_url + '/api/v1/devicestatus.json?find[loop.enacted][$exists]=true&count=' + loopEnactedCache.maxSize, config.nightscout_token),
       loopEnactedCache,
       'created_at'
     );
@@ -806,7 +812,7 @@ var data = function(c, maxSGVCount) {
     // changes so infrequently that we can simply request it once per app load.
     // (If the user updates their profile, they should restart the watchface.)
     if (profileCache === undefined) {
-      profileCache = d.getJSON(config.nightscout_url + '/api/v1/profile.json');
+      profileCache = d.getJSON(d.addTokenToUrl(config.nightscout_url + '/api/v1/profile.json', config.nightscout_token));
     }
     return profileCache;
   };

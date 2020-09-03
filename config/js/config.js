@@ -627,6 +627,7 @@
   function populateValues(current) {
     $('[name=dataSource][value=' + current['dataSource'] + ']').addClass('active');
     $('#ns-url').val(current['nightscout_url'] || '');
+    $('#ns-token').val(current['nightscout_token'] || '');
     $('[name=dexcomUsername]').val(current['dexcomUsername'] || '');
     $('[name=dexcomPassword]').val(current['dexcomPassword'] || '');
 
@@ -690,6 +691,7 @@
       mmol: mmol,
       dataSource: $('[name=dataSource].active').attr('value'),
       nightscout_url: $('#ns-url').val().replace(/\/$/, ''),
+      nightscout_token: $('#ns-token').val(),
       dexcomUsername: $('[name=dexcomUsername]').val(),
       dexcomPassword: $('[name=dexcomPassword]').val(),
       hGridlines: tryParseInt($('#hGridlines').val()),
@@ -752,6 +754,7 @@
     // redact PII
     var current = JSON.parse(JSON.stringify(phoneConfig));
     delete current['nightscout_url'];
+    delete current['nightscout_token'];
     delete current['dexcomUsername'];
     delete current['dexcomPassword'];
     delete current['statusText'];

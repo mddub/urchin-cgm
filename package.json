@@ -1,7 +1,7 @@
 {
   "name": "urchin-cgm",
   "author": "Mark Wilson",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "keywords": ["pebble-app"],
   "private": true,
   "devDependencies": {
@@ -41,7 +41,7 @@
       "prediction2": 11,
       "prediction3": 12,
       "predictionRecency": 13,
-
+      
       "mmol": 1,
       "topOfGraph": 2,
       "topOfRange": 3,
