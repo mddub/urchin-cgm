@@ -2,7 +2,7 @@ A Pebble watchface to view data from a continuous glucose monitor in graph forma
 
 ![Screenshot](http://i.imgur.com/xefGk6A.png)
 
-To install, enable Developer Mode in the Pebble app on your phone, then open [this pbw file][pbw] in the Pebble app.
+To install, enable Developer Mode in the Pebble app on your phone, then download and open this pbw file https://github.com/woernsn/urchin-cgm/releases/download/v0.2.0/urchin-cgm.pbw in the Pebble app. For iPhone: Locate the downloaded .pwb file, and use the iPhone Share menu and pick the Pebble app to install Urchin. 
 
 Urchin CGM is an **U**nopinionated, **R**idiculously **C**onfigurable **H**uman **IN**nterface to your CGM. It's not released yet / in beta / a work-in-progress.
 
